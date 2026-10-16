@@ -1,0 +1,31 @@
+# dependencies
+node_modules/
+
+# env files (commit only .env.example)
+.env
+.env.*
+!.env.example
+
+# build output
+dist/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+
+# tests & coverage
+coverage/
+
+# logs
+*.log
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/
+
+# AI assistant files (local only)
+AGENTS.md
+CLAUDE.md
+docs/REQUIREMENTS.md
+.claude/

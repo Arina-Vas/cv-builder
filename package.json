@@ -1,0 +1,17 @@
+{
+  "name": "cv-builder",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@12.5.1",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "pnpm --parallel -r dev",
+    "dev:frontend": "pnpm --filter frontend dev",
+    "dev:backend": "pnpm --filter backend dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r --if-present lint",
+    "test": "pnpm -r --if-present test"
+  }
+}

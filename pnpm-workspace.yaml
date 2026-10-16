@@ -1,0 +1,9 @@
+packages:
+  - frontend
+  - backend
+
+# Packages allowed to run install scripts (pnpm blocks them by default).
+allowBuilds:
+  '@parcel/watcher': true
+  sharp: true
+  unrs-resolver: true
