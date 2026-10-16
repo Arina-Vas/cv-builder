@@ -8,22 +8,31 @@ admins also manage users and global catalogs (skills, languages, departments, po
 
 ## Tech stack
 
-| Layer           | Tech                                         |
-| --------------- | -------------------------------------------- |
-| Monorepo        | pnpm workspaces (`frontend`, `backend`)      |
-| Frontend        | Next.js 15 (App Router), React 19, TypeScript |
-| Backend         | NestJS 11, TypeScript                        |
-| Backend tests   | Jest + @nestjs/testing                       |
+| Layer         | Tech                                          |
+| ------------- | --------------------------------------------- |
+| Monorepo      | pnpm workspaces (`frontend`, `backend`)       |
+| Frontend      | Next.js 16 (App Router), React 19, TypeScript |
+| Backend       | NestJS 11, TypeScript                         |
+| Backend tests | Jest + @nestjs/testing                        |
+| Code quality  | ESLint 9 (flat config), Prettier              |
 
 Planned (to be added): GraphQL (Apollo), PostgreSQL + Prisma, MUI, react-hook-form + zod, next-intl,
 Vitest + React Testing Library, Supertest, Docker (docker-compose for DB and Mailpit).
 
-## Project structure
+## 📚 Documentation & Project Structure
+
+This repository is a monorepo containing the frontend and backend applications:
+
+- 🎨 **Frontend** (`frontend/`): Next.js App Router app, see [frontend/README.md](frontend/README.md).
+- ⚙️ **Backend** (`backend/`): NestJS API, see [backend/README.md](backend/README.md).
 
 ```
 cv-builder/
 ├── package.json          # root scripts that run both apps
 ├── pnpm-workspace.yaml
+├── tsconfig.base.json    # shared TypeScript options, extended by both apps
+├── eslint.config.mjs     # shared ESLint flat config
+├── .prettierrc           # shared Prettier config
 ├── backend/              # NestJS API
 │   └── src/
 └── frontend/             # Next.js app
@@ -33,7 +42,7 @@ cv-builder/
 ## Requirements
 
 - Node.js 24 (see `.nvmrc`)
-- pnpm 10+
+- pnpm 12.5.1 (pinned via `packageManager`; `npm i -g pnpm@12.5.1` or Corepack)
 
 ## Getting started
 
@@ -47,49 +56,15 @@ pnpm dev
 
 ## Scripts (run from the repo root)
 
-| Command             | Description                        |
-| ------------------- | ---------------------------------- |
-| `pnpm dev`          | Start frontend and backend in parallel |
-| `pnpm dev:frontend` | Start only the frontend            |
-| `pnpm dev:backend`  | Start only the backend             |
-| `pnpm build`        | Build both apps                    |
-| `pnpm lint`         | Lint all packages (where configured) |
-| `pnpm test`         | Run tests in all packages          |
-
-## Environment variables
-
-TODO: list required variables once `.env.example` files are added (backend: `PORT`, defaults to `4000`).
-
-## Database & migrations
-
-TODO: docker-compose (PostgreSQL), migrations and seed instructions.
-
-## Testing & coverage
-
-TODO: unit and integration test instructions, coverage report (target > 80% for frontend and backend).
-
-## E2E tests (optional)
-
-TODO
-
-## Implemented features
-
-TODO
-
-## Architectural decisions
-
-TODO: UI library, auth approach, ORM & DB approach, SSR/SSG usage, testing tools — agreed with the mentor.
-
-## API documentation
-
-TODO
-
-## Team & task distribution
-
-TODO
-
-## Git workflow
-
-- Feature branches: `feature/<topic>`, `fix/<topic>`
-- Every change goes through a PR with code review
-- Conventional Commits: `feat(cvs): ...`, `fix(auth): ...`, `test(users): ...`
+| Command             | Description                             |
+| ------------------- | --------------------------------------- |
+| `pnpm dev`          | Start frontend and backend in parallel  |
+| `pnpm dev:frontend` | Start only the frontend                 |
+| `pnpm dev:backend`  | Start only the backend                  |
+| `pnpm build`        | Build both apps                         |
+| `pnpm lint`         | Lint the whole repo with ESLint         |
+| `pnpm lint:fix`     | Lint and auto-fix (e.g. unused imports) |
+| `pnpm typecheck`    | Run `tsc --noEmit` in all packages      |
+| `pnpm format`       | Format the repo with Prettier           |
+| `pnpm format:check` | Check formatting without writing        |
+| `pnpm test`         | Run tests in all packages               |
