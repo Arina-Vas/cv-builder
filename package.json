@@ -16,7 +16,15 @@
     "typecheck": "pnpm -r --if-present typecheck",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "pnpm -r --if-present test"
+    "test": "pnpm -r --if-present test",
+    "db:up": "docker compose up -d --wait",
+    "db:down": "docker compose down",
+    "db:generate": "pnpm --filter backend db:generate",
+    "db:migrate": "pnpm --filter backend db:migrate",
+    "db:deploy": "pnpm --filter backend db:deploy",
+    "db:status": "pnpm --filter backend db:status",
+    "db:reset": "pnpm --filter backend db:reset",
+    "db:studio": "pnpm --filter backend db:studio"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",

@@ -1,0 +1,23 @@
+# Local development database. Credentials are for local use only.
+name: cv-builder
+
+services:
+  postgres:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: cv_builder
+      POSTGRES_PASSWORD: cv_builder
+      POSTGRES_DB: cv_builder
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U cv_builder -d cv_builder']
+      interval: 2s
+      timeout: 3s
+      retries: 15
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+volumes:
+  postgres-data:
