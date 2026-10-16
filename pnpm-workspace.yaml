@@ -4,6 +4,7 @@ packages:
 
 # Packages allowed to run install scripts (pnpm blocks them by default).
 allowBuilds:
+  '@apollo/protobufjs': false
   '@parcel/watcher': true
   '@prisma/engines': true
   esbuild: true
