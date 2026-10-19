@@ -1,0 +1,421 @@
+/* ==========================================================================
+   CV Builder — design tokens (Light + Dark)
+   --------------------------------------------------------------------------
+   Source tags used in comments:
+     [F]  measured in Figma (file "CV Builder", page "Design system (components)")
+     [A]  app theme source (cv-innowise.vercel.app bundle). The Figma pages
+          "1440px Desktop" / "768px Tablet" are html-to-design captures of this
+          app, so these are the values rendered on those Figma screens.
+     [M]  MUI v5 default, computed from the [A] palette with createTheme()
+          (exact, not estimated — but NOT individually verified in Figma)
+     TODO not found → see "Missing / ambiguous" in TOKENS.md
+   Components must use semantic / component tokens only, never --color-*.
+   ========================================================================== */
+
+:root {
+  /* ------------------------------------------------------------------ */
+  /* Palette — raw values, theme-independent                            */
+  /* ------------------------------------------------------------------ */
+  --color-primary: #c63031;            /* [F] Button/Primary fill */
+  --color-primary-active-bg: #e9b0b0;  /* [F] Button/Primary Active fill */
+  --color-primary-dark: #631818;       /* [F] Toast Error border/text, Level 5 track */
+  --color-primary-dark-hover: rgb(138, 33, 34); /* [M] primary.dark (darken .3) */
+
+  --color-secondary: #626262;          /* [F] Secondary border, focused input border, Level 1 fill */
+  --color-disabled: #aeaeae;           /* [F] Primary Disabled fill (light) */
+  --color-text-muted: #767676;         /* [A] palette.secondary.main */
+
+  --color-grey-50: #f5f5f7;            /* [F] Light frame fill  = --color-bg-light */
+  --color-bg-light: #f5f5f7;
+  --color-grey-100: #e2e2e4;           /* [F] Dark Secondary border / hover fill */
+  --color-grey-200: #c4c4c6;           /* [F] Light input placeholder, disabled input fill */
+  --color-grey-600: #454545;           /* [F] Dark Secondary fill, Level 0/1 track */
+  --color-bg-canvas: #454545;
+  --color-grey-700: #353535;           /* [A] dark background.default (app) */
+  --color-bg-dark: #353535;
+  --color-grey-800: #2e2e2e;           /* [F] Dark frame fill; [F] light input text */
+  --color-grey-900: #121212;           /* [A] dark background.paper */
+  --color-border-nav: #515151;         /* [A] mobile bottom-nav border-top */
+  --color-scrollbar: #bdbdbd;          /* [A] scrollbar thumb */
+
+  --color-white: #ffffff;
+  --color-white-70: rgba(255, 255, 255, 0.7);
+  --color-white-23: rgba(255, 255, 255, 0.23);
+
+  --color-success: #66bb6a;            /* [F] Toast Success fill, Level 3 fill */
+  --color-success-dark: #335d35;       /* [F] Toast Success border/text, Level 3 track */
+  --color-warning: #ffb800;            /* [F] Toast Warning fill, Level 4 fill; [A] warning.main */
+  --color-warning-dark: #7f5c00;       /* [F] Toast Warning border/text, Level 4 track */
+  --color-info: #29b6f6;               /* [F] Toast Info fill, Level 2 fill */
+  --color-info-dark: #145b7b;          /* [F] Toast Info border/text, Level 2 track */
+
+  /* ------------------------------------------------------------------ */
+  /* Typography                                                          */
+  /* ------------------------------------------------------------------ */
+  --font-family: var(--font-roboto), "Helvetica", "Arial", sans-serif; /* [F][A] */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;         /* [A] active tab / sidebar */
+
+  /* size / line-height / letter-spacing (px) */
+  --type-h1-size: 96px;  --type-h1-lh: 112.03px; --type-h1-ls: -1.5px;  --type-h1-weight: 300;   /* [M] */
+  --type-h2-size: 60px;  --type-h2-lh: 72px;     --type-h2-ls: -0.5px;  --type-h2-weight: 300;   /* [M] */
+  --type-h3-size: 48px;  --type-h3-lh: 56.02px;  --type-h3-ls: 0px;     --type-h3-weight: 400;   /* [M] */
+  --type-h4-size: 34px;  --type-h4-lh: 41.99px;  --type-h4-ls: 0.25px;  --type-h4-weight: 400;   /* [A] login title, [M] */
+  --type-h5-size: 24px;  --type-h5-lh: 32.02px;  --type-h5-ls: 0px;     --type-h5-weight: 400;   /* [M] */
+  --type-h6-size: 20px;  --type-h6-lh: 32px;     --type-h6-ls: 0.15px;  --type-h6-weight: 500;   /* [M] */
+  --type-subtitle1-size: 16px; --type-subtitle1-lh: 28px;    --type-subtitle1-ls: 0.15px; --type-subtitle1-weight: 400; /* [M] */
+  --type-subtitle2-size: 14px; --type-subtitle2-lh: 21.98px; --type-subtitle2-ls: 0.1px;  --type-subtitle2-weight: 500; /* [M] */
+  --type-body1-size: 16px; --type-body1-lh: 24px;    --type-body1-ls: 0.15px; --type-body1-weight: 400; /* [A][M] */
+  --type-body2-size: 14px; --type-body2-lh: 20.02px; --type-body2-ls: 0.15px; --type-body2-weight: 400; /* [M] */
+  --type-button-size: 14px; --type-button-lh: 24.5px; --type-button-ls: 0.4px; --type-button-weight: 500; /* [F] Button/Update */
+  --type-caption-size: 12px; --type-caption-lh: 19.92px; --type-caption-ls: 0.4px; --type-caption-weight: 400; /* [M] */
+  --type-overline-size: 12px; --type-overline-lh: 31.92px; --type-overline-ls: 1px; --type-overline-weight: 400; /* [M] */
+
+  --type-input-size: 16px;  --type-input-lh: 23px;  --type-input-ls: 0.15px;   /* [F] Input value + placeholder */
+  --type-label-size: 12px;  --type-label-lh: 23px;  --type-label-ls: 0.15px;   /* [F] floating label (Active) */
+  --type-helper-size: 12px; --type-helper-lh: 16px; --type-helper-ls: 0.15px;  /* [F] "Name is required" */
+  --type-table-head-lh: 24px; --type-table-head-weight: 500;                    /* [M] TableCell head, size = body2 */
+  --type-tab-lh: 17.5px;                                                        /* [A] measured tab text, size/ls = button */
+  --type-toast-title-size: 16px; --type-toast-title-lh: 16px; --type-toast-title-ls: 0.15px; --type-toast-title-weight: 500; /* [F] */
+  --type-toast-text-size: 12px;  --type-toast-text-lh: 20.02px; --type-toast-text-ls: 0.15px; --type-toast-text-weight: 400; /* [F] */
+  --type-tooltip-size: 11px;                                                    /* [M] */
+
+  /* ------------------------------------------------------------------ */
+  /* Spacing — steps actually used in the app/Figma                      */
+  /* ------------------------------------------------------------------ */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-3-5: 14px;   /* [A] sidebar nav gap */
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-11: 44px;    /* [A] header height / sidebar padding-top */
+  --space-14: 56px;
+  --space-32: 128px;   /* [A] empty-state padding-top */
+
+  /* ------------------------------------------------------------------ */
+  /* Radii                                                               */
+  /* ------------------------------------------------------------------ */
+  --radius-none: 0;            /* [A] inputs */
+  --radius-sm: 4px;            /* [M] shape.borderRadius: menus, modals, skeleton(rounded), tooltip */
+  --radius-toast: 12px;        /* [F] Toast */
+  --radius-chip: 16px;         /* [M] Chip medium */
+  --radius-pill: 40px;         /* [F][A] buttons */
+  --radius-nav: 200px;         /* [A] sidebar items */
+  --radius-round: 50%;         /* [M] avatar */
+
+  /* ------------------------------------------------------------------ */
+  /* Shadows — [M] elevation (identical in both themes)                  */
+  /* ------------------------------------------------------------------ */
+  --shadow-1: 0px 2px 1px -1px rgba(0,0,0,0.2), 0px 1px 1px 0px rgba(0,0,0,0.14), 0px 1px 3px 0px rgba(0,0,0,0.12);
+  --shadow-2: 0px 3px 1px -2px rgba(0,0,0,0.2), 0px 2px 2px 0px rgba(0,0,0,0.14), 0px 1px 5px 0px rgba(0,0,0,0.12);
+  --shadow-8: 0px 5px 5px -3px rgba(0,0,0,0.2), 0px 8px 10px 1px rgba(0,0,0,0.14), 0px 3px 14px 2px rgba(0,0,0,0.12);
+  --shadow-24: 0px 11px 15px -7px rgba(0,0,0,0.2), 0px 24px 38px 3px rgba(0,0,0,0.14), 0px 9px 46px 8px rgba(0,0,0,0.12);
+
+  /* ------------------------------------------------------------------ */
+  /* Sizes / layout                                                      */
+  /* ------------------------------------------------------------------ */
+  --sidebar-width: 200px;              /* [A] expanded */
+  --sidebar-width-collapsed: 56px;     /* [A] collapsed */
+  --sidebar-padding-top: 44px;         /* [A] */
+  --sidebar-padding-bottom: 16px;      /* [A] */
+  --bottom-nav-height: 56px;           /* [A] < 900px */
+  --header-height: 44px;               /* [A] breadcrumbs header */
+  --header-padding: 16px 0 0 20px;     /* [A] top / left */
+  --content-max-width: 1536px;         /* [A] Container maxWidth "xl" */
+  --content-padding-x: 24px;           /* [M] Container gutters ≥600px */
+  --settings-max-width: 720px;         /* [A] */
+  --auth-form-max-width: 220px;        /* [A] */
+  --modal-width-sm: 600px;             /* [A] maxWidth "sm" */
+  --modal-width-md: 900px;             /* [A] maxWidth "md" (project / user forms) */
+  --icon-size: 24px;                   /* [M] SvgIcon medium */
+  --icon-size-sm: 20px;                /* [M] SvgIcon small */
+  --avatar-size-sm: 24px;              /* [A] skill/language bullet */
+  --avatar-size: 40px;                 /* [A] sidebar user avatar */
+  --avatar-size-lg: 120px;             /* [A] profile avatar */
+  --avatar-font-size-lg: 40px;         /* [A] */
+  --scrollbar-size: 2px;               /* [A] */
+  --breakpoint-sm: 600px;              /* [M] */
+  --breakpoint-md: 900px;              /* [M] layout switches to bottom nav below this */
+
+  /* ------------------------------------------------------------------ */
+  /* Motion                                                              */
+  /* ------------------------------------------------------------------ */
+  --duration-shortest: 150ms;          /* [M] */
+  --duration-shorter: 200ms;           /* [A] hover bg/color, input border, chevron */
+  --duration-short: 250ms;             /* [M] */
+  --duration-standard: 300ms;          /* [A] sidebar width */
+  --duration-enter: 225ms;             /* [M] menus/modals entering */
+  --duration-leave: 195ms;             /* [M] leaving */
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1); /* [M] */
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);      /* [M] */
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);       /* [M] */
+  --ease-sharp: cubic-bezier(0.4, 0, 0.6, 1);  /* [M] */
+
+  /* ------------------------------------------------------------------ */
+  /* Component constants (theme-independent)                            */
+  /* ------------------------------------------------------------------ */
+  --button-height: 48px;               /* [F][A] */
+  --button-height-sm: 40px;            /* [A] toolbar "Create" buttons */
+  --button-min-width: 220px;           /* [A] MuiButton minWidth (Figma DS buttons are 160px — see Missing) */
+  --button-radius: var(--radius-pill);
+  --button-border-width: 1px;          /* [F] */
+
+  --input-height: 48px;                /* [F][A] */
+  --input-padding: 12px;               /* [A] */
+  --input-radius: var(--radius-none);  /* [A] */
+  --input-border-width: 1px;           /* [F][A] all states */
+  --input-label-offset: translate(12px, 12px) scale(1);      /* [A] */
+  --input-label-offset-shrink: translate(12px, -9px) scale(0.75); /* [A] */
+  --textarea-height: 120px;            /* [F] Textarea container */
+
+  --tabs-height: 56px;                 /* [A] */
+  --tabs-padding-top: 6px;             /* [A] */
+  --tab-min-width: 150px;              /* [A] */
+  --tab-indicator-height: 2px;         /* [M] */
+
+  --sidebar-item-height: 56px;         /* [A] (40px < 900px) */
+  --sidebar-item-padding: 9px 16px;    /* [A] */
+  --sidebar-item-gap: 16px;            /* [A] icon ↔ label */
+  --sidebar-item-radius: 0 var(--radius-nav) var(--radius-nav) 0; /* [A] */
+
+  --table-cell-padding: 16px;          /* [M] TableCell normal */
+  --table-checkbox-cell-width: 48px;   /* [M] */
+  --table-skeleton-row-height: 40px;   /* [A] */
+
+  --modal-radius: var(--radius-sm);    /* [M] */
+  --modal-title-padding: 16px 24px;    /* [M] DialogTitle */
+  --modal-content-padding: 16px 24px 20px; /* [A] paddingTop 16 override, [M] 24/20 */
+  --modal-actions-padding: 8px;        /* [M] DialogActions */
+  --modal-actions-gap: 8px;            /* [M] */
+
+  --menu-min-width: 200px;             /* [A] user menu */
+  --menu-radius: var(--radius-sm);     /* [M] */
+  --menu-item-padding: 6px 16px;       /* [M] MenuItem */
+  --menu-item-min-height: 48px;        /* [M] (MUI switches to auto ≥600px) */
+
+  --toast-width: 280px;                /* [F] */
+  --toast-height: 80px;                /* [F] */
+  --toast-radius: var(--radius-toast); /* [F] */
+  --toast-border-width: 1px;           /* [F] */
+  --toast-padding: 8px 16px;           /* [F] title top 8, left 16 */
+
+  --chip-height: 32px;                 /* [M] */
+  --chip-gap: 8px;                     /* [A] project environment chips */
+
+  --skill-bar-height: 4px;             /* [F] Progressbar */
+  --skill-bar-track-opacity: 0.9;      /* [F] Progressbar opacity 90% */
+
+  /* ------------------------------------------------------------------ */
+  /* Semantic — LIGHT theme                                              */
+  /* ------------------------------------------------------------------ */
+  color-scheme: light;
+
+  --bg: #f5f5f7;                          /* [F] Light frame */
+  --surface: #ffffff;                     /* [A] background.paper */
+  --sidebar-bg: var(--bg);                /* [A] aside has no own fill */
+  --header-bg: var(--bg);                 /* [A] breadcrumbs header */
+
+  --text: #2e2e2e;                        /* [F] input value text; [A] text.primary */
+  --text-muted: #626262;                  /* [F] floating label */
+  --text-secondary: rgba(0, 0, 0, 0.6);   /* [M] text.secondary (sidebar items, table head icons) */
+  --text-disabled: rgba(0, 0, 0, 0.38);   /* [M] */
+  --text-placeholder: #c4c4c6;            /* [F] */
+  --on-primary: #ffffff;                  /* [M] primary.contrastText */
+
+  --border: rgba(0, 0, 0, 0.12);          /* [M] divider */
+  --border-strong: #626262;               /* [F] */
+
+  --primary: #c63031;                     /* [F] */
+  --primary-hover-bg: transparent;        /* [F] Primary Hover = outlined look */
+  --primary-hover-border: #c63031;        /* [F] */
+  --primary-hover-text: #c63031;          /* [F] */
+  --primary-pressed-bg: #e9b0b0;          /* [F] */
+  --primary-pressed-border: #c63031;      /* [F] */
+  --primary-disabled-bg: #aeaeae;         /* [F] */
+  --primary-tint-hover: rgba(198, 48, 49, 0.04);  /* [M] outlined/text button hover bg */
+  --primary-tint-selected: rgba(198, 48, 49, 0.08); /* [M] */
+
+  --error: #c63031;                       /* [F] error border + helper text */
+  --error-strong: #631818;                /* [F] */
+  --success: #66bb6a;                     /* [F] */
+  --success-strong: #335d35;              /* [F] */
+  --warning: #ffb800;                     /* [F] */
+  --warning-strong: #7f5c00;              /* [F] */
+  --info: #29b6f6;                        /* [F] */
+  --info-strong: #145b7b;                 /* [F] */
+
+  --focus-ring: #626262;                  /* [F] = focused input border. TODO: no dedicated ring in Figma */
+  --overlay: rgba(0, 0, 0, 0.5);          /* [M] Backdrop */
+
+  --action-hover: rgba(0, 0, 0, 0.04);    /* [M] */
+  --action-selected: rgba(0, 0, 0, 0.08); /* [M] */
+  --action-focus: rgba(0, 0, 0, 0.12);    /* [M] */
+  --action-active: rgba(0, 0, 0, 0.54);   /* [M] icons */
+  --action-disabled: rgba(0, 0, 0, 0.26); /* [M] */
+  --action-disabled-bg: rgba(0, 0, 0, 0.12); /* [M] */
+
+  --skeleton: rgba(46, 46, 46, 0.11);     /* [M] alpha(text.primary, .11) */
+  --scrollbar-thumb: var(--color-scrollbar); /* [A] */
+
+  /* Button — secondary (outlined grey) */
+  --button-secondary-bg: transparent;            /* [F] default */
+  --button-secondary-border: #626262;            /* [F] */
+  --button-secondary-text: #2e2e2e;              /* TODO: text colour not measured */
+  --button-secondary-hover-bg: #aeaeae;          /* [F] */
+  --button-secondary-hover-border: #626262;      /* [F] */
+  --button-secondary-pressed-bg: #626262;        /* [F] */
+  --button-secondary-pressed-border: #626262;    /* [F] */
+  --button-secondary-pressed-text: #ffffff;      /* TODO: visual only */
+  --button-secondary-disabled-bg: #aeaeae;       /* [F] */
+  /* Button — ghost (text) */
+  --button-ghost-hover-border: #626262;          /* TODO: visual only, not measured */
+  --button-ghost-pressed-bg: #aeaeae;            /* [F] */
+  --button-ghost-pressed-border: #626262;        /* [F] */
+
+  /* Input */
+  --input-bg: transparent;                       /* [F] no fill */
+  --input-border: #aeaeae;                       /* [F] Default Fieldset:styles */
+  --input-border-hover: #626262;                 /* [F] Hover */
+  --input-border-focus: #626262;                 /* [F] Active */
+  --input-border-error: #c63031;                 /* [F] Invalid */
+  --input-disabled-bg: #c4c4c6;                  /* [F] Disabled container fill */
+  --input-label: #626262;                        /* [F] */
+  --input-helper-error: #c63031;                 /* [F] */
+
+  /* Table */
+  --table-header-bg: var(--bg);                  /* [A] sticky head uses background.default */
+  --table-row-hover: var(--action-hover);        /* [M] */
+  --table-row-selected: rgba(198, 48, 49, 0.08); /* [M] alpha(primary, .08) */
+  --table-border: rgba(224, 224, 224, 1);        /* [M] TableCell border (lighten(divider)) */
+
+  /* Menu / Select / Autocomplete popover */
+  --menu-bg: var(--bg);                          /* [A] user menu paper = background.default */
+  --menu-shadow: var(--shadow-8);                /* [A] Autocomplete paper / [M] Menu */
+  --menu-item-hover: var(--action-hover);        /* [M] */
+  --menu-item-selected: rgba(198, 48, 49, 0.08); /* [M] */
+  --menu-group-label: #c63031;                   /* [A] Autocomplete groupLabel = primary */
+
+  /* Modal */
+  --modal-bg: var(--bg);                         /* [A] MuiDialog paper = background.default */
+  --modal-shadow: var(--shadow-24);              /* [M] */
+
+  /* Tabs */
+  --tab-text: #2e2e2e;                           /* [A] */
+  --tab-text-active: #c63031;                    /* [M] selected = primary */
+  --tab-indicator: #c63031;                      /* [M] */
+
+  /* Sidebar */
+  --sidebar-item-text: var(--text-secondary);    /* [A] */
+  --sidebar-item-hover-bg: var(--action-hover);  /* [A] */
+  --sidebar-item-active-bg: var(--action-hover); /* [A] */
+  --sidebar-item-active-text: var(--text);       /* [A] */
+  --sidebar-avatar-bg: #c63031;                  /* [A] */
+  --bottom-nav-border: #515151;                  /* [A] */
+
+  /* Chips, avatars, toasts, skill levels */
+  --chip-bg: var(--action-selected);             /* [M] Chip filled default */
+  --chip-text: var(--text);                      /* [M] */
+  --avatar-placeholder-bg: #c63031;              /* [A] */
+  --avatar-placeholder-text: #ffffff;            /* [M] */
+  --tooltip-bg: rgba(97, 97, 97, 0.92);          /* [M] */
+  --tooltip-text: #ffffff;                       /* [M] */
+
+  --toast-success-bg: #66bb6a;  --toast-success-fg: #335d35;  /* [F] fg = border + text */
+  --toast-error-bg: #c63031;    --toast-error-fg: #631818;    /* [F] */
+  --toast-warning-bg: #ffb800;  --toast-warning-fg: #7f5c00;  /* [F] */
+  --toast-info-bg: #29b6f6;     --toast-info-fg: #145b7b;     /* [F] */
+
+  /* Skill mastery / language proficiency: fill + track  [F] Level 0–5,
+     mapping [A]: Novice|A1|A2 → 1, Advanced|B1 → 2, Competent|B2 → 3,
+     Proficient|C1|C2 → 4, Expert|Native → 5; value = index × 20% */
+  --level-0-track: #454545;
+  --level-1-fill: #626262;  --level-1-track: #454545;
+  --level-2-fill: #29b6f6;  --level-2-track: #145b7b;
+  --level-3-fill: #66bb6a;  --level-3-track: #335d35;
+  --level-4-fill: #ffb800;  --level-4-track: #7f5c00;
+  --level-5-fill: #c63031;  --level-5-track: #631818;
+
+  /* Checkbox (selection mode) — [M], not in Figma */
+  --checkbox-checked: #c63031;
+  --checkbox-unchecked: rgba(0, 0, 0, 0.6);
+  --checkbox-disabled: rgba(0, 0, 0, 0.26);
+}
+
+/* ==========================================================================
+   Semantic — DARK theme overrides
+   ========================================================================== */
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  --bg: #2e2e2e;                          /* [F] Dark frame (app uses #353535 — see Missing) */
+  --surface: #121212;                     /* [A] background.paper */
+  --surface-overlay-8: linear-gradient(rgba(255,255,255,0.11), rgba(255,255,255,0.11));  /* [M] elevation 8 */
+  --surface-overlay-24: linear-gradient(rgba(255,255,255,0.16), rgba(255,255,255,0.16)); /* [M] elevation 24 */
+
+  --text: #f5f5f7;                        /* [F] dark input text; [A] tab text (app text.primary is #fff) */
+  --text-muted: rgba(255, 255, 255, 0.7); /* [M] TODO: dark label colour not measured */
+  --text-secondary: rgba(255, 255, 255, 0.7); /* [M] */
+  --text-disabled: rgba(255, 255, 255, 0.5);  /* [M] */
+  --text-placeholder: #626262;            /* [F] */
+  --on-primary: #ffffff;                  /* [M] */
+
+  --border: rgba(255, 255, 255, 0.12);    /* [M] */
+  --border-strong: #e2e2e4;               /* [F] */
+
+  --primary-disabled-bg: #626262;         /* [F] */
+  --primary-tint-hover: rgba(198, 48, 49, 0.08);    /* [M] */
+  --primary-tint-selected: rgba(198, 48, 49, 0.16); /* [M] */
+
+  --focus-ring: #e2e2e4;                  /* TODO: not in Figma; = dark strong border */
+  --overlay: rgba(0, 0, 0, 0.5);          /* [M] */
+
+  --action-hover: rgba(255, 255, 255, 0.08);
+  --action-selected: rgba(255, 255, 255, 0.16);
+  --action-focus: rgba(255, 255, 255, 0.12);
+  --action-active: #ffffff;
+  --action-disabled: rgba(255, 255, 255, 0.3);
+  --action-disabled-bg: rgba(255, 255, 255, 0.12);
+
+  --skeleton: rgba(255, 255, 255, 0.13);  /* [M] */
+
+  --button-secondary-bg: #454545;          /* [F] */
+  --button-secondary-border: #e2e2e4;      /* [F] */
+  --button-secondary-text: #ffffff;        /* TODO: visual only */
+  --button-secondary-hover-bg: #e2e2e4;    /* [F] */
+  --button-secondary-hover-border: #e2e2e4;/* TODO: not measured */
+  --button-secondary-pressed-bg: #454545;  /* TODO: visual only */
+  --button-secondary-pressed-border: #e2e2e4; /* TODO: visual only */
+  --button-secondary-pressed-text: #ffffff;   /* TODO */
+  --button-secondary-disabled-bg: #626262; /* [F] */
+  --button-ghost-hover-border: #e2e2e4;    /* TODO: visual only */
+  --button-ghost-pressed-bg: #e2e2e4;      /* [F] */
+  --button-ghost-pressed-border: #454545;  /* [F] */
+
+  --input-border: #aeaeae;                 /* [F] Default (2 colours: #626262 placeholder + #AEAEAE) */
+  --input-border-hover: #626262;           /* [F] Hover (only #626262 present) */
+  --input-border-focus: #626262;           /* TODO: dark Active border not isolated */
+  --input-border-error: #c63031;           /* [F] */
+  --input-disabled-bg: #626262;            /* [F] */
+  --input-label: rgba(255, 255, 255, 0.7); /* TODO: [M] fallback */
+  --input-helper-error: #c63031;           /* [F] */
+
+  --table-row-selected: rgba(198, 48, 49, 0.16);   /* [M] */
+  --table-border: rgba(81, 81, 81, 1);             /* [M] */
+
+  --menu-item-selected: rgba(198, 48, 49, 0.16);   /* [M] */
+
+  --tab-text: #f5f5f7;                     /* [A] */
+
+  --tooltip-bg: rgba(97, 97, 97, 0.92);    /* [M] same in dark */
+
+  --checkbox-unchecked: rgba(255, 255, 255, 0.7);  /* [M] */
+  --checkbox-disabled: rgba(255, 255, 255, 0.3);   /* [M] */
+
+  /* Toasts and level colours: Figma has only one (light) frame —
+     values inherited from :root. TODO: confirm for dark. */
+}
