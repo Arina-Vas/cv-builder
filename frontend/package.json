@@ -9,9 +9,13 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@apollo/client": "^4.3.4",
+    "@apollo/client-integration-nextjs": "^0.14.5",
+    "graphql": "^16.14.2",
     "next": "16.4.2",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "rxjs": "^7.8.2"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
