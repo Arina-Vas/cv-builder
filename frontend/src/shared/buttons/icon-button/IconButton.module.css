@@ -1,0 +1,45 @@
+/* Icon: plain icon → circle outline on hover → filled circle on press */
+.iconButton {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: var(--icon-button-size);
+  height: var(--icon-button-size);
+  padding: 0;
+  border: var(--button-border-width) solid transparent;
+  border-radius: var(--radius-round);
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-shorter) var(--ease-in-out),
+    border-color var(--duration-shorter) var(--ease-in-out),
+    color var(--duration-shorter) var(--ease-in-out);
+}
+
+.iconButton svg {
+  width: var(--icon-size);
+  height: var(--icon-size);
+  fill: currentColor;
+}
+
+.iconButton:hover:not(:disabled) {
+  border-color: var(--button-ghost-hover-border);
+}
+
+.iconButton:active:not(:disabled) {
+  background: var(--button-ghost-pressed-bg);
+  border-color: var(--button-ghost-pressed-border);
+  color: var(--button-ghost-pressed-text);
+}
+
+.iconButton:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.iconButton:disabled {
+  color: var(--action-disabled);
+  cursor: not-allowed;
+}
