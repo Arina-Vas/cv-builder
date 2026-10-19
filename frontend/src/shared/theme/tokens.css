@@ -221,9 +221,10 @@
   /* ------------------------------------------------------------------ */
   --button-height: 48px; /* [F][A] */
   --button-height-sm: 40px; /* [A] toolbar "Create" buttons */
-  --button-min-width: 220px; /* [A] MuiButton minWidth (Figma DS buttons are 160px — see Missing) */
+  --button-min-width: 160px; /* [A] MuiButton minWidth (Figma DS buttons are 160px — see Missing) */
   --button-radius: var(--radius-pill);
   --button-border-width: 1px; /* [F] */
+  --icon-button-size: 40px; /* [M] IconButton medium. TODO: not measured in Figma */
 
   --input-height: 48px; /* [F][A] */
   --input-padding: 12px; /* [A] */
@@ -328,6 +329,7 @@
   --button-secondary-text: #2e2e2e; /* TODO: text colour not measured */
   --button-secondary-hover-bg: #aeaeae; /* [F] */
   --button-secondary-hover-border: #626262; /* [F] */
+  --button-secondary-hover-text: #2e2e2e; /* TODO: visual only */
   --button-secondary-pressed-bg: #626262; /* [F] */
   --button-secondary-pressed-border: #626262; /* [F] */
   --button-secondary-pressed-text: #ffffff; /* TODO: visual only */
@@ -336,6 +338,7 @@
   --button-ghost-hover-border: #626262; /* TODO: visual only, not measured */
   --button-ghost-pressed-bg: #aeaeae; /* [F] */
   --button-ghost-pressed-border: #626262; /* [F] */
+  --button-ghost-pressed-text: #2e2e2e; /* TODO: visual only */
 
   /* Input */
   --input-bg: transparent; /* [F] no fill */
@@ -463,6 +466,7 @@
   --button-secondary-text: #ffffff; /* TODO: visual only */
   --button-secondary-hover-bg: #e2e2e4; /* [F] */
   --button-secondary-hover-border: #e2e2e4; /* TODO: not measured */
+  --button-secondary-hover-text: #2e2e2e; /* TODO: visual only (dark text on light fill) */
   --button-secondary-pressed-bg: #454545; /* TODO: visual only */
   --button-secondary-pressed-border: #e2e2e4; /* TODO: visual only */
   --button-secondary-pressed-text: #ffffff; /* TODO */
@@ -470,6 +474,7 @@
   --button-ghost-hover-border: #e2e2e4; /* TODO: visual only */
   --button-ghost-pressed-bg: #e2e2e4; /* [F] */
   --button-ghost-pressed-border: #454545; /* [F] */
+  --button-ghost-pressed-text: #2e2e2e; /* TODO: visual only (dark text on light fill) */
 
   --input-border: #aeaeae; /* [F] Default (2 colours: #626262 placeholder + #AEAEAE) */
   --input-border-hover: #626262; /* [F] Hover (only #626262 present) */
