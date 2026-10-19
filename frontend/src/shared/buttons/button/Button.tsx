@@ -33,7 +33,6 @@ export function Button({
       disabled={disabled || loading}
       aria-busy={loading || undefined}
     >
-      {/* label stays in the layout while loading, so the width doesn't jump */}
       <span className={styles.label}>{children}</span>
       {loading && <span className={styles.spinner} aria-hidden="true" />}
     </button>

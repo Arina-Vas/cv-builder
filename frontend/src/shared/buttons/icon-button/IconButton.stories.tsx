@@ -34,7 +34,6 @@ export const Disabled: Story = {
   args: { disabled: true },
 };
 
-// Hover / Active: hover and press the buttons here.
 export const LightAndDark: Story = {
   parameters: { layout: 'fullscreen', controls: { disable: true } },
   render: (args) => (

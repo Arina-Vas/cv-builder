@@ -3,7 +3,6 @@ import type { ButtonHTMLAttributes } from 'react';
 import styles from './IconButton.module.css';
 
 export interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  // No visible text, so the accessible name is required
   'aria-label': string;
 }
 
