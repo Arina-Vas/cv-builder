@@ -8,63 +8,63 @@ How the values were obtained:
 
 ## Source table
 
-| Token | Light | Dark | Source / Figma node |
-|---|---|---|---|
-| `--bg` | `#F5F5F7` | `#2E2E2E` | [F] `Light` / `Dark` sub-frame fill (Buttons, Input & Textarea). App dark bg is `#353535` ⚠ |
-| `--surface` | `#FFFFFF` | `#121212` | [A] `background.paper` |
-| `--sidebar-bg` / `--header-bg` | = `--bg` | = `--bg` | [A] breadcrumbs header `background.default`, aside has no fill |
-| `--text` | `#2E2E2E` | `#F5F5F7` | [F] Input `Active › Name` text (L); dark Input selection colors (D). App dark `text.primary` is `#FFF` ⚠ |
-| `--text-muted` | `#626262` | `rgba(255,255,255,.7)` | [F] `Active › Label › Name` (L); [M] (D) |
-| `--text-secondary` | `rgba(0,0,0,.6)` | `rgba(255,255,255,.7)` | [M] |
-| `--text-disabled` | `rgba(0,0,0,.38)` | `rgba(255,255,255,.5)` | [M] |
-| `--text-placeholder` | `#C4C4C6` | `#626262` | [F] `Default › Label › Name` (L); dark Hover container has only `#626262` (D) |
-| `--on-primary` | `#FFFFFF` | `#FFFFFF` | [M] `primary.contrastText` |
-| `--border` | `rgba(0,0,0,.12)` | `rgba(255,255,255,.12)` | [M] divider |
-| `--primary` | `#C63031` | same | [F] `Buttons › Light › Button` (Primary Default) fill |
-| `--primary-pressed-bg` / border | `#E9B0B0` / `#C63031` | same | [F] Primary Active button |
-| `--primary-hover-*` | outlined, `#C63031` | same | [F] Primary Hover (outlined look; fill not measured) |
-| `--primary-disabled-bg` | `#AEAEAE` | `#626262` | [F] Primary Disabled (L/D) |
-| `--primary-tint-hover` | `rgba(198,48,49,.04)` | `.08` | [M] outlined/text hover |
-| `--error` | `#C63031` | same | [F] `Invalid › Fieldset:styles`, `Name is required`; [A] `error.main` |
-| `--success` / strong | `#66BB6A` / `#335D35` | same | [F] `Notifications › Frame › Success` |
-| `--warning` / strong | `#FFB800` / `#7F5C00` | same | [F] Notifications Warning; [A] `warning.main` |
-| `--info` / strong | `#29B6F6` / `#145B7B` | same | [F] Notifications Info |
-| `--focus-ring` | `#626262` | `#E2E2E4` | ⚠ no focus ring in Figma; light = focused input border |
-| `--overlay` | `rgba(0,0,0,.5)` | same | [M] Backdrop |
-| `--action-hover` / selected | `.04` / `.08` black | `.08` / `.16` white | [M] |
-| `--skeleton` | `rgba(46,46,46,.11)` | `rgba(255,255,255,.13)` | [M]; [A] variant rounded, wave, height 40 |
-| `--button-secondary-border` | `#626262` | `#E2E2E4` | [F] Secondary Default |
-| `--button-secondary-bg` | transparent | `#454545` | [F] |
-| `--button-secondary-hover-bg` | `#AEAEAE` | `#E2E2E4` | [F] Secondary Hover |
-| `--button-secondary-pressed-bg` | `#626262` | `#454545`(?) | [F] L; D not measured ⚠ |
-| `--button-ghost-pressed-bg` / border | `#AEAEAE` / `#626262` | `#E2E2E4` / `#454545` | [F] Ghost Active |
-| `--input-border` | `#AEAEAE` | `#AEAEAE` | [F] `Default › Fieldset › Fieldset:styles` (L); D from container colors |
-| `--input-border-hover` | `#626262` | `#626262` | [F] Hover container |
-| `--input-border-focus` | `#626262` | TODO | [F] `Active › Fieldset:styles` (L) |
-| `--input-border-error` | `#C63031` | same | [F] Invalid |
-| `--input-disabled-bg` | `#C4C4C6` | `#626262` | [F] Disabled `Container` fill |
-| `--table-header-bg` | `--bg` | `--bg` | [A] sticky `TableHead` row `background.default` + gradient |
-| `--table-row-hover` | `--action-hover` | same | [M] |
-| `--table-row-selected` | `rgba(198,48,49,.08)` | `.16` | [M] |
-| `--menu-bg` | `--bg` | `--bg` | [A] user menu paper override |
-| `--menu-shadow` | elevation 8 | same + overlay `.11` | [A] Autocomplete paper; [M] |
-| `--modal-bg` | `--bg` | `--bg` | [A] `MuiDialog.paper` override |
-| `--tab-text` | `#2E2E2E` | `#F5F5F7` | [A] `MuiTab` override; active weight 600 |
-| `--tab-indicator` / active | `#C63031` | same | [M] |
-| `--sidebar-item-*` | text `text.secondary`; hover & active bg `action.hover`; active text `text.primary` | same rule | [A] |
-| `--avatar-placeholder-bg` | `#C63031` | same | [A] |
-| `--chip-bg` | `rgba(0,0,0,.08)` | `rgba(255,255,255,.16)` | [M] Chip filled default |
-| Toast | 280×80, r 12, 1px border, title 16/16 500, text 12/20.02, padding 8/16 | — | [F] `Notifications › Frame › Success` |
-| Level 0–5 fill / track | `—/#454545`, `#626262/#454545`, `#29B6F6/#145B7B`, `#66BB6A/#335D35`, `#FFB800/#7F5C00`, `#C63031/#631818` | — | [F] `Frame › Progressbar › Background`; track opacity 90%, height 4 |
-| Button size | h 48, r 40, border 1 | — | [F] Button 160×48; [A] minWidth 220 ⚠ |
-| Input size | h 48 (container 400×48), textarea 120 | — | [F]; [A] padding 12, radius 0, border 1px, `transition: border 200ms` |
-| Type: button | 14 / 24.5 / .4 / 500 / uppercase | — | [F] `Button › Update` |
-| Type: input value, placeholder | 16 / 23 / .15 / 400 | — | [F] |
-| Type: floating label | 12 / 23 / .15 / 400 | — | [F] |
-| Type: helper / error | 12 / 16 / .15 / 400 | — | [F] |
-| Type: h1–h6, subtitle, body, caption, overline | MUI scale | — | [M] (h4 34/41.99/.25 also [A] login title) |
-| Layout | sidebar 200/56, header 44, content max 1536, settings 720, modal sm 600 / md 900 | — | [A] |
-| Motion | 200ms hover/border, 300ms sidebar width, MUI enter 225 / leave 195, ease-in-out `cubic-bezier(.4,0,.2,1)` | — | [A] / [M] |
+| Token                                          | Light                                                                                                      | Dark                    | Source / Figma node                                                                                      |
+| ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------- | ----------------------- | -------------------------------------------------------------------------------------------------------- |
+| `--bg`                                         | `#F5F5F7`                                                                                                  | `#2E2E2E`               | [F] `Light` / `Dark` sub-frame fill (Buttons, Input & Textarea). App dark bg is `#353535` ⚠              |
+| `--surface`                                    | `#FFFFFF`                                                                                                  | `#121212`               | [A] `background.paper`                                                                                   |
+| `--sidebar-bg` / `--header-bg`                 | = `--bg`                                                                                                   | = `--bg`                | [A] breadcrumbs header `background.default`, aside has no fill                                           |
+| `--text`                                       | `#2E2E2E`                                                                                                  | `#F5F5F7`               | [F] Input `Active › Name` text (L); dark Input selection colors (D). App dark `text.primary` is `#FFF` ⚠ |
+| `--text-muted`                                 | `#626262`                                                                                                  | `rgba(255,255,255,.7)`  | [F] `Active › Label › Name` (L); [M] (D)                                                                 |
+| `--text-secondary`                             | `rgba(0,0,0,.6)`                                                                                           | `rgba(255,255,255,.7)`  | [M]                                                                                                      |
+| `--text-disabled`                              | `rgba(0,0,0,.38)`                                                                                          | `rgba(255,255,255,.5)`  | [M]                                                                                                      |
+| `--text-placeholder`                           | `#C4C4C6`                                                                                                  | `#626262`               | [F] `Default › Label › Name` (L); dark Hover container has only `#626262` (D)                            |
+| `--on-primary`                                 | `#FFFFFF`                                                                                                  | `#FFFFFF`               | [M] `primary.contrastText`                                                                               |
+| `--border`                                     | `rgba(0,0,0,.12)`                                                                                          | `rgba(255,255,255,.12)` | [M] divider                                                                                              |
+| `--primary`                                    | `#C63031`                                                                                                  | same                    | [F] `Buttons › Light › Button` (Primary Default) fill                                                    |
+| `--primary-pressed-bg` / border                | `#E9B0B0` / `#C63031`                                                                                      | same                    | [F] Primary Active button                                                                                |
+| `--primary-hover-*`                            | outlined, `#C63031`                                                                                        | same                    | [F] Primary Hover (outlined look; fill not measured)                                                     |
+| `--primary-disabled-bg`                        | `#AEAEAE`                                                                                                  | `#626262`               | [F] Primary Disabled (L/D)                                                                               |
+| `--primary-tint-hover`                         | `rgba(198,48,49,.04)`                                                                                      | `.08`                   | [M] outlined/text hover                                                                                  |
+| `--error`                                      | `#C63031`                                                                                                  | same                    | [F] `Invalid › Fieldset:styles`, `Name is required`; [A] `error.main`                                    |
+| `--success` / strong                           | `#66BB6A` / `#335D35`                                                                                      | same                    | [F] `Notifications › Frame › Success`                                                                    |
+| `--warning` / strong                           | `#FFB800` / `#7F5C00`                                                                                      | same                    | [F] Notifications Warning; [A] `warning.main`                                                            |
+| `--info` / strong                              | `#29B6F6` / `#145B7B`                                                                                      | same                    | [F] Notifications Info                                                                                   |
+| `--focus-ring`                                 | `#626262`                                                                                                  | `#E2E2E4`               | ⚠ no focus ring in Figma; light = focused input border                                                   |
+| `--overlay`                                    | `rgba(0,0,0,.5)`                                                                                           | same                    | [M] Backdrop                                                                                             |
+| `--action-hover` / selected                    | `.04` / `.08` black                                                                                        | `.08` / `.16` white     | [M]                                                                                                      |
+| `--skeleton`                                   | `rgba(46,46,46,.11)`                                                                                       | `rgba(255,255,255,.13)` | [M]; [A] variant rounded, wave, height 40                                                                |
+| `--button-secondary-border`                    | `#626262`                                                                                                  | `#E2E2E4`               | [F] Secondary Default                                                                                    |
+| `--button-secondary-bg`                        | transparent                                                                                                | `#454545`               | [F]                                                                                                      |
+| `--button-secondary-hover-bg`                  | `#AEAEAE`                                                                                                  | `#E2E2E4`               | [F] Secondary Hover                                                                                      |
+| `--button-secondary-pressed-bg`                | `#626262`                                                                                                  | `#454545`(?)            | [F] L; D not measured ⚠                                                                                  |
+| `--button-ghost-pressed-bg` / border           | `#AEAEAE` / `#626262`                                                                                      | `#E2E2E4` / `#454545`   | [F] Ghost Active                                                                                         |
+| `--input-border`                               | `#AEAEAE`                                                                                                  | `#AEAEAE`               | [F] `Default › Fieldset › Fieldset:styles` (L); D from container colors                                  |
+| `--input-border-hover`                         | `#626262`                                                                                                  | `#626262`               | [F] Hover container                                                                                      |
+| `--input-border-focus`                         | `#626262`                                                                                                  | TODO                    | [F] `Active › Fieldset:styles` (L)                                                                       |
+| `--input-border-error`                         | `#C63031`                                                                                                  | same                    | [F] Invalid                                                                                              |
+| `--input-disabled-bg`                          | `#C4C4C6`                                                                                                  | `#626262`               | [F] Disabled `Container` fill                                                                            |
+| `--table-header-bg`                            | `--bg`                                                                                                     | `--bg`                  | [A] sticky `TableHead` row `background.default` + gradient                                               |
+| `--table-row-hover`                            | `--action-hover`                                                                                           | same                    | [M]                                                                                                      |
+| `--table-row-selected`                         | `rgba(198,48,49,.08)`                                                                                      | `.16`                   | [M]                                                                                                      |
+| `--menu-bg`                                    | `--bg`                                                                                                     | `--bg`                  | [A] user menu paper override                                                                             |
+| `--menu-shadow`                                | elevation 8                                                                                                | same + overlay `.11`    | [A] Autocomplete paper; [M]                                                                              |
+| `--modal-bg`                                   | `--bg`                                                                                                     | `--bg`                  | [A] `MuiDialog.paper` override                                                                           |
+| `--tab-text`                                   | `#2E2E2E`                                                                                                  | `#F5F5F7`               | [A] `MuiTab` override; active weight 600                                                                 |
+| `--tab-indicator` / active                     | `#C63031`                                                                                                  | same                    | [M]                                                                                                      |
+| `--sidebar-item-*`                             | text `text.secondary`; hover & active bg `action.hover`; active text `text.primary`                        | same rule               | [A]                                                                                                      |
+| `--avatar-placeholder-bg`                      | `#C63031`                                                                                                  | same                    | [A]                                                                                                      |
+| `--chip-bg`                                    | `rgba(0,0,0,.08)`                                                                                          | `rgba(255,255,255,.16)` | [M] Chip filled default                                                                                  |
+| Toast                                          | 280×80, r 12, 1px border, title 16/16 500, text 12/20.02, padding 8/16                                     | —                       | [F] `Notifications › Frame › Success`                                                                    |
+| Level 0–5 fill / track                         | `—/#454545`, `#626262/#454545`, `#29B6F6/#145B7B`, `#66BB6A/#335D35`, `#FFB800/#7F5C00`, `#C63031/#631818` | —                       | [F] `Frame › Progressbar › Background`; track opacity 90%, height 4                                      |
+| Button size                                    | h 48, r 40, border 1                                                                                       | —                       | [F] Button 160×48; [A] minWidth 220 ⚠                                                                    |
+| Input size                                     | h 48 (container 400×48), textarea 120                                                                      | —                       | [F]; [A] padding 12, radius 0, border 1px, `transition: border 200ms`                                    |
+| Type: button                                   | 14 / 24.5 / .4 / 500 / uppercase                                                                           | —                       | [F] `Button › Update`                                                                                    |
+| Type: input value, placeholder                 | 16 / 23 / .15 / 400                                                                                        | —                       | [F]                                                                                                      |
+| Type: floating label                           | 12 / 23 / .15 / 400                                                                                        | —                       | [F]                                                                                                      |
+| Type: helper / error                           | 12 / 16 / .15 / 400                                                                                        | —                       | [F]                                                                                                      |
+| Type: h1–h6, subtitle, body, caption, overline | MUI scale                                                                                                  | —                       | [M] (h4 34/41.99/.25 also [A] login title)                                                               |
+| Layout                                         | sidebar 200/56, header 44, content max 1536, settings 720, modal sm 600 / md 900                           | —                       | [A]                                                                                                      |
+| Motion                                         | 200ms hover/border, 300ms sidebar width, MUI enter 225 / leave 195, ease-in-out `cubic-bezier(.4,0,.2,1)`  | —                       | [A] / [M]                                                                                                |
 
 ## Missing / ambiguous: questions for the designer
 
