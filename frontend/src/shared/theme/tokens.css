@@ -429,6 +429,14 @@
   --datepicker-selected-bg: var(--primary); /* [F] */
   --datepicker-selected-text: var(--on-primary); /* [F] */
   --datepicker-active-label: var(--primary); /* [F] active month/year in header */
+
+  /* Select */
+  --radix-select-trigger-width: auto;
+  --radix-select-content-available-height: auto;
+
+  --select-option-hover-bg: #aeaeae;
+  --select-option-selected-bg: #626262;
+  --select-option-selected-text: #ffffff;
 }
 
 /* ==========================================================================
