@@ -66,7 +66,7 @@ export const DatePicker = ({
         </button>
       </Popover.Trigger>
       <Popover.Portal>
-        <Popover.Content align="start" sideOffset={4} collisionPadding={16} className={s.content}>
+        <Popover.Content align="start" sideOffset={0} collisionPadding={16} className={s.content}>
           <ReactDatePicker
             inline
             key={view}
