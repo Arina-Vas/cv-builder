@@ -1,6 +1,6 @@
 import { useState, type ComponentProps } from 'react';
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
-import { expect, fn, userEvent, within } from 'storybook/test';
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { DatePicker } from './DatePicker';
 
 type Props = ComponentProps<typeof DatePicker>;
@@ -100,5 +100,58 @@ export const SelectsDate: Story = {
 
     await expect(args.onChange).toHaveBeenCalledWith(new Date(2025, 8, 12));
     await expect(canvas.getByRole('button', { name: /12\.09\.2025/ })).toBeInTheDocument();
+  },
+};
+
+export const OpenClose: Story = {
+  args: { value: new Date(2025, 8, 4) },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+    const body = within(canvasElement.ownerDocument.body);
+
+    const trigger = canvas.getByRole('button', { name: /04\.09\.2025/ });
+
+    await step('click on trigger opens popover', async () => {
+      await userEvent.click(trigger);
+
+      await expect(await body.findByRole('dialog')).toBeInTheDocument();
+      await expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    });
+
+    await step('Escape closes popover and returns focus to trigger', async () => {
+      await userEvent.keyboard('{Escape}');
+
+      await waitFor(() => expect(body.queryByRole('dialog')).not.toBeInTheDocument());
+      await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+      await expect(trigger).toHaveFocus();
+    });
+
+    await step('click outside closes popover', async () => {
+      await userEvent.click(trigger);
+      await body.findByRole('dialog');
+
+      await userEvent.click(canvasElement.ownerDocument.body);
+
+      await waitFor(() => expect(body.queryByRole('dialog')).not.toBeInTheDocument());
+      await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    await step('reopening shows day view again', async () => {
+      await userEvent.click(trigger);
+      const dialog = await body.findByRole('dialog');
+
+      await userEvent.click(within(dialog).getByRole('button', { name: 'September' }));
+      await expect(within(dialog).getByText('January')).toBeInTheDocument();
+
+      await userEvent.keyboard('{Escape}');
+      await waitFor(() => expect(body.queryByRole('dialog')).not.toBeInTheDocument());
+      await userEvent.click(trigger);
+      const reopened = await body.findByRole('dialog');
+
+      await expect(within(reopened).queryByText('January')).not.toBeInTheDocument();
+      await expect(
+        within(reopened).getByRole('rowgroup', { name: 'Month September, 2025' }),
+      ).toBeInTheDocument();
+    });
   },
 };
