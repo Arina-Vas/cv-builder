@@ -1,12 +1,17 @@
 .label {
-  visibility: hidden;
+  display: block;
+  opacity: 0;
   font-size: var(--type-label-size);
-  color: var(--input-label)
+  color: var(--input-label);
+}
+
+.wrapper:has(.trigger:disabled) .label {
+  color: var(--text-disabled);
 }
 
 .wrapper:has(.trigger[data-state='open']) .label,
 .wrapper:has(.trigger:not([data-placeholder])) .label {
-  visibility: visible;
+  opacity: 1;
 }
 
 .trigger {
@@ -52,7 +57,15 @@
     background: var(--input-disabled-bg);
     border-color: transparent;
     cursor: not-allowed;
+    color: var(--text-disabled);
   }
+}
+
+.value {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap
 }
 
 .icon {
@@ -67,13 +80,24 @@
   transform: rotate(180deg);
 }
 
+.trigger:disabled .icon {
+  color: var(--text-disabled);
+}
+
 .content {
   z-index: 50;
   width: var(--radix-select-trigger-width);
-  max-height: var(--radix-select-content-available-height);
+  max-height: min(240px, var(--radix-select-content-available-height));
   border: var(--input-border-width) solid var(--input-border-focus);
-  border-top: none;
   background: var(--menu-bg);
+
+  &[data-side='bottom'] {
+    border-top: none;
+  }
+
+  &[data-side='top'] {
+    border-bottom: none;
+  }
 }
 
 .item {
@@ -98,6 +122,7 @@
 }
 
 .error {
+  display: block;
   font-size: var(--type-helper-size);
   color: var(--input-helper-error);
 }
