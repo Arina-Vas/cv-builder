@@ -233,7 +233,7 @@
   --input-radius: var(--radius-none); /* [A] */
   --input-border-width: 1px; /* [F][A] all states */
   --input-label-offset: translate(12px, 12px) scale(1); /* [A] */
-  --input-label-offset-shrink: translate(12px, -9px) scale(0.75); /* [A] */
+  --input-label-offset-shrink: translate(12px, -16px) scale(0.75); /* label above the border */
   --textarea-height: 120px; /* [F] Textarea container */
 
   --tabs-height: 56px; /* [A] */
@@ -349,6 +349,7 @@
   --input-border-focus: #626262; /* [F] Active */
   --input-border-error: #c63031; /* [F] Invalid */
   --input-disabled-bg: #c4c4c6; /* [F] Disabled container fill */
+  --input-disabled-text: #aeaeae;
   --input-label: #626262; /* [F] */
   --input-helper-error: #c63031; /* [F] */
 
