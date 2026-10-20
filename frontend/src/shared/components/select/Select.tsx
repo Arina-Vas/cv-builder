@@ -1,9 +1,7 @@
-'use client';
-
 import { Select as RadixSelect } from 'radix-ui';
 import s from './Select.module.css';
 import { ChevronIcon } from '@/shared/components/icons/ChevronIcon';
-import { useId } from 'react';
+import { type Ref, useId } from 'react';
 
 type SelectOption = {
   value: string;
@@ -27,6 +25,7 @@ type Props = {
   open?: boolean;
   defaultOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
+  ref?: Ref<HTMLButtonElement>;
 };
 
 export const Select = ({
@@ -35,16 +34,17 @@ export const Select = ({
   placeholder = 'Select option',
   className,
   error,
-  defaultOpen = false,
+  defaultOpen,
   onOpenChange,
   open,
   defaultValue,
   id,
   value,
   label,
-  required = false,
-  disabled = false,
+  required,
+  disabled,
   name,
+  ref,
 }: Props) => {
   const autoId = useId();
   const triggerId = id ?? autoId;
@@ -66,8 +66,10 @@ export const Select = ({
         required={required}
         name={name}
       >
-        <RadixSelect.Trigger id={triggerId} className={s.trigger} aria-invalid={!!error}>
-          <RadixSelect.Value placeholder={placeholder} />
+        <RadixSelect.Trigger ref={ref} id={triggerId} className={s.trigger} aria-invalid={!!error}>
+          <span className={s.value}>
+            <RadixSelect.Value placeholder={placeholder} />
+          </span>
           <RadixSelect.Icon asChild>
             <ChevronIcon direction="down" className={s.icon} />
           </RadixSelect.Icon>
