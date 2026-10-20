@@ -1,6 +1,6 @@
 import { Popover } from 'radix-ui';
 import 'react-datepicker/dist/react-datepicker.css';
-import s from './DatePicker.module.scss';
+import s from './DatePicker.module.css';
 import { format } from 'date-fns';
 import { DatePicker as ReactDatePicker } from 'react-datepicker';
 import { useState } from 'react';
