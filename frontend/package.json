@@ -13,10 +13,12 @@
   "dependencies": {
     "@apollo/client": "^4.3.4",
     "@apollo/client-integration-nextjs": "^0.14.5",
+    "date-fns": "^4.4.0",
     "graphql": "^16.14.2",
     "next": "16.4.2",
     "radix-ui": "^1.8.1",
     "react": "19.3.0",
+    "react-datepicker": "^9.1.0",
     "react-dom": "19.3.0",
     "rxjs": "^7.8.2"
   },
