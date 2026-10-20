@@ -261,7 +261,9 @@
 
   /*selected state for every view — stays last so it wins over hover*/
 
-  :global(.react-datepicker__day--selected), :global(.react-datepicker__month-text--selected), :global(.react-datepicker__year-text--selected) {
+  :global(.react-datepicker__day--selected),
+  :global(.react-datepicker__month-text--selected),
+  :global(.react-datepicker__year-text--selected) {
     &,
     &:hover,
     &:not([aria-disabled='true']):hover {
