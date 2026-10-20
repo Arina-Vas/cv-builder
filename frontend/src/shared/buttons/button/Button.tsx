@@ -21,7 +21,13 @@ export function Button({
   children,
   ...rest
 }: ButtonProps) {
-  const classes = [styles.button, styles[variant], styles[size], loading && styles.loading, className]
+  const classes = [
+    styles.button,
+    styles[variant],
+    styles[size],
+    loading && styles.loading,
+    className,
+  ]
     .filter(Boolean)
     .join(' ');
 

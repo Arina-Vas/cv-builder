@@ -5,10 +5,10 @@ Live examples of every variant and state, Light and Dark: Storybook → **Shared
 
 ## Files
 
-| Folder         | Component    | Use for                                            |
-| -------------- | ------------ | -------------------------------------------------- |
-| `button/`      | `Button`     | every button with a text label                     |
-| `icon-button/` | `IconButton` | icon-only buttons, e.g. three-dot row action menu  |
+| Folder         | Component    | Use for                                           |
+| -------------- | ------------ | ------------------------------------------------- |
+| `button/`      | `Button`     | every button with a text label                    |
+| `icon-button/` | `IconButton` | icon-only buttons, e.g. three-dot row action menu |
 
 ```tsx
 import { Button, IconButton } from '@/shared/buttons';
