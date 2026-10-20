@@ -1,9 +1,31 @@
 import type { Preview } from '@storybook/nextjs-vite';
-
 import '../src/shared/theme/tokens.css';
 import '../src/app/globals.css';
 
 const preview: Preview = {
+  globalTypes: {
+    theme: {
+      description: 'Color theme',
+      toolbar: {
+        title: 'Theme',
+        icon: 'mirror',
+        items: [
+          { value: 'light', title: 'Light', icon: 'sun' },
+          { value: 'dark', title: 'Dark', icon: 'moon' },
+        ],
+        dynamicTitle: true,
+      },
+    },
+  },
+  initialGlobals: {
+    theme: 'light',
+  },
+  decorators: [
+    (Story, { globals }) => {
+      document.documentElement.dataset.theme = globals.theme === 'dark' ? 'dark' : 'light';
+      return <Story />;
+    },
+  ],
   parameters: {
     layout: 'centered',
     controls: {
@@ -12,13 +34,8 @@ const preview: Preview = {
         date: /Date$/i,
       },
     },
-    // appDirectory: true crashes on Next 16.4: Storybook 10.6 app-router mock lacks
-    // LayoutRouterContext.parentRenderTree (useRouter reads .data from it).
-    // Enable per story only once Storybook ships a fix.
-    nextjs: { appDirectory: false },
-
     a11y: {
-      // test show a11y violations in the test UI only
+      // 'todo' - show a11y violations in the test UI only
       // 'error' - fail CI on a11y violations
       // 'off' - skip a11y checks entirely
       test: 'todo',
