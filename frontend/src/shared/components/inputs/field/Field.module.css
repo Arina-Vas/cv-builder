@@ -11,29 +11,11 @@
 
 .outline {
   position: absolute;
-  inset: -5px 0 0;
-  min-width: 0;
-  margin: 0;
-  padding: 0 8px;
+  inset: 0;
   border: var(--input-border-width) solid var(--input-border);
   border-radius: var(--input-radius);
   pointer-events: none;
   transition: border-color var(--duration-shorter) var(--ease-in-out);
-}
-
-.legend {
-  display: block;
-  max-width: 0.01px;
-  height: 11px;
-  padding: 0;
-  font-size: 0.75em;
-  white-space: nowrap;
-  visibility: hidden;
-}
-
-.legend > span {
-  display: inline-block;
-  padding: 0 5px;
 }
 
 .label {
@@ -64,9 +46,13 @@
   border-color: var(--input-border-focus);
 }
 
+.control:has(> button) > .label {
+  max-width: calc(100% - var(--input-padding) - var(--icon-button-size) - var(--space-1));
+}
+
 .control > :is(input, textarea):focus ~ .label,
 .control > :is(input, textarea):not(:placeholder-shown) ~ .label {
-  max-width: calc(100% / 0.75);
+  max-width: calc((100% - var(--input-padding)) / 0.75);
   color: var(--input-label);
   transform: var(--input-label-offset-shrink);
 }

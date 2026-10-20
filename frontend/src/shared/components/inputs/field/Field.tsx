@@ -27,11 +27,7 @@ export function Field({ id, label, error, disabled = false, className, children 
         <label htmlFor={id} className={styles.label}>
           {label}
         </label>
-        <fieldset aria-hidden className={styles.outline}>
-          <legend className={styles.legend}>
-            <span>{label}</span>
-          </legend>
-        </fieldset>
+        <span aria-hidden className={styles.outline} />
       </div>
 
       {error && (
