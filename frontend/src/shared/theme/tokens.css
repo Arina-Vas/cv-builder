@@ -133,6 +133,8 @@
   --type-toast-text-weight: 400; /* [F] */
   --type-tooltip-size: 11px; /* [M] */
 
+  --type-datepicker-size: 18px; /* [F] */
+
   /* ------------------------------------------------------------------ */
   /* Spacing — steps actually used in the app/Figma                      */
   /* ------------------------------------------------------------------ */
@@ -416,6 +418,17 @@
   --checkbox-checked: #c63031;
   --checkbox-unchecked: rgba(0, 0, 0, 0.6);
   --checkbox-disabled: rgba(0, 0, 0, 0.26);
+
+  /* Date picker — [F] DatePicker frame (sizes measured at 100% zoom, ±2px) */
+  --datepicker-bg: var(--bg); /* [F] card fill = frame fill */
+  --datepicker-border: #aeaeae; /* [F] visual, = input border */
+  --datepicker-text: var(--text);
+  --datepicker-text-muted: var(--text-disabled); /* [F] other-month and disabled days */
+  --datepicker-nav-border: #626262; /* [F] visual */
+  --datepicker-item-hover: var(--primary-pressed-bg); /* visual */
+  --datepicker-selected-bg: var(--primary); /* [F] */
+  --datepicker-selected-text: var(--on-primary); /* [F] */
+  --datepicker-active-label: var(--primary); /* [F] active month/year in header */
 }
 
 /* ==========================================================================
@@ -495,6 +508,9 @@
 
   --checkbox-unchecked: rgba(255, 255, 255, 0.7); /* [M] */
   --checkbox-disabled: rgba(255, 255, 255, 0.3); /* [M] */
+
+  --datepicker-item-hover: rgb(198 48 49 / 0.4); /* visual */
+  --datepicker-nav-border: #e2e2e4; /* [F] visual */
 
   /* Toasts and level colours: Figma has only one (light) frame —
      values inherited from :root. TODO: confirm for dark. */

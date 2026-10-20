@@ -21,6 +21,7 @@ const preview: Preview = {
     theme: 'light',
   },
   decorators: [
+    // same attribute the app's ThemeProvider sets, so tokens.css and Radix portals pick it up
     (Story, { globals }) => {
       document.documentElement.dataset.theme = globals.theme === 'dark' ? 'dark' : 'light';
       return <Story />;
