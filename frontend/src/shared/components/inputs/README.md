@@ -9,7 +9,8 @@ Live examples of every state, Light and Dark: Storybook → **Shared/Input**, **
 | ----------- | ---------- | ----------------------------------------------------------- |
 | `input/`    | `Input`    | single-line fields: email, password, names, ISO code, …     |
 | `textarea/` | `Textarea` | multi-line fields: CV description, project responsibilities |
-| `field/`    | `Field`    | internal wrapper (label, border, error). Not exported       |
+
+Label, border and error text come from the shared [`Field`](../field/README.md) wrapper.
 
 ```tsx
 import { Input, Textarea } from '@/shared/components/inputs';
@@ -85,8 +86,8 @@ All states are CSS, not props, except `error` and `disabled`.
 
 ## Layout
 
-The raised label sits **above** the border, so `Field` reserves `padding-top: var(--space-4)` (16px).
-A field takes 64px (Input) / 136px (Textarea) plus the error line. Width is 100% of the parent:
+A field takes 64px (Input) / 136px (Textarea) plus the error line: 16px above the border are reserved
+for the raised label (see [`Field`](../field/README.md#layout)). Width is 100% of the parent:
 set the width on the parent or via `className`.
 
 ## Tokens

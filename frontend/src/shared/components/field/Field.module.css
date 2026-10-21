@@ -42,7 +42,9 @@
   border-color: var(--input-border-hover);
 }
 
-.control > :is(input, textarea):focus ~ .outline {
+.control > :is(input, textarea):focus ~ .outline,
+.control > [role='combobox']:focus-visible ~ .outline,
+.root[data-active] > .control > .outline {
   border-color: var(--input-border-focus);
 }
 
@@ -51,7 +53,9 @@
 }
 
 .control > :is(input, textarea):focus ~ .label,
-.control > :is(input, textarea):not(:placeholder-shown) ~ .label {
+.control > :is(input, textarea):not(:placeholder-shown) ~ .label,
+.root[data-filled] > .control > .label,
+.root[data-active] > .control > .label {
   max-width: calc((100% - var(--input-padding)) / 0.75);
   color: var(--input-label);
   transform: var(--input-label-offset-shrink);
@@ -62,7 +66,9 @@
 }
 
 .root[data-error] > .control > :is(input, textarea):focus ~ .label,
-.root[data-error] > .control > :is(input, textarea):not(:placeholder-shown) ~ .label {
+.root[data-error] > .control > :is(input, textarea):not(:placeholder-shown) ~ .label,
+.root[data-error][data-filled] > .control > .label,
+.root[data-error][data-active] > .control > .label {
   color: var(--error);
 }
 
