@@ -1,2 +1,20 @@
-.message {
+.row:hover {
+  background: transparent;
+}
+
+.cell {
+  padding-block: 48px;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.text {
+  margin: 0;
+  color: var(--text-secondary);
+  text-align: center;
 }

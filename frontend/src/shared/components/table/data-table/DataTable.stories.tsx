@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { useState } from 'react';
+import { fn } from 'storybook/test';
 
 import { positions, type PositionRow } from '../__fixtures__/positions';
 import { users, type UserRow } from '../__fixtures__/users';
@@ -22,6 +23,26 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
+
+/* ------------------------------------------------------------------ */
+/* States                                                              */
+/* ------------------------------------------------------------------ */
+
+export const Loading: Story = {
+  args: { isLoading: true },
+};
+
+export const Empty: Story = {
+  args: { rows: [] },
+};
+
+export const ErrorState: Story = {
+  name: 'Error',
+  args: {
+    error: 'Failed to load positions',
+    onRetry: fn(),
+  },
+};
 
 /* ------------------------------------------------------------------ */
 /* Users: sorting                                                      */
