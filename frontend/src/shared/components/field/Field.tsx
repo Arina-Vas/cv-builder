@@ -7,12 +7,23 @@ export interface FieldProps {
   error?: string;
   disabled?: boolean;
   className?: string;
+  filled?: boolean;
+  active?: boolean;
   children: ReactNode;
 }
 
 export const getErrorId = (id: string) => `${id}-error`;
 
-export function Field({ id, label, error, disabled = false, className, children }: FieldProps) {
+export function Field({
+  id,
+  label,
+  error,
+  disabled = false,
+  active = false,
+  filled = false,
+  className,
+  children,
+}: FieldProps) {
   const classes = [styles.root, className].filter(Boolean).join(' ');
 
   return (
@@ -20,6 +31,8 @@ export function Field({ id, label, error, disabled = false, className, children 
       className={classes}
       data-error={error ? true : undefined}
       data-disabled={disabled ? true : undefined}
+      data-filled={filled ? true : undefined}
+      data-active={active ? true : undefined}
     >
       <div className={styles.control}>
         {children}

@@ -3,7 +3,7 @@ import { useId, useState, type ComponentProps } from 'react';
 import { IconButton } from '../../buttons';
 import { EyeIcon } from '../../icons/EyeIcon';
 import { EyeOffIcon } from '../../icons/EyeOffIcon';
-import { Field, getErrorId } from '../field/Field';
+import { Field, getErrorId } from '@/shared/components/field/Field';
 import styles from './Input.module.css';
 
 export interface InputProps extends ComponentProps<'input'> {
