@@ -97,18 +97,13 @@
   color: var(--text);
   cursor: pointer;
 
-  &[data-highlighted] {
-    background: var(--select-option-hover-bg);
-  }
-
   &[aria-selected='true'] {
     background: var(--select-option-selected-bg);
     color: var(--select-option-selected-text);
   }
 
-  &[aria-selected='true'][data-highlighted] {
-    outline: 2px solid var(--select-option-hover-bg);
-    outline-offset: -2px;
+  &[data-highlighted] {
+    background: var(--select-option-hover-bg);
   }
 
   &[aria-disabled='true'] {
@@ -122,18 +117,9 @@
   display: grid;
   place-items: center;
   flex-shrink: 0;
-  width: 18px;
-  height: 18px;
-  border: 2px solid currentColor;
-  border-radius: 2px;
-
-  svg {
-    width: 14px;
-    height: 14px;
-    stroke: currentColor;
-    stroke-width: 1.5;
-    stroke-linejoin: round;
-  }
+  width: 20px;
+  height: 20px;
+  border: 1px solid currentColor;
 }
 
 .optionLabel {
