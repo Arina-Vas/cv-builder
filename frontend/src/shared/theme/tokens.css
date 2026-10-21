@@ -157,7 +157,7 @@
   --radius-none: 0; /* [A] inputs */
   --radius-sm: 4px; /* [M] shape.borderRadius: menus, modals, skeleton(rounded), tooltip */
   --radius-toast: 12px; /* [F] Toast */
-  --radius-chip: 16px; /* [M] Chip medium */
+  --radius-chip: 12px; /* [M] Chip medium */
   --radius-pill: 40px; /* [F][A] buttons */
   --radius-nav: 200px; /* [A] sidebar items */
   --radius-round: 50%; /* [M] avatar */
@@ -165,18 +165,14 @@
   /* ------------------------------------------------------------------ */
   /* Shadows — [M] elevation (identical in both themes)                  */
   /* ------------------------------------------------------------------ */
-  --shadow-1:
-    0px 2px 1px -1px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14),
-    0px 1px 3px 0px rgba(0, 0, 0, 0.12);
-  --shadow-2:
-    0px 3px 1px -2px rgba(0, 0, 0, 0.2), 0px 2px 2px 0px rgba(0, 0, 0, 0.14),
-    0px 1px 5px 0px rgba(0, 0, 0, 0.12);
-  --shadow-8:
-    0px 5px 5px -3px rgba(0, 0, 0, 0.2), 0px 8px 10px 1px rgba(0, 0, 0, 0.14),
-    0px 3px 14px 2px rgba(0, 0, 0, 0.12);
-  --shadow-24:
-    0px 11px 15px -7px rgba(0, 0, 0, 0.2), 0px 24px 38px 3px rgba(0, 0, 0, 0.14),
-    0px 9px 46px 8px rgba(0, 0, 0, 0.12);
+  --shadow-1: 0px 2px 1px -1px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14),
+  0px 1px 3px 0px rgba(0, 0, 0, 0.12);
+  --shadow-2: 0px 3px 1px -2px rgba(0, 0, 0, 0.2), 0px 2px 2px 0px rgba(0, 0, 0, 0.14),
+  0px 1px 5px 0px rgba(0, 0, 0, 0.12);
+  --shadow-8: 0px 5px 5px -3px rgba(0, 0, 0, 0.2), 0px 8px 10px 1px rgba(0, 0, 0, 0.14),
+  0px 3px 14px 2px rgba(0, 0, 0, 0.12);
+  --shadow-24: 0px 11px 15px -7px rgba(0, 0, 0, 0.2), 0px 24px 38px 3px rgba(0, 0, 0, 0.14),
+  0px 9px 46px 8px rgba(0, 0, 0, 0.12);
 
   /* ------------------------------------------------------------------ */
   /* Sizes / layout                                                      */
@@ -269,6 +265,7 @@
 
   --chip-height: 32px; /* [M] */
   --chip-gap: 8px; /* [A] project environment chips */
+  --chip-remove-size: 12px; /* [F]*/
 
   --skill-bar-height: 4px; /* [F] Progressbar */
   --skill-bar-track-opacity: 0.9; /* [F] Progressbar opacity 90% */
@@ -384,6 +381,7 @@
   --bottom-nav-border: #515151; /* [A] */
 
   /* Chips, avatars, toasts, skill levels */
+  --chip-border: #2e2e2e;
   --chip-bg: var(--action-selected); /* [M] Chip filled default */
   --chip-text: var(--text); /* [M] */
   --avatar-placeholder-bg: #c63031; /* [A] */
@@ -439,6 +437,9 @@
   --select-option-hover-bg: #aeaeae;
   --select-option-selected-bg: #626262;
   --select-option-selected-text: #ffffff;
+
+  --chip-remove-hover: #626262;
+  --chip-remove: #aeaeae;
 }
 
 /* ==========================================================================
@@ -525,6 +526,9 @@
   --select-option-hover-bg: #626262;
   --select-option-selected-bg: #f5f5f7;
   --select-option-selected-text: #2e2e2e;
+
+  --chip-border: #aeaeae;
+  --chip-remove-hover: #f5f5f7;
 
   /* Toasts and level colours: Figma has only one (light) frame —
      values inherited from :root. TODO: confirm for dark. */
