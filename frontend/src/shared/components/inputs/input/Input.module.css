@@ -1,0 +1,54 @@
+.input {
+  display: block;
+  width: 100%;
+  height: var(--input-height);
+  padding: 0 var(--input-padding);
+  border: 0;
+  outline: none;
+  background: var(--input-bg);
+  color: var(--text);
+  font: inherit;
+  font-size: var(--type-input-size);
+  line-height: var(--type-input-lh);
+  letter-spacing: var(--type-input-ls);
+}
+
+.input::-ms-reveal {
+  display: none;
+}
+
+.withToggle {
+  padding-right: calc(var(--icon-button-size) + var(--space-1) + var(--space-2));
+}
+
+.toggle {
+  position: absolute;
+  top: 50%;
+  right: var(--space-1);
+  transform: translateY(-50%);
+}
+
+.toggle:not(:disabled) {
+  border: 0;
+  color: var(--input-label);
+}
+
+.toggle:disabled {
+  border: 0;
+}
+
+.input[aria-invalid='true'] ~ .toggle:not(:disabled) {
+  color: var(--error);
+}
+
+.toggle:not(:disabled):focus-visible {
+  outline-width: 1px;
+  outline-offset: -6px;
+}
+
+.input:disabled {
+  color: var(--input-disabled-text);
+  -webkit-text-fill-color: var(--input-disabled-text);
+  opacity: 1;
+  cursor: not-allowed;
+}

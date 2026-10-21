@@ -1,0 +1,22 @@
+.textarea {
+  display: block;
+  width: 100%;
+  height: var(--textarea-height);
+  padding: var(--input-padding);
+  border: 0;
+  outline: none;
+  background: var(--input-bg);
+  color: var(--text);
+  font: inherit;
+  font-size: var(--type-input-size);
+  line-height: var(--type-input-lh);
+  letter-spacing: var(--type-input-ls);
+  resize: none;
+}
+
+.textarea:disabled {
+  color: var(--input-disabled-text);
+  -webkit-text-fill-color: var(--input-disabled-text);
+  opacity: 1;
+  cursor: not-allowed;
+}

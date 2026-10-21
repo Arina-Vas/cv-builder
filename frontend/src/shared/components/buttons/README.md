@@ -11,7 +11,7 @@ Live examples of every variant and state, Light and Dark: Storybook → **Shared
 | `icon-button/` | `IconButton` | icon-only buttons, e.g. three-dot row action menu |
 
 ```tsx
-import { Button, IconButton } from '@/shared/buttons';
+import { Button, IconButton } from '@/shared/components/buttons';
 ```
 
 ## Button
