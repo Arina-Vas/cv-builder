@@ -34,8 +34,9 @@ const ControlledSelect = ({ value: initial = '', onValueChange, ...rest }: Props
 
 const getBody = (canvasElement: HTMLElement) => within(canvasElement.ownerDocument.body);
 
-const getLabel = (canvasElement: HTMLElement) =>
-  within(canvasElement).getByText('Position', { selector: 'label' });
+// Field root: label → .control → root (data-filled / data-active live there)
+const getFieldRoot = (canvasElement: HTMLElement) =>
+  within(canvasElement).getByText('Position', { selector: 'label' }).parentElement!.parentElement!;
 
 const meta = {
   title: 'Shared/Select',
@@ -75,12 +76,15 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   play: async ({ canvasElement }) => {
     const trigger = within(canvasElement).getByRole('combobox', { name: 'Position' });
+    const root = getFieldRoot(canvasElement);
 
-    await expect(trigger).toHaveTextContent('Position');
     await expect(trigger).toHaveAttribute('data-placeholder');
+    // closed: the Field label takes the place of the placeholder
+    await expect(within(trigger).getByText('Position')).not.toBeVisible();
     await expect(trigger).toHaveAttribute('aria-expanded', 'false');
-    await expect(trigger).toHaveAttribute('aria-invalid', 'false');
-    await expect(getLabel(canvasElement)).toHaveStyle({ opacity: '0' });
+    await expect(trigger).not.toHaveAttribute('aria-invalid');
+    await expect(root).not.toHaveAttribute('data-filled');
+    await expect(root).not.toHaveAttribute('data-active');
   },
 };
 
@@ -95,7 +99,9 @@ export const Open: Story = {
     await expect(within(listbox).getAllByRole('option')).toHaveLength(OPTIONS.length);
     await expect(trigger).toHaveAttribute('aria-expanded', 'true');
     await expect(args.onOpenChange).toHaveBeenCalledWith(true);
-    await expect(getLabel(canvasElement)).toHaveStyle({ opacity: '1' });
+    await expect(getFieldRoot(canvasElement)).toHaveAttribute('data-active');
+    // open and empty: label raised, placeholder shown until something is chosen
+    await expect(within(trigger).getByText('Position')).toBeVisible();
   },
 };
 
@@ -105,10 +111,10 @@ export const WithValue: Story = {
     const trigger = within(canvasElement).getByRole('combobox');
     const body = getBody(canvasElement);
 
-    await step('shows the value and the label', async () => {
+    await step('shows the value, the label is raised', async () => {
       await expect(trigger).toHaveTextContent('Software Engineer 2');
       await expect(trigger).not.toHaveAttribute('data-placeholder');
-      await expect(getLabel(canvasElement)).toHaveStyle({ opacity: '1' });
+      await expect(getFieldRoot(canvasElement)).toHaveAttribute('data-filled');
     });
 
     await step('marks the selected option in the list', async () => {
@@ -145,7 +151,8 @@ export const Invalid: Story = {
     const trigger = canvas.getByRole('combobox');
 
     await expect(trigger).toHaveAttribute('aria-invalid', 'true');
-    await expect(canvas.getByText('Position is required')).toBeVisible();
+    await expect(trigger).toHaveAccessibleDescription('Position is required');
+    await expect(getFieldRoot(canvasElement)).toHaveAttribute('data-error');
   },
 };
 
@@ -284,12 +291,12 @@ export const Controlled: Story = {
       await expect(trigger).toHaveTextContent('Software Engineer 2');
     });
 
-    await step('reset returns the placeholder and hides the label', async () => {
+    await step('reset empties the field and lowers the label', async () => {
       await userEvent.click(canvas.getByRole('button', { name: 'Reset' }));
 
-      await expect(trigger).toHaveTextContent('Position');
       await expect(trigger).toHaveAttribute('data-placeholder');
-      await expect(getLabel(canvasElement)).toHaveStyle({ opacity: '0' });
+      await expect(within(trigger).getByText('Position')).not.toBeVisible();
+      await expect(getFieldRoot(canvasElement)).not.toHaveAttribute('data-filled');
     });
   },
 };

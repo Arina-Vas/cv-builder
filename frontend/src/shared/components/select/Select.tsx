@@ -1,20 +1,17 @@
 import { Select as RadixSelect } from 'radix-ui';
 import s from './Select.module.css';
+import { Field, getErrorId } from '@/shared/components/field/Field';
 import { ChevronIcon } from '@/shared/components/icons/ChevronIcon';
 import { type Ref, useId } from 'react';
-
-type SelectOption = {
-  value: string;
-  label: string;
-  disabled?: boolean;
-};
+import { useControllableState } from '@/shared/lib/useControllableState';
+import type { SelectOption } from '@/shared/components/select/Select.types';
 
 type Props = {
   options: SelectOption[];
   value?: string;
   defaultValue?: string;
   onValueChange?: (value: string) => void;
-  label?: string;
+  label: string;
   placeholder?: string;
   error?: string;
   required?: boolean;
@@ -31,7 +28,6 @@ type Props = {
 export const Select = ({
   options,
   onValueChange,
-  placeholder = 'Select option',
   className,
   error,
   defaultOpen,
@@ -41,32 +37,44 @@ export const Select = ({
   id,
   value,
   label,
+  placeholder = label,
   required,
-  disabled,
+  disabled = false,
   name,
   ref,
 }: Props) => {
   const autoId = useId();
   const triggerId = id ?? autoId;
-  const wrapperClassName = [s.wrapper, className].filter(Boolean).join(' ');
+
+  const [selected, setSelected] = useControllableState(value, defaultValue ?? '', onValueChange);
+  const [isOpen, setIsOpen] = useControllableState(open, defaultOpen ?? false, onOpenChange);
 
   return (
-    <div className={wrapperClassName}>
-      <label className={s.label} htmlFor={triggerId}>
-        {label}
-      </label>
+    <Field
+      id={triggerId}
+      label={label}
+      error={error}
+      disabled={disabled}
+      filled={selected !== ''}
+      active={isOpen}
+      className={className}
+    >
       <RadixSelect.Root
-        value={value}
-        onValueChange={onValueChange}
-        defaultValue={defaultValue}
-        defaultOpen={defaultOpen}
-        open={open}
-        onOpenChange={onOpenChange}
+        value={selected}
+        onValueChange={setSelected}
+        open={isOpen}
+        onOpenChange={setIsOpen}
         disabled={disabled}
         required={required}
         name={name}
       >
-        <RadixSelect.Trigger ref={ref} id={triggerId} className={s.trigger} aria-invalid={!!error}>
+        <RadixSelect.Trigger
+          ref={ref}
+          id={triggerId}
+          className={s.trigger}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? getErrorId(triggerId) : undefined}
+        >
           <span className={s.value}>
             <RadixSelect.Value placeholder={placeholder} />
           </span>
@@ -97,7 +105,6 @@ export const Select = ({
           </RadixSelect.Content>
         </RadixSelect.Portal>
       </RadixSelect.Root>
-      {error && <span className={s.error}>{error}</span>}
-    </div>
+    </Field>
   );
 };

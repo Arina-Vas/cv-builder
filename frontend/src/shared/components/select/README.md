@@ -2,16 +2,18 @@
 
 Shared single-value select from the Figma design system ("Design system (components)" → Select, left column).
 Built on Radix [`Select`](https://www.radix-ui.com/primitives/docs/components/select): keyboard, focus, ARIA, portal
-and collision handling come from Radix, the look comes from `Select.module.css`.
+and collision handling come from Radix. Label, border and error come from [`Field`](../field/README.md),
+the trigger and the list from `Select.module.css`.
 Live examples of every state, Light and Dark: Storybook → **Shared/Select**.
+Several values with search and chips: [`MultiSelect`](./multi-select/README.md).
 
 ## Files
 
-| File                 | What                                         |
-| -------------------- | -------------------------------------------- |
-| `Select.tsx`         | component                                    |
-| `Select.module.css`  | styles, tokens only                          |
-| `Select.stories.tsx` | states + `play` interaction tests            |
+| File                 | What                              |
+| -------------------- | --------------------------------- |
+| `Select.tsx`         | component                         |
+| `Select.module.css`  | styles, tokens only               |
+| `Select.stories.tsx` | states + `play` interaction tests |
 
 ```tsx
 import { Select } from '@/shared/components/select/Select';
@@ -25,55 +27,58 @@ const POSITIONS = [
   { value: 'qa', label: 'QA Engineer' },
 ];
 
-<Select label="Position" placeholder="Position" options={POSITIONS} />          // uncontrolled
+<Select label="Position" options={POSITIONS} />                                 // uncontrolled
 <Select label="Position" options={POSITIONS} defaultValue="se" />               // uncontrolled, preselected
 <Select label="Position" options={POSITIONS} value={value} onValueChange={setValue} />  // controlled
 <Select label="Position" options={POSITIONS} error="Position is required" />
 <Select label="Position" options={POSITIONS} disabled />
 ```
 
-| Prop            | Values                                   | Default           |
-| --------------- | ---------------------------------------- | ----------------- |
-| `options`       | `{ value, label, disabled? }[]`          | required          |
-| `value`         | `string` · `''` = nothing selected ⚠️    | —                 |
-| `defaultValue`  | `string`                                 | —                 |
-| `onValueChange` | `(value: string) => void`                | —                 |
-| `label`         | `string`                                 | —                 |
-| `placeholder`   | `string`                                 | `'Select option'` |
-| `error`         | `string`: red border + chevron + text    | —                 |
-| `disabled`      | `boolean`                                | `false`           |
-| `required`      | `boolean`                                | `false`           |
-| `name`          | `string`: native form field name         | —                 |
-| `id`            | `string`: trigger id, auto via `useId`   | auto              |
-| `open`          | `boolean`                                | —                 |
-| `defaultOpen`   | `boolean`                                | `false`           |
-| `onOpenChange`  | `(open: boolean) => void`                | —                 |
-| `ref`           | `Ref<HTMLButtonElement>`: the trigger    | —                 |
-| `className`     | on the wrapper (label + trigger + error) | —                 |
+| Prop            | Values                                           | Default  |
+| --------------- | ------------------------------------------------ | -------- |
+| `options`       | `{ value, label, disabled? }[]` (`SelectOption`) | required |
+| `label`         | `string`: sits inside the empty closed field     | required |
+| `placeholder`   | `string`: shown in the open list until a choice  | `label`  |
+| `value`         | `string` · `''` = nothing selected ⚠️            | —        |
+| `defaultValue`  | `string`                                         | `''`     |
+| `onValueChange` | `(value: string) => void`                        | —        |
+| `error`         | `string`: red border + chevron + text            | —        |
+| `disabled`      | `boolean`                                        | `false`  |
+| `required`      | `boolean`                                        | `false`  |
+| `name`          | `string`: native form field name                 | —        |
+| `id`            | `string`: trigger id, auto via `useId`           | auto     |
+| `open`          | `boolean`                                        | —        |
+| `defaultOpen`   | `boolean`                                        | `false`  |
+| `onOpenChange`  | `(open: boolean) => void`                        | —        |
+| `ref`           | `Ref<HTMLButtonElement>`: the trigger            | —        |
+| `className`     | on the `Field` root (label + trigger + error)    | —        |
 
-- ⚠️ **Controlled vs uncontrolled** is decided by Radix: `value === undefined` → uncontrolled. To clear a
-  controlled select pass `value=""`, **not** `undefined` (that silently switches it to uncontrolled).
-  Start the state as `useState('')`, not `useState<string>()`.
+- ⚠️ **Controlled vs uncontrolled:** `value === undefined` → uncontrolled. To clear a controlled select pass
+  `value=""`, **not** `undefined` (that silently switches it to uncontrolled). Start the state as `useState('')`,
+  not `useState<string>()`. Same for `open` / `defaultOpen`.
+- `Field` has to know whether there is a value and whether the list is open, so both live in
+  [`useControllableState`](../../lib/useControllableState.ts) and Radix itself is always controlled.
 - `option.value` must be a non-empty string: Radix throws on `value=""` for an item. Convert numeric ids outside.
 - `open` without `onOpenChange` freezes the select. Use `defaultOpen` for "open on mount" (stories, demos).
 - `name` + `required` render a hidden native `<select>`, so the value is sent with a plain `<form>` submit.
 - `ref` points at the trigger button: react-hook-form uses it to focus the field on a validation error.
-- Hover / Open / Focus / Disabled / Invalid are CSS states (`:hover`, `[data-state='open']`,
-  `:focus-visible`, `:disabled`, `[aria-invalid='true']`), not props.
+- With `error`: `aria-invalid` and `aria-describedby` → the `Field` error text.
 
 ## Label
 
-The label sits **above** the field and is shown only when the list is open or a value is chosen
-(Figma: no label in Default / Hover / Invalid). This is pure CSS, so it works in both modes without state:
+Like in `Input` and `MultiSelect`, the `Field` label sits inside the empty field and moves up when the list is
+open (`active`) or a value is chosen (`filled`). Keyboard focus without opening only darkens the border
+(`[role='combobox']:focus-visible` in `Field`).
 
-```css
-.wrapper:has(.trigger[data-state='open']) .label,
-.wrapper:has(.trigger:not([data-placeholder])) .label { opacity: 1; }
-```
+| State            | Label  | In the field  |
+| ---------------- | ------ | ------------- |
+| closed, empty    | inside | —             |
+| open, empty      | raised | `placeholder` |
+| a value selected | raised | the value     |
 
-- It is hidden with `opacity`, **not** `visibility` / `display`: a hidden label drops out of the accessibility
-  tree and the trigger loses its name. In tests use `toHaveStyle({ opacity })`: `toBeVisible` ignores opacity.
-- The space is always reserved, so the field doesn't jump when the label appears.
+- While closed and empty the placeholder is in the DOM but `visibility: hidden`
+  (`.trigger[data-placeholder]:not([data-state='open']) .value`), so it doesn't overlap the label.
+  The trigger's accessible name still comes from the label.
 
 ## Usage with react-hook-form
 
@@ -100,10 +105,10 @@ The label sits **above** the field and is shown only when the list is open or a 
 ## Sizing rules
 
 The select owns its **height and look** (`--input-height`); its **width comes from the parent**
-(`width: 100%` of the wrapper). There is no fixed or max width in the component.
+(`Field` is `width: 100%`). There is no fixed or max width in the component.
 
 - Form column → the parent sets the width, e.g. `grid-template-columns: repeat(2, 1fr)`.
-- One-off width → `className` on the wrapper.
+- One-off width → `className` on the `Field` root.
 - The list always matches the trigger width (`--radix-select-trigger-width`) and is capped at
   `240px` or the space left on screen, whichever is smaller.
 - No room below → Radix flips the list above; the joint border follows via `[data-side]`.
@@ -120,21 +125,22 @@ To change a size or colour, change the token, not the component CSS.
 `play` functions in `Select.stories.tsx` run in Storybook (Interactions panel) and in Vitest
 (`@storybook/addon-vitest`, needs `npx playwright install chromium` once).
 
-| Story                 | Checks                                                              |
-| --------------------- | ------------------------------------------------------------------- |
-| `Default`             | placeholder, closed, accessible name, label hidden                  |
-| `Open`                | list with every option, `aria-expanded`, `onOpenChange`, label shown |
-| `WithValue`           | value + label shown, chosen option is `data-state="checked"`        |
-| `Disabled`            | can't be opened                                                     |
-| `Invalid`             | `aria-invalid`, error text                                          |
-| `DisabledOption`      | a disabled option can't be chosen                                   |
-| `SelectsWithMouse`    | click → `onValueChange`, list closes, focus back on the trigger     |
-| `SelectsWithKeyboard` | Tab / Enter / arrows / Home / End                                   |
-| `Closes`              | Escape and click outside close without changing the value           |
-| `Controlled`          | external state + reset back to the placeholder                      |
+| Story                 | Checks                                                                  |
+| --------------------- | ----------------------------------------------------------------------- |
+| `Default`             | empty, closed, accessible name, label inside                            |
+| `Open`                | list with every option, `aria-expanded`, `onOpenChange`, `Field` active |
+| `WithValue`           | value shown, label raised, chosen option is `data-state="checked"`      |
+| `Disabled`            | can't be opened                                                         |
+| `Invalid`             | `aria-invalid`, error as the accessible description                     |
+| `DisabledOption`      | a disabled option can't be chosen                                       |
+| `SelectsWithMouse`    | click → `onValueChange`, list closes, focus back on the trigger         |
+| `SelectsWithKeyboard` | Tab / Enter / arrows / Home / End                                       |
+| `Closes`              | Escape and click outside close without changing the value               |
+| `Controlled`          | external state + reset back to an empty field                           |
 
 Radix quirks the tests rely on:
 
+- `Field` state is on its root: `data-filled` / `data-active` / `data-error` (label → `.control` → root).
 - The list is portaled to `<body>`: query it with `within(canvasElement.ownerDocument.body)`.
 - The chosen option is `data-state="checked"`; `aria-selected` follows **focus**, not the value.
 - While open, Radix sets `pointer-events: none` on `<body>`: close by outside click with
