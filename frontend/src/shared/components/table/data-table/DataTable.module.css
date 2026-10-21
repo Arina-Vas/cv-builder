@@ -1,2 +1,43 @@
 .table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-family);
+  color: var(--text);
+}
+
+.table th,
+.table td {
+  padding: var(--table-cell-padding);
+  border-bottom: 1px solid var(--table-border);
+  text-align: left;
+  font-size: var(--type-body2-size);
+  letter-spacing: var(--type-body2-ls);
+}
+
+.table th {
+  background: var(--table-header-bg);
+  font-weight: var(--type-table-head-weight);
+  line-height: var(--type-table-head-lh);
+}
+
+.table td {
+  font-weight: var(--type-body2-weight);
+  line-height: var(--type-body2-lh);
+}
+
+.table tbody tr {
+  transition: background-color var(--duration-shorter) var(--ease-in-out);
+}
+
+.table tbody tr:hover {
+  background: var(--table-row-hover);
+}
+
+.caption {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
