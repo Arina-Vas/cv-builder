@@ -390,6 +390,8 @@
   --chip-text: var(--text); /* [M] */
   --avatar-placeholder-bg: #c63031; /* [A] */
   --avatar-placeholder-text: #ffffff; /* [M] */
+  --avatar-bg: #aeaeae; /* [F] */
+  --avatar-fallback-text: #f5f5f7; /* [F] */
   --tooltip-bg: rgba(97, 97, 97, 0.92); /* [M] */
   --tooltip-text: #ffffff; /* [M] */
 
@@ -488,6 +490,9 @@
   --action-active: #ffffff;
   --action-disabled: rgba(255, 255, 255, 0.3);
   --action-disabled-bg: rgba(255, 255, 255, 0.12);
+
+  --avatar-bg: #626262; /* [F] */
+  --avatar-fallback-text: #2e2e2e; /* [F] */
 
   --skeleton: rgba(255, 255, 255, 0.13); /* [M] */
 
