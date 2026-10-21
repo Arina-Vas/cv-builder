@@ -23,25 +23,25 @@ const controlId = id ?? autoId;
     aria-invalid={error ? true : undefined}
     aria-describedby={error ? getErrorId(controlId) : undefined}
   />
-</Field>
+</Field>;
 ```
 
-| Prop        | Values                                         | Default  |
-| ----------- | ---------------------------------------------- | -------- |
+| Prop        | Values                                          | Default  |
+| ----------- | ----------------------------------------------- | -------- |
 | `id`        | `string`: id of the control, `htmlFor` of label | required |
-| `label`     | `string`                                       | required |
-| `error`     | `string`: red border + text under the field    | —        |
-| `disabled`  | `boolean`: grey fill, grey label               | `false`  |
-| `filled`    | `boolean`: the control has a value             | `false`  |
-| `active`    | `boolean`: the control is open / in use        | `false`  |
-| `className` | on the root (label + control + error)          | —        |
+| `label`     | `string`                                        | required |
+| `error`     | `string`: red border + text under the field     | —        |
+| `disabled`  | `boolean`: grey fill, grey label                | `false`  |
+| `filled`    | `boolean`: the control has a value              | `false`  |
+| `active`    | `boolean`: the control is open / in use         | `false`  |
+| `className` | on the root (label + control + error)           | —        |
 
 ## When the label is raised
 
-| Control                 | How Field knows                                         | Pass                   |
-| ----------------------- | ------------------------------------------------------- | ---------------------- |
+| Control                 | How Field knows                                         | Pass                       |
+| ----------------------- | ------------------------------------------------------- | -------------------------- |
 | `<input>`, `<textarea>` | CSS: `:focus` and `:not(:placeholder-shown)`            | nothing, `placeholder=" "` |
-| `Select`, `MultiSelect` | no native placeholder, focus moves into the list portal | `filled`, `active`     |
+| `Select`, `MultiSelect` | no native placeholder, focus moves into the list portal | `filled`, `active`         |
 
 - `filled` → raised label. `active` → raised label + focus border (e.g. while the list is open).
 - The control must be a **direct child** for the CSS states (`.control > input`, `.control > [role='combobox']`).

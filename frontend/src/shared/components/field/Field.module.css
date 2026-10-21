@@ -33,8 +33,9 @@
   transform: var(--input-label-offset);
   transform-origin: top left;
   pointer-events: none;
-  transition: transform var(--duration-shorter) var(--ease-in-out),
-  color var(--duration-shorter) var(--ease-in-out);
+  transition:
+    transform var(--duration-shorter) var(--ease-in-out),
+    color var(--duration-shorter) var(--ease-in-out);
 }
 
 .control:hover > .outline {

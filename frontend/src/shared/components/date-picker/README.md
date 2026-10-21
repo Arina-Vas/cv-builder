@@ -35,15 +35,15 @@ const [endDate, setEndDate] = useState<Date | null>(null);
 <DatePicker value={date} onChange={setDate} disabled />
 ```
 
-| Prop           | Values                          | Default         |
-| -------------- | ------------------------------- | --------------- |
-| `value`        | `Date` · `null` = empty         | required ⚠️     |
-| `onChange`     | `(date: Date \| null) => void`  | required        |
-| `placeholder`  | `string`                        | `'Select date'` |
-| `minDate`      | `Date`: earlier days disabled   | —               |
-| `maxDate`      | `Date`: later days disabled     | —               |
-| `excludeDates` | `Date[]`: single days disabled  | —               |
-| `disabled`     | `boolean`                       | `false`         |
+| Prop           | Values                         | Default         |
+| -------------- | ------------------------------ | --------------- |
+| `value`        | `Date` · `null` = empty        | required ⚠️     |
+| `onChange`     | `(date: Date \| null) => void` | required        |
+| `placeholder`  | `string`                       | `'Select date'` |
+| `minDate`      | `Date`: earlier days disabled  | —               |
+| `maxDate`      | `Date`: later days disabled    | —               |
+| `excludeDates` | `Date[]`: single days disabled | —               |
+| `disabled`     | `boolean`                      | `false`         |
 
 - ⚠️ **Controlled only**: there is no `defaultValue`, the parent always owns the date. Empty is `null`, not `undefined`.
 - `onChange` is called only when a **day** is clicked; it gets a local `Date` at 00:00. The popover closes after it.
@@ -57,11 +57,11 @@ const [endDate, setEndDate] = useState<Date | null>(null);
 
 The calendar has three views, switched from the header:
 
-| View    | Opened by                       | Clicking an item                  | ← / →           |
-| ------- | ------------------------------- | --------------------------------- | --------------- |
-| `day`   | default, every time it opens    | picks the date → `onChange`, closes | month           |
-| `month` | the month name in the header    | goes to `day` of that month       | year            |
-| `year`  | the year in the header          | goes to `month` of that year      | year range (12) |
+| View    | Opened by                    | Clicking an item                    | ← / →           |
+| ------- | ---------------------------- | ----------------------------------- | --------------- |
+| `day`   | default, every time it opens | picks the date → `onChange`, closes | month           |
+| `month` | the month name in the header | goes to `day` of that month         | year            |
+| `year`  | the year in the header       | goes to `month` of that year        | year range (12) |
 
 - Every open starts from the `day` view on the month of `value`, or today when it's empty.
   Switching views or months without picking a day changes nothing outside.
@@ -74,8 +74,8 @@ The calendar has three views, switched from the header:
 any timezone ahead of UTC the day moves back by one (`2025-09-04T00:00` in Minsk → `2025-09-03T21:00Z`).
 
 ```tsx
-format(date, 'yyyy-MM-dd');     // send
-parseISO('2025-09-04');         // receive → local midnight
+format(date, 'yyyy-MM-dd'); // send
+parseISO('2025-09-04'); // receive → local midnight
 ```
 
 ## Usage with react-hook-form
@@ -124,9 +124,9 @@ To change a size or colour, change the token, not the component CSS.
 `play` functions in `DatePicker.stories.tsx` run in Storybook (Interactions panel) and in Vitest
 (`@storybook/addon-vitest`, needs `npx playwright install chromium` once).
 
-| Story         | Checks                                                                          |
-| ------------- | ------------------------------------------------------------------------------- |
-| `SelectsDate` | clicking a day calls `onChange` with that date and shows it in the trigger      |
+| Story         | Checks                                                                                    |
+| ------------- | ----------------------------------------------------------------------------------------- |
+| `SelectsDate` | clicking a day calls `onChange` with that date and shows it in the trigger                |
 | `OpenClose`   | open, Escape (focus back on the trigger), click outside, reopening resets to the day view |
 
 The other stories (`Default`, `WithValue`, `EndDate`, `ExcludeDates`, `Disabled`, `Dark`) are visual.
