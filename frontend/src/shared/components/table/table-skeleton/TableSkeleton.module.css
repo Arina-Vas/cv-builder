@@ -1,2 +1,41 @@
-.skeleton {
+.skeleton .cell {
+  padding: calc(
+      (var(--table-cell-padding) * 2 + var(--type-body2-lh) - var(--table-skeleton-row-height)) / 2
+    )
+    0;
+}
+
+.skeleton .row:hover {
+  background: transparent;
+}
+
+.bar {
+  position: relative;
+  display: block;
+  height: var(--table-skeleton-row-height);
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background: var(--skeleton);
+}
+
+.bar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, var(--action-hover), transparent);
+  transform: translateX(-100%);
+  animation: wave 1.6s linear 0.5s infinite;
+}
+
+@keyframes wave {
+  60%,
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bar::after {
+    animation: none;
+  }
 }

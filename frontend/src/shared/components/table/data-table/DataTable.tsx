@@ -1,4 +1,5 @@
 import { SortableHeaderCell } from '../sortable-header-cell/SortableHeaderCell';
+import { TableSkeleton } from '../table-skeleton/TableSkeleton';
 import type { DataTableProps } from '../types';
 import styles from './DataTable.module.css';
 
@@ -9,9 +10,10 @@ export function DataTable<T>({
   caption,
   sort,
   onSortChange,
+  isLoading,
 }: DataTableProps<T>) {
   return (
-    <table className={styles.table}>
+    <table aria-busy={isLoading} className={styles.table}>
       <caption className={styles.caption}>{caption}</caption>
 
       <thead>
@@ -37,15 +39,19 @@ export function DataTable<T>({
         </tr>
       </thead>
 
-      <tbody>
-        {rows.map((row) => (
-          <tr key={getRowId(row)}>
-            {columns.map((column) => (
-              <td key={column.key}>{column.render(row)}</td>
-            ))}
-          </tr>
-        ))}
-      </tbody>
+      {isLoading ? (
+        <TableSkeleton columnCount={5} />
+      ) : (
+        <tbody>
+          {rows.map((row) => (
+            <tr key={getRowId(row)}>
+              {columns.map((column) => (
+                <td key={column.key}>{column.render(row)}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      )}
     </table>
   );
 }
