@@ -20,8 +20,8 @@ import { Chip } from '@/shared/components/chip/Chip';
 | Prop        | Values                                         | Default  |
 | ----------- | ---------------------------------------------- | -------- |
 | `label`     | `string`                                       | required |
-| `onRemove`  | `() => void`: shows the ⊗ button                | —        |
-| `disabled`  | `boolean`: grey text, border and ⊗; ⊗ disabled  | `false`  |
+| `onRemove`  | `() => void`: shows the ⊗ button               | —        |
+| `disabled`  | `boolean`: grey text, border and ⊗; ⊗ disabled | `false`  |
 | `className` | on the root `<span>`                           | —        |
 
 Plus every native `<span>` attribute (`aria-*`, `data-*`, `style`), except `children`: the text is `label`.

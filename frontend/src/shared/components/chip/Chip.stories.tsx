@@ -122,7 +122,10 @@ const STATES: { title: string; props: Partial<ChipProps> }[] = [
   { title: 'Default', props: {} },
   { title: 'Removable', props: { onRemove: () => {} } },
   { title: 'Disabled', props: { disabled: true, onRemove: () => {} } },
-  { title: 'Long label', props: { label: 'Senior Software Engineer in Test Automation', onRemove: () => {} } },
+  {
+    title: 'Long label',
+    props: { label: 'Senior Software Engineer in Test Automation', onRemove: () => {} },
+  },
 ];
 
 const gridStyle: CSSProperties = {

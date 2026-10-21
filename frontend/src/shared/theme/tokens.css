@@ -433,6 +433,8 @@
   /* Provide default values for Radix Select dynamic variables */
   --radix-select-trigger-width: auto;
   --radix-select-content-available-height: auto;
+  --radix-popover-trigger-width: auto;
+  --radix-popover-content-available-height: auto;
 
   --select-option-hover-bg: #aeaeae;
   --select-option-selected-bg: #626262;
