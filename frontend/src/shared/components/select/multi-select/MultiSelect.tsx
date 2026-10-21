@@ -262,6 +262,7 @@ export function MultiSelect({
                     onMouseMove={() => {
                       if (!option.disabled && index !== activeIndex) setActiveIndex(index);
                     }}
+                    onMouseLeave={() => setActiveIndex(-1)}
                     onClick={() => selectOption(option)}
                   >
                     <span className={s.checkbox} aria-hidden>
