@@ -2,6 +2,7 @@ import s from './AvatarUploader.module.css';
 import { UploadIcon } from '@/shared/components/icons/UploadIcon';
 import { CloseIcon } from '@/shared/components/icons/CloseIcon';
 import type { ChangeEvent } from 'react';
+import Image from 'next/image';
 
 const MAX_SIZE = 0.5 * 1024 * 1024; // 0.5MB
 const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/gif'];
@@ -36,7 +37,7 @@ export const AvatarUploader = ({ src, fallback, onChange, onRemove, onError, dis
     <div className={s.wrapper}>
       <div className={s.image}>
         {src ? (
-          <img src={src} alt={fallback} className={s.avatar} />
+          <Image src={src} alt={fallback} fill sizes="120px" className={s.avatar} />
         ) : (
           <span className={s.fallback}>{fallback.charAt(0).toUpperCase()}</span>
         )}

@@ -30,6 +30,9 @@ import { AvatarUploader } from '@/shared/components/avatar-uploader/AvatarUpload
 - `fallback` is the user's name: the first letter, upper-cased, is shown in the grey circle when there
   is no `src`. It is also the `alt` of the image.
 - `src` is any image URL: a link from the API or a `blob:` URL from `URL.createObjectURL()` for a preview.
+  It is rendered with `next/image` (`fill`, `sizes="120px"`). `blob:` and `data:` URLs are not optimized
+  by Next, so they work as is; a link from another host has to be allowed in `images.remotePatterns`
+  in `next.config.ts`.
 - `onChange` gets the chosen file only after it passes the checks below.
 - `onError` gets the message when the file fails a check. The component does not show it itself:
   the parent decides how (toast, text under the field).
