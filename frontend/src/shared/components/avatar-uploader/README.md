@@ -10,6 +10,9 @@ click and checks the chosen file. Keeping the file, the preview and the upload b
 import { AvatarUploader } from '@/shared/components/avatar-uploader/AvatarUploader';
 ```
 
+The circle itself is the shared [`Avatar`](../avatar/README.md) (`size="lg"`, 120px). The uploader adds
+the red × over it and the file input on the right.
+
 ## Usage
 
 ```tsx
@@ -95,13 +98,20 @@ an image.
 
 ## How it works
 
+The left side is `<div class="avatar">` (`position: relative`) with the `Avatar` and the × inside it:
+the × is `position: absolute` in the top-right corner and fades in on `:hover` of that wrapper.
+The uploader is always 120px, as in Figma, so it has no `size` prop.
+
 The right side is a `<label>` with a visually hidden `<input type="file">` inside, so a click anywhere
 on the icon or the text opens the file dialog without any JS. The input is hidden with the
 visually-hidden pattern (`clip-path`, 1×1px), not `display: none`, so it is still reachable with Tab.
 
 The disabled look is driven by `data-disabled` on the label, because a `<label>` has no `:disabled` state.
 
-The cross is the shared [`CloseIcon`](../icons/CloseIcon.tsx): a circle in `currentColor` with the X cut
+The × button is the shared [`IconButton`](../buttons/README.md), as in `Chip`. The uploader CSS overrides
+its look under `.avatar`: 24px, no border, no fill on press, no focus ring.
+
+The icon is the shared [`CloseIcon`](../icons/CloseIcon.tsx): a circle in `currentColor` with the X cut
 out. The X is filled with `--close-icon-cross` (transparent by default, as in `Chip`); the uploader sets
 it to `--on-primary`, so the X is white and no background is needed behind the icon.
 
@@ -109,8 +119,8 @@ it to `--on-primary`, so the X is white and no background is needed behind the i
 
 - The file input stays focusable; focus underlines the text the same way as hover.
 - The remove button is `type="button"` (never submits a form) and has `aria-label="Remove avatar"`.
-- Keyboard focus on the cross (`:focus-visible`) shows it even without hover and draws a 2px
-  `--focus-ring` outline around it, the same ring as `IconButton`.
+- Keyboard focus on the cross (`:focus-visible`) shows it even without hover; there is no ring around it,
+  the × appearing is the focus state.
 - Tab order: the remove button (when there is an image), then the file input.
 - When `disabled`, the cross is not rendered and the file input is disabled, so neither is reachable
   with Tab.
@@ -119,10 +129,7 @@ it to `--on-primary`, so the X is white and no background is needed behind the i
 
 ## Tokens
 
-Styles use tokens from [`theme/tokens.css`](../../theme/tokens.css): `--avatar-size-lg`,
-`--avatar-font-size-lg`, `--avatar-bg`, `--avatar-fallback-text`, `--primary`, `--on-primary`, `--text`,
-`--text-secondary`, `--text-disabled`, `--focus-ring`, `--type-h6-size`, `--type-body1-size`,
-`--font-weight-medium`, `--duration-shorter`, `--ease-in-out`.
-
-`--avatar-bg` / `--avatar-fallback-text` are the grey circle and the letter, with Light and Dark values.
-They are not the same as `--avatar-placeholder-*` (the red sidebar avatar).
+Styles use tokens from [`theme/tokens.css`](../../theme/tokens.css): `--primary`, `--on-primary`,
+`--icon-size`, `--duration-shorter`, `--ease-in-out` (the ×), `--text`, `--text-secondary`,
+`--text-disabled`, `--type-h6-size`, `--type-body1-size`, `--font-weight-medium` (the text).
+The circle's tokens are listed in the [Avatar README](../avatar/README.md#sizes).
