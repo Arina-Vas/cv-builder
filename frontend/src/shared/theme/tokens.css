@@ -247,6 +247,7 @@
   --sidebar-item-radius: 0 var(--radius-nav) var(--radius-nav) 0; /* [A] */
 
   --table-cell-padding: 16px; /* [M] TableCell normal */
+  --table-row-height: 73px; /* [F] Row = 16 + 40 avatar + 16 + 1 border */
   --table-checkbox-cell-width: 48px; /* [M] */
   --table-skeleton-row-height: 40px; /* [A] */
 
@@ -360,8 +361,9 @@
   --table-border: rgba(224, 224, 224, 1); /* [M] TableCell border (lighten(divider)) */
 
   /* Menu / Select / Autocomplete popover */
-  --menu-bg: var(--bg); /* [A] user menu paper = background.default */
+  --menu-bg: var(--color-grey-100); /* [F] RowActionsMenu fill */
   --menu-shadow: var(--shadow-8); /* [A] Autocomplete paper / [M] Menu */
+  --menu-border: #aeaeae; /* [F] RowActionsMenu 1px stroke */
   --menu-item-hover: var(--action-hover); /* [M] */
   --menu-item-selected: rgba(198, 48, 49, 0.08); /* [M] */
   --menu-group-label: #c63031; /* [A] Autocomplete groupLabel = primary */
@@ -501,6 +503,8 @@
   --table-row-selected: rgba(198, 48, 49, 0.16); /* [M] */
   --table-border: rgba(81, 81, 81, 1); /* [M] */
 
+  --menu-bg: var(--color-grey-600); /* [F] RowActionsMenu fill */
+  --menu-border: var(--color-secondary); /* [F] RowActionsMenu 1px stroke */
   --menu-item-selected: rgba(198, 48, 49, 0.16); /* [M] */
 
   --tab-text: #f5f5f7; /* [A] */
