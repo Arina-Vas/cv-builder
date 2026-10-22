@@ -276,6 +276,7 @@
   --chip-remove-size: 12px; /* [F]*/
 
   --skill-bar-height: 4px; /* [F] Progressbar */
+  --skill-bar-width: 80px; /* [F] Progressbar */
   --skill-bar-track-opacity: 0.9; /* [F] Progressbar opacity 90% */
 
   /* ------------------------------------------------------------------ */
