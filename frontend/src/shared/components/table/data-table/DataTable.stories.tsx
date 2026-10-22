@@ -1,10 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
-import { useState } from 'react';
 import { fn } from 'storybook/test';
 
+import { Chip } from '@/shared/components/chip/Chip';
+
+import { cvs, type CvRow } from '../__fixtures__/cvs';
 import { positions, type PositionRow } from '../__fixtures__/positions';
+import { projects, type ProjectRow } from '../__fixtures__/projects';
 import { users, type UserRow } from '../__fixtures__/users';
-import type { Column, RowAction, SortState } from '../types';
+import type { Column } from '../types';
 import { DataTable } from './DataTable';
 
 const meta = {
@@ -21,8 +24,6 @@ const meta = {
 
 export default meta;
 type Story = StoryObj<typeof meta>;
-
-export const Default: Story = {};
 
 /* ------------------------------------------------------------------ */
 /* States                                                              */
@@ -45,59 +46,225 @@ export const ErrorState: Story = {
 };
 
 /* ------------------------------------------------------------------ */
-/* Users: sorting                                                      */
+/* Row details: edge cases and themes (Figma screens: Shared/DataTable/Figma) */
 /* ------------------------------------------------------------------ */
 
-type UserSortField = Exclude<keyof UserRow, 'id'>;
+const cvColumns: Column<CvRow>[] = [
+  { key: 'name', header: 'Name', render: (cv) => cv.name },
+  { key: 'education', header: 'Education', render: (cv) => cv.education },
+  { key: 'employee', header: 'Employee', render: (cv) => cv.employeeEmail },
+];
 
-const userColumns: Column<UserRow>[] = [
-  // Placeholder until the Avatar component exists
-  { key: 'avatar', header: '', width: '56px', render: (user) => <span>{user.firstName[0]}</span> },
-  { key: 'firstName', header: 'First Name', sortable: true, render: (user) => user.firstName },
-  { key: 'lastName', header: 'Last Name', sortable: true, render: (user) => user.lastName },
+const projectColumns: Column<ProjectRow>[] = [
+  { key: 'name', header: 'Name', render: (project) => project.name },
+  { key: 'domain', header: 'Domain', render: (project) => project.domain },
+  { key: 'startDate', header: 'Start Date', render: (project) => project.startDate },
+  { key: 'endDate', header: 'End Date', render: (project) => project.endDate },
+];
+
+// TODO: description ↔ chips spacing not measured in Figma yet
+const renderProjectDetails = (project: ProjectRow) => (
+  <>
+    <p style={{ margin: 0 }}>{project.description}</p>
+    <div
+      style={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: 'var(--chip-gap)',
+        marginTop: 'var(--space-2)',
+      }}
+    >
+      {project.environment.map((technology) => (
+        <Chip key={technology} label={technology} />
+      ))}
+    </div>
+  </>
+);
+
+// Edge cases: a row without details gets no details row and keeps its own bottom line;
+// a project without environment shows only the description; long text wraps
+// Fixtures have 3 rows; the tuple type satisfies noUncheckedIndexedAccess
+const [firstCv, secondCv] = cvs as [CvRow, CvRow];
+const [firstProject, secondProject] = projects as [ProjectRow, ProjectRow];
+
+const mixedCvs: CvRow[] = [
+  firstCv,
+  { ...secondCv, description: '' },
+  { ...firstCv, id: 'long', description: firstCv.description.repeat(4) },
+];
+
+const mixedProjects: ProjectRow[] = [
+  firstProject,
+  { ...secondProject, environment: [] },
+  {
+    ...firstProject,
+    id: 'many',
+    environment: [
+      ...firstProject.environment,
+      ...secondProject.environment,
+      'Node.js',
+      'GraphQL',
+      'PostgreSQL',
+    ],
+  },
+];
+
+const renderMixedProjectDetails = (project: ProjectRow) =>
+  project.environment.length > 0 ? renderProjectDetails(project) : project.description;
+
+export const RowDetailsEdgeCases: Story = {
+  name: 'Row details: edge cases',
+  render: () => (
+    <div style={{ display: 'grid', gap: 48 }}>
+      <DataTable<CvRow>
+        columns={cvColumns}
+        rows={mixedCvs}
+        getRowId={(cv) => cv.id}
+        caption="CVs with and without description"
+        emptyMessage="No CVs found"
+        rowActions={() => [{ label: 'View', onSelect: fn() }]}
+        getRowLabel={(cv) => cv.name}
+        renderRowDetails={(cv) => cv.description}
+      />
+      <DataTable<ProjectRow>
+        columns={projectColumns}
+        rows={mixedProjects}
+        getRowId={(project) => project.id}
+        caption="Projects with and without environment"
+        emptyMessage="No projects found"
+        rowActions={() => [{ label: 'Update', onSelect: fn() }]}
+        getRowLabel={(project) => project.name}
+        renderRowDetails={renderMixedProjectDetails}
+      />
+    </div>
+  ),
+};
+
+export const RowDetailsLightAndDark: Story = {
+  name: 'Row details: Light and Dark',
+  parameters: { layout: 'fullscreen' },
+  render: () => (
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
+      {(['light', 'dark'] as const).map((theme) => (
+        <div key={theme} data-theme={theme} style={{ padding: 24, background: 'var(--bg)' }}>
+          <DataTable<ProjectRow>
+            columns={projectColumns}
+            rows={projects}
+            getRowId={(project) => project.id}
+            caption={`Projects (${theme})`}
+            emptyMessage="No projects found"
+            rowActions={() => [{ label: 'Update', onSelect: fn() }]}
+            getRowLabel={(project) => project.name}
+            renderRowDetails={renderProjectDetails}
+          />
+        </div>
+      ))}
+    </div>
+  ),
+};
+
+/* ------------------------------------------------------------------ */
+/* Scroll: 50 rows                                                     */
+/* ------------------------------------------------------------------ */
+
+// 50 rows built from the 3 fixture users
+const manyUsers: UserRow[] = Array.from({ length: 50 }, (_, index) => {
+  const base = users[index % users.length] as UserRow;
+  return { ...base, id: String(index + 1), firstName: `${base.firstName} ${index + 1}` };
+});
+
+const manyCvs: CvRow[] = Array.from({ length: 50 }, (_, index) => {
+  const base = cvs[index % cvs.length] as CvRow;
+  // Every 3rd CV has no description, every 5th a long one: rows of different height
+  const description =
+    index % 3 === 2 ? '' : index % 5 === 0 ? base.description.repeat(3) : base.description;
+  return { ...base, id: String(index + 1), name: `${base.name} #${index + 1}`, description };
+});
+
+const scrollUserColumns: Column<UserRow>[] = [
+  { key: 'firstName', header: 'First Name', render: (user) => user.firstName },
+  { key: 'lastName', header: 'Last Name', render: (user) => user.lastName },
   { key: 'email', header: 'Email', render: (user) => user.email },
-  { key: 'department', header: 'Department', sortable: true, render: (user) => user.department },
-  { key: 'position', header: 'Position', sortable: true, render: (user) => user.position },
+  { key: 'department', header: 'Department', render: (user) => user.department },
+  { key: 'position', header: 'Position', render: (user) => user.position },
 ];
 
-// Stands in for backend sorting
-function sortUsers(rows: UserRow[], sort?: SortState) {
-  if (!sort) return rows;
+const usersTable = (
+  <DataTable<UserRow>
+    columns={scrollUserColumns}
+    rows={manyUsers}
+    getRowId={(user) => user.id}
+    caption="Employees"
+    emptyMessage="No users found"
+    rowActions={() => [
+      { label: 'View', onSelect: fn() },
+      { label: 'Update', onSelect: fn() },
+      { label: 'Delete', onSelect: fn() },
+    ]}
+    getRowLabel={(user) => `${user.firstName} ${user.lastName}`}
+  />
+);
 
-  const field = sort.field as UserSortField;
-  const direction = sort.order === 'ASC' ? 1 : -1;
+// The whole page scrolls (iframe = browser window)
+export const ScrollPage: Story = {
+  name: 'Scroll: 50 rows, page scroll',
+  parameters: { layout: 'padded' },
+  render: () => usersTable,
+};
 
-  return [...rows].sort((a, b) => a[field].localeCompare(b[field]) * direction);
-}
+// As in the app: header and search stay, only the content area under them scrolls
+export const ScrollContainer: Story = {
+  name: 'Scroll: 50 rows, content area scroll',
+  parameters: { layout: 'fullscreen' },
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+      <div style={{ padding: 16, borderBottom: '1px solid var(--table-border)' }}>
+        Page header and search (stays in place)
+      </div>
+      <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '0 16px' }}>
+        {usersTable}
+      </div>
+    </div>
+  ),
+};
 
-const onView = fn();
-const onUpdate = fn();
-const onDelete = fn();
-
-const getUserActions = (): RowAction<UserRow>[] => [
-  { label: 'View', onSelect: onView },
-  { label: 'Update', onSelect: onUpdate },
-  { label: 'Delete', onSelect: onDelete },
-];
-
-function UsersTable() {
-  const [sort, setSort] = useState<SortState>({ field: 'department', order: 'ASC' });
-
-  return (
-    <DataTable
-      columns={userColumns}
-      rows={sortUsers(users, sort)}
-      getRowId={(user) => user.id}
-      caption="Employees"
-      emptyMessage="No users found"
-      sort={sort}
-      onSortChange={setSort}
-      rowActions={getUserActions}
-      getRowLabel={(user) => `${user.firstName} ${user.lastName}`}
+// Rows of different height: with, without and with a long description
+export const ScrollWithDetails: Story = {
+  name: 'Scroll: 50 rows with details',
+  parameters: { layout: 'padded' },
+  render: () => (
+    <DataTable<CvRow>
+      columns={cvColumns}
+      rows={manyCvs}
+      getRowId={(cv) => cv.id}
+      caption="CVs"
+      emptyMessage="No CVs found"
+      rowActions={() => [
+        { label: 'View', onSelect: fn() },
+        { label: 'Edit', onSelect: fn() },
+        { label: 'Delete', onSelect: fn() },
+      ]}
+      getRowLabel={(cv) => cv.name}
+      renderRowDetails={(cv) => cv.description}
     />
-  );
-}
+  ),
+};
 
-export const Users: Story = {
-  render: () => <UsersTable />,
+// Minimum supported width (< 768px is the Device Error page): long emails may overflow
+export const ScrollTablet: Story = {
+  name: 'Scroll: 50 rows, tablet 768px',
+  parameters: { layout: 'fullscreen' },
+  render: () => (
+    <div
+      style={{
+        width: 768,
+        height: '100vh',
+        overflow: 'auto',
+        padding: '0 16px',
+        outline: '1px dashed var(--table-border)',
+      }}
+    >
+      {usersTable}
+    </div>
+  ),
 };
