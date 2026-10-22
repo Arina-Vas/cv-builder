@@ -2,6 +2,7 @@ import { Fragment } from 'react';
 
 import { IconButton } from '../../buttons';
 import { ChevronIcon } from '../../icons/ChevronIcon';
+import { LoadMoreTrigger } from '../load-more-trigger/LoadMoreTrigger';
 import { RowActionsMenu } from '../row-actions-menu/RowActionsMenu';
 import { SortableHeaderCell } from '../sortable-header-cell/SortableHeaderCell';
 import { TableMessage } from '../table-message/TableMessage';
@@ -24,6 +25,10 @@ export function DataTable<T>({
   error,
   onRetry,
   emptyMessage,
+  hasMore = false,
+  isLoadingMore = false,
+  loadMoreError,
+  onLoadMore,
 }: DataTableProps<T>) {
   // Last column: ⋮ menu (rowActions) or › open arrow (onRowClick); the menu wins if both are passed
   const hasActionsColumn = !!rowActions || !!onRowClick;
@@ -127,12 +132,32 @@ export function DataTable<T>({
     );
   };
 
-  return (
-    <table aria-busy={isLoading} className={styles.table}>
-      <caption className={styles.visuallyHidden}>{caption}</caption>
+  const showLoadMore = !isLoading && !error && rows.length > 0;
+  const loadMoreStatus = isLoadingMore ? 'Loading more rows' : `${rows.length} rows loaded`;
 
-      {renderHead()}
-      {renderBody()}
-    </table>
+  return (
+    <>
+      <table aria-busy={isLoading || isLoadingMore} className={styles.table}>
+        <caption className={styles.visuallyHidden}>{caption}</caption>
+
+        {renderHead()}
+        {renderBody()}
+        {onLoadMore && showLoadMore && (
+          <LoadMoreTrigger
+            columnCount={columnCount}
+            hasMore={hasMore}
+            isLoading={isLoadingMore}
+            error={loadMoreError}
+            onLoadMore={onLoadMore}
+          />
+        )}
+      </table>
+
+      {onLoadMore && (
+        <div role="status" className={styles.visuallyHidden}>
+          {showLoadMore && !loadMoreError && loadMoreStatus}
+        </div>
+      )}
+    </>
   );
 }

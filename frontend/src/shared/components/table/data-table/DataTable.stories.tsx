@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
+import { useEffect, useRef, useState } from 'react';
 import { fn } from 'storybook/test';
 
 import { Avatar } from '@/shared/components/avatar/Avatar';
@@ -274,4 +275,75 @@ export const ScrollTablet: Story = {
       {usersTable}
     </div>
   ),
+};
+
+/* ------------------------------------------------------------------ */
+/* Infinite scroll: next 10 rows after a 3s fake request              */
+/* ------------------------------------------------------------------ */
+
+const PAGE_SIZE = 10;
+const LOAD_DELAY_MS = 3000;
+
+// Fake backend over the 50 users: pages of 10, every request takes 3s.
+// failOnce: the first request for page 2 fails, RETRY loads it
+function InfiniteUsersTable({ failOnce = false }: { failOnce?: boolean }) {
+  const [rows, setRows] = useState(() => manyUsers.slice(0, PAGE_SIZE));
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [loadMoreError, setLoadMoreError] = useState<string>();
+  const failedRef = useRef(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  useEffect(() => () => clearTimeout(timerRef.current), []);
+
+  const loadMore = () => {
+    setIsLoadingMore(true);
+    setLoadMoreError(undefined);
+
+    timerRef.current = setTimeout(() => {
+      setIsLoadingMore(false);
+
+      if (failOnce && !failedRef.current && rows.length === PAGE_SIZE) {
+        failedRef.current = true;
+        setLoadMoreError('Failed to load users');
+        return;
+      }
+
+      setRows(manyUsers.slice(0, rows.length + PAGE_SIZE));
+    }, LOAD_DELAY_MS);
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+      <div style={{ padding: 16, borderBottom: '1px solid var(--table-border)' }}>
+        Loaded {rows.length} of {manyUsers.length}
+        {isLoadingMore && ' — loading the next 10…'}
+      </div>
+      <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '0 16px' }}>
+        <DataTable<UserRow>
+          columns={scrollUserColumns}
+          rows={rows}
+          getRowId={(user) => user.id}
+          caption="Employees"
+          emptyMessage="No users found"
+          getRowLabel={(user) => `${user.firstName} ${user.lastName}`}
+          hasMore={rows.length < manyUsers.length}
+          isLoadingMore={isLoadingMore}
+          loadMoreError={loadMoreError}
+          onLoadMore={loadMore}
+        />
+      </div>
+    </div>
+  );
+}
+
+export const InfiniteScroll: Story = {
+  name: 'Infinite scroll: 10 per page, 3s',
+  parameters: { layout: 'fullscreen' },
+  render: () => <InfiniteUsersTable />,
+};
+
+export const InfiniteScrollError: Story = {
+  name: 'Infinite scroll: page 2 fails, RETRY',
+  parameters: { layout: 'fullscreen' },
+  render: () => <InfiniteUsersTable failOnce />,
 };

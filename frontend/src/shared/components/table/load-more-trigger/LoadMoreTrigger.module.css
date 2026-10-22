@@ -1,2 +1,13 @@
-.trigger {
+.trigger > .row {
+  height: 1px;
+}
+
+.trigger > .row:hover {
+  background: transparent;
+}
+
+.row > .cell {
+  height: 1px;
+  padding: 0;
+  border: none;
 }
