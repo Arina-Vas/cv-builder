@@ -1,0 +1,67 @@
+.root {
+  position: relative;
+  padding: var(--toast-padding);
+  border: 1px solid transparent;
+  border-radius: var(--toast-radius);
+  width: var(--toast-width);
+  min-height: var(--toast-height);
+}
+
+.root[data-type='error'] {
+  border-color: var(--toast-error-fg);
+  background-color: var(--toast-error-bg);
+  color: var(--toast-error-text);
+}
+
+.root[data-type='warning'] {
+  border-color: var(--toast-warning-fg);
+  background-color: var(--toast-warning-bg);
+  color: var(--toast-warning-fg);
+}
+
+.root[data-type='info'] {
+  border-color: var(--toast-info-fg);
+  background-color: var(--toast-info-bg);
+  color: var(--toast-info-fg);
+}
+
+.root[data-type='success'] {
+  border-color: var(--toast-success-fg);
+  background-color: var(--toast-success-bg);
+  color: var(--toast-success-fg);
+}
+
+.title {
+  font-weight: var(--font-weight-medium);
+  font-size: var(--type-toast-title-size);
+  padding-right: 32px;
+  letter-spacing: var(--type-toast-title-ls);
+  line-height: var(--type-toast-title-lh);
+  color: inherit;
+}
+
+.description {
+  font-size: var(--type-toast-text-size);
+  color: inherit;
+  line-height: var(--type-toast-text-lh);
+  letter-spacing: var(--type-toast-text-ls);
+}
+
+.root .close {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  width: 24px;
+  height: 24px;
+  color: inherit;
+}
+
+.root .close:active:not(:disabled) {
+  background: rgb(0 0 0 / 0.12);
+  border-color: transparent;
+  color: inherit;
+}
+
+.root .close:hover:not(:disabled) {
+  border-color: currentColor;
+}
