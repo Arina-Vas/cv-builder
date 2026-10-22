@@ -28,10 +28,13 @@ Plus every native `<span>` attribute (`aria-*`, `data-*`, `style`), except `chil
 
 - `onRemove` gets **no arguments**: the parent already knows which value it removes
   (`onRemove={() => toggle(option.value)}`). Don't key chips by their label: labels can repeat.
-- The ⊗ button is `type="button"` (never submits a form) with `aria-label="Remove {label}"`.
+- The ⊗ is the shared [`IconButton`](../buttons/README.md), `type="button"` (never submits a form)
+  with `aria-label="Remove {label}"`. The chip CSS overrides its look: 12px, grey, no fill on press,
+  same grey when disabled.
 - Clicking ⊗ calls `stopPropagation()`, so the click doesn't reach the parent (e.g. doesn't open a select list).
 - ⊗ has `onMouseDown` → `preventDefault()`: focus stays where it was, e.g. in the `MultiSelect` input.
 - ⊗ is a normal focusable button: Tab reaches it, Enter / Space remove the chip.
+  Keyboard focus has no ring: the ⊗ turns the hover colour (`--chip-remove-hover`).
 - `disabled` keeps the ⊗ on screen (Figma: disabled MultiSelect) but sets the native `disabled` on the button:
   no click, skipped by Tab, still announced by screen readers as "Remove … , dimmed".
 - A chip **without** ⊗ is not in the design system. The closest thing is Project → Environment in the app
@@ -39,12 +42,14 @@ Plus every native `<span>` attribute (`aria-*`, `data-*`, `style`), except `chil
 
 ## Layout
 
-The chip is `inline-flex` and never wider than its parent. A long label is cut with an ellipsis,
+The chip is `inline-flex` and never wider than its parent. Side padding is 12px, or 12px left /
+6px right when it has a ⊗ (`data-removable` on the root). A long label is cut with an ellipsis,
 the full text is in the native tooltip (`title`). Put chips in a `flex-wrap` parent with
 `gap: var(--chip-gap)`; the chip has no margins of its own.
 
 ## Tokens
 
 Styles use tokens from [`theme/tokens.css`](../../theme/tokens.css) only, so Light / Dark switch automatically:
-`--chip-border`, `--chip-remove`, `--chip-remove-hover`, `--chip-remove-size`, `--radius-chip`, `--input-disabled-text`.
+`--chip-border`, `--chip-remove`, `--chip-remove-hover`, `--chip-remove-size`, `--radius-chip`, `--input-disabled-text`,
+`--space-1` (gap), `--space-3` (padding).
 To change a size or colour, change the token, not the component CSS.

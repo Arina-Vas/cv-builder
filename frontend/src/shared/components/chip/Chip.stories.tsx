@@ -31,6 +31,11 @@ export const Default: Story = {
 
     await expect(canvas.getByText('Software Engineer')).toBeInTheDocument();
     await expect(canvas.queryByRole('button')).not.toBeInTheDocument();
+
+    // no ⊗: 12px on both sides
+    const chip = canvas.getByText('Software Engineer').parentElement!;
+    await expect(getComputedStyle(chip).paddingLeft).toBe('12px');
+    await expect(getComputedStyle(chip).paddingRight).toBe('12px');
   },
 };
 
@@ -47,6 +52,12 @@ export const Removable: Story = {
       await expect(height).toBeGreaterThan(0);
     });
 
+    await step('with ⊗: 12px left, 6px right', async () => {
+      const chip = canvas.getByText('Software Engineer').parentElement!;
+      await expect(getComputedStyle(chip).paddingLeft).toBe('12px');
+      await expect(getComputedStyle(chip).paddingRight).toBe('6px');
+    });
+
     await step('click on ⊗ calls onRemove once', async () => {
       await userEvent.click(remove);
       await expect(args.onRemove).toHaveBeenCalledTimes(1);
@@ -60,6 +71,8 @@ export const Removable: Story = {
     await step('⊗ is reachable with Tab and works with Enter', async () => {
       await userEvent.tab();
       await expect(remove).toHaveFocus();
+      // focus is shown by the hover colour, without IconButton's ring
+      await expect(getComputedStyle(remove).outlineStyle).toBe('none');
 
       await userEvent.keyboard('{Enter}');
       await expect(args.onRemove).toHaveBeenCalledTimes(2);
@@ -76,6 +89,11 @@ export const Disabled: Story = {
 
     await step('⊗ is shown but disabled', async () => {
       await expect(remove).toBeDisabled();
+    });
+
+    await step('⊗ keeps the chip grey, not IconButton disabled colour', async () => {
+      const chip = remove.parentElement!;
+      await expect(getComputedStyle(remove).color).toBe(getComputedStyle(chip).color);
     });
 
     await step('click on ⊗ does not remove', async () => {
