@@ -199,6 +199,7 @@
   --avatar-size-sm: 24px; /* [A] skill/language bullet */
   --avatar-size: 40px; /* [A] sidebar user avatar */
   --avatar-size-lg: 120px; /* [A] profile avatar */
+  --avatar-font-size: 20px; /* [M] Avatar default */
   --avatar-font-size-lg: 40px; /* [A] */
   --scrollbar-size: 2px; /* [A] */
   --breakpoint-sm: 600px; /* [M] */
