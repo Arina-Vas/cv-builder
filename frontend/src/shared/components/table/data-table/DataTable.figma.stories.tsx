@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { useState } from 'react';
 import { fn } from 'storybook/test';
 
+import { Avatar } from '@/shared/components/avatar/Avatar';
 import { Chip } from '@/shared/components/chip/Chip';
 
 import { cvProjects, type CvProjectRow } from '../__fixtures__/cvProjects';
@@ -86,8 +87,13 @@ function FigmaTable<T>({
 /* ------------------------------------------------------------------ */
 
 const userColumns: Column<UserRow>[] = [
-  // Placeholder until the Avatar component exists
-  { key: 'avatar', header: '', width: '56px', render: (user) => <span>{user.firstName[0]}</span> },
+  // 40px avatar + 16px cell padding on both sides
+  {
+    key: 'avatar',
+    header: '',
+    width: '72px',
+    render: (user) => <Avatar fallback={user.firstName} src={user.avatarUrl} size="md" />,
+  },
   { key: 'firstName', header: 'First Name', sortable: true, render: (user) => user.firstName },
   { key: 'lastName', header: 'Last Name', sortable: true, render: (user) => user.lastName },
   { key: 'email', header: 'Email', render: (user) => user.email },

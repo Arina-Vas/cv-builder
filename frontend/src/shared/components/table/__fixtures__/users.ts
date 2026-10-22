@@ -5,7 +5,11 @@ export interface UserRow {
   email: string;
   department: string;
   position: string;
+  avatarUrl?: string;
 }
+
+export const SAMPLE_AVATAR_URL =
+  'https://img.magnific.com/free-vector/mysterious-mafia-man-smoking-cigarette_52683-34828.jpg?semt=ais_hybrid&w=740&q=80';
 
 export const users: UserRow[] = [
   {
@@ -23,6 +27,7 @@ export const users: UserRow[] = [
     email: 'christophernolan@gmail.com',
     department: 'Blockchain',
     position: 'DevOps Engineer',
+    avatarUrl: SAMPLE_AVATAR_URL,
   },
   {
     id: '3',

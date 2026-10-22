@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { fn } from 'storybook/test';
 
+import { Avatar } from '@/shared/components/avatar/Avatar';
 import { Chip } from '@/shared/components/chip/Chip';
 
 import { cvs, type CvRow } from '../__fixtures__/cvs';
@@ -182,6 +183,12 @@ const manyCvs: CvRow[] = Array.from({ length: 50 }, (_, index) => {
 });
 
 const scrollUserColumns: Column<UserRow>[] = [
+  {
+    key: 'avatar',
+    header: '',
+    width: '72px',
+    render: (user) => <Avatar fallback={user.firstName} src={user.avatarUrl} size="md" />,
+  },
   { key: 'firstName', header: 'First Name', render: (user) => user.firstName },
   { key: 'lastName', header: 'Last Name', render: (user) => user.lastName },
   { key: 'email', header: 'Email', render: (user) => user.email },
