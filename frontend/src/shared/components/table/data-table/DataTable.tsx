@@ -1,3 +1,7 @@
+import { Fragment } from 'react';
+
+import { IconButton } from '../../buttons';
+import { ChevronIcon } from '../../icons/ChevronIcon';
 import { RowActionsMenu } from '../row-actions-menu/RowActionsMenu';
 import { SortableHeaderCell } from '../sortable-header-cell/SortableHeaderCell';
 import { TableMessage } from '../table-message/TableMessage';
@@ -12,18 +16,72 @@ export function DataTable<T>({
   caption,
   sort,
   onSortChange,
+  onRowClick,
   rowActions,
   getRowLabel,
+  renderRowDetails,
   isLoading,
   error,
   onRetry,
   emptyMessage,
 }: DataTableProps<T>) {
-  const hasRowActions = !!rowActions;
-  const columnCount = columns.length + (hasRowActions ? 1 : 0);
+  // Last column: ⋮ menu (rowActions) or › open arrow (onRowClick); the menu wins if both are passed
+  const hasActionsColumn = !!rowActions || !!onRowClick;
+  const columnCount = columns.length + (hasActionsColumn ? 1 : 0);
 
-  const getActionsLabel = (row: T) =>
-    `Actions for ${getRowLabel ? getRowLabel(row) : `row ${getRowId(row)}`}`;
+  const getRowName = (row: T) => (getRowLabel ? getRowLabel(row) : `row ${getRowId(row)}`);
+
+  const renderActionsCell = (row: T) => {
+    if (rowActions) {
+      return (
+        <RowActionsMenu
+          row={row}
+          actions={rowActions(row)}
+          label={`Actions for ${getRowName(row)}`}
+        />
+      );
+    }
+
+    if (onRowClick) {
+      return (
+        <IconButton aria-label={`Open ${getRowName(row)}`} onClick={() => onRowClick(row)}>
+          <ChevronIcon direction="right" />
+        </IconButton>
+      );
+    }
+
+    return null;
+  };
+
+  const renderHead = () => (
+    <thead>
+      <tr>
+        {columns.map((column) => {
+          const isSortable = !!column.sortable && onSortChange;
+
+          return isSortable ? (
+            <SortableHeaderCell
+              key={column.key}
+              field={column.key}
+              header={column.header}
+              width={column.width}
+              sort={sort}
+              onSortChange={onSortChange}
+            />
+          ) : (
+            <th key={column.key} style={{ width: column.width }} scope="col">
+              {column.header}
+            </th>
+          );
+        })}
+        {hasActionsColumn && (
+          <th scope="col" className={styles.actionsCell}>
+            <span className={styles.visuallyHidden}>Actions</span>
+          </th>
+        )}
+      </tr>
+    </thead>
+  );
 
   const renderBody = () => {
     if (isLoading) {
@@ -42,18 +100,29 @@ export function DataTable<T>({
 
     return (
       <tbody>
-        {rows.map((row) => (
-          <tr key={getRowId(row)}>
-            {columns.map((column) => (
-              <td key={column.key}>{column.render(row)}</td>
-            ))}
-            {hasRowActions && (
-              <td className={styles.actionsCell}>
-                <RowActionsMenu row={row} actions={rowActions(row)} label={getActionsLabel(row)} />
-              </td>
-            )}
-          </tr>
-        ))}
+        {rows.map((row) => {
+          // null/undefined/'' → no details row, so an empty one never removes the row's bottom line
+          const details = renderRowDetails?.(row);
+          const hasDetails = details !== null && details !== undefined && details !== '';
+
+          return (
+            <Fragment key={getRowId(row)}>
+              <tr>
+                {columns.map((column) => (
+                  <td key={column.key}>{column.render(row)}</td>
+                ))}
+                {hasActionsColumn && (
+                  <td className={styles.actionsCell}>{renderActionsCell(row)}</td>
+                )}
+              </tr>
+              {hasDetails && (
+                <tr className={styles.detailsRow}>
+                  <td colSpan={columnCount}>{details}</td>
+                </tr>
+              )}
+            </Fragment>
+          );
+        })}
       </tbody>
     );
   };
@@ -62,34 +131,7 @@ export function DataTable<T>({
     <table aria-busy={isLoading} className={styles.table}>
       <caption className={styles.visuallyHidden}>{caption}</caption>
 
-      <thead>
-        <tr>
-          {columns.map((column) => {
-            const isSortable = !!column.sortable && onSortChange;
-
-            return isSortable ? (
-              <SortableHeaderCell
-                key={column.key}
-                field={column.key}
-                header={column.header}
-                width={column.width}
-                sort={sort}
-                onSortChange={onSortChange}
-              />
-            ) : (
-              <th key={column.key} style={{ width: column.width }} scope="col">
-                {column.header}
-              </th>
-            );
-          })}
-          {hasRowActions && (
-            <th scope="col" className={styles.actionsCell}>
-              <span className={styles.visuallyHidden}>Actions</span>
-            </th>
-          )}
-        </tr>
-      </thead>
-
+      {renderHead()}
       {renderBody()}
     </table>
   );
