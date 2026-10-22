@@ -1,0 +1,45 @@
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  max-width: 100%;
+  padding: 0 var(--space-1) 0 var(--space-3);
+  border: 1px solid var(--chip-border);
+  border-radius: var(--radius-chip);
+  color: var(--text);
+  font-size: var(--type-body1-size);
+}
+
+.chip[data-disabled] {
+  color: var(--input-disabled-text);
+  border-color: var(--input-disabled-text);
+}
+
+.label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.remove {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--chip-remove);
+  cursor: pointer;
+}
+
+.remove:disabled {
+  cursor: not-allowed;
+}
+
+.remove:hover:not(:disabled) {
+  color: var(--chip-remove-hover);
+}
+
+.remove svg {
+  width: var(--chip-remove-size);
+  height: var(--chip-remove-size);
+}

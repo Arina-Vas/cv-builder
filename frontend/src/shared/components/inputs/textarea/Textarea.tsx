@@ -1,5 +1,5 @@
 import { useId, type ComponentProps } from 'react';
-import { Field, getErrorId } from '../field/Field';
+import { Field, getErrorId } from '@/shared/components/field/Field';
 import styles from './Textarea.module.css';
 
 export interface TextareaProps extends ComponentProps<'textarea'> {
