@@ -75,4 +75,4 @@ To change a size or colour, change the token, not the component CSS.
 - [x] Storybook stories
 - [ ] Unit tests (blocked: Vitest + React Testing Library are not set up yet)
 - [ ] `fullWidth` prop: add when the auth pages need it
-- [ ] Icon set: no shared icon library yet; `MoreIcon` in stories is an inline SVG
+- [x] Icon set: `MoreIcon` lives in `shared/components/icons/` (inline SVG, no icon library)

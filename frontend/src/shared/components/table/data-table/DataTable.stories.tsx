@@ -4,7 +4,7 @@ import { fn } from 'storybook/test';
 
 import { positions, type PositionRow } from '../__fixtures__/positions';
 import { users, type UserRow } from '../__fixtures__/users';
-import type { Column, SortState } from '../types';
+import type { Column, RowAction, SortState } from '../types';
 import { DataTable } from './DataTable';
 
 const meta = {
@@ -70,6 +70,16 @@ function sortUsers(rows: UserRow[], sort?: SortState) {
   return [...rows].sort((a, b) => a[field].localeCompare(b[field]) * direction);
 }
 
+const onView = fn();
+const onUpdate = fn();
+const onDelete = fn();
+
+const getUserActions = (): RowAction<UserRow>[] => [
+  { label: 'View', onSelect: onView },
+  { label: 'Update', onSelect: onUpdate },
+  { label: 'Delete', onSelect: onDelete },
+];
+
 function UsersTable() {
   const [sort, setSort] = useState<SortState>({ field: 'department', order: 'ASC' });
 
@@ -82,6 +92,8 @@ function UsersTable() {
       emptyMessage="No users found"
       sort={sort}
       onSortChange={setSort}
+      rowActions={getUserActions}
+      getRowLabel={(user) => `${user.firstName} ${user.lastName}`}
     />
   );
 }

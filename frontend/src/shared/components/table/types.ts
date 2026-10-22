@@ -31,6 +31,7 @@ export interface DataTableProps<T> {
 
   onRowClick?: (row: T) => void;
   rowActions?: (row: T) => RowAction<T>[];
+  getRowLabel?: (row: T) => string;
   renderRowDetails?: (row: T) => ReactNode;
 
   isLoading?: boolean;

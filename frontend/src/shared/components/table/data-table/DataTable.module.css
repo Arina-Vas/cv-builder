@@ -26,6 +26,7 @@
 }
 
 .table tbody tr {
+  height: var(--table-row-height);
   transition: background-color var(--duration-shorter) var(--ease-in-out);
 }
 
@@ -33,7 +34,14 @@
   background: var(--table-row-hover);
 }
 
-.caption {
+.table .actionsCell {
+  width: 1%;
+  padding-block: 0;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.visuallyHidden {
   position: absolute;
   width: 1px;
   height: 1px;

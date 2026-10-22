@@ -1,6 +1,6 @@
 import { DropdownMenu } from 'radix-ui';
 import { IconButton } from '../../buttons';
-import { MoreVertIcon } from '../../icons/MoreVertIcon';
+import { MoreIcon } from '../../icons/MoreIcon';
 import type { RowAction } from '../types';
 import styles from './RowActionsMenu.module.css';
 
@@ -11,16 +11,17 @@ export interface RowActionsMenuProps<T> {
 }
 
 export function RowActionsMenu<T>({ row, actions, label }: RowActionsMenuProps<T>) {
+
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild>
         <IconButton aria-label={label}>
-          <MoreVertIcon />
+          <MoreIcon />
         </IconButton>
       </DropdownMenu.Trigger>
 
       <DropdownMenu.Portal>
-        <DropdownMenu.Content className={styles.content} align="end" sideOffset={5}>
+        <DropdownMenu.Content  className={styles.content} align="end" alignOffset={5} sideOffset={0}>
           {actions.map((action) => (
             <DropdownMenu.Item
               className={styles.item}
