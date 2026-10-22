@@ -1,6 +1,7 @@
 import type { ComponentProps } from 'react';
 import s from './Chip.module.css';
 import { CloseIcon } from '@/shared/components/icons/CloseIcon';
+import { IconButton } from '@/shared/components/buttons';
 
 export interface ChipProps extends Omit<ComponentProps<'span'>, 'children'> {
   label: string;
@@ -12,10 +13,16 @@ export function Chip({ label, onRemove, disabled = false, className, ...rest }: 
   const classes = [s.chip, className].filter(Boolean).join(' ');
 
   return (
-    <span {...rest} className={classes} title={label} data-disabled={disabled || undefined}>
+    <span
+      {...rest}
+      className={classes}
+      title={label}
+      data-disabled={disabled || undefined}
+      data-removable={onRemove ? true : undefined}
+    >
       <span className={s.label}>{label}</span>
       {onRemove && (
-        <button
+        <IconButton
           type="button"
           className={s.remove}
           aria-label={`Remove ${label}`}
@@ -27,7 +34,7 @@ export function Chip({ label, onRemove, disabled = false, className, ...rest }: 
           }}
         >
           <CloseIcon />
-        </button>
+        </IconButton>
       )}
     </span>
   );

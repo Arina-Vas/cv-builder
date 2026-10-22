@@ -1,22 +1,30 @@
 import s from './AvatarUploader.module.css';
 import { UploadIcon } from '@/shared/components/icons/UploadIcon';
-import { CloseIcon } from '@/shared/components/icons/CloseIcon';
 import type { ChangeEvent } from 'react';
-import Image from 'next/image';
+import { Avatar } from '@/shared/components/avatar/Avatar';
+import { CloseIcon } from '@/shared/components/icons/CloseIcon';
+import { IconButton } from '@/shared/components/buttons';
 
 const MAX_SIZE = 0.5 * 1024 * 1024; // 0.5MB
 const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/gif'];
 
-type Props = {
+export interface AvatarUploaderProps {
   src?: string;
   fallback: string;
   onRemove?: () => void;
   onChange?: (file: File) => void;
   disabled?: boolean;
   onError?: (message: string) => void;
-};
+}
 
-export const AvatarUploader = ({ src, fallback, onChange, onRemove, onError, disabled }: Props) => {
+export const AvatarUploader = ({
+  src,
+  fallback,
+  onChange,
+  onRemove,
+  onError,
+  disabled,
+}: AvatarUploaderProps) => {
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = '';
@@ -35,21 +43,12 @@ export const AvatarUploader = ({ src, fallback, onChange, onRemove, onError, dis
 
   return (
     <div className={s.wrapper}>
-      <div className={s.image}>
-        {src ? (
-          <Image src={src} alt={fallback} fill sizes="120px" className={s.avatar} />
-        ) : (
-          <span className={s.fallback}>{fallback.charAt(0).toUpperCase()}</span>
-        )}
+      <div className={s.avatar}>
+        <Avatar src={src} fallback={fallback} size="lg" />
         {src && !disabled && (
-          <button
-            type={'button'}
-            aria-label={'Remove avatar'}
-            onClick={onRemove}
-            className={s.removeButton}
-          >
+          <IconButton aria-label={'Remove avatar'} onClick={onRemove} className={s.removeButton}>
             <CloseIcon />
-          </button>
+          </IconButton>
         )}
       </div>
       <label className={s.uploader} data-disabled={disabled || undefined}>
