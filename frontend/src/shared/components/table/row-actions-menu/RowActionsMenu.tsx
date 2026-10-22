@@ -13,7 +13,7 @@ export interface RowActionsMenuProps<T> {
 export function RowActionsMenu<T>({ row, actions, label }: RowActionsMenuProps<T>) {
 
   return (
-    <DropdownMenu.Root>
+    <DropdownMenu.Root modal={false}>
       <DropdownMenu.Trigger asChild>
         <IconButton aria-label={label}>
           <MoreIcon />
