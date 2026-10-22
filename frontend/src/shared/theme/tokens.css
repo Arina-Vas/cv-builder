@@ -266,6 +266,10 @@
   --toast-radius: var(--radius-toast); /* [F] */
   --toast-border-width: 1px; /* [F] */
   --toast-padding: 8px 16px; /* [F] title top 8, left 16 */
+  --z-toast: 9999;
+  /* Provide default values for Radix Toast dynamic variables */
+  --radix-toast-swipe-move-x: 0px;
+  --radix-toast-swipe-end-x: 0px;
 
   --chip-height: 32px; /* [M] */
   --chip-gap: 8px; /* [A] project environment chips */

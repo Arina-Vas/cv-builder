@@ -6,6 +6,7 @@ import { ThemeProvider } from '@/shared/theme/theme-provider';
 import { themeScript } from '@/shared/theme/theme-script';
 import '@/shared/theme/tokens.css';
 import './globals.css';
+import { ToastProvider } from '@/shared/components/toast/ToastProvider';
 
 const roboto = Roboto({
   subsets: ['latin', 'cyrillic'],
@@ -26,7 +27,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       </head>
       <body>
         <ThemeProvider>
-          <ApolloWrapper>{children}</ApolloWrapper>
+          <ToastProvider>
+            <ApolloWrapper>{children}</ApolloWrapper>
+          </ToastProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -34,7 +34,7 @@
 .title {
   font-weight: var(--font-weight-medium);
   font-size: var(--type-toast-title-size);
-  padding-right: 32px;
+  padding: 0 32px 8px 0;
   letter-spacing: var(--type-toast-title-ls);
   line-height: var(--type-toast-title-lh);
   color: inherit;
@@ -64,4 +64,72 @@
 
 .root .close:hover:not(:disabled) {
   border-color: currentColor;
+}
+
+.viewport {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  z-index: var(--z-toast);
+  outline: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .root[data-state='open'] {
+    animation: toast-in var(--duration-enter) var(--ease-out);
+  }
+
+  .root[data-state='closed'] {
+    animation: toast-out var(--duration-leave) var(--ease-in);
+  }
+
+  .root[data-swipe='move'] {
+    transform: translateX(var(--radix-toast-swipe-move-x));
+  }
+
+  .root[data-swipe='cancel'] {
+    transform: translateX(0);
+    transition: transform var(--duration-shorter) var(--ease-out);
+  }
+
+  .root[data-swipe='end'] {
+    animation: toast-swipe-out var(--duration-leave) var(--ease-in);
+  }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(calc(100% + 16px));
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes toast-out {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+}
+
+@keyframes toast-swipe-out {
+  from {
+    transform: translateX(var(--radix-toast-swipe-end-x));
+  }
+  to {
+    transform: translateX(calc(100% + 16px));
+  }
 }

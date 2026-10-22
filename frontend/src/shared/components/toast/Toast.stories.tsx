@@ -1,8 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { Toast as RadixToast } from 'radix-ui';
-import { type CSSProperties, type ReactNode, useState } from 'react';
+import { type CSSProperties, type ReactNode, useRef, useState } from 'react';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
 
 import { Toast } from './Toast';
+import { ToastProvider, useToast } from './ToastProvider';
 import { type ToastType, TITLES } from './Toast.types';
 
 // from TITLES, so a new type shows up here without editing the stories
@@ -142,35 +144,74 @@ export const AllTypes: Story = {
 };
 
 /* ------------------------------------------------------------------ */
-/* Live: toasts appear and close by timer, like in the app             */
+/* With provider: useToast() as in the app (top-right, timer, max 3)  */
 /* ------------------------------------------------------------------ */
 
-function LiveStage({ duration }: { duration: number }) {
-  const [items, setItems] = useState<{ id: number; type: ToastType }[]>([]);
-
-  const add = (type: ToastType) => setItems((prev) => [...prev, { id: Date.now(), type }]);
+function ToastButtons() {
+  const toast = useToast();
+  const counter = useRef(0);
 
   return (
-    <div style={{ display: 'flex', gap: 48, alignItems: 'flex-start' }}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {TYPES.map((type) => (
-          <button key={type} type="button" onClick={() => add(type)}>
-            Show {type}
-          </button>
-        ))}
-      </div>
-      <ToastStage duration={duration}>
-        {items.map(({ id, type }) => (
-          <Toast key={id} type={type} description={`Toast #${id % 10000}`} />
-        ))}
-      </ToastStage>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 8 }}>
+      {TYPES.map((type) => (
+        <button key={type} type="button" onClick={() => toast[type](`Toast #${++counter.current}`)}>
+          Show {type}
+        </button>
+      ))}
+      <button
+        type="button"
+        onClick={() => toast.success('Closes after 1 s', { title: 'Saved', duration: 1000 })}
+      >
+        Custom title, 1 s
+      </button>
     </div>
   );
 }
 
-// For animations, hover-to-pause, swipe and stacking. Closed toasts stay in `items`
-// here (Radix just hides them); the real provider will remove them from its list.
-export const Live: Story = {
-  parameters: { controls: { disable: true } },
-  render: () => <LiveStage duration={5000} />,
+const getToasts = (canvasElement: HTMLElement) =>
+  canvasElement.querySelectorAll<HTMLElement>('li[data-type]');
+
+// For animations, hover-to-pause, swipe and stacking: click the buttons by hand.
+export const WithProvider: Story = {
+  // padded: buttons on the left, so the top-right toasts don't cover them
+  parameters: { layout: 'padded', controls: { disable: true } },
+  render: () => (
+    <ToastProvider>
+      <ToastButtons />
+    </ToastProvider>
+  ),
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('a call shows a toast with the default title', async () => {
+      await userEvent.click(canvas.getByRole('button', { name: 'Show success' }));
+      await expect(await canvas.findByText('Toast #1')).toBeInTheDocument();
+      await expect(canvas.getByText('Success')).toBeInTheDocument();
+    });
+
+    await step('no more than 3 toasts at a time, the oldest goes first', async () => {
+      for (const type of ['error', 'warning', 'info']) {
+        await userEvent.click(canvas.getByRole('button', { name: `Show ${type}` }));
+      }
+      await waitFor(() => expect(getToasts(canvasElement)).toHaveLength(3));
+      await expect(canvas.queryByText('Toast #1')).not.toBeInTheDocument();
+    });
+
+    await step('options: custom title and duration', async () => {
+      await userEvent.click(canvas.getByRole('button', { name: 'Custom title, 1 s' }));
+      await expect(await canvas.findByText('Saved')).toBeInTheDocument();
+      await waitFor(() => expect(canvas.queryByText('Saved')).not.toBeInTheDocument(), {
+        timeout: 2000,
+      });
+      await expect(getToasts(canvasElement)).toHaveLength(2);
+    });
+
+    // Last on purpose: after ✕ Radix moves focus to the viewport, and while it is
+    // focused all timers are paused (keyboard users get time to read).
+    await step('✕ closes a toast', async () => {
+      const [close] = canvas.getAllByRole('button', { name: 'Close' });
+      await userEvent.click(close!);
+      await waitFor(() => expect(getToasts(canvasElement)).toHaveLength(1));
+    });
+  },
 };
