@@ -35,12 +35,10 @@ export interface DataTableProps<T> {
   renderRowDetails?: (row: T) => ReactNode;
 
   isLoading?: boolean;
+  isRefreshing?: boolean;
   error?: string;
   onRetry?: () => void;
   emptyMessage: string;
 
-  hasMore?: boolean;
-  isLoadingMore?: boolean;
-  loadMoreError?: string;
-  onLoadMore?: () => void;
+  scrollResetKey?: string | number;
 }

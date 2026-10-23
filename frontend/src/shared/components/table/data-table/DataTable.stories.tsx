@@ -4,6 +4,7 @@ import { fn } from 'storybook/test';
 
 import { Avatar } from '@/shared/components/avatar/Avatar';
 import { Chip } from '@/shared/components/chip/Chip';
+import { Pagination } from '@/shared/components/pagination';
 
 import { cvs, type CvRow } from '../__fixtures__/cvs';
 import { positions, type PositionRow } from '../__fixtures__/positions';
@@ -278,72 +279,111 @@ export const ScrollTablet: Story = {
 };
 
 /* ------------------------------------------------------------------ */
-/* Infinite scroll: next 10 rows after a 3s fake request              */
+/* Pagination: 195 users, every request takes 1.5s                     */
 /* ------------------------------------------------------------------ */
 
-const PAGE_SIZE = 10;
-const LOAD_DELAY_MS = 3000;
+const LOAD_DELAY_MS = 1500;
 
-// Fake backend over the 50 users: pages of 10, every request takes 3s.
-// failOnce: the first request for page 2 fails, RETRY loads it
-function InfiniteUsersTable({ failOnce = false }: { failOnce?: boolean }) {
-  const [rows, setRows] = useState(() => manyUsers.slice(0, PAGE_SIZE));
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [loadMoreError, setLoadMoreError] = useState<string>();
+// 195 rows → 20 pages of 10, the last one has 5
+const allUsers: UserRow[] = Array.from({ length: 195 }, (_, index) => {
+  const base = users[index % users.length] as UserRow;
+  return { ...base, id: String(index + 1), firstName: `${base.firstName} ${index + 1}` };
+});
+
+interface UsersPage {
+  items: UserRow[];
+  total: number;
+}
+
+// Fake backend with the same states as Apollo: the first load shows the skeleton,
+// later requests keep the old rows dimmed until the new page comes.
+// failOnPage: the first request for that page fails, RETRY repeats it
+function PaginatedUsersTable({ failOnPage }: { failOnPage?: number }) {
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [result, setResult] = useState<UsersPage>();
+  const [isFetching, setIsFetching] = useState(true);
+  const [error, setError] = useState<string>();
+  const [attempt, setAttempt] = useState(0);
   const failedRef = useRef(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
-  useEffect(() => () => clearTimeout(timerRef.current), []);
+  useEffect(() => {
+    setIsFetching(true);
+    setError(undefined);
 
-  const loadMore = () => {
-    setIsLoadingMore(true);
-    setLoadMoreError(undefined);
+    // Cleanup cancels the previous request: after fast clicks only the last page arrives
+    const timer = setTimeout(() => {
+      setIsFetching(false);
 
-    timerRef.current = setTimeout(() => {
-      setIsLoadingMore(false);
-
-      if (failOnce && !failedRef.current && rows.length === PAGE_SIZE) {
+      if (page === failOnPage && !failedRef.current) {
         failedRef.current = true;
-        setLoadMoreError('Failed to load users');
+        setError('Failed to load users');
         return;
       }
 
-      setRows(manyUsers.slice(0, rows.length + PAGE_SIZE));
+      const start = (page - 1) * pageSize;
+      setResult({ items: allUsers.slice(start, start + pageSize), total: allUsers.length });
     }, LOAD_DELAY_MS);
-  };
+
+    return () => clearTimeout(timer);
+  }, [page, pageSize, attempt, failOnPage]);
+
+  const isFirstLoad = result === undefined;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
       <div style={{ padding: 16, borderBottom: '1px solid var(--table-border)' }}>
-        Loaded {rows.length} of {manyUsers.length}
-        {isLoadingMore && ' — loading the next 10…'}
+        Page {page}, {pageSize} per page{isFetching && ' — loading…'}
       </div>
       <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '0 16px' }}>
         <DataTable<UserRow>
           columns={scrollUserColumns}
-          rows={rows}
+          rows={result?.items ?? []}
           getRowId={(user) => user.id}
           caption="Employees"
           emptyMessage="No users found"
+          rowActions={() => [
+            { label: 'View', onSelect: fn() },
+            { label: 'Update', onSelect: fn() },
+            { label: 'Delete', onSelect: fn() },
+          ]}
           getRowLabel={(user) => `${user.firstName} ${user.lastName}`}
-          hasMore={rows.length < manyUsers.length}
-          isLoadingMore={isLoadingMore}
-          loadMoreError={loadMoreError}
-          onLoadMore={loadMore}
+          isLoading={isFirstLoad && isFetching}
+          isRefreshing={!isFirstLoad && isFetching}
+          error={error}
+          onRetry={() => setAttempt((count) => count + 1)}
+          scrollResetKey={page}
         />
+        {result && (
+          <Pagination
+            page={page}
+            pageSize={pageSize}
+            total={result.total}
+            onPageChange={setPage}
+            onPageSizeChange={(size) => {
+              setPageSize(size);
+              setPage(1);
+            }}
+          />
+        )}
       </div>
     </div>
   );
 }
 
-export const InfiniteScroll: Story = {
-  name: 'Infinite scroll: 10 per page, 3s',
+export const WithPagination: Story = {
+  name: 'Pagination: 195 users, 1.5s',
   parameters: { layout: 'fullscreen' },
-  render: () => <InfiniteUsersTable />,
+  render: () => <PaginatedUsersTable />,
 };
 
-export const InfiniteScrollError: Story = {
-  name: 'Infinite scroll: page 2 fails, RETRY',
+export const WithPaginationError: Story = {
+  name: 'Pagination: page 3 fails, RETRY',
   parameters: { layout: 'fullscreen' },
-  render: () => <InfiniteUsersTable failOnce />,
+  render: () => <PaginatedUsersTable failOnPage={3} />,
+};
+
+export const Refreshing: Story = {
+  name: 'Refreshing (next page loading)',
+  args: { isRefreshing: true, rowActions: () => [{ label: 'Update', onSelect: fn() }] },
 };

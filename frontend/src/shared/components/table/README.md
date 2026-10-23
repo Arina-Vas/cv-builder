@@ -3,7 +3,8 @@
 Shared table for every list page in Figma: Users, User CVs, CVs, Skills, Languages, Departments,
 Positions, Projects and CV Projects. It only shows the rows it gets: search, sorting and paging
 are done on the backend, the page passes the result and the callbacks.
-Live examples, Light and Dark: Storybook → **Shared/DataTable** (states, scroll, infinite scroll)
+Paging is a separate component under the table: [`Pagination`](../pagination/README.md).
+Live examples, Light and Dark: Storybook → **Shared/DataTable** (states, scroll, pagination)
 and **Shared/DataTable/Figma** (one story per Figma frame).
 
 ```tsx
@@ -23,13 +24,10 @@ import { DataTable, type Column } from '@/shared/components/table';
   onSortChange={setSort}
   rowActions={(user) => [{ label: 'View', onSelect: openUser }]}
   getRowLabel={(user) => `${user.firstName} ${user.lastName}`}
-  isLoading={loading}
+  isLoading={!data && loading}
+  isRefreshing={!!data && loading}
   error={error && 'Failed to load users'}
   onRetry={refetch}
-  hasMore={data.items.length < data.total}
-  isLoadingMore={loadingMore}
-  loadMoreError={loadMoreError}
-  onLoadMore={fetchNextPage}
 />
 ```
 
@@ -46,13 +44,11 @@ import { DataTable, type Column } from '@/shared/components/table';
 | `onRowClick`       | `(row) => void`           | › arrow in the last column (Employee on Users)             |
 | `getRowLabel`      | `(row) => string`         | row name in `Actions for …` / `Open …`; default `row {id}` |
 | `renderRowDetails` | `(row) => ReactNode`      | extra full-width row under the row, e.g. description       |
-| `isLoading`        | `boolean`                 | first page loading: skeleton                               |
-| `error`            | `string`                  | first page failed: message + RETRY                         |
-| `onRetry`          | `() => void`              | RETRY of the first page                                    |
-| `hasMore`          | `boolean`                 | the backend has more rows                                  |
-| `isLoadingMore`    | `boolean`                 | next page loading                                          |
-| `loadMoreError`    | `string`                  | next page failed: message + RETRY under the rows           |
-| `onLoadMore`       | `() => void`              | load the next page; without it there is no infinite scroll |
+| `isLoading`        | `boolean`                 | no rows yet (first load): skeleton                         |
+| `isRefreshing`     | `boolean`                 | page / sort / search changed: old rows dimmed and inert    |
+| `error`            | `string`                  | request failed: message + RETRY                            |
+| `onRetry`          | `() => void`              | RETRY: repeat the same request                             |
+| `scrollResetKey`   | `string \| number`        | on change the table scrolls to its first row               |
 
 ## Columns
 
@@ -93,34 +89,36 @@ the description). The two rows share one bottom line and the hover background.
 
 ## States
 
-| State               | When            | What is shown                                 |
-| ------------------- | --------------- | --------------------------------------------- |
-| loading             | `isLoading`     | 5 skeleton rows, `aria-busy` on the table     |
-| error               | `error`         | message + RETRY (`onRetry`), `role="alert"`   |
-| empty               | `rows` is empty | `emptyMessage`                                |
-| rows                | otherwise       | the rows                                      |
-| loading more        | `isLoadingMore` | 1 skeleton row under the rows                 |
-| loading more failed | `loadMoreError` | message + RETRY (`onLoadMore`) under the rows |
+| State      | When            | What is shown                               |
+| ---------- | --------------- | ------------------------------------------- |
+| loading    | `isLoading`     | 5 skeleton rows, `aria-busy` on the table   |
+| error      | `error`         | message + RETRY (`onRetry`), `role="alert"` |
+| empty      | `rows` is empty | `emptyMessage`                              |
+| rows       | otherwise       | the rows                                    |
+| refreshing | `isRefreshing`  | the old rows at half opacity, `inert`       |
 
 The order is the same as in the table: `isLoading` beats `error`, `error` beats empty.
 "No data" and "no search results" are both `emptyMessage`: the page picks the text
 (`You have no CVs yet` / `No CVs found`).
 
-## Infinite scroll
+## Loading: first load vs next page
 
-Figma has no pagination control, so pages are loaded on scroll:
+A skeleton on every page change would shrink the table (10 rows ≈ 730px, skeleton ≈ 280px),
+the pagination would jump up under the cursor and back. So:
 
-1. The page loads the first page and passes `hasMore` (e.g. `items.length < total`) and `onLoadMore`.
-2. Under the last row `LoadMoreTrigger` puts an invisible 1px row and watches it with `IntersectionObserver`.
-3. When it comes into view, `onLoadMore` is called once; while `isLoadingMore` or `loadMoreError`
-   is set the observer is off, so there are no duplicate requests.
-4. The page appends the next page to `rows`. If the rows still do not fill the screen,
-   the next page is loaded right away.
-5. `hasMore = false` → nothing more is loaded.
+- `isLoading` — there are no rows yet: skeleton.
+- `isRefreshing` — rows are shown and a new page / sort / search is loading: the old rows stay,
+  dimmed and `inert` (a stale row cannot be opened or edited), the height does not change.
 
-It works both when the whole page scrolls and when only the content area under the header does.
-Changing search or sort must reset the list to the first page: that is the page's job.
-Not shown under the first page's loading, error or empty states.
+With Apollo: `loading && !data` → `isLoading`; `loading` while `previousData` is shown → `isRefreshing`.
+
+## Scroll to the first row
+
+The user scrolls down, clicks the next page in `Pagination` → the table should start from the top.
+Pass `scrollResetKey={page}`: when it changes, the table scrolls its top
+(the sticky header + first row) into view, smoothly or at once with `prefers-reduced-motion`.
+It waits for the response (new `rows` or a new `error`): while the page loads the user stays
+at the pagination and sees the dimmed rows; a cached page scrolls at once. Not on the first render.
 
 ## Accessibility
 
@@ -128,10 +126,9 @@ Not shown under the first page's loading, error or empty states.
 - Sortable headers are buttons with `aria-sort` (`ascending` / `descending` / `none`).
 - The ⋮ and › buttons have names from `getRowLabel`; the menu works with the keyboard and Escape,
   focus goes back to ⋮ on close.
-- `aria-busy` while the first or the next page loads; skeleton rows are `aria-hidden`.
+- `aria-busy` while loading or refreshing; skeleton rows are `aria-hidden`.
 - Errors are `role="alert"`.
-- With `onLoadMore` a hidden `role="status"` region says `Loading more rows` and then
-  `{n} rows loaded`, so a screen reader hears that new rows came.
+- A hidden `role="status"` region says `Loading rows` while refreshing.
 
 ## Files
 
@@ -142,6 +139,5 @@ Not shown under the first page's loading, error or empty states.
 | `row-actions-menu/`     | ⋮ button and menu                                    |
 | `table-skeleton/`       | skeleton rows                                        |
 | `table-message/`        | empty / error row with RETRY                         |
-| `load-more-trigger/`    | next page: observer, skeleton row, error + RETRY     |
 | `__fixtures__/`         | sample rows for the stories                          |
 | `types.ts`              | `Column`, `RowAction`, `SortState`, `DataTableProps` |

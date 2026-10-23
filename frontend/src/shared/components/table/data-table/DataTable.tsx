@@ -1,14 +1,14 @@
-import { Fragment } from 'react';
+import { Fragment, useRef } from 'react';
 
 import { IconButton } from '../../buttons';
 import { ChevronIcon } from '../../icons/ChevronIcon';
-import { LoadMoreTrigger } from '../load-more-trigger/LoadMoreTrigger';
 import { RowActionsMenu } from '../row-actions-menu/RowActionsMenu';
 import { SortableHeaderCell } from '../sortable-header-cell/SortableHeaderCell';
 import { TableMessage } from '../table-message/TableMessage';
 import { TableSkeleton } from '../table-skeleton/TableSkeleton';
 import type { DataTableProps } from '../types';
 import styles from './DataTable.module.css';
+import { useScrollResetOnData } from './useScrollResetOnData';
 
 export function DataTable<T>({
   columns,
@@ -22,15 +22,17 @@ export function DataTable<T>({
   getRowLabel,
   renderRowDetails,
   isLoading,
+  isRefreshing = false,
   error,
   onRetry,
   emptyMessage,
-  hasMore = false,
-  isLoadingMore = false,
-  loadMoreError,
-  onLoadMore,
+  scrollResetKey,
 }: DataTableProps<T>) {
-  // Last column: ⋮ menu (rowActions) or › open arrow (onRowClick); the menu wins if both are passed
+  const rootRef = useRef<HTMLDivElement>(null);
+  const isBusy = !!isLoading || isRefreshing;
+
+  useScrollResetOnData(rootRef, { key: scrollResetKey, rows, error, isBusy });
+
   const hasActionsColumn = !!rowActions || !!onRowClick;
   const columnCount = columns.length + (hasActionsColumn ? 1 : 0);
 
@@ -104,9 +106,8 @@ export function DataTable<T>({
     }
 
     return (
-      <tbody>
+      <tbody className={isRefreshing ? styles.refreshing : undefined} inert={isRefreshing}>
         {rows.map((row) => {
-          // null/undefined/'' → no details row, so an empty one never removes the row's bottom line
           const details = renderRowDetails?.(row);
           const hasDetails = details !== null && details !== undefined && details !== '';
 
@@ -132,32 +133,18 @@ export function DataTable<T>({
     );
   };
 
-  const showLoadMore = !isLoading && !error && rows.length > 0;
-  const loadMoreStatus = isLoadingMore ? 'Loading more rows' : `${rows.length} rows loaded`;
-
   return (
-    <>
-      <table aria-busy={isLoading || isLoadingMore} className={styles.table}>
+    <div ref={rootRef} className={styles.root}>
+      <table aria-busy={isBusy} className={styles.table}>
         <caption className={styles.visuallyHidden}>{caption}</caption>
 
         {renderHead()}
         {renderBody()}
-        {onLoadMore && showLoadMore && (
-          <LoadMoreTrigger
-            columnCount={columnCount}
-            hasMore={hasMore}
-            isLoading={isLoadingMore}
-            error={loadMoreError}
-            onLoadMore={onLoadMore}
-          />
-        )}
       </table>
 
-      {onLoadMore && (
-        <div role="status" className={styles.visuallyHidden}>
-          {showLoadMore && !loadMoreError && loadMoreStatus}
-        </div>
-      )}
-    </>
+      <div role="status" className={styles.visuallyHidden}>
+        {isRefreshing && 'Loading rows'}
+      </div>
+    </div>
   );
 }
