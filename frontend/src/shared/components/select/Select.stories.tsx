@@ -156,6 +156,18 @@ export const Invalid: Story = {
   },
 };
 
+export const WithoutLabel: Story = {
+  args: { hideLabel: true, defaultValue: 'se-2' },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    await expect(canvas.getByRole('combobox', { name: 'Position' })).toHaveTextContent(
+      'Software Engineer 2',
+    );
+    await expect(getFieldRoot(canvasElement)).toHaveAttribute('data-label-hidden');
+  },
+};
+
 export const DisabledOption: Story = {
   args: {
     options: [...OPTIONS, { value: 'se-5', label: 'Software Engineer 5', disabled: true }],

@@ -78,81 +78,17 @@
 }
 
 .page:focus-visible,
-.arrow:focus-visible,
-.sizeTrigger:focus-visible {
+.arrow:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
-.sizeTrigger {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: var(--pagination-select-width);
-  height: var(--pagination-item-size);
-  padding: var(--pagination-select-padding);
-  border: var(--input-border-width) solid var(--pagination-border);
-  border-radius: var(--input-radius);
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  font-size: var(--type-body1-size);
-  letter-spacing: var(--type-body1-ls);
-  cursor: pointer;
-  transition: border-color var(--duration-shorter) var(--ease-in-out);
-}
-
-.sizeTrigger:hover:not(:disabled),
-.sizeTrigger[data-state='open'] {
-  border-color: var(--pagination-hover-border);
-}
-
-.sizeTrigger:disabled {
-  color: var(--text-disabled);
-  cursor: not-allowed;
-}
-
-.sizeIcon {
+.pagination .sizeSelect {
   flex-shrink: 0;
-  width: var(--icon-size);
-  height: var(--icon-size);
-  color: var(--pagination-arrow);
-  transition: transform var(--duration-shorter) var(--ease-in-out);
-}
-
-.sizeTrigger[data-state='open'] .sizeIcon {
-  transform: rotate(180deg);
-}
-
-.sizeContent {
-  z-index: 50;
-  width: var(--radix-select-trigger-width);
-  border: var(--input-border-width) solid var(--pagination-hover-border);
-  background: var(--menu-bg);
-
-  &[data-side='bottom'] {
-    border-top: none;
-  }
-
-  &[data-side='top'] {
-    border-bottom: none;
-  }
-}
-
-.sizeItem {
-  padding: var(--space-2) var(--space-3);
-  color: var(--text);
-  font-family: var(--font-family);
-  font-size: var(--type-body1-size);
-  cursor: pointer;
-  outline: none;
-
-  &[data-highlighted] {
-    background: var(--select-option-hover-bg);
-  }
-
-  &[data-state='checked'] {
-    background: var(--select-option-selected-bg);
-    color: var(--select-option-selected-text);
-  }
+  width: var(--pagination-select-width);
+  --input-height: var(--pagination-item-size);
+  --input-padding: var(--pagination-select-padding);
+  --input-border: var(--pagination-border);
+  --input-border-hover: var(--pagination-hover-border);
+  --input-border-focus: var(--pagination-hover-border);
 }

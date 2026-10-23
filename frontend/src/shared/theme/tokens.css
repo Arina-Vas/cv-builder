@@ -257,7 +257,7 @@
   --pagination-gap: 8px; /* [F] between items */
   --pagination-select-gap: 40px; /* [F] next arrow ↔ page-size select */
   --pagination-select-width: 70px; /* [F] */
-  --pagination-select-padding: 0 4px 0 12px; /* [F] text left 12 */
+  --pagination-select-padding: 8px; /* [A] Figma text left 12, but 12 + "10" + gap + chevron + 12 > 70 */
   --pagination-padding: 8px; /* [A] block padding under the table */
 
   --modal-radius: var(--radius-sm); /* [M] */

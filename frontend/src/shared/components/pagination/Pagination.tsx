@@ -1,6 +1,5 @@
-import { Select } from 'radix-ui';
-
 import { ChevronIcon } from '../icons/ChevronIcon';
+import { Select } from '../select/Select';
 import { getPageCount, getPageItems } from './getPageItems';
 import styles from './Pagination.module.css';
 
@@ -83,29 +82,17 @@ export function Pagination({
         </li>
       </ul>
 
-      <Select.Root
+      <Select
+        label="Rows per page"
+        hideLabel
+        options={pageSizeOptions.map((option) => ({
+          value: String(option),
+          label: String(option),
+        }))}
         value={String(pageSize)}
         onValueChange={(value) => onPageSizeChange(Number(value))}
-      >
-        <Select.Trigger className={styles.sizeTrigger} aria-label="Rows per page">
-          <Select.Value />
-          <Select.Icon asChild>
-            <ChevronIcon direction="down" className={styles.sizeIcon} />
-          </Select.Icon>
-        </Select.Trigger>
-
-        <Select.Portal>
-          <Select.Content position="popper" side="bottom" className={styles.sizeContent}>
-            <Select.Viewport>
-              {pageSizeOptions.map((option) => (
-                <Select.Item key={option} value={String(option)} className={styles.sizeItem}>
-                  <Select.ItemText>{option}</Select.ItemText>
-                </Select.Item>
-              ))}
-            </Select.Viewport>
-          </Select.Content>
-        </Select.Portal>
-      </Select.Root>
+        className={styles.sizeSelect}
+      />
     </nav>
   );
 }

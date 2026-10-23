@@ -12,6 +12,7 @@ type Props = {
   defaultValue?: string;
   onValueChange?: (value: string) => void;
   label: string;
+  hideLabel?: boolean;
   placeholder?: string;
   error?: string;
   required?: boolean;
@@ -37,6 +38,7 @@ export const Select = ({
   id,
   value,
   label,
+  hideLabel = false,
   placeholder = label,
   required,
   disabled = false,
@@ -57,6 +59,7 @@ export const Select = ({
       disabled={disabled}
       filled={selected !== ''}
       active={isOpen}
+      hideLabel={hideLabel}
       className={className}
     >
       <RadixSelect.Root
@@ -71,7 +74,7 @@ export const Select = ({
         <RadixSelect.Trigger
           ref={ref}
           id={triggerId}
-          className={s.trigger}
+          className={hideLabel ? `${s.trigger} ${s.noLabel}` : s.trigger}
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? getErrorId(triggerId) : undefined}
         >

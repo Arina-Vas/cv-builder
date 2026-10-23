@@ -35,6 +35,10 @@
   }
 }
 
+.noLabel[data-placeholder]:not([data-state='open']) .value {
+  visibility: visible;
+}
+
 .value {
   min-width: 0;
   overflow: hidden;

@@ -64,6 +64,8 @@ The page's job, not this component's:
 
 Sizes and colours are tokens `--pagination-*` in `tokens.css`. Figma has no current-page and no
 hover state: current page = selected option colours, hover = input hover border (`[A]`).
+The select is sized by overriding `--input-*` tokens on its root (`.sizeSelect`); its dropdown
+is in a portal, so it keeps the regular Select look.
 Figma draws `1 2 … 20`; we keep a fixed 7 slots so the arrows do not move while clicking.
 
 ## Accessibility
@@ -71,7 +73,8 @@ Figma draws `1 2 … 20`; we keep a fixed 7 slots so the arrows do not move whil
 - `<nav aria-label="Pagination">` with a list; pages are buttons named `Page 2`,
   the current one has `aria-current="page"`.
 - Arrows: `Previous page` / `Next page`, `disabled` on the edges. Ellipses are `aria-hidden`.
-- The select is Radix Select (`Rows per page`): keyboard, Escape, focus back to the trigger.
+- The page-size select is the shared [`Select`](../select/README.md) with `hideLabel`: the label
+  `Rows per page` is only for screen readers; keyboard, Escape, focus back to the trigger.
 
 ## Files
 
