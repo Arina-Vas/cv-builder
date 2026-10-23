@@ -25,6 +25,7 @@ Linting and formatting are configured at the repo root (`pnpm lint`, `pnpm forma
 ## Database
 
 Setup, migration workflow and model conventions: see [Database](../README.md#database) in the root README.
+Entities, relations, deletion policy and constraints: see [docs/data-model.md](../docs/data-model.md).
 
 The environment is read from `backend/.env` (copy `backend/.env.example`).
 
@@ -38,7 +39,7 @@ The port is taken from the `PORT` environment variable (default `4000`).
 
 ```
 prisma/
-  schema.prisma       # data models
+  schema/             # data models, one file per domain (schema.prisma: generator + datasource)
   migrations/         # SQL migrations (committed)
 prisma.config.ts      # Prisma CLI config
 src/                  # main.ts, app.module.ts, app.controller.ts

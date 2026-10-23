@@ -26,6 +26,7 @@ This repository is a monorepo containing the frontend and backend applications:
 
 - 🎨 **Frontend** (`frontend/`): Next.js App Router app, see [frontend/README.md](frontend/README.md).
 - ⚙️ **Backend** (`backend/`): NestJS API, see [backend/README.md](backend/README.md).
+- 🗄️ **Data model** (`docs/`): entities, relations, deletion policy and constraints, see [docs/data-model.md](docs/data-model.md).
 
 ```
 cv-builder/
@@ -35,8 +36,9 @@ cv-builder/
 ├── tsconfig.base.json    # shared TypeScript options, extended by both apps
 ├── eslint.config.mjs     # shared ESLint flat config
 ├── .prettierrc           # shared Prettier config
+├── docs/                 # project documentation (data model)
 ├── backend/              # NestJS API
-│   ├── prisma/           # schema.prisma + migrations/
+│   ├── prisma/           # schema/ (one .prisma file per domain) + migrations/
 │   ├── prisma.config.ts  # Prisma CLI config (schema path, DATABASE_URL)
 │   └── src/
 └── frontend/             # Next.js app
@@ -104,10 +106,14 @@ pnpm db:deploy    # apply migrations added by teammates
 
 ### Changing the schema
 
-1. Edit `backend/prisma/schema.prisma`.
+1. Edit the models in `backend/prisma/schema/` (one file per domain; generator and datasource live in `schema.prisma`).
 2. Run `pnpm db:migrate --name <short-description>`, e.g. `--name add-user`.
    It creates `backend/prisma/migrations/<timestamp>_<name>/migration.sql`, applies it and regenerates the client.
 3. Read the generated SQL and commit the migration together with the code that uses it.
+4. If you add a model, a relation or a constraint, update [docs/data-model.md](docs/data-model.md) in the same PR.
+
+Some rules cannot be expressed in Prisma (the `citext` extension, `CHECK` constraints). Create such a migration with
+`pnpm db:migrate --name <name> --create-only`, add the SQL by hand, then run `pnpm db:migrate` to apply it.
 
 Rules:
 
@@ -122,6 +128,11 @@ Rules:
 - Fields are camelCase in Prisma and snake_case in the DB: `@map("created_at")`, table names via `@@map("users")`.
 - Every table has `createdAt` (`@default(now())`) and `updatedAt` (`@updatedAt`).
 - Uniqueness rules from the spec are enforced with `@unique` / `@@unique` in the DB, not only in services.
+  Case-insensitive values (emails, catalog names) use `@db.Citext`.
+- Length limits from the spec are enforced with `@db.VarChar(n)` and repeated in the input DTOs.
+- Every relation sets `onDelete` explicitly: catalog items use `Restrict` (cannot be deleted while referenced),
+  owner → link relations use `Cascade`. See [Deletion policy](docs/data-model.md#deletion-policy).
+- One schema file per domain; a join table lives in the file of the module that writes it.
 
 ## Environment variables
 
