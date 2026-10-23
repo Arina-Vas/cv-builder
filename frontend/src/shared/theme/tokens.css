@@ -251,6 +251,14 @@
   --table-row-height: 73px; /* [F] Row = 16 + 40 avatar + 16 + 1 border */
   --table-checkbox-cell-width: 48px; /* [M] */
   --table-skeleton-row-height: 40px; /* [A] */
+  --table-refreshing-opacity: 0.5; /* [A] old rows while the next page loads */
+
+  --pagination-item-size: 36px; /* [F] page circle / arrow */
+  --pagination-gap: 8px; /* [F] between items */
+  --pagination-select-gap: 40px; /* [F] next arrow ↔ page-size select */
+  --pagination-select-width: 70px; /* [F] */
+  --pagination-select-padding: 0 4px 0 12px; /* [F] text left 12 */
+  --pagination-padding: 8px; /* [A] block padding under the table */
 
   --modal-radius: var(--radius-sm); /* [M] */
   --modal-title-padding: 16px 24px; /* [M] DialogTitle */
@@ -361,6 +369,14 @@
   --table-row-hover: var(--action-hover); /* [M] */
   --table-row-selected: rgba(198, 48, 49, 0.08); /* [M] alpha(primary, .08) */
   --table-border: rgba(224, 224, 224, 1); /* [M] TableCell border (lighten(divider)) */
+
+  /* Pagination — [F] Pagination component (Table (pagination) frame) */
+  --pagination-border: #aeaeae; /* [F] page circle + select stroke */
+  --pagination-text: var(--text); /* [F] #2E2E2E */
+  --pagination-arrow: #626262; /* [F] */
+  --pagination-hover-border: #626262; /* [A] = input hover, no hover state in Figma */
+  --pagination-current-bg: #626262; /* [A] = selected option, no current state in Figma */
+  --pagination-current-text: #ffffff; /* [A] */
 
   /* Menu / Select / Autocomplete popover */
   --menu-bg: var(--color-grey-100); /* [F] RowActionsMenu fill */
@@ -524,6 +540,13 @@
 
   --table-row-selected: rgba(198, 48, 49, 0.16); /* [M] */
   --table-border: rgba(81, 81, 81, 1); /* [M] */
+
+  --pagination-border: #626262; /* [F] */
+  --pagination-text: var(--text); /* [F] #F5F5F7; re-declared so nested data-theme works */
+  --pagination-arrow: #aeaeae; /* [F] visual */
+  --pagination-hover-border: #aeaeae; /* [A] */
+  --pagination-current-bg: #f5f5f7; /* [A] = selected option */
+  --pagination-current-text: #2e2e2e; /* [A] */
 
   --menu-bg: var(--color-grey-600); /* [F] RowActionsMenu fill */
   --menu-border: var(--color-secondary); /* [F] RowActionsMenu 1px stroke */
