@@ -29,3 +29,8 @@ AGENTS.md
 CLAUDE.md
 docs/REQUIREMENTS.md
 .claude/
+
+# Storybook
+storybook-static
+debug-storybook.log
+*storybook.log

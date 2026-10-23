@@ -1,0 +1,48 @@
+.root {
+  width: var(--skill-bar-width);
+  height: var(--skill-bar-height);
+  position: relative;
+}
+
+.root::before {
+  position: absolute;
+  content: '';
+  inset: 0;
+  background: var(--track);
+  opacity: var(--skill-bar-track-opacity);
+}
+
+.fill {
+  position: relative;
+  height: 100%;
+  background-color: var(--fill);
+}
+
+.root[data-level='0'] {
+  --track: var(--level-0-track);
+}
+
+.root[data-level='1'] {
+  --fill: var(--level-1-fill);
+  --track: var(--level-1-track);
+}
+
+.root[data-level='2'] {
+  --fill: var(--level-2-fill);
+  --track: var(--level-2-track);
+}
+
+.root[data-level='3'] {
+  --fill: var(--level-3-fill);
+  --track: var(--level-3-track);
+}
+
+.root[data-level='4'] {
+  --fill: var(--level-4-fill);
+  --track: var(--level-4-track);
+}
+
+.root[data-level='5'] {
+  --fill: var(--level-5-fill);
+  --track: var(--level-5-track);
+}

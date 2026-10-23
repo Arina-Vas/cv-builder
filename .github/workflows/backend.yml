@@ -1,0 +1,68 @@
+name: Backend
+
+on:
+  push:
+    branches: [main, dev]
+    paths:
+      - 'backend/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'tsconfig.base.json'
+      - '.github/workflows/backend.yml'
+  pull_request:
+    branches: [main, dev]
+    paths:
+      - 'backend/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'tsconfig.base.json'
+      - '.github/workflows/backend.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: backend
+
+jobs:
+  build:
+    name: Typecheck, test & build
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://cv_builder:cv_builder@localhost:5432/cv_builder?schema=public
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --filter backend
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Test
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build
+
+      - name: Upload build artifact
+        if: github.event_name == 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-dist-${{ github.ref_name }}
+          path: backend/dist
+          retention-days: 7

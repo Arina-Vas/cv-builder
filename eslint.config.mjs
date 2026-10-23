@@ -1,3 +1,6 @@
+// For more info, see https://github.com/storybookjs/eslint-plugin-storybook#configuration-flat-config-format
+import storybook from 'eslint-plugin-storybook';
+
 import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import prettier from 'eslint-config-prettier';
@@ -16,10 +19,8 @@ export default tseslint.config(
       '**/next-env.d.ts',
     ],
   },
-
   js.configs.recommended,
   ...tseslint.configs.recommended,
-
   {
     plugins: { 'unused-imports': unusedImports },
     rules: {
@@ -33,7 +34,6 @@ export default tseslint.config(
       'no-console': ['warn', { allow: ['warn', 'error'] }],
     },
   },
-
   {
     files: ['backend/**/*.ts'],
     languageOptions: { globals: globals.node },
@@ -42,17 +42,14 @@ export default tseslint.config(
       '@typescript-eslint/consistent-type-imports': 'off',
     },
   },
-
   ...[...nextVitals, ...nextTs].map((config) => ({
     ...config,
     files: ['frontend/**/*.{ts,tsx,js,mjs}'],
   })),
-
   {
     files: ['frontend/**/*.{ts,tsx,js,mjs}'],
     settings: { next: { rootDir: 'frontend/' } },
-  },
-
-  // must stay last: turns off rules that conflict with Prettier
+  }, // must stay last: turns off rules that conflict with Prettier
+  storybook.configs['flat/recommended'],
   prettier,
 );

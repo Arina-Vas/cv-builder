@@ -1,0 +1,100 @@
+.trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  width: 100%;
+  height: var(--input-height);
+  padding: 0 var(--input-padding);
+  border: 0;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: var(--type-input-size);
+  line-height: var(--type-input-lh);
+  letter-spacing: var(--type-input-ls);
+  text-align: left;
+  cursor: pointer;
+  outline: none;
+
+  &[data-placeholder] {
+    color: var(--text-placeholder);
+  }
+
+  &[data-placeholder]:not([data-state='open']) .value {
+    visibility: hidden;
+  }
+
+  &[aria-invalid='true'] .icon {
+    color: var(--input-border-error);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    color: var(--text-disabled);
+  }
+}
+
+.noLabel[data-placeholder]:not([data-state='open']) .value {
+  visibility: visible;
+}
+
+.value {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.icon {
+  flex-shrink: 0;
+  width: var(--icon-size);
+  height: var(--icon-size);
+  color: var(--action-active);
+  transition: transform var(--duration-shorter) var(--ease-in-out);
+}
+
+.trigger[data-state='open'] .icon {
+  transform: rotate(180deg);
+}
+
+.trigger:disabled .icon {
+  color: var(--text-disabled);
+}
+
+.content {
+  z-index: 50;
+  width: var(--radix-select-trigger-width);
+  max-height: min(240px, var(--radix-select-content-available-height));
+  border: var(--input-border-width) solid var(--input-border-focus);
+  background: var(--menu-bg);
+
+  &[data-side='bottom'] {
+    border-top: none;
+  }
+
+  &[data-side='top'] {
+    border-bottom: none;
+  }
+}
+
+.item {
+  padding: var(--input-padding);
+  color: var(--text);
+  cursor: pointer;
+  outline: none;
+
+  &[data-highlighted] {
+    background: var(--select-option-hover-bg);
+  }
+
+  &[data-state='checked'] {
+    background: var(--select-option-selected-bg);
+    color: var(--select-option-selected-text);
+  }
+
+  &[data-disabled] {
+    color: var(--text-disabled);
+    cursor: default;
+  }
+}

@@ -1,0 +1,21 @@
+.row:hover {
+  background: transparent;
+}
+
+/* .row .cell (0,2,0) beats .table td (0,1,1) from DataTable, same as TableSkeleton */
+.row .cell {
+  padding-block: var(--table-message-padding);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.text {
+  margin: 0;
+  color: var(--text-secondary);
+  text-align: center;
+}

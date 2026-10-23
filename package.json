@@ -16,13 +16,22 @@
     "typecheck": "pnpm -r --if-present typecheck",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "pnpm -r --if-present test"
+    "test": "pnpm -r --if-present test",
+    "db:up": "docker compose up -d --wait",
+    "db:down": "docker compose down",
+    "db:generate": "pnpm --filter backend db:generate",
+    "db:migrate": "pnpm --filter backend db:migrate",
+    "db:deploy": "pnpm --filter backend db:deploy",
+    "db:status": "pnpm --filter backend db:status",
+    "db:reset": "pnpm --filter backend db:reset",
+    "db:studio": "pnpm --filter backend db:studio"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
     "eslint": "^9.39.5",
     "eslint-config-next": "16.4.2",
     "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-storybook": "^10.6.2",
     "eslint-plugin-unused-imports": "^4.4.1",
     "globals": "^17.13.0",
     "prettier": "^3.9.10",

@@ -1,0 +1,58 @@
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  max-width: 100%;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--chip-border);
+  border-radius: var(--radius-chip);
+  color: var(--text);
+  font-size: var(--type-body1-size);
+}
+
+.chip[data-removable] {
+  padding-right: 6px;
+}
+
+.chip[data-disabled] {
+  color: var(--input-disabled-text);
+  border-color: var(--input-disabled-text);
+}
+
+.label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chip .remove {
+  width: var(--chip-remove-size);
+  height: var(--chip-remove-size);
+  border: 0;
+  color: var(--chip-remove);
+}
+
+/* IconButton greys out ⊗ and fills it on press: the chip keeps its own colour and no fill */
+.chip .remove:disabled {
+  color: var(--chip-remove);
+}
+
+.chip .remove:active:not(:disabled) {
+  background: none;
+  color: var(--chip-remove);
+}
+
+.chip .remove:hover:not(:disabled) {
+  color: var(--chip-remove-hover);
+}
+
+/* keyboard focus shows as the hover colour instead of IconButton's ring */
+.chip .remove:focus-visible {
+  outline: none;
+  color: var(--chip-remove-hover);
+}
+
+.chip .remove svg {
+  width: var(--chip-remove-size);
+  height: var(--chip-remove-size);
+}

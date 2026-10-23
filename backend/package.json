@@ -7,12 +7,30 @@
     "build": "nest build",
     "start": "node dist/main",
     "test": "jest",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "postinstall": "prisma generate --no-hints",
+    "db:generate": "prisma generate --no-hints",
+    "db:migrate": "prisma migrate dev --no-hints",
+    "db:deploy": "prisma migrate deploy",
+    "db:status": "prisma migrate status",
+    "db:reset": "prisma migrate reset",
+    "db:studio": "prisma studio"
   },
   "dependencies": {
+    "@apollo/server": "^5.5.1",
+    "@as-integrations/express5": "^1.1.2",
+    "@nestjs/apollo": "^13.4.5",
     "@nestjs/common": "^11.2.7",
+    "@nestjs/config": "^12.0.1",
     "@nestjs/core": "^11.2.7",
+    "@nestjs/graphql": "^13.4.5",
     "@nestjs/platform-express": "^11.2.7",
+    "@prisma/adapter-pg": "^7.10.0",
+    "@prisma/client": "^7.10.0",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.15.1",
+    "graphql": "^16.14.2",
+    "pg": "^8.23.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2"
   },
@@ -21,8 +39,11 @@
     "@nestjs/testing": "^11.2.7",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.0.0",
+    "@types/pg": "^8.23.1",
     "jest": "^30.0.5",
+    "prisma": "^7.10.0",
     "ts-jest": "^29.4.1",
+    "tsx": "^4.23.15",
     "typescript": "~5.9.3"
   },
   "jest": {
@@ -31,6 +52,9 @@
     "transform": {
       "^.+\\.ts$": "ts-jest"
     },
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "moduleNameMapper": {
+      "^@/(.*)$": "<rootDir>/$1"
+    }
   }
 }
