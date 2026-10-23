@@ -2,8 +2,9 @@
   background: transparent;
 }
 
-.cell {
-  padding-block: 48px;
+/* .row .cell (0,2,0) beats .table td (0,1,1) from DataTable, same as TableSkeleton */
+.row .cell {
+  padding-block: var(--table-message-padding);
 }
 
 .content {

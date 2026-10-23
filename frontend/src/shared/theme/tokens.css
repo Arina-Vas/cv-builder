@@ -251,6 +251,7 @@
   --table-row-height: 73px; /* [F] Row = 16 + 40 avatar + 16 + 1 border */
   --table-checkbox-cell-width: 48px; /* [M] */
   --table-skeleton-row-height: 40px; /* [A] */
+  --table-message-padding: 99px; /* [F] Table (empty): row 219 = 99 + 20 text + 99 + 1 border */
   --table-refreshing-opacity: 0.5; /* [A] old rows while the next page loads */
 
   --pagination-item-size: 36px; /* [F] page circle / arrow */
