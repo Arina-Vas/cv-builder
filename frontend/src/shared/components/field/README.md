@@ -34,6 +34,7 @@ const controlId = id ?? autoId;
 | `disabled`  | `boolean`: grey fill, grey label                | `false`  |
 | `filled`    | `boolean`: the control has a value              | `false`  |
 | `active`    | `boolean`: the control is open / in use         | `false`  |
+| `hideLabel` | `boolean`: no visible label, no space above     | `false`  |
 | `className` | on the root (label + control + error)           | —        |
 
 ## When the label is raised

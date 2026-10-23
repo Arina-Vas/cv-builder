@@ -38,6 +38,7 @@ const POSITIONS = [
 | --------------- | ------------------------------------------------ | -------- |
 | `options`       | `{ value, label, disabled? }[]` (`SelectOption`) | required |
 | `label`         | `string`: sits inside the empty closed field     | required |
+| `hideLabel`     | `boolean`: label only for screen readers         | `false`  |
 | `placeholder`   | `string`: shown in the open list until a choice  | `label`  |
 | `value`         | `string` · `''` = nothing selected ⚠️            | —        |
 | `defaultValue`  | `string`                                         | `''`     |

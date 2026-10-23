@@ -84,6 +84,18 @@
   color: var(--text-disabled);
 }
 
+.root[data-label-hidden] {
+  padding-top: 0;
+}
+
+.root[data-label-hidden] > .control > .label {
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 .helper {
   margin: var(--space-1) var(--input-padding) 0;
   color: var(--input-helper-error);

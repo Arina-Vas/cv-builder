@@ -9,6 +9,7 @@ export interface FieldProps {
   className?: string;
   filled?: boolean;
   active?: boolean;
+  hideLabel?: boolean;
   children: ReactNode;
 }
 
@@ -21,6 +22,7 @@ export function Field({
   disabled = false,
   active = false,
   filled = false,
+  hideLabel = false,
   className,
   children,
 }: FieldProps) {
@@ -33,6 +35,7 @@ export function Field({
       data-disabled={disabled ? true : undefined}
       data-filled={filled ? true : undefined}
       data-active={active ? true : undefined}
+      data-label-hidden={hideLabel ? true : undefined}
     >
       <div className={styles.control}>
         {children}
