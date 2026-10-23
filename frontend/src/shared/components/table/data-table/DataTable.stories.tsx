@@ -307,10 +307,12 @@ function PaginatedUsersTable({ failOnPage }: { failOnPage?: number }) {
   const [attempt, setAttempt] = useState(0);
   const failedRef = useRef(false);
 
-  useEffect(() => {
+  const startRequest = () => {
     setIsFetching(true);
     setError(undefined);
+  };
 
+  useEffect(() => {
     // Cleanup cancels the previous request: after fast clicks only the last page arrives
     const timer = setTimeout(() => {
       setIsFetching(false);
@@ -351,7 +353,10 @@ function PaginatedUsersTable({ failOnPage }: { failOnPage?: number }) {
           isLoading={isFirstLoad && isFetching}
           isRefreshing={!isFirstLoad && isFetching}
           error={error}
-          onRetry={() => setAttempt((count) => count + 1)}
+          onRetry={() => {
+            startRequest();
+            setAttempt((count) => count + 1);
+          }}
           scrollResetKey={page}
         />
         {result && (
@@ -359,8 +364,12 @@ function PaginatedUsersTable({ failOnPage }: { failOnPage?: number }) {
             page={page}
             pageSize={pageSize}
             total={result.total}
-            onPageChange={setPage}
+            onPageChange={(next) => {
+              startRequest();
+              setPage(next);
+            }}
             onPageSizeChange={(size) => {
+              startRequest();
               setPageSize(size);
               setPage(1);
             }}
