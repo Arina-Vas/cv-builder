@@ -1,0 +1,68 @@
+model Cv {
+  id          String @id @default(uuid()) @db.Uuid
+  name        String @db.VarChar(255)
+  education   String @db.VarChar(255)
+  description String
+
+  skills   CvSkill[]
+  projects CvProject[]
+
+  userId String @map("user_id") @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@map("cvs")
+}
+
+model CvProject {
+  id               String    @id @default(uuid()) @db.Uuid
+  cvId             String    @map("cv_id") @db.Uuid
+  projectId        String    @map("project_id") @db.Uuid
+  startDate        DateTime  @map("start_date") @db.Date
+  endDate          DateTime? @map("end_date") @db.Date // null = "Till now"
+  responsibilities String?
+
+  cv      Cv              @relation(fields: [cvId], references: [id], onDelete: Cascade)
+  project Project         @relation(fields: [projectId], references: [id], onDelete: Restrict)
+  roles   CvProjectRole[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([cvId, projectId])
+  @@index([projectId])
+  @@map("cv_projects")
+}
+
+model CvProjectRole {
+  id          String @id @default(uuid()) @db.Uuid
+  cvProjectId String @map("cv_project_id") @db.Uuid
+  roleId      String @map("role_id") @db.Uuid
+
+  cvProject CvProject   @relation(fields: [cvProjectId], references: [id], onDelete: Cascade)
+  role      ProjectRole @relation(fields: [roleId], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([cvProjectId, roleId])
+  @@index([roleId])
+  @@map("cv_project_roles")
+}
+
+model CvSkill {
+  id      String @id @default(uuid()) @db.Uuid
+  cvId    String @map("cv_id") @db.Uuid
+  skillId String @map("skill_id") @db.Uuid
+  cv      Cv     @relation(fields: [cvId], references: [id], onDelete: Cascade)
+  skill   Skill  @relation(fields: [skillId], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([cvId, skillId])
+  @@map("cv_skills")
+}

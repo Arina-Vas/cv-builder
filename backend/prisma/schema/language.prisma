@@ -1,0 +1,27 @@
+model Language {
+  id         String         @id @default(uuid()) @db.Uuid
+  name       String         @unique @db.Citext
+  iso        String         @unique @db.VarChar(5)
+  nativeName String         @map("native_name")
+  users      UserLanguage[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("languages")
+}
+
+model UserLanguage {
+  id          String      @id @default(uuid()) @db.Uuid
+  userId      String      @map("user_id") @db.Uuid
+  languageId  String      @map("language_id") @db.Uuid
+  proficiency Proficiency
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  language    Language    @relation(fields: [languageId], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([userId, languageId])
+  @@map("user_languages")
+}
