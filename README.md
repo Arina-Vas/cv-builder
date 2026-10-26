@@ -94,7 +94,7 @@ The database itself is never shared between developers. Everyone gets the same d
 
 - `docker-compose.yml`: the same PostgreSQL version and settings;
 - `backend/prisma/migrations/`: the same schema;
-- seed script (added together with the first models): the same initial data.
+- `backend/prisma/seed.ts`: the same initial data.
 
 ### After `git pull`
 
@@ -102,7 +102,22 @@ The database itself is never shared between developers. Everyone gets the same d
 pnpm install      # new dependencies + regenerated Prisma Client
 pnpm db:up
 pnpm db:deploy    # apply migrations added by teammates
+pnpm db:seed      # fill the database with shared dev data
 ```
+
+### Seed data
+
+`pnpm db:seed` fills the catalogs (departments, positions, skill categories and skills, languages, project roles,
+sample projects) and creates two accounts with a verified email. Their emails and passwords come from the
+`SEED_*` variables in `backend/.env` (defaults in [`backend/.env.example`](backend/.env.example)):
+
+| Role     | Email                       | Password      |
+| -------- | --------------------------- | ------------- |
+| Admin    | `admin@cv-builder.local`    | `admin123`    |
+| Employee | `employee@cv-builder.local` | `employee123` |
+
+The seed is idempotent: it only adds missing rows and never changes existing ones, so it is safe to run again.
+These accounts are for local development only.
 
 ### Changing the schema
 
@@ -120,7 +135,8 @@ Rules:
 - The schema changes only through migrations. Do not use `prisma db push`.
 - Never edit a migration that is already merged. Add a new one instead.
 - If two branches both add migrations, the second one to merge runs `pnpm db:migrate` again after rebasing.
-- Start from scratch: `pnpm db:reset`. To also remove the Docker volume: `docker compose down -v`.
+- Start from scratch: `pnpm db:reset`, then `pnpm db:seed` (Prisma 7 does not run the seed on reset).
+  To also remove the Docker volume: `docker compose down -v`.
 
 ### Model conventions
 
