@@ -31,9 +31,14 @@ The environment is read from `backend/.env` (copy `backend/.env.example`).
 
 ## API
 
+- `POST /graphql` — GraphQL API; Apollo Sandbox opens at the same URL in a browser (outside production).
 - `GET /health` — health check.
 
 The port is taken from the `PORT` environment variable (default `4000`).
+
+The schema is code-first: NestJS generates [schema.gql](schema.gql) from the decorators on start; commit it together
+with the code. Conventions and access rules: [docs/api/conventions.md](../docs/api/conventions.md),
+[docs/api/permissions.md](../docs/api/permissions.md).
 
 ## Structure
 
@@ -42,6 +47,11 @@ prisma/
   schema/             # data models, one file per domain (schema.prisma: generator + datasource)
   migrations/         # SQL migrations (committed)
 prisma.config.ts      # Prisma CLI config
+schema.gql            # generated GraphQL schema (committed)
 src/                  # main.ts, app.module.ts, app.controller.ts
+  common/
+    graphql/          # list args, pagination, SortOrder, Date scalar, GraphQL enums
+    errors/           # error codes, helpers, validation errors, global exception filter
+    auth/             # @Roles() decorator
   generated/prisma/   # generated Prisma Client (git-ignored)
 ```

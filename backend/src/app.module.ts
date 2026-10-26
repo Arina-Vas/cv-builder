@@ -5,6 +5,7 @@ import { ConfigModule } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { HealthModule } from './health/health.module';
+import { join } from 'node:path';
 
 @Module({
   imports: [
@@ -12,9 +13,10 @@ import { HealthModule } from './health/health.module';
     PrismaModule,
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
-      autoSchemaFile: true,
+      autoSchemaFile: join(process.cwd(), 'schema.gql'),
       sortSchema: true,
       introspection: process.env['NODE_ENV'] !== 'production',
+      includeStacktraceInErrorResponses: process.env['NODE_ENV'] !== 'production',
     }),
     HealthModule,
   ],
