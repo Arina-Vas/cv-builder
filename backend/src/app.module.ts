@@ -6,6 +6,7 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { HealthModule } from './health/health.module';
 import { Environment, EnvironmentVariables, validate } from './config/env.validation';
+import { join } from 'node:path';
 
 @Module({
   imports: [
@@ -14,11 +15,17 @@ import { Environment, EnvironmentVariables, validate } from './config/env.valida
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,
       inject: [ConfigService],
-      useFactory: (configService: ConfigService<EnvironmentVariables, true>) => ({
-        autoSchemaFile: true,
-        sortSchema: true,
-        introspection: configService.get('NODE_ENV', { infer: true }) !== Environment.Production,
-      }),
+      useFactory: (configService: ConfigService<EnvironmentVariables, true>) => {
+        const isProduction =
+          configService.get('NODE_ENV', { infer: true }) === Environment.Production;
+
+        return {
+          autoSchemaFile: join(process.cwd(), 'schema.gql'),
+          sortSchema: true,
+          introspection: !isProduction,
+          includeStacktraceInErrorResponses: !isProduction,
+        };
+      },
     }),
     HealthModule,
   ],

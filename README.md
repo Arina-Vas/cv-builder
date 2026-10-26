@@ -13,12 +13,13 @@ admins also manage users and global catalogs (skills, languages, departments, po
 | Monorepo      | pnpm workspaces (`frontend`, `backend`)       |
 | Frontend      | Next.js 16 (App Router), React 19, TypeScript |
 | Backend       | NestJS 11, TypeScript                         |
+| API           | GraphQL, code-first (NestJS + Apollo Server)  |
 | Database      | PostgreSQL 17 (Docker), Prisma ORM 7          |
 | Backend tests | Jest + @nestjs/testing                        |
 | Code quality  | ESLint 9 (flat config), Prettier              |
 
-Planned (to be added): GraphQL (Apollo), MUI, react-hook-form + zod, next-intl,
-Vitest + React Testing Library, Supertest, Mailpit (docker-compose).
+Planned (to be added): GraphQL Code Generator, MUI, react-hook-form + zod, next-intl,
+Vitest + React Testing Library, Supertest.
 
 ## 📚 Documentation & Project Structure
 
@@ -27,6 +28,9 @@ This repository is a monorepo containing the frontend and backend applications:
 - 🎨 **Frontend** (`frontend/`): Next.js App Router app, see [frontend/README.md](frontend/README.md).
 - ⚙️ **Backend** (`backend/`): NestJS API, see [backend/README.md](backend/README.md).
 - 🗄️ **Data model** (`docs/`): entities, relations, deletion policy and constraints, see [docs/data-model.md](docs/data-model.md).
+- 🔌 **API** (`docs/api/`): GraphQL conventions (lists, errors, scalars) and access rules, see
+  [docs/api/conventions.md](docs/api/conventions.md) and [docs/api/permissions.md](docs/api/permissions.md).
+  The generated schema is [backend/schema.gql](backend/schema.gql).
 - 🔐 **Authentication** (`docs/`): tokens, sessions, email verification and password reset, see [docs/auth.md](docs/auth.md).
 
 ```
@@ -37,10 +41,14 @@ cv-builder/
 ├── tsconfig.base.json    # shared TypeScript options, extended by both apps
 ├── eslint.config.mjs     # shared ESLint flat config
 ├── .prettierrc           # shared Prettier config
-├── docs/                 # project documentation (data model, auth)
+├── docs/                 # project documentation
+│   ├── data-model.md     # database schema
+│   ├── auth.md           # authentication decisions
+│   └── api/              # GraphQL conventions and permissions
 ├── backend/              # NestJS API
 │   ├── prisma/           # schema/ (one .prisma file per domain) + migrations/
 │   ├── prisma.config.ts  # Prisma CLI config (schema path, DATABASE_URL)
+│   ├── schema.gql        # generated GraphQL schema (committed)
 │   └── src/
 └── frontend/             # Next.js app
     └── src/app/
