@@ -1,3 +1,5 @@
+import { EmailVerificationForm } from '@/features/auth/components/email-verification-form/EmailVerificationForm';
+
 export default function VerificationPage() {
-  return <h1>Verification</h1>;
+  return <EmailVerificationForm />;
 }
