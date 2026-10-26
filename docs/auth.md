@@ -1,0 +1,81 @@
+# Authentication
+
+How sign-in, sessions and email verification work in the CV Builder backend, and the decisions behind them.
+Requirements come from the CV Builder Wiki (Notion): Sign In, Sign Up, Forgot Password, Reset Password and
+Email Verification pages. Tables are described in [data-model.md](data-model.md): `users`, `sessions`,
+`auth_tokens`.
+
+## Tokens and cookies
+
+- **Both tokens live in httpOnly cookies** (access + refresh), never in `localStorage` or in GraphQL responses,
+  so page scripts cannot read them.
+- Cookies use `SameSite=Lax`, `Secure` in production only. CORS allows the frontend origin (`FRONTEND_URL`)
+  with credentials. The frontend and the API run on different ports of the same host, which is still one site,
+  so `Lax` cookies are sent.
+- The Next.js middleware uses the cookie to redirect between auth pages and the app.
+
+| Token   | Format                                                      | Lifetime                              | Stored in the DB                 |
+| ------- | ----------------------------------------------------------- | ------------------------------------- | -------------------------------- |
+| Access  | JWT signed with `JWT_ACCESS_SECRET`, `{ sub: userId, sid }` | 30 minutes (`JWT_ACCESS_TTL_SECONDS`) | no                               |
+| Refresh | random value                                                | 1 day, sliding (`REFRESH_TTL_DAYS`)   | hash only, `sessions.token_hash` |
+
+- Role and verification status are not stored in the access token.
+- Every refresh **rotates** the refresh token (new value, new expiry), so an old refresh token stops working.
+  An active user stays signed in; a user who is inactive for more than a day signs in again.
+
+## Sessions and the auth guard
+
+- One `sessions` row per sign-in; several devices at once are allowed.
+- The auth guard checks the JWT, then loads the user and the session from the database on every request. A role
+  change, a revoked session or a deleted user takes effect immediately, not when the access token expires.
+- Logout revokes the current session and clears both cookies.
+- Password reset revokes all sessions of the user.
+
+## Sign up and email verification
+
+- **Sign up** creates the user (role `EMPLOYEE`, email not verified), starts a session and sends a verification
+  code. The user is redirected to the Email Verification page already signed in.
+- **Verification uses the session**, not email + code: the backend takes the user from the auth context. This
+  lets LATER open the app without signing in again and prevents guessing codes for someone else's email.
+  "Public" for this page in the access matrix means "no role required"; a session is still required.
+- **Status** is `users.email_verified_at` (`null` = not verified). GraphQL exposes it as `emailVerified: Boolean!`.
+- **Codes** are 6 digits, generated with a secure random source, stored as hashes in `auth_tokens`, valid for
+  10 minutes and single-use. A new code invalidates the previous one. Verify and resend are rate-limited.
+- Verifying sets `users.email_verified_at` and `auth_tokens.used_at` in one transaction.
+
+### Unverified users are read-only
+
+- They can run queries, but every mutation is rejected with `EMAIL_NOT_VERIFIED` except the ones marked
+  `@AllowUnverified()`: verify email, resend code, refresh, logout, theme and language.
+- Changing the password in Settings is also blocked. Forgot / Reset password still works.
+- The spec does not list which features need a verified email (Email Verification AC-16), so this rule is a
+  team decision.
+
+### Users created by an Admin
+
+- They are created **not verified**: the admin has no access to the user's mailbox, and the spec allows email
+  verification only on the user's own profile.
+- No email is sent on creation (a code would expire before the first sign-in). The user verifies their email
+  after signing in via Profile → VERIFY EMAIL.
+- Seed accounts are created verified for local development.
+
+## Password reset
+
+- The forgot-password response is the same whether the email exists or not (no account enumeration).
+- The reset token is random, stored as a hash in `auth_tokens`, expiring and single-use.
+- Resetting updates the password hash, marks the token used and revokes all sessions in one transaction.
+- The user is not signed in automatically: the frontend redirects to Sign In with a success message.
+
+## Configuration
+
+| Variable                 | Used for                                                          |
+| ------------------------ | ----------------------------------------------------------------- |
+| `JWT_ACCESS_SECRET`      | Signing and verifying access tokens (≥ 32 chars, never committed) |
+| `JWT_ACCESS_TTL_SECONDS` | Access token lifetime and its cookie `maxAge`                     |
+| `REFRESH_TTL_DAYS`       | Refresh token lifetime (sliding)                                  |
+| `FRONTEND_URL`           | CORS origin and links in emails                                   |
+| `SMTP_HOST`, `SMTP_PORT` | Mail server; Mailpit in local development                         |
+| `MAIL_FROM`              | Sender of verification and reset emails                           |
+
+All variables are validated on startup in `backend/src/config/env.validation.ts`; the app does not start if one
+is missing or invalid. In local development every email lands in Mailpit: http://localhost:8025.
