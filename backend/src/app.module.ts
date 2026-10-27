@@ -7,6 +7,7 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { HealthModule } from './health/health.module';
 import { Environment, EnvironmentVariables, validate } from './config/env.validation';
 import { join } from 'node:path';
+import { createGqlContext } from './common/graphql/graphql.context';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { join } from 'node:path';
           sortSchema: true,
           introspection: !isProduction,
           includeStacktraceInErrorResponses: !isProduction,
+          context: createGqlContext,
         };
       },
     }),
