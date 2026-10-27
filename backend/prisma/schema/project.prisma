@@ -6,8 +6,8 @@ model Project {
   endDate     DateTime @map("end_date") @db.Date
   description String   @db.VarChar(2000)
 
-  environment ProjectSkill[]
-  cvs         CvProject[]
+  technologies ProjectSkill[]
+  cvs          CvProject[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
