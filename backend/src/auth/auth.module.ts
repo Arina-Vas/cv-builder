@@ -7,6 +7,8 @@ import type { EnvironmentVariables } from '@/config/env.validation';
 import { UsersModule } from '@/users/users.module';
 import { AccessTokenService } from './access-token.service';
 import { AuthGuard } from './auth.guard';
+import { AuthResolver } from './auth.resolver';
+import { AuthService } from './auth.service';
 import { SessionsService } from './sessions.service';
 
 @Module({
@@ -23,6 +25,8 @@ import { SessionsService } from './sessions.service';
   providers: [
     AccessTokenService,
     SessionsService,
+    AuthService,
+    AuthResolver,
     { provide: APP_GUARD, useClass: AuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
   ],

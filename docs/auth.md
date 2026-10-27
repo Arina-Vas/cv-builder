@@ -34,6 +34,28 @@ Email Verification pages. Tables are described in [data-model.md](data-model.md)
 - Logout revokes the current session and clears both cookies.
 - Password reset revokes all sessions of the user.
 
+## Operations
+
+| Operation                            | Access | Result                                                                         |
+| ------------------------------------ | ------ | ------------------------------------------------------------------------------ |
+| `signUp(input: SignUpInput!): User!` | Public | creates an Employee, starts a session, sets both cookies                       |
+| `signIn(input: SignInInput!): User!` | Public | starts a session, sets both cookies                                            |
+| `refresh: Boolean!`                  | Public | rotates the refresh token from the cookie, sets both cookies                   |
+| `logout: Boolean!`                   | Public | revokes the session of the refresh cookie (if any), always clears both cookies |
+| `me: User!`                          | All    | the current user                                                               |
+
+- Input validation (both inputs): email required and valid (trimmed), password 6–128 characters. Messages match
+  the wiki: `Email is required`, `Please enter a valid email address`, `Password is required`,
+  `Password must be at least 6 characters long`.
+- `signIn` with a wrong email or password returns `UNAUTHENTICATED` with `Invalid email or password`. An unknown
+  email still runs a password check against a dummy hash, so the response time does not reveal which emails exist.
+  The frontend must not try `refresh` on this error.
+- `signUp` with a taken email returns `CONFLICT` with `field: "email"` and
+  `An account with this email already exists`.
+- `refresh` without a valid session returns `UNAUTHENTICATED` and clears both cookies.
+- `logout` is public so it works after the access token has expired; otherwise the browser would keep httpOnly
+  cookies the frontend cannot delete.
+
 ## Sign up and email verification
 
 - **Sign up** creates the user (role `EMPLOYEE`, email not verified), starts a session and sends a verification

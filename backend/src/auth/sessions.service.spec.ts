@@ -137,6 +137,15 @@ describe('SessionsService', () => {
       });
     });
 
+    it('revokes the session of a refresh token', async () => {
+      await service.revokeByRefreshToken('old-token');
+
+      expect(prisma.session.updateMany).toHaveBeenCalledWith({
+        where: { tokenHash: hashToken('old-token'), revokedAt: null },
+        data: { revokedAt: NOW },
+      });
+    });
+
     it('revokes every active session of a user', async () => {
       await service.revokeAllForUser('user-1');
 

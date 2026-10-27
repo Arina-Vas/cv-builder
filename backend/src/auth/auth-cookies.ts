@@ -1,4 +1,4 @@
-import type { CookieOptions, Response } from 'express';
+import type { CookieOptions, Request, Response } from 'express';
 
 export const ACCESS_TOKEN_COOKIE = 'access_token';
 export const REFRESH_TOKEN_COOKIE = 'refresh_token';
@@ -37,6 +37,11 @@ export const setAuthCookies = (
     ...baseOptions(settings),
     maxAge: settings.refreshTtlDays * DAY_MS,
   });
+};
+
+export const readCookie = (req: Request, name: string): string | undefined => {
+  const value: unknown = req.cookies?.[name];
+  return typeof value === 'string' && value !== '' ? value : undefined;
 };
 
 export const clearAuthCookies = (res: Response, settings: AuthCookieSettings): void => {

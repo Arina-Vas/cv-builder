@@ -1,10 +1,28 @@
-import type { Response } from 'express';
+import type { Request, Response } from 'express';
 import {
   ACCESS_TOKEN_COOKIE,
   clearAuthCookies,
+  readCookie,
   REFRESH_TOKEN_COOKIE,
   setAuthCookies,
 } from './auth-cookies';
+
+describe('readCookie', () => {
+  const request = (cookies: unknown) => ({ cookies }) as unknown as Request;
+
+  it('returns a string cookie', () => {
+    expect(readCookie(request({ refresh_token: 'value' }), REFRESH_TOKEN_COOKIE)).toBe('value');
+  });
+
+  it.each([
+    ['missing', {}],
+    ['empty', { refresh_token: '' }],
+    ['not a string', { refresh_token: { nested: true } }],
+    ['without cookie-parser', undefined],
+  ])('returns undefined for a %s cookie', (_, cookies) => {
+    expect(readCookie(request(cookies), REFRESH_TOKEN_COOKIE)).toBeUndefined();
+  });
+});
 
 const settings = { secure: true, accessTtlSeconds: 1800, refreshTtlDays: 1 };
 
