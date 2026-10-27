@@ -67,6 +67,25 @@ Email Verification pages. Tables are described in [data-model.md](data-model.md)
 - Resetting updates the password hash, marks the token used and revokes all sessions in one transaction.
 - The user is not signed in automatically: the frontend redirects to Sign In with a success message.
 
+## Hashing and random values
+
+Helpers live in `backend/src/common/crypto/`; other modules use them instead of calling `argon2` or `node:crypto`
+directly.
+
+| Secret                              | Generated with                                    | Stored as                      |
+| ----------------------------------- | ------------------------------------------------- | ------------------------------ |
+| Password                            | chosen by the user                                | argon2id hash (`hashPassword`) |
+| Refresh token, password reset token | `generateToken`: 32 random bytes, base64url       | sha256 hex (`hashToken`)       |
+| Email verification code             | `generateVerificationCode`: 6 digits, `randomInt` | sha256 hex (`hashToken`)       |
+
+- **Passwords use argon2id** because people choose weak passwords: a slow, salted hash makes guessing them from a
+  leaked database too expensive. `verifyPassword` returns `false` for a malformed stored hash instead of throwing.
+- **Tokens use sha256**: they are long random values that cannot be guessed, so a fast hash is enough, and it lets
+  the database find a token by its hash.
+- A verification code has only a million values, so its sha256 hash alone could be brute-forced from a leaked
+  database. The 10-minute expiry, single use and rate limits keep that window small.
+- Random values come from `node:crypto`, never from `Math.random()`, which is predictable.
+
 ## Configuration
 
 | Variable                 | Used for                                                          |
