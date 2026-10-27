@@ -347,8 +347,10 @@ Frontend side:
   `credentials: 'include'` and never reads them. No `Authorization` header is used. Details in
   [auth.md](../auth.md).
 - Users with an unverified email are read-only: mutations are rejected unless marked `@AllowUnverified()`.
-- Admin-only operations are marked with `@Roles(UserRole.ADMIN)`. The decorator only stores metadata; the guard that
-  checks it is added by the Auth task, and a failed check returns `FORBIDDEN`.
+- Admin-only operations are marked with `@Roles(UserRole.ADMIN)`; a failed check returns `FORBIDDEN`.
+- Two global guards run on every operation: `AuthGuard` (`backend/src/auth/auth.guard.ts`: access token, session,
+  user, read-only rule) and `RolesGuard` (`backend/src/common/auth/roles.guard.ts`). Resolvers get the current user
+  with `@CurrentUser()` and the current session with `@CurrentSessionId()` (`common/auth/current-user.decorator.ts`).
 - "Own data or Admin" checks (profile, user skills and languages, CVs) cannot be expressed with `@Roles`. Services
   do them, using the current user from the request, never a user id sent by the client as proof of ownership.
 - Catalogs (departments, positions, skills, languages, projects) are readable by every authenticated user, because

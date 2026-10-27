@@ -1,9 +1,12 @@
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
+import { RolesGuard } from '@/common/auth/roles.guard';
 import type { EnvironmentVariables } from '@/config/env.validation';
 import { UsersModule } from '@/users/users.module';
 import { AccessTokenService } from './access-token.service';
+import { AuthGuard } from './auth.guard';
 import { SessionsService } from './sessions.service';
 
 @Module({
@@ -17,7 +20,12 @@ import { SessionsService } from './sessions.service';
       }),
     }),
   ],
-  providers: [AccessTokenService, SessionsService],
+  providers: [
+    AccessTokenService,
+    SessionsService,
+    { provide: APP_GUARD, useClass: AuthGuard },
+    { provide: APP_GUARD, useClass: RolesGuard },
+  ],
   exports: [AccessTokenService, SessionsService],
 })
 export class AuthModule {}
