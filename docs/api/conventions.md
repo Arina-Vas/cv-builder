@@ -43,8 +43,55 @@ Modules import these instead of writing their own:
 Prisma enums are always imported from `common/graphql/enums.ts`, not from `src/generated/prisma`: that file
 registers them for GraphQL.
 
-Shared output types live in the module that owns the entity (e.g. `Department` in
-`backend/src/departments/models/`) and are imported by other modules.
+### Shared entity types
+
+Output types that other modules reference live in the module that owns the entity, not in `common/`, so a module
+can return `department: Department` without waiting for the Departments module.
+
+| Type            | Model                                    | Mapper                                         |
+| --------------- | ---------------------------------------- | ---------------------------------------------- |
+| `Department`    | `departments/models/department.model.ts` | `departments/department.mapper.ts`             |
+| `Position`      | `positions/models/position.model.ts`     | `positions/position.mapper.ts`                 |
+| `Language`      | `languages/models/language.model.ts`     | `languages/language.mapper.ts`                 |
+| `SkillCategory` | `skills/models/skill-category.model.ts`  | `skills/skill.mapper.ts` (`toSkillCategory`)   |
+| `Skill`         | `skills/models/skill.model.ts`           | `skills/skill.mapper.ts`                       |
+| `ProjectRole`   | `projects/models/project-role.model.ts`  | `projects/project.mapper.ts` (`toProjectRole`) |
+| `Project`       | `projects/models/project.model.ts`       | `projects/project.mapper.ts`                   |
+| `User`          | `users/models/user.model.ts`             | `users/user.mapper.ts`                         |
+
+Paths are relative to `backend/src/`. Link types that only one module uses (`UserSkill`, `UserLanguage`, `Cv`,
+`CvSkill`, `CvProject`) stay in that module's contract.
+
+Rules for output types:
+
+- One class per file, `<entity>.model.ts` in `<module>/models/`; the module folder is plural, the file singular.
+- The class name is the GraphQL type name (`@ObjectType()` without an explicit name). The Prisma type is imported
+  with an alias: `import type { Department as DepartmentEntity } from '@/generated/prisma/client'`.
+- The class declares `implements Pick<XEntity, 'id' | 'name' | …>`, so renaming or removing a column breaks the
+  build. `Pick`, never `Omit`: a new column must not appear in the API by default.
+- A relation is returned as an object (`category: SkillCategory!`), not as an id field (`categoryId`).
+- No back-relations (`Department.users`, `Skill.cvs`): they create import cycles between modules and unbounded
+  lists. Such data is fetched through the owning module's queries.
+- Nullability follows Prisma: an optional column or relation is `{ nullable: true }` with the type `X | null`.
+  Nullable fields need an explicit type in `@Field(() => String, { nullable: true })`.
+- `User.emailVerifiedAt: DateTime` is the verification status: `null` means the email is not verified.
+
+Rules for mappers:
+
+- A mapper (`toDepartment`, `toUser`, …) turns a Prisma row into the output type. Services return
+  `rows.map(toX)`, never a raw Prisma row.
+- Fields are listed explicitly; no `{ ...row }`, so service fields (`passwordHash`, `createdAt`, `…Id`) never leak.
+- A type with relations exports its `include` and the matching row type, and services load data with that
+  `include`:
+
+  ```ts
+  export const skillInclude = { category: true } satisfies Prisma.SkillInclude;
+  export type SkillWithCategory = Prisma.SkillGetPayload<{ include: typeof skillInclude }>;
+  ```
+
+- A missing optional relation stays `null`: `row.department ? toDepartment(row.department) : null`.
+- Mappers are pure: no database calls, access checks or errors. Mappers with logic (nested relations,
+  `Project.environment`, `User`) have a `*.mapper.spec.ts`.
 
 ## Naming
 
@@ -294,7 +341,10 @@ Frontend side:
 ## Authentication and access
 
 - Every operation requires authentication unless it is marked `@Public()`.
-- The access token is sent as `Authorization: Bearer <token>`.
+- Access and refresh tokens are httpOnly cookies set by the API; the frontend sends them with
+  `credentials: 'include'` and never reads them. No `Authorization` header is used. Details in
+  [auth.md](../auth.md).
+- Users with an unverified email are read-only: mutations are rejected unless marked `@AllowUnverified()`.
 - Admin-only operations are marked with `@Roles(UserRole.ADMIN)`. The decorator only stores metadata; the guard that
   checks it is added by the Auth task, and a failed check returns `FORBIDDEN`.
 - "Own data or Admin" checks (profile, user skills and languages, CVs) cannot be expressed with `@Roles`. Services
