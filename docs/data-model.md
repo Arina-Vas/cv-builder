@@ -43,7 +43,7 @@ erDiagram
     User ||--o{ UserLanguage : "speaks"
     Language ||--o{ UserLanguage : "assigned in"
 
-    Project ||--o{ ProjectSkill : "environment"
+    Project ||--o{ ProjectSkill : "technologies"
     Skill ||--o{ ProjectSkill : "used in"
 
     User ||--o{ Cv : "owns"
@@ -98,14 +98,14 @@ All tables have `id` (uuid), `created_at` and `updated_at`. Only the meaningful 
 | ------------------ | ------------------------------------------------------------------------------- |
 | `user_skills`      | `user_id`, `skill_id`, `mastery` (`NOVICE` … `EXPERT`)                          |
 | `user_languages`   | `user_id`, `language_id`, `proficiency` (`A1` … `C2`, `NATIVE`)                 |
-| `project_skills`   | `project_id`, `skill_id` (project environment)                                  |
+| `project_skills`   | `project_id`, `skill_id` (project technologies)                                 |
 | `cvs`              | `user_id`, `name` varchar(255), `education` varchar(255), `description`         |
 | `cv_skills`        | `cv_id`, `skill_id`                                                             |
 | `cv_projects`      | `cv_id`, `project_id`, `start_date` date, `end_date?` date, `responsibilities?` |
 | `cv_project_roles` | `cv_project_id`, `role_id`                                                      |
 
 - `cv_projects.end_date = null` means "Till now". In the `projects` catalog `end_date` is required.
-- Project name, domain, description and environment shown on a CV come from the referenced `projects` row;
+- Project name, domain, description and technologies shown on a CV come from the referenced `projects` row;
   only participation dates, responsibilities and roles are CV-specific.
 
 ## Deletion policy
@@ -116,26 +116,26 @@ The spec asks each catalog to define its deletion policy explicitly. One rule is
   error, e.g. "Skill cannot be deleted because it is assigned to users".
 - **Deleting an owner removes its own links** (`Cascade`). Global catalog items are never deleted as a side effect.
 
-| Relation (FK)                                  | On delete of the referenced row | Effect                                                |
-| ---------------------------------------------- | ------------------------------- | ----------------------------------------------------- |
-| `users.department_id` → departments            | Restrict                        | Department in use cannot be deleted                   |
-| `users.position_id` → positions                | Restrict                        | Position in use cannot be deleted                     |
-| `sessions.user_id` → users                     | Cascade                         | Deleting a user removes their sessions                |
-| `auth_tokens.user_id` → users                  | Cascade                         | Deleting a user removes their codes/tokens            |
-| `skills.category_id` → skill_categories        | Restrict                        | Category with skills cannot be deleted                |
-| `user_skills.user_id` → users                  | Cascade                         | Deleting a user removes their skill assignments       |
-| `user_skills.skill_id` → skills                | Restrict                        | Skill assigned to a user cannot be deleted            |
-| `user_languages.user_id` → users               | Cascade                         | Deleting a user removes their language assignments    |
-| `user_languages.language_id` → languages       | Restrict                        | Language assigned to a user cannot be deleted         |
-| `project_skills.project_id` → projects         | Cascade                         | Deleting a project removes its environment links      |
-| `project_skills.skill_id` → skills             | Restrict                        | Skill used in a project environment cannot be deleted |
-| `cvs.user_id` → users                          | Cascade                         | Deleting a user removes their CVs                     |
-| `cv_skills.cv_id` → cvs                        | Cascade                         | Deleting a CV removes its skill links                 |
-| `cv_skills.skill_id` → skills                  | Restrict                        | Skill used in a CV cannot be deleted                  |
-| `cv_projects.cv_id` → cvs                      | Cascade                         | Deleting a CV removes its projects                    |
-| `cv_projects.project_id` → projects            | Restrict                        | Project used in a CV cannot be deleted                |
-| `cv_project_roles.cv_project_id` → cv_projects | Cascade                         | Deleting a CV project removes its roles               |
-| `cv_project_roles.role_id` → project_roles     | Restrict                        | Role used in a CV cannot be deleted                   |
+| Relation (FK)                                  | On delete of the referenced row | Effect                                               |
+| ---------------------------------------------- | ------------------------------- | ---------------------------------------------------- |
+| `users.department_id` → departments            | Restrict                        | Department in use cannot be deleted                  |
+| `users.position_id` → positions                | Restrict                        | Position in use cannot be deleted                    |
+| `sessions.user_id` → users                     | Cascade                         | Deleting a user removes their sessions               |
+| `auth_tokens.user_id` → users                  | Cascade                         | Deleting a user removes their codes/tokens           |
+| `skills.category_id` → skill_categories        | Restrict                        | Category with skills cannot be deleted               |
+| `user_skills.user_id` → users                  | Cascade                         | Deleting a user removes their skill assignments      |
+| `user_skills.skill_id` → skills                | Restrict                        | Skill assigned to a user cannot be deleted           |
+| `user_languages.user_id` → users               | Cascade                         | Deleting a user removes their language assignments   |
+| `user_languages.language_id` → languages       | Restrict                        | Language assigned to a user cannot be deleted        |
+| `project_skills.project_id` → projects         | Cascade                         | Deleting a project removes its technology links      |
+| `project_skills.skill_id` → skills             | Restrict                        | Skill used as a project technology cannot be deleted |
+| `cvs.user_id` → users                          | Cascade                         | Deleting a user removes their CVs                    |
+| `cv_skills.cv_id` → cvs                        | Cascade                         | Deleting a CV removes its skill links                |
+| `cv_skills.skill_id` → skills                  | Restrict                        | Skill used in a CV cannot be deleted                 |
+| `cv_projects.cv_id` → cvs                      | Cascade                         | Deleting a CV removes its projects                   |
+| `cv_projects.project_id` → projects            | Restrict                        | Project used in a CV cannot be deleted               |
+| `cv_project_roles.cv_project_id` → cv_projects | Cascade                         | Deleting a CV project removes its roles              |
+| `cv_project_roles.role_id` → project_roles     | Restrict                        | Role used in a CV cannot be deleted                  |
 
 ## Constraints
 
@@ -202,7 +202,8 @@ pnpm db:migrate
   Skill type"). It is a string rather than an enum, so new types can be added through the seed without a migration.
   A category tree (type = parent category) was considered and rejected: it needs an extra service rule
   ("skills reference second-level categories only") and a self-relation.
-- **Project environment references `skills`.** Technologies come from a managed catalog; skills already are one.
+- **Project technologies reference `skills`.** Technologies come from a managed catalog; skills already are one.
+  The relation is named `technologies` (as in the wiki GraphQL examples); "Environment" is only the UI label.
 - **Project name is not unique.** The spec requires it only to be present. Revisit if the team decides otherwise.
 - **User preferences (theme, language) are not stored.** The spec allows keeping them on the client.
 - **`responsibilities` is a single text field** (a textarea in the spec), not an array.

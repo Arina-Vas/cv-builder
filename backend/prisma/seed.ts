@@ -60,7 +60,7 @@ const PROJECTS = [
     endDate: '2024-12-31',
     description:
       'Online marketplace with product catalog, cart, checkout and an admin panel for sellers.',
-    environment: ['TypeScript', 'React', 'Next.js', 'Node.js', 'PostgreSQL'],
+    technologies: ['TypeScript', 'React', 'Next.js', 'Node.js', 'PostgreSQL'],
   },
   {
     name: 'MediTrack',
@@ -68,7 +68,7 @@ const PROJECTS = [
     startDate: '2023-06-01',
     endDate: '2026-06-30',
     description: 'Patient appointment and medical records system for a network of private clinics.',
-    environment: ['TypeScript', 'Angular', 'NestJS', 'GraphQL', 'PostgreSQL', 'Docker'],
+    technologies: ['TypeScript', 'Angular', 'NestJS', 'GraphQL', 'PostgreSQL', 'Docker'],
   },
   {
     name: 'FinSight',
@@ -76,7 +76,7 @@ const PROJECTS = [
     startDate: '2024-01-15',
     endDate: '2027-01-15',
     description: 'Dashboard for personal budgeting with bank account sync and spending analytics.',
-    environment: ['JavaScript', 'React', 'Express', 'MongoDB', 'AWS'],
+    technologies: ['JavaScript', 'React', 'Express', 'MongoDB', 'AWS'],
   },
 ];
 
@@ -122,7 +122,7 @@ async function seedProjects(): Promise<void> {
   const skills = await prisma.skill.findMany();
   const skillIdByName = new Map(skills.map((s) => [s.name, s.id]));
 
-  for (const { environment, startDate, endDate, ...project } of PROJECTS) {
+  for (const { technologies, startDate, endDate, ...project } of PROJECTS) {
     // Project name is not unique, so look it up instead of upsert.
     const existing = await prisma.project.findFirst({ where: { name: project.name } });
     const { id } =
@@ -132,7 +132,7 @@ async function seedProjects(): Promise<void> {
       }));
 
     await prisma.projectSkill.createMany({
-      data: environment.map((skill) => ({ projectId: id, skillId: skillIdByName.get(skill)! })),
+      data: technologies.map((skill) => ({ projectId: id, skillId: skillIdByName.get(skill)! })),
       skipDuplicates: true,
     });
   }
