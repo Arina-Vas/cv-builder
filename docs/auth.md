@@ -9,6 +9,7 @@ Email Verification pages. Tables are described in [data-model.md](data-model.md)
 
 - **Both tokens live in httpOnly cookies** (access + refresh), never in `localStorage` or in GraphQL responses,
   so page scripts cannot read them.
+- Cookie names: `access_token`, `refresh_token`; `path=/`, `maxAge` equals the token lifetime.
 - Cookies use `SameSite=Lax`, `Secure` in production only. CORS allows the frontend origin (`FRONTEND_URL`)
   with credentials. The frontend and the API run on different ports of the same host, which is still one site,
   so `Lax` cookies are sent.
@@ -21,6 +22,8 @@ Email Verification pages. Tables are described in [data-model.md](data-model.md)
 
 - Role and verification status are not stored in the access token.
 - Every refresh **rotates** the refresh token (new value, new expiry), so an old refresh token stops working.
+  Rotation is a conditional update on the old hash, so two parallel refreshes with the same token cannot both
+  succeed.
   An active user stays signed in; a user who is inactive for more than a day signs in again.
 
 ## Sessions and the auth guard
