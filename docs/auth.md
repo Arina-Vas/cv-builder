@@ -122,5 +122,8 @@ directly.
 | `SMTP_HOST`, `SMTP_PORT` | Mail server; Mailpit in local development                         |
 | `MAIL_FROM`              | Sender of verification and reset emails                           |
 
+Emails are sent by `MailService` (`backend/src/mail/`, nodemailer over SMTP); their texts are in
+`mail.templates.ts`. Codes and reset links appear only in the email itself, never in logs or error messages.
+
 All variables are validated on startup in `backend/src/config/env.validation.ts`; the app does not start if one
 is missing or invalid. In local development every email lands in Mailpit: http://localhost:8025.

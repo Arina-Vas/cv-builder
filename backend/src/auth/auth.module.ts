@@ -4,6 +4,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { RolesGuard } from '@/common/auth/roles.guard';
 import type { EnvironmentVariables } from '@/config/env.validation';
+import { MailModule } from '@/mail/mail.module';
 import { UsersModule } from '@/users/users.module';
 import { AccessTokenService } from './access-token.service';
 import { AuthGuard } from './auth.guard';
@@ -14,6 +15,7 @@ import { SessionsService } from './sessions.service';
 @Module({
   imports: [
     UsersModule,
+    MailModule,
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService<EnvironmentVariables, true>) => ({
