@@ -38,7 +38,8 @@ Email Verification pages. Tables are described in [data-model.md](data-model.md)
 - **Verification uses the session**, not email + code: the backend takes the user from the auth context. This
   lets LATER open the app without signing in again and prevents guessing codes for someone else's email.
   "Public" for this page in the access matrix means "no role required"; a session is still required.
-- **Status** is `users.email_verified_at` (`null` = not verified). GraphQL exposes it as `emailVerified: Boolean!`.
+- **Status** is `users.email_verified_at` (`null` = not verified). GraphQL exposes the same value as
+  `User.emailVerifiedAt: DateTime` (see [shared entity types](api/conventions.md#shared-entity-types)).
 - **Codes** are 6 digits, generated with a secure random source, stored as hashes in `auth_tokens`, valid for
   10 minutes and single-use. A new code invalidates the previous one. Verify and resend are rate-limited.
 - Verifying sets `users.email_verified_at` and `auth_tokens.used_at` in one transaction.
