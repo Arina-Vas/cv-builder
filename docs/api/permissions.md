@@ -15,6 +15,9 @@ Status: **draft for review.** Operation tables are added together with the resol
 ## Rules
 
 - Every operation requires authentication unless it is marked **Public**.
+- **Verified email**: a user whose email is not verified can run queries, but mutations are rejected (except the ones
+  marked `@AllowUnverified()`). The wiki does not list which features need a verified email, so this is a team
+  decision, see [auth.md](../auth.md#unverified-users-are-read-only).
 - **Admin-only** operations are marked with `@Roles(UserRole.ADMIN)`; the roles guard (Auth task) checks them.
 - **Own or Admin**: an Employee may change only their own data; an Admin may change anyone's. The service compares
   the owner with the current user from the request. A user id or CV id sent by the client is never proof of
@@ -111,11 +114,17 @@ by changing a client-supplied user ID").
 
 ### Authentication and settings
 
-| Action                                                                 | Access                  |
-| ---------------------------------------------------------------------- | ----------------------- |
-| Sign up, sign in, verify email, resend code, forgot and reset password | Public                  |
-| Current user (`me`), sign out                                          | authenticated           |
-| Change password, theme and language preferences                        | authenticated, own only |
+| Action                                               | Access                                           |
+| ---------------------------------------------------- | ------------------------------------------------ |
+| Sign up, sign in, refresh, forgot and reset password | Public                                           |
+| Verify email, resend code                            | authenticated, email not verified yet (own only) |
+| Current user (`me`), sign out                        | authenticated, verified or not                   |
+| Theme and language preferences                       | authenticated, own only, verified or not         |
+| Change password                                      | authenticated, own only, verified email          |
+
+"Public" for the Email Verification page in the wiki access table means no role is required; the verify and resend
+operations still need the session started at sign-up, because the backend takes the user from the auth context
+([auth.md](../auth.md#sign-up-and-email-verification)).
 
 ## Operations
 

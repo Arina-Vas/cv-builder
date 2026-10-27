@@ -341,7 +341,10 @@ Frontend side:
 ## Authentication and access
 
 - Every operation requires authentication unless it is marked `@Public()`.
-- The access token is sent as `Authorization: Bearer <token>`.
+- Access and refresh tokens are httpOnly cookies set by the API; the frontend sends them with
+  `credentials: 'include'` and never reads them. No `Authorization` header is used. Details in
+  [auth.md](../auth.md).
+- Users with an unverified email are read-only: mutations are rejected unless marked `@AllowUnverified()`.
 - Admin-only operations are marked with `@Roles(UserRole.ADMIN)`. The decorator only stores metadata; the guard that
   checks it is added by the Auth task, and a failed check returns `FORBIDDEN`.
 - "Own data or Admin" checks (profile, user skills and languages, CVs) cannot be expressed with `@Roles`. Services
