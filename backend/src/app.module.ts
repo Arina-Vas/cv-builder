@@ -8,6 +8,7 @@ import { HealthModule } from './health/health.module';
 import { Environment, EnvironmentVariables, validate } from './config/env.validation';
 import { join } from 'node:path';
 import { createGqlContext } from './common/graphql/graphql.context';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { createGqlContext } from './common/graphql/graphql.context';
       },
     }),
     HealthModule,
+    UsersModule,
   ],
   controllers: [AppController],
 })
