@@ -9,6 +9,7 @@ import { Environment, EnvironmentVariables, validate } from './config/env.valida
 import { join } from 'node:path';
 import { DepartmentModule } from '@/departments/department.module';
 import { PositionModule } from '@/positions/position.module';
+import { LanguageModule } from '@/languages/language.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { PositionModule } from '@/positions/position.module';
     HealthModule,
     DepartmentModule,
     PositionModule,
+    LanguageModule,
   ],
   controllers: [AppController],
 })

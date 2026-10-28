@@ -6,6 +6,12 @@ input CreateDepartmentInput {
   name: String!
 }
 
+input CreateLanguageInput {
+  iso: String!
+  name: String!
+  nativeName: String!
+}
+
 input CreatePositionInput {
   name: String!
 }
@@ -34,16 +40,44 @@ type Health {
   status: String!
 }
 
+type Language {
+  id: ID!
+  iso: String!
+  name: String!
+  nativeName: String!
+}
+
+type LanguagePage {
+  items: [Language!]!
+
+  """Current page, 1-based"""
+  page: Int!
+  pageSize: Int!
+
+  """Items matching the search, not the page size"""
+  total: Int!
+}
+
+enum LanguageSortField {
+  iso
+  name
+}
+
 type Mutation {
   createDepartment(input: CreateDepartmentInput!): Department!
+  createLanguage(input: CreateLanguageInput!): Language!
   createPosition(input: CreatePositionInput!): Position!
 
   """Fails with ENTITY_IN_USE if the department is assigned to users"""
   deleteDepartment(id: ID!): ID!
 
+  """Fails with ENTITY_IN_USE if the language is assigned to users"""
+  deleteLanguage(id: ID!): ID!
+
   """Fails with ENTITY_IN_USE if the position is assigned to users"""
   deletePosition(id: ID!): ID!
   updateDepartment(input: UpdateDepartmentInput!): Department!
+  updateLanguage(input: UpdateLanguageInput!): Language!
   updatePosition(input: UpdatePositionInput!): Position!
 }
 
@@ -79,6 +113,16 @@ type Query {
     sortOrder: SortOrder! = ASC
   ): DepartmentPage!
   health: Health!
+  languages(
+    """1-based page number"""
+    page: Int! = 1
+
+    """One of 10, 20, 50"""
+    pageSize: Int! = 10
+    search: String
+    sortBy: LanguageSortField! = name
+    sortOrder: SortOrder! = ASC
+  ): LanguagePage!
   positions(
     """1-based page number"""
     page: Int! = 1
@@ -99,6 +143,13 @@ enum SortOrder {
 input UpdateDepartmentInput {
   id: ID!
   name: String!
+}
+
+input UpdateLanguageInput {
+  id: ID!
+  iso: String!
+  name: String!
+  nativeName: String!
 }
 
 input UpdatePositionInput {
