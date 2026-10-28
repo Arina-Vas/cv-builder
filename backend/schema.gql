@@ -19,7 +19,15 @@ type Health {
 type Mutation {
   logout: Boolean!
   refresh: Boolean!
+
+  """Always returns true, whether or not the email belongs to an account"""
+  requestPasswordReset(input: RequestPasswordResetInput!): Boolean!
   resendVerificationCode: Boolean!
+
+  """
+  Fails with BAD_USER_INPUT (field "token") when the link is invalid, used or expired. Signs out every session of the user; the client signs in again with the new password.
+  """
+  resetPassword(input: ResetPasswordInput!): Boolean!
   signIn(input: SignInInput!): User!
   signUp(input: SignUpInput!): User!
   verifyEmail(input: VerifyEmailInput!): User!
@@ -33,6 +41,15 @@ type Position {
 type Query {
   health: Health!
   me: User!
+}
+
+input RequestPasswordResetInput {
+  email: String!
+}
+
+input ResetPasswordInput {
+  newPassword: String!
+  token: String!
 }
 
 input SignInInput {

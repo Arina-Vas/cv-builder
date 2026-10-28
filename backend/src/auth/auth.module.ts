@@ -12,6 +12,8 @@ import { AuthResolver } from './auth.resolver';
 import { AuthService } from './auth.service';
 import { EmailVerificationResolver } from './email-verification/email-verification.resolver';
 import { EmailVerificationService } from './email-verification/email-verification.service';
+import { PasswordResetResolver } from './password-reset/password-reset.resolver';
+import { PasswordResetService } from './password-reset/password-reset.service';
 import { SessionsService } from './sessions/sessions.service';
 
 @Module({
@@ -33,6 +35,8 @@ import { SessionsService } from './sessions/sessions.service';
     AuthResolver,
     EmailVerificationService,
     EmailVerificationResolver,
+    PasswordResetService,
+    PasswordResetResolver,
     { provide: APP_GUARD, useClass: AuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
   ],

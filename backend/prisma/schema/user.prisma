@@ -61,5 +61,6 @@ model AuthToken {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@index([userId, type])
+  @@index([type, codeHash])
   @@map("auth_tokens")
 }

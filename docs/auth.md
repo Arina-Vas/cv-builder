@@ -104,9 +104,23 @@ Email Verification pages. Tables are described in [data-model.md](data-model.md)
 
 ## Password reset
 
-- The forgot-password response is the same whether the email exists or not (no account enumeration).
-- The reset token is random, stored as a hash in `auth_tokens`, expiring and single-use.
-- Resetting updates the password hash, marks the token used and revokes all sessions in one transaction.
+Mutations (both public): `requestPasswordReset(input: { email })` and `resetPassword(input: { token, newPassword })`,
+code in `backend/src/auth/password-reset/`.
+
+- The forgot-password response is the same whether the email exists or not (no account enumeration): it always
+  returns `true`, and the email is sent without awaiting it, so SMTP time and SMTP failures do not change the
+  response. Mail failures are logged with the user id only.
+- The reset token is random (`generateToken`), stored as a hash in `auth_tokens` (type `PASSWORD_RESET`), expires
+  in **30 minutes** and is single-use. A new request expires the previous unused link.
+- Per-account cooldown: a second request within **60 seconds** is ignored silently. It cannot return
+  `RATE_LIMITED`, because that would reveal that the account exists; per-client limits come from the throttler.
+- Reset link: `${FRONTEND_URL}/reset-password?token=<token>`. The Reset Password page sends the token back with the
+  new password.
+- `resetPassword` errors are `BAD_USER_INPUT` with field `token`: `This password reset link is invalid` (unknown,
+  malformed or already used token) and `This password reset link has expired`.
+- Resetting updates the password hash, marks the token used and revokes all sessions in one transaction. The token
+  is marked used with a conditional update, so two parallel requests with the same link cannot both succeed.
+- Resetting does not mark the email as verified: verification stays a separate flow.
 - The user is not signed in automatically: the frontend redirects to Sign In with a success message.
 
 ## Hashing and random values
