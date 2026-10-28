@@ -2,7 +2,10 @@ import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { RolesGuard } from '@/common/auth/roles.guard';
+import { GqlThrottlerGuard } from '@/common/throttling/gql-throttler.guard';
+import { DEFAULT_THROTTLE } from '@/common/throttling/throttle.decorators';
 import type { EnvironmentVariables } from '@/config/env.validation';
 import { MailModule } from '@/mail/mail.module';
 import { UsersModule } from '@/users/users.module';
@@ -20,6 +23,7 @@ import { SessionsService } from './sessions/sessions.service';
   imports: [
     UsersModule,
     MailModule,
+    ThrottlerModule.forRoot([DEFAULT_THROTTLE]),
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService<EnvironmentVariables, true>) => ({
@@ -37,6 +41,7 @@ import { SessionsService } from './sessions/sessions.service';
     EmailVerificationResolver,
     PasswordResetService,
     PasswordResetResolver,
+    { provide: APP_GUARD, useClass: GqlThrottlerGuard },
     { provide: APP_GUARD, useClass: AuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
   ],

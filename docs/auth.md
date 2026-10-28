@@ -123,6 +123,28 @@ code in `backend/src/auth/password-reset/`.
 - Resetting does not mark the email as verified: verification stays a separate flow.
 - The user is not signed in automatically: the frontend redirects to Sign In with a success message.
 
+## Rate limiting
+
+`@nestjs/throttler` counts requests per client IP in memory. `GqlThrottlerGuard`
+(`backend/src/common/throttling/`) is the first global guard, so a throttled request never reaches the auth guard
+or the database.
+
+| Operations                                                                                                               | Limit per IP                             |
+| ------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------- |
+| `signUp`, `signIn`, `requestPasswordReset`, `resetPassword`, `verifyEmail`, `resendVerificationCode` (`@AuthThrottle()`) | 10 per minute, each operation separately |
+| every other operation                                                                                                    | 100 per minute                           |
+| `health` query and `GET /health` (`@SkipThrottle()`)                                                                     | none                                     |
+
+- Over the limit: `RATE_LIMITED` with `Please wait before trying again` and `retryAfter` in seconds. The HTTP
+  response also has a `Retry-After` header, and every response has `X-RateLimit-Limit` / `-Remaining` / `-Reset`.
+- These limits come on top of the per-account rules: 60 s cooldown for resending a code (`RATE_LIMITED`) and for
+  requesting a reset link (ignored silently, see [Password reset](#password-reset)).
+- The counters live in the API process: they reset on restart and are not shared between several instances.
+  A shared store (Redis) is needed only if the API is scaled out.
+- Behind a reverse proxy every request comes from the proxy's IP, so all clients would share one limit. Set
+  `TRUST_PROXY_HOPS` to the number of proxies so Express takes the client IP from `X-Forwarded-For`. Do not set it
+  higher than the real number: a client could then fake its IP in that header.
+
 ## Hashing and random values
 
 Helpers live in `backend/src/common/crypto/`; other modules use them instead of calling `argon2` or `node:crypto`
@@ -144,14 +166,15 @@ directly.
 
 ## Configuration
 
-| Variable                 | Used for                                                          |
-| ------------------------ | ----------------------------------------------------------------- |
-| `JWT_ACCESS_SECRET`      | Signing and verifying access tokens (≥ 32 chars, never committed) |
-| `JWT_ACCESS_TTL_SECONDS` | Access token lifetime and its cookie `maxAge`                     |
-| `REFRESH_TTL_DAYS`       | Refresh token lifetime (sliding)                                  |
-| `FRONTEND_URL`           | CORS origin and links in emails                                   |
-| `SMTP_HOST`, `SMTP_PORT` | Mail server; Mailpit in local development                         |
-| `MAIL_FROM`              | Sender of verification and reset emails                           |
+| Variable                 | Used for                                                                            |
+| ------------------------ | ----------------------------------------------------------------------------------- |
+| `JWT_ACCESS_SECRET`      | Signing and verifying access tokens (≥ 32 chars, never committed)                   |
+| `JWT_ACCESS_TTL_SECONDS` | Access token lifetime and its cookie `maxAge`                                       |
+| `REFRESH_TTL_DAYS`       | Refresh token lifetime (sliding)                                                    |
+| `FRONTEND_URL`           | CORS origin and links in emails                                                     |
+| `SMTP_HOST`, `SMTP_PORT` | Mail server; Mailpit in local development                                           |
+| `MAIL_FROM`              | Sender of verification and reset emails                                             |
+| `TRUST_PROXY_HOPS`       | Reverse proxies in front of the API, for the client IP in rate limits (default `0`) |
 
 Emails are sent by `MailService` (`backend/src/mail/`, nodemailer over SMTP); their texts are in
 `mail.templates.ts`. Codes and reset links appear only in the email itself, never in logs or error messages.

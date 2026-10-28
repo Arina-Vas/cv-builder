@@ -2,6 +2,7 @@ import { ConfigService } from '@nestjs/config';
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CurrentUser } from '@/common/auth/current-user.decorator';
 import { Public } from '@/common/auth/public.decorator';
+import { AuthThrottle } from '@/common/throttling/throttle.decorators';
 import type { GqlContext } from '@/common/graphql/graphql.context';
 import { Environment, type EnvironmentVariables } from '@/config/env.validation';
 import { User } from '@/users/models/user.model';
@@ -23,6 +24,7 @@ export class AuthResolver {
   ) {}
 
   @Public()
+  @AuthThrottle()
   @Mutation(() => User)
   async signUp(
     @Args('input') input: SignUpInput,
@@ -34,6 +36,7 @@ export class AuthResolver {
   }
 
   @Public()
+  @AuthThrottle()
   @Mutation(() => User)
   async signIn(
     @Args('input') input: SignInInput,

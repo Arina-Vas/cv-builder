@@ -1,4 +1,5 @@
 import { NestFactory } from '@nestjs/core';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -8,7 +9,7 @@ import { GraphqlExceptionFilter } from '@/common/errors/graphql-exception.filter
 import cookieParser from 'cookie-parser';
 
 async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const config = app.get<ConfigService<EnvironmentVariables, true>>(ConfigService);
 
   app.useGlobalPipes(
@@ -17,6 +18,7 @@ async function bootstrap(): Promise<void> {
 
   app.useGlobalFilters(new GraphqlExceptionFilter());
   app.use(cookieParser());
+  app.set('trust proxy', config.get('TRUST_PROXY_HOPS', { infer: true }));
   app.enableCors({ origin: config.get('FRONTEND_URL', { infer: true }), credentials: true });
 
   await app.listen(config.get('PORT', { infer: true }));

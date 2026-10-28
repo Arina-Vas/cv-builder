@@ -176,6 +176,7 @@ Backend variables live in `backend/.env` (git-ignored). The template is `backend
 | `SMTP_HOST`              | Mail server host                                    | `localhost` (Mailpit)                                                        |
 | `SMTP_PORT`              | Mail server port                                    | `1025` (Mailpit)                                                             |
 | `MAIL_FROM`              | Sender of outgoing emails                           | `CV Builder <no-reply@cv-builder.local>`                                     |
+| `TRUST_PROXY_HOPS`       | Number of reverse proxies in front of the API       | `0`                                                                          |
 | `SEED_*`                 | Accounts created by `pnpm db:seed`                  | see [Seed data](#seed-data)                                                  |
 
 The backend validates these variables on startup (`backend/src/config/env.validation.ts`) and does not start if

@@ -257,7 +257,7 @@ helpers in `backend/src/common/errors/app-errors.ts`; a global exception filter 
 | `BAD_USER_INPUT`        | validation failed                                    | `fields: [{ field, message }]` | inline errors under the fields                           |
 | `CONFLICT`              | a unique value is already taken                      | `field` (when known)           | inline error under `field`                               |
 | `ENTITY_IN_USE`         | delete blocked because the item is referenced        | —                              | toast                                                    |
-| `RATE_LIMITED`          | too many requests (e.g. resend verification code)    | `retryAfter` (seconds)         | "please wait" message                                    |
+| `RATE_LIMITED`          | too many requests (per IP or e.g. resend code)       | `retryAfter` (seconds)         | "please wait" message                                    |
 | `INTERNAL_SERVER_ERROR` | unexpected error                                     | —                              | generic error toast with a retry option                  |
 
 The codes cover the error categories the wiki asks the frontend to handle:
@@ -272,7 +272,7 @@ The codes cover the error categories the wiki asks the frontend to handle:
 | Conflict errors                      | `CONFLICT`                                                                         |
 | Dependency / business-rule errors    | `ENTITY_IN_USE`                                                                    |
 | Unexpected server errors             | `INTERNAL_SERVER_ERROR`                                                            |
-| Rate limiting (Verification page)    | `RATE_LIMITED`                                                                     |
+| Rate limiting (auth pages)           | `RATE_LIMITED`                                                                     |
 | Network errors                       | no code: the request did not reach the server (`networkError` in Apollo Client)    |
 
 `UNAUTHENTICATED`, `FORBIDDEN`, `BAD_USER_INPUT` and `INTERNAL_SERVER_ERROR` follow Apollo Server conventions;

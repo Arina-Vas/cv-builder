@@ -1,5 +1,6 @@
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { Public } from '@/common/auth/public.decorator';
+import { AuthThrottle } from '@/common/throttling/throttle.decorators';
 import { RequestPasswordResetInput } from './dto/request-password-reset.input';
 import { ResetPasswordInput } from './dto/reset-password.input';
 import { PasswordResetService } from './password-reset.service';
@@ -9,6 +10,7 @@ export class PasswordResetResolver {
   constructor(private readonly passwordReset: PasswordResetService) {}
 
   @Public()
+  @AuthThrottle()
   @Mutation(() => Boolean, {
     description: 'Always returns true, whether or not the email belongs to an account',
   })
@@ -18,6 +20,7 @@ export class PasswordResetResolver {
   }
 
   @Public()
+  @AuthThrottle()
   @Mutation(() => Boolean, {
     description:
       'Fails with BAD_USER_INPUT (field "token") when the link is invalid, used or expired. ' +
