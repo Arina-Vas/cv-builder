@@ -50,8 +50,34 @@ prisma.config.ts      # Prisma CLI config
 schema.gql            # generated GraphQL schema (committed)
 src/                  # main.ts, app.module.ts, app.controller.ts
   common/
-    graphql/          # list args, pagination, SortOrder, Date scalar, GraphQL enums
+    graphql/          # list args, pagination, SortOrder, Date scalar, GraphQL enums, constants
     errors/           # error codes, helpers, validation errors, global exception filter
+    validation/       # input transforms: @NormalizeText(), @TrimText(), @ToUpperCaseText()
     auth/             # @Roles() decorator
+  prisma/             # PrismaService (global module), isPrismaError()
+  departments/        # feature module, see Module layout
   generated/prisma/   # generated Prisma Client (git-ignored)
 ```
+
+### Module layout
+
+A feature module is one folder; Departments is the reference implementation:
+
+```
+departments/
+  department.module.ts       # registers the resolver and the service; imported in AppModule
+  department.resolver.ts     # queries and mutations; @Roles() on admin operations; no logic
+  department.service.ts      # Prisma calls, search / sort / pagination, Prisma error handling
+  department.mapper.ts       # Prisma row → output type
+  dto/                       # @ArgsType list args and @InputType inputs with class-validator rules
+  models/                    # @ObjectType output types, <Entity>Page, <Entity>SortField enum
+```
+
+Rules for each part are in [docs/api/conventions.md](../docs/api/conventions.md).
+
+## Tests
+
+`*.spec.ts` next to the tested file (`pnpm test`). DTO tests run `plainToInstance` + `validate`, as the global
+`ValidationPipe` does. Service tests pass a mocked `PrismaService` to the constructor and replace the real module
+with `jest.mock('@/prisma/prisma.service', () => ({ PrismaService: class {} }))`: it imports `@nestjs/config`, which
+Jest cannot load as ESM.

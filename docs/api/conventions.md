@@ -28,20 +28,30 @@ GraphQL schema from them.
 
 Modules import these instead of writing their own:
 
-| What                                    | File                                               |
-| --------------------------------------- | -------------------------------------------------- |
-| `ListArgs` (search + sortOrder)         | `backend/src/common/graphql/list.args.ts`          |
-| `PaginatedListArgs` (+ page, pageSize)  | `backend/src/common/graphql/list.args.ts`          |
-| `Paginated(Type)`, `PaginatedResult<T>` | `backend/src/common/graphql/paginated.response.ts` |
-| `SortOrder`                             | `backend/src/common/graphql/sort-order.enum.ts`    |
-| Pagination defaults, page sizes         | `backend/src/common/graphql/constants.ts`          |
-| `DateScalar`                            | `backend/src/common/graphql/date.scalar.ts`        |
-| `UserRole`, `Mastery`, `Proficiency`    | `backend/src/common/graphql/enums.ts`              |
-| `ErrorCode` and error helpers           | `backend/src/common/errors/`                       |
-| `@Roles()`                              | `backend/src/common/auth/roles.decorator.ts`       |
+| What                                                    | File                                               |
+| ------------------------------------------------------- | -------------------------------------------------- |
+| `ListArgs` (search + sortOrder)                         | `backend/src/common/graphql/list.args.ts`          |
+| `PaginatedListArgs` (+ page, pageSize)                  | `backend/src/common/graphql/list.args.ts`          |
+| `Paginated(Type)`, `PaginatedResult<T>`                 | `backend/src/common/graphql/paginated.response.ts` |
+| `SortOrder`                                             | `backend/src/common/graphql/sort-order.enum.ts`    |
+| Pagination defaults, page sizes, `MAX_NAME_LENGTH`      | `backend/src/common/graphql/constants.ts`          |
+| `DateScalar`                                            | `backend/src/common/graphql/date.scalar.ts`        |
+| `UserRole`, `Mastery`, `Proficiency`                    | `backend/src/common/graphql/enums.ts`              |
+| `ErrorCode` and error helpers                           | `backend/src/common/errors/`                       |
+| `@Roles()`                                              | `backend/src/common/auth/roles.decorator.ts`       |
+| `@NormalizeText()`, `@TrimText()`, `@ToUpperCaseText()` | `backend/src/common/validation/transforms.ts`      |
+| `isPrismaError(error, code)`                            | `backend/src/prisma/prisma-errors.ts`              |
 
 Prisma enums are always imported from `common/graphql/enums.ts`, not from `src/generated/prisma`: that file
 registers them for GraphQL.
+
+Text inputs are normalized in the DTO, before validation, so a blank value fails `@IsNotEmpty` and services and
+uniqueness checks get the stored form:
+
+- `@NormalizeText()` trims and collapses repeated whitespace (`"  Big   Data "` → `"Big Data"`): names and other
+  single-line values;
+- `@TrimText()` only trims the ends and keeps line breaks: multiline values such as a project description;
+- `@ToUpperCaseText()` upper-cases the value (language ISO code), placed together with `@NormalizeText()`.
 
 ### Shared entity types
 
@@ -312,6 +322,30 @@ Rules for services:
 - **Blocked delete.** Catalogs use `onDelete: Restrict` ([data model](../data-model.md#deletion-policy)), so the
   database rejects deleting a referenced item and the filter returns `ENTITY_IN_USE`.
 - **Rate limits.** A service that knows the cooldown throws `rateLimited(<seconds>, '<message>')`.
+
+Which Prisma errors a service catches (with `isPrismaError(error, code)`); everything else is rethrown for the
+global filter:
+
+| Code    | Where                                          | Service throws                               | If not caught                     |
+| ------- | ---------------------------------------------- | -------------------------------------------- | --------------------------------- |
+| `P2002` | every `create` / `update` of a unique value    | `conflict('<input field>', '<message>')`     | `CONFLICT` without `field`        |
+| `P2003` | `create` / `update` whose input references ids | `badUserInput([{ field: '<id field>', … }])` | `ENTITY_IN_USE`, wrong for a form |
+| `P2025` | not caught                                     | —                                            | `NOT_FOUND` (filter)              |
+| `P2003` | `delete`: not caught                           | —                                            | `ENTITY_IN_USE` (filter)          |
+
+`P2003` on `create` / `update` happens when a referenced record is deleted between the existence check and the
+write. `P2025` is caught only when the frontend needs a specific message (e.g. `notFound('CV not found')`).
+
+```ts
+async update({ id, name }: UpdateDepartmentInput): Promise<Department> {
+  try {
+    return toDepartment(await this.prisma.department.update({ where: { id }, data: { name } }));
+  } catch (error) {
+    if (isPrismaError(error, 'P2002')) throw conflict('name', 'Department already exists');
+    throw error;
+  }
+}
+```
 
 Errors found by Apollo before a resolver runs (`GRAPHQL_PARSE_FAILED`, `GRAPHQL_VALIDATION_FAILED`, a variable of
 the wrong type) do not pass through the filter. They are developer errors; frontend codegen catches most of them at

@@ -130,3 +130,12 @@ operations still need the session started at sign-up, because the backend takes 
 
 Operation-level tables are added by each module together with its resolvers: the operation name and its access
 (**All**, **Admin**, **Own or Admin**, **Public**), matching the rules above.
+
+### Departments
+
+| Operation          | Access |
+| ------------------ | ------ |
+| `departments`      | All    |
+| `createDepartment` | Admin  |
+| `updateDepartment` | Admin  |
+| `deleteDepartment` | Admin  |
