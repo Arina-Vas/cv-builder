@@ -6,9 +6,9 @@ import { getRequest, isMutation } from '@/common/auth/request';
 import { emailNotVerified, unauthenticated } from '@/common/errors/app-errors';
 import type { User } from '@/users/models/user.model';
 import { UsersService } from '@/users/users.service';
-import { AccessTokenService } from './access-token.service';
-import { ACCESS_TOKEN_COOKIE } from './auth-cookies';
-import { SessionsService } from './sessions.service';
+import { AccessTokenService } from '../sessions/access-token.service';
+import { ACCESS_TOKEN_COOKIE } from '../sessions/auth-cookies';
+import { SessionsService } from '../sessions/sessions.service';
 
 @Injectable()
 export class AuthGuard implements CanActivate {

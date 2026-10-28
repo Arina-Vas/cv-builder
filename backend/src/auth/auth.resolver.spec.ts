@@ -4,7 +4,7 @@ import { UserRole } from '@/common/graphql/enums';
 import type { GqlContext } from '@/common/graphql/graphql.context';
 import type { EnvironmentVariables } from '@/config/env.validation';
 import type { User } from '@/users/models/user.model';
-import { ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE } from './auth-cookies';
+import { ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE } from './sessions/auth-cookies';
 import { AuthResolver } from './auth.resolver';
 import type { AuthService } from './auth.service';
 

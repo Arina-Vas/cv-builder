@@ -348,7 +348,7 @@ Frontend side:
   [auth.md](../auth.md).
 - Users with an unverified email are read-only: mutations are rejected unless marked `@AllowUnverified()`.
 - Admin-only operations are marked with `@Roles(UserRole.ADMIN)`; a failed check returns `FORBIDDEN`.
-- Two global guards run on every operation: `AuthGuard` (`backend/src/auth/auth.guard.ts`: access token, session,
+- Two global guards run on every operation: `AuthGuard` (`backend/src/auth/guards/auth.guard.ts`: access token, session,
   user, read-only rule) and `RolesGuard` (`backend/src/common/auth/roles.guard.ts`). Resolvers get the current user
   with `@CurrentUser()` and the current session with `@CurrentSessionId()` (`common/auth/current-user.decorator.ts`).
 - "Own data or Admin" checks (profile, user skills and languages, CVs) cannot be expressed with `@Roles`. Services

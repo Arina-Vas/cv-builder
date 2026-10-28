@@ -4,11 +4,11 @@ import { conflict, unauthenticated } from '@/common/errors/app-errors';
 import { Prisma } from '@/generated/prisma/client';
 import type { User } from '@/users/models/user.model';
 import { UsersService } from '@/users/users.service';
-import { AccessTokenService } from './access-token.service';
-import type { AuthTokens } from './auth-cookies';
+import { AccessTokenService } from './sessions/access-token.service';
+import type { AuthTokens } from './sessions/auth-cookies';
 import type { SignInInput, SignUpInput } from './dto/credentials.input';
-import { EmailVerificationService } from './email-verification.service';
-import { SessionsService } from './sessions.service';
+import { EmailVerificationService } from './email-verification/email-verification.service';
+import { SessionsService } from './sessions/sessions.service';
 
 export const EMAIL_TAKEN_MESSAGE = 'An account with this email already exists';
 export const INVALID_CREDENTIALS_MESSAGE = 'Invalid email or password';

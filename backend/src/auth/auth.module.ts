@@ -6,13 +6,13 @@ import { RolesGuard } from '@/common/auth/roles.guard';
 import type { EnvironmentVariables } from '@/config/env.validation';
 import { MailModule } from '@/mail/mail.module';
 import { UsersModule } from '@/users/users.module';
-import { AccessTokenService } from './access-token.service';
-import { AuthGuard } from './auth.guard';
+import { AccessTokenService } from './sessions/access-token.service';
+import { AuthGuard } from './guards/auth.guard';
 import { AuthResolver } from './auth.resolver';
 import { AuthService } from './auth.service';
-import { EmailVerificationResolver } from './email-verification.resolver';
-import { EmailVerificationService } from './email-verification.service';
-import { SessionsService } from './sessions.service';
+import { EmailVerificationResolver } from './email-verification/email-verification.resolver';
+import { EmailVerificationService } from './email-verification/email-verification.service';
+import { SessionsService } from './sessions/sessions.service';
 
 @Module({
   imports: [

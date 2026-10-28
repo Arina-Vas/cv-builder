@@ -11,7 +11,7 @@ import {
   readCookie,
   REFRESH_TOKEN_COOKIE,
   setAuthCookies,
-} from './auth-cookies';
+} from './sessions/auth-cookies';
 import { AuthService } from './auth.service';
 import { SignInInput, SignUpInput } from './dto/credentials.input';
 

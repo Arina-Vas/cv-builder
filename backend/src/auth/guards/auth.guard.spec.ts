@@ -8,9 +8,9 @@ import { ErrorCode } from '@/common/errors/error-code.enum';
 import { UserRole } from '@/common/graphql/enums';
 import type { User } from '@/users/models/user.model';
 import type { UsersService } from '@/users/users.service';
-import type { AccessTokenService } from './access-token.service';
+import type { AccessTokenService } from '../sessions/access-token.service';
 import { AuthGuard } from './auth.guard';
-import type { SessionsService } from './sessions.service';
+import type { SessionsService } from '../sessions/sessions.service';
 
 jest.mock('@/prisma/prisma.service', () => ({ PrismaService: class PrismaService {} }));
 jest.mock('@nestjs/config', () => ({ ConfigService: class ConfigService {} }));
