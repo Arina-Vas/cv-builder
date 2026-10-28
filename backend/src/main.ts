@@ -1,26 +1,15 @@
 import { NestFactory } from '@nestjs/core';
+import { ConfigService } from '@nestjs/config';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { configureApp } from './app.setup';
 import { EnvironmentVariables } from './config/env.validation';
-import { validationExceptionFactory } from '@/common/errors/validation-exception.factory';
-import { GraphqlExceptionFilter } from '@/common/errors/graphql-exception.filter';
-import cookieParser from 'cookie-parser';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  configureApp(app);
+
   const config = app.get<ConfigService<EnvironmentVariables, true>>(ConfigService);
-
-  app.useGlobalPipes(
-    new ValidationPipe({ transform: true, exceptionFactory: validationExceptionFactory }),
-  );
-
-  app.useGlobalFilters(new GraphqlExceptionFilter());
-  app.use(cookieParser());
-  app.set('trust proxy', config.get('TRUST_PROXY_HOPS', { infer: true }));
-  app.enableCors({ origin: config.get('FRONTEND_URL', { infer: true }), credentials: true });
-
   await app.listen(config.get('PORT', { infer: true }));
 }
 

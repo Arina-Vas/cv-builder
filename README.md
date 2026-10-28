@@ -15,11 +15,11 @@ admins also manage users and global catalogs (skills, languages, departments, po
 | Backend       | NestJS 11, TypeScript                         |
 | API           | GraphQL, code-first (NestJS + Apollo Server)  |
 | Database      | PostgreSQL 17 (Docker), Prisma ORM 7          |
-| Backend tests | Jest + @nestjs/testing                        |
+| Backend tests | Jest + @nestjs/testing, Supertest             |
 | Code quality  | ESLint 9 (flat config), Prettier              |
 
 Planned (to be added): GraphQL Code Generator, MUI, react-hook-form + zod, next-intl,
-Vitest + React Testing Library, Supertest.
+Vitest + React Testing Library.
 
 ## 📚 Documentation & Project Structure
 

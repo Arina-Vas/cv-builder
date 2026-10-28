@@ -19,11 +19,11 @@ import { AuthModule } from './auth/auth.module';
       driver: ApolloDriver,
       inject: [ConfigService],
       useFactory: (configService: ConfigService<EnvironmentVariables, true>) => {
-        const isProduction =
-          configService.get('NODE_ENV', { infer: true }) === Environment.Production;
+        const nodeEnv = configService.get('NODE_ENV', { infer: true });
+        const isProduction = nodeEnv === Environment.Production;
 
         return {
-          autoSchemaFile: join(process.cwd(), 'schema.gql'),
+          autoSchemaFile: nodeEnv === Environment.Test ? true : join(process.cwd(), 'schema.gql'),
           sortSchema: true,
           introspection: !isProduction,
           includeStacktraceInErrorResponses: !isProduction,
