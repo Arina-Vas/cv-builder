@@ -7,6 +7,7 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { HealthModule } from './health/health.module';
 import { Environment, EnvironmentVariables, validate } from './config/env.validation';
 import { join } from 'node:path';
+import { DepartmentModule } from '@/departments/department.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { join } from 'node:path';
       },
     }),
     HealthModule,
+    DepartmentModule,
   ],
   controllers: [AppController],
 })
