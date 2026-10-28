@@ -4,6 +4,7 @@ import { GraphQLError } from 'graphql';
 import { ErrorCode } from '@/common/errors/error-code.enum';
 import { UserRole } from '@/common/graphql/enums';
 import type { AuthenticatedRequest } from './request';
+import { Roles, ROLES_KEY } from './roles.decorator';
 import { RolesGuard } from './roles.guard';
 
 const graphqlContext = (req: Partial<AuthenticatedRequest>): ExecutionContext => {
@@ -52,5 +53,18 @@ describe('RolesGuard', () => {
     reflector.getAllAndOverride.mockReturnValue([UserRole.ADMIN]);
 
     expect(() => guard.canActivate(graphqlContext({}))).toThrow(GraphQLError);
+  });
+});
+
+describe('@Roles', () => {
+  it('stores the required roles for RolesGuard', () => {
+    class Resolver {
+      @Roles(UserRole.ADMIN)
+      createDepartment(): void {}
+    }
+
+    expect(new Reflector().get(ROLES_KEY, Resolver.prototype.createDepartment)).toEqual([
+      UserRole.ADMIN,
+    ]);
   });
 });

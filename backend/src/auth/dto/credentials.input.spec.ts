@@ -30,6 +30,12 @@ describe.each([SignInInput, SignUpInput])('%p', (type) => {
     expect(messages['password']).toContain('Password is required');
   });
 
+  it('rejects a non-string email without trying to trim it', async () => {
+    const messages = await messagesFor(type, { email: 42, password: 'secret123' });
+
+    expect(messages['email']).toContain('Please enter a valid email address');
+  });
+
   it('rejects an invalid email', async () => {
     const messages = await messagesFor(type, { email: 'em ployee@x', password: 'secret123' });
 

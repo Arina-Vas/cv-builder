@@ -12,6 +12,7 @@ Run from the repo root (`pnpm <script>`) or from this folder.
 | `pnpm build`       | Build to `dist/`                               |
 | `pnpm start`       | Run the built app (`dist/main`)                |
 | `pnpm test`        | Run Jest tests                                 |
+| `pnpm test:cov`    | Run Jest tests with coverage (fails under 80%) |
 | `pnpm typecheck`   | Type-check with `tsc --noEmit`                 |
 | `pnpm db:migrate`  | Create and apply a migration (`--name <name>`) |
 | `pnpm db:deploy`   | Apply pending migrations                       |
@@ -21,6 +22,17 @@ Run from the repo root (`pnpm <script>`) or from this folder.
 | `pnpm db:studio`   | Open Prisma Studio                             |
 
 Linting and formatting are configured at the repo root (`pnpm lint`, `pnpm format`).
+
+## Tests and coverage
+
+- Unit tests sit next to the code as `*.spec.ts`.
+- `pnpm test:cov` writes the report to `backend/coverage/` (`lcov-report/index.html`) and fails when statements,
+  branches, functions or lines drop below **80%** (`coverageThreshold` in `package.json`).
+- Coverage counts every source file, not only the ones a test imports. Excluded: generated Prisma Client,
+  `main.ts` and `*.module.ts` (wiring only; the app boot is checked by integration tests).
+- `src/schema.spec.ts` builds the schema from the resolvers and compares it with the committed `schema.gql`.
+  When it fails, start the backend to regenerate the file and commit it. Add a new resolver to its `RESOLVERS`
+  list. `src/shared-models.spec.ts` checks that every shared `@ObjectType` builds, even before an operation uses it.
 
 ## Database
 

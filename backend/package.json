@@ -7,6 +7,7 @@
     "build": "nest build",
     "start": "node dist/main",
     "test": "jest",
+    "test:cov": "jest --coverage",
     "typecheck": "tsc --noEmit",
     "postinstall": "prisma generate --no-hints",
     "db:generate": "prisma generate --no-hints",
@@ -64,6 +65,22 @@
     "testEnvironment": "node",
     "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/$1"
+    },
+    "collectCoverageFrom": [
+      "**/*.ts",
+      "!**/*.spec.ts",
+      "!generated/**",
+      "!main.ts",
+      "!**/*.module.ts"
+    ],
+    "coverageDirectory": "../coverage",
+    "coverageThreshold": {
+      "global": {
+        "statements": 80,
+        "branches": 80,
+        "functions": 80,
+        "lines": 80
+      }
     }
   }
 }

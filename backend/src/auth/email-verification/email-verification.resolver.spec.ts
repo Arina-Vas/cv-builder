@@ -46,6 +46,10 @@ describe('VerifyEmailInput', () => {
     await expect(messagesFor('')).resolves.toContain('Verification code is required');
   });
 
+  it('rejects a code sent as a number', async () => {
+    await expect(messagesFor(42917)).resolves.toContain('Please enter a valid 6-digit code');
+  });
+
   it.each(['12345', '1234567', '12a456'])('rejects "%s"', async (code) => {
     await expect(messagesFor(code)).resolves.toEqual(['Please enter a valid 6-digit code']);
   });
