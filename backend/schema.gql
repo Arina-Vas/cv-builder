@@ -19,8 +19,10 @@ type Health {
 type Mutation {
   logout: Boolean!
   refresh: Boolean!
+  resendVerificationCode: Boolean!
   signIn(input: SignInInput!): User!
   signUp(input: SignUpInput!): User!
+  verifyEmail(input: VerifyEmailInput!): User!
 }
 
 type Position {
@@ -59,4 +61,8 @@ type User {
 enum UserRole {
   ADMIN
   EMPLOYEE
+}
+
+input VerifyEmailInput {
+  code: String!
 }

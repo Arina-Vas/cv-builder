@@ -10,6 +10,8 @@ import { AccessTokenService } from './access-token.service';
 import { AuthGuard } from './auth.guard';
 import { AuthResolver } from './auth.resolver';
 import { AuthService } from './auth.service';
+import { EmailVerificationResolver } from './email-verification.resolver';
+import { EmailVerificationService } from './email-verification.service';
 import { SessionsService } from './sessions.service';
 
 @Module({
@@ -29,6 +31,8 @@ import { SessionsService } from './sessions.service';
     SessionsService,
     AuthService,
     AuthResolver,
+    EmailVerificationService,
+    EmailVerificationResolver,
     { provide: APP_GUARD, useClass: AuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
   ],

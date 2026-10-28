@@ -36,13 +36,15 @@ Email Verification pages. Tables are described in [data-model.md](data-model.md)
 
 ## Operations
 
-| Operation                            | Access | Result                                                                         |
-| ------------------------------------ | ------ | ------------------------------------------------------------------------------ |
-| `signUp(input: SignUpInput!): User!` | Public | creates an Employee, starts a session, sets both cookies                       |
-| `signIn(input: SignInInput!): User!` | Public | starts a session, sets both cookies                                            |
-| `refresh: Boolean!`                  | Public | rotates the refresh token from the cookie, sets both cookies                   |
-| `logout: Boolean!`                   | Public | revokes the session of the refresh cookie (if any), always clears both cookies |
-| `me: User!`                          | All    | the current user                                                               |
+| Operation                                      | Access                  | Result                                                                         |
+| ---------------------------------------------- | ----------------------- | ------------------------------------------------------------------------------ |
+| `signUp(input: SignUpInput!): User!`           | Public                  | creates an Employee, starts a session, sets both cookies                       |
+| `signIn(input: SignInInput!): User!`           | Public                  | starts a session, sets both cookies                                            |
+| `refresh: Boolean!`                            | Public                  | rotates the refresh token from the cookie, sets both cookies                   |
+| `logout: Boolean!`                             | Public                  | revokes the session of the refresh cookie (if any), always clears both cookies |
+| `me: User!`                                    | All                     | the current user                                                               |
+| `verifyEmail(input: VerifyEmailInput!): User!` | All, `@AllowUnverified` | checks the code of the current user, returns the verified user                 |
+| `resendVerificationCode: Boolean!`             | All, `@AllowUnverified` | sends a new code to the current user (also used by Profile → VERIFY EMAIL)     |
 
 - Input validation (both inputs): email required and valid (trimmed), password 6–128 characters. Messages match
   the wiki: `Email is required`, `Please enter a valid email address`, `Password is required`,
@@ -68,6 +70,21 @@ Email Verification pages. Tables are described in [data-model.md](data-model.md)
 - **Codes** are 6 digits, generated with a secure random source, stored as hashes in `auth_tokens`, valid for
   10 minutes and single-use. A new code invalidates the previous one. Verify and resend are rate-limited.
 - Verifying sets `users.email_verified_at` and `auth_tokens.used_at` in one transaction.
+- A new code expires the previous unused ones, so an old code answers `Verification code has expired`.
+- If the email cannot be sent during sign up, the account and the session are still created (the failure is
+  logged without the code); the user asks for a new code on the verification page.
+- Errors of `verifyEmail` (the frontend maps them by `fields[0].message`):
+
+  | Case                   | Code             | Message                                                               |
+  | ---------------------- | ---------------- | --------------------------------------------------------------------- |
+  | empty / not 6 digits   | `BAD_USER_INPUT` | `Verification code is required` / `Please enter a valid 6-digit code` |
+  | wrong code             | `BAD_USER_INPUT` | `Invalid verification code`                                           |
+  | expired or replaced    | `BAD_USER_INPUT` | `Verification code has expired`                                       |
+  | already used           | `BAD_USER_INPUT` | `Verification code has already been used`                             |
+  | email already verified | `CONFLICT`       | `Email is already verified`                                           |
+
+- `resendVerificationCode` within 60 seconds of the previous code returns `RATE_LIMITED` with `retryAfter`
+  (seconds) and `Please wait before requesting another code`.
 
 ### Unverified users are read-only
 

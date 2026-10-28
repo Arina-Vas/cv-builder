@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common';
 import { GraphQLError } from 'graphql';
 import { hashPassword } from '@/common/crypto/password';
 import { ErrorCode } from '@/common/errors/error-code.enum';
@@ -7,6 +8,7 @@ import type { User } from '@/users/models/user.model';
 import type { UsersService } from '@/users/users.service';
 import type { AccessTokenService } from './access-token.service';
 import { AuthService, EMAIL_TAKEN_MESSAGE, INVALID_CREDENTIALS_MESSAGE } from './auth.service';
+import type { EmailVerificationService } from './email-verification.service';
 import type { SessionsService } from './sessions.service';
 
 jest.mock('@/prisma/prisma.service', () => ({ PrismaService: class PrismaService {} }));
@@ -45,15 +47,18 @@ describe('AuthService', () => {
   };
   const sessions = { create: jest.fn(), rotate: jest.fn(), revokeByRefreshToken: jest.fn() };
   const accessTokens = { sign: jest.fn() };
+  const verification = { sendCode: jest.fn() };
   const service = new AuthService(
     users as unknown as UsersService,
     sessions as unknown as SessionsService,
     accessTokens as unknown as AccessTokenService,
+    verification as unknown as EmailVerificationService,
   );
 
   beforeEach(() => {
     sessions.create.mockResolvedValue({ sessionId: 'session-1', refreshToken: 'refresh' });
     accessTokens.sign.mockResolvedValue('access');
+    verification.sendCode.mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -77,6 +82,25 @@ describe('AuthService', () => {
       expect(sessions.create).toHaveBeenCalledWith('user-1', 'Firefox');
       expect(accessTokens.sign).toHaveBeenCalledWith('user-1', 'session-1');
       expect(result).toEqual({ user, tokens: { accessToken: 'access', refreshToken: 'refresh' } });
+    });
+
+    it('sends a verification code to the new user', async () => {
+      users.findByEmail.mockResolvedValue(null);
+      users.create.mockResolvedValue(user);
+
+      await service.signUp(input);
+
+      expect(verification.sendCode).toHaveBeenCalledWith('user-1', user.email);
+    });
+
+    it('still signs the user up when the email cannot be sent', async () => {
+      jest.spyOn(Logger.prototype, 'warn').mockImplementation();
+      users.findByEmail.mockResolvedValue(null);
+      users.create.mockResolvedValue(user);
+      verification.sendCode.mockRejectedValue(new Error('SMTP is down'));
+
+      await expect(service.signUp(input)).resolves.toMatchObject({ user });
+      expect(sessions.create).toHaveBeenCalled();
     });
 
     it('rejects an email that is already registered', async () => {
