@@ -139,3 +139,12 @@ Operation-level tables are added by each module together with its resolvers: the
 | `createDepartment` | Admin  |
 | `updateDepartment` | Admin  |
 | `deleteDepartment` | Admin  |
+
+### Positions
+
+| Operation        | Access |
+| ---------------- | ------ |
+| `positions`      | All    |
+| `createPosition` | Admin  |
+| `updatePosition` | Admin  |
+| `deletePosition` | Admin  |
