@@ -205,5 +205,9 @@ pnpm db:migrate
 - **Project technologies reference `skills`.** Technologies come from a managed catalog; skills already are one.
   The relation is named `technologies` (as in the wiki GraphQL examples); "Environment" is only the UI label.
 - **Project name is not unique.** The spec requires it only to be present. Revisit if the team decides otherwise.
+- **Language native name is not unique.** The spec requires uniqueness only for name and ISO code; variants of one
+  language share a native name (Portuguese / Brazilian Portuguese → "Português").
+- **Language ISO format** is checked by the input DTO: 2–3 letters with an optional 2-letter region (`EN`, `ENG`,
+  `PT-BR`). The spec only says "a language ISO code, max 5 characters".
 - **User preferences (theme, language) are not stored.** The spec allows keeping them on the client.
 - **`responsibilities` is a single text field** (a textarea in the spec), not an array.

@@ -57,6 +57,7 @@ src/                  # main.ts, app.module.ts, app.controller.ts
   prisma/             # PrismaService (global module), isPrismaError()
   departments/        # feature module, see Module layout
   positions/          # feature module, same layout
+  languages/          # feature module, same layout
   generated/prisma/   # generated Prisma Client (git-ignored)
 ```
 

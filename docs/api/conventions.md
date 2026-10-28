@@ -316,6 +316,12 @@ Rules for services:
 - **Uniqueness.** A service that knows the field catches Prisma `P2002` and throws
   `conflict('<input field>', '<message>')`. Prisma reports database columns (`native_name`), not input fields
   (`nativeName`), so the filter's `CONFLICT` has no `field` and is only a fallback.
+- **Several unique fields.** A `P2002` does not say which unique field was taken (with the driver adapter there is
+  no `meta.target`), so when an entity has more than one (`Language`: `name`, `iso`) the service checks each field
+  with `findUnique` before `create` / `update` and throws `conflict` for that field. The record being updated is
+  excluded by its `id` (wiki: "saving an unchanged language must not produce a duplicate error"). The service does
+  not catch `P2002`: it only happens when two requests write the same value at once, and the filter returns
+  `CONFLICT` without `field`.
 - **References.** Before `create` / `update`, a service checks that referenced records exist (`departmentId`,
   `categoryId`, `technologyIds`, …) and throws `badUserInput([{ field, message }])` otherwise (wiki: "Backend validates
   the selected department"). That is why a Prisma `P2003` reaching the filter means a blocked delete.
@@ -328,7 +334,7 @@ global filter:
 
 | Code    | Where                                          | Service throws                               | If not caught                     |
 | ------- | ---------------------------------------------- | -------------------------------------------- | --------------------------------- |
-| `P2002` | every `create` / `update` of a unique value    | `conflict('<input field>', '<message>')`     | `CONFLICT` without `field`        |
+| `P2002` | `create` / `update` of one unique field        | `conflict('<input field>', '<message>')`     | `CONFLICT` without `field`        |
 | `P2003` | `create` / `update` whose input references ids | `badUserInput([{ field: '<id field>', … }])` | `ENTITY_IN_USE`, wrong for a form |
 | `P2025` | not caught                                     | —                                            | `NOT_FOUND` (filter)              |
 | `P2003` | `delete`: not caught                           | —                                            | `ENTITY_IN_USE` (filter)          |
@@ -344,6 +350,21 @@ async update({ id, name }: UpdateDepartmentInput): Promise<Department> {
     if (isPrismaError(error, 'P2002')) throw conflict('name', 'Department already exists');
     throw error;
   }
+}
+```
+
+With several unique fields:
+
+```ts
+// The language being updated (`id`) does not count as a duplicate of itself
+private async assertUnique({ name, iso }: CreateLanguageInput, id?: string): Promise<void> {
+  const [byName, byIso] = await Promise.all([
+    this.prisma.language.findUnique({ where: { name }, select: { id: true } }),
+    this.prisma.language.findUnique({ where: { iso }, select: { id: true } }),
+  ]);
+
+  if (byName && byName.id !== id) throw conflict('name', 'Language already exists');
+  if (byIso && byIso.id !== id) throw conflict('iso', 'ISO code already exists');
 }
 ```
 

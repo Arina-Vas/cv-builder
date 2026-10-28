@@ -148,3 +148,12 @@ Operation-level tables are added by each module together with its resolvers: the
 | `createPosition` | Admin  |
 | `updatePosition` | Admin  |
 | `deletePosition` | Admin  |
+
+### Languages
+
+| Operation        | Access |
+| ---------------- | ------ |
+| `languages`      | All    |
+| `createLanguage` | Admin  |
+| `updateLanguage` | Admin  |
+| `deleteLanguage` | Admin  |
