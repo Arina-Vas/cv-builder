@@ -6,6 +6,10 @@ input CreateDepartmentInput {
   name: String!
 }
 
+input CreatePositionInput {
+  name: String!
+}
+
 type Department {
   id: ID!
   name: String!
@@ -32,10 +36,35 @@ type Health {
 
 type Mutation {
   createDepartment(input: CreateDepartmentInput!): Department!
+  createPosition(input: CreatePositionInput!): Position!
 
   """Fails with ENTITY_IN_USE if the department is assigned to users"""
   deleteDepartment(id: ID!): ID!
+
+  """Fails with ENTITY_IN_USE if the position is assigned to users"""
+  deletePosition(id: ID!): ID!
   updateDepartment(input: UpdateDepartmentInput!): Department!
+  updatePosition(input: UpdatePositionInput!): Position!
+}
+
+type Position {
+  id: ID!
+  name: String!
+}
+
+type PositionPage {
+  items: [Position!]!
+
+  """Current page, 1-based"""
+  page: Int!
+  pageSize: Int!
+
+  """Items matching the search, not the page size"""
+  total: Int!
+}
+
+enum PositionSortField {
+  name
 }
 
 type Query {
@@ -50,6 +79,16 @@ type Query {
     sortOrder: SortOrder! = ASC
   ): DepartmentPage!
   health: Health!
+  positions(
+    """1-based page number"""
+    page: Int! = 1
+
+    """One of 10, 20, 50"""
+    pageSize: Int! = 10
+    search: String
+    sortBy: PositionSortField! = name
+    sortOrder: SortOrder! = ASC
+  ): PositionPage!
 }
 
 enum SortOrder {
@@ -58,6 +97,11 @@ enum SortOrder {
 }
 
 input UpdateDepartmentInput {
+  id: ID!
+  name: String!
+}
+
+input UpdatePositionInput {
   id: ID!
   name: String!
 }

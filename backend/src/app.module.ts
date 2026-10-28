@@ -8,6 +8,7 @@ import { HealthModule } from './health/health.module';
 import { Environment, EnvironmentVariables, validate } from './config/env.validation';
 import { join } from 'node:path';
 import { DepartmentModule } from '@/departments/department.module';
+import { PositionModule } from '@/positions/position.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { DepartmentModule } from '@/departments/department.module';
     }),
     HealthModule,
     DepartmentModule,
+    PositionModule,
   ],
   controllers: [AppController],
 })
