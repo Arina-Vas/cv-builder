@@ -14,7 +14,11 @@ jest.mock('@nestjs/jwt', () => ({ JwtService: class JwtService {} }));
 
 const user = { id: 'user-1', role: UserRole.EMPLOYEE } as User;
 const tokens = { accessToken: 'access', refreshToken: 'refresh' };
-const input = { email: 'employee@cv-builder.local', password: 'secret123' };
+const input = {
+  email: 'employee@cv-builder.local',
+  password: 'secret123',
+  confirmPassword: 'secret123',
+};
 
 const env: Record<string, unknown> = {
   NODE_ENV: 'development',

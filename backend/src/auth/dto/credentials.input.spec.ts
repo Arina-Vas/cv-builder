@@ -17,6 +17,7 @@ describe.each([SignInInput, SignUpInput])('%p', (type) => {
     const instance = plainToInstance(type, {
       email: '  employee@cv-builder.local ',
       password: 'secret123',
+      confirmPassword: 'secret123',
     });
 
     await expect(validate(instance)).resolves.toHaveLength(0);
@@ -52,5 +53,33 @@ describe.each([SignInInput, SignUpInput])('%p', (type) => {
     const messages = await messagesFor(type, { email: 'a@b.co', password: 'x'.repeat(129) });
 
     expect(messages['password']).toEqual(['Password must not exceed 128 characters']);
+  });
+});
+
+describe('SignUpInput confirmPassword', () => {
+  it('is required', async () => {
+    const messages = await messagesFor(SignUpInput, {
+      email: 'a@b.co',
+      password: 'secret123',
+      confirmPassword: '',
+    });
+
+    expect(messages['confirmPassword']).toContain('Confirm Password is required');
+  });
+
+  it('must match the password', async () => {
+    const messages = await messagesFor(SignUpInput, {
+      email: 'a@b.co',
+      password: 'secret123',
+      confirmPassword: 'secret124',
+    });
+
+    expect(messages['confirmPassword']).toEqual(['Passwords do not match']);
+  });
+
+  it('is not part of SignInInput', async () => {
+    await expect(
+      validate(plainToInstance(SignInInput, { email: 'a@b.co', password: 'secret123' })),
+    ).resolves.toHaveLength(0);
   });
 });

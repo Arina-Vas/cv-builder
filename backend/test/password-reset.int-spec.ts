@@ -61,7 +61,9 @@ describe('Password reset (integration)', () => {
     expect(stored.codeHash).not.toBe(token);
 
     await expect(
-      client().data(RESET_PASSWORD, { input: { token, newPassword: NEW_PASSWORD } }),
+      client().data(RESET_PASSWORD, {
+        input: { token, newPassword: NEW_PASSWORD, confirmPassword: NEW_PASSWORD },
+      }),
     ).resolves.toEqual({ resetPassword: true });
 
     expect((await laptop.error(ME)).extensions.code).toBe('UNAUTHENTICATED');
@@ -70,7 +72,7 @@ describe('Password reset (integration)', () => {
     await expect(signIn(client(), email, NEW_PASSWORD)).resolves.toBeDefined();
 
     const reused = await client().error(RESET_PASSWORD, {
-      input: { token, newPassword: 'another-secret' },
+      input: { token, newPassword: 'another-secret', confirmPassword: 'another-secret' },
     });
     expect(reused).toMatchObject({
       message: ResetLinkMessage.invalid,
@@ -85,16 +87,37 @@ describe('Password reset (integration)', () => {
     await t.prisma.authToken.updateMany({ data: { expiresAt: new Date(Date.now() - 1000) } });
 
     const error = await client().error(RESET_PASSWORD, {
-      input: { token, newPassword: NEW_PASSWORD },
+      input: { token, newPassword: NEW_PASSWORD, confirmPassword: NEW_PASSWORD },
     });
 
     expect(error.message).toBe(ResetLinkMessage.expired);
     await expect(signIn(client(), email, PASSWORD)).resolves.toBeDefined();
   });
 
+  it('rejects a confirmation that differs from the new password and keeps the link usable', async () => {
+    const { email } = await createUser(t.prisma);
+    await client().data(REQUEST_RESET, { input: { email } });
+    const token = tokenFromEmail(email);
+
+    const error = await client().error(RESET_PASSWORD, {
+      input: { token, newPassword: NEW_PASSWORD, confirmPassword: `${NEW_PASSWORD}-typo` },
+    });
+
+    expect(error.extensions).toMatchObject({
+      code: 'BAD_USER_INPUT',
+      fields: [{ field: 'confirmPassword', message: 'Passwords do not match' }],
+    });
+    await expect(signIn(client(), email, PASSWORD)).resolves.toBeDefined();
+    await expect(
+      client().data(RESET_PASSWORD, {
+        input: { token, newPassword: NEW_PASSWORD, confirmPassword: NEW_PASSWORD },
+      }),
+    ).resolves.toEqual({ resetPassword: true });
+  });
+
   it('rejects a link that was never issued', async () => {
     const error = await client().error(RESET_PASSWORD, {
-      input: { token: 'x'.repeat(43), newPassword: NEW_PASSWORD },
+      input: { token: 'x'.repeat(43), newPassword: NEW_PASSWORD, confirmPassword: NEW_PASSWORD },
     });
 
     expect(error.message).toBe(ResetLinkMessage.invalid);
@@ -109,13 +132,17 @@ describe('Password reset (integration)', () => {
     await client().data(REQUEST_RESET, { input: { email } });
 
     const error = await client().error(RESET_PASSWORD, {
-      input: { token: first, newPassword: NEW_PASSWORD },
+      input: { token: first, newPassword: NEW_PASSWORD, confirmPassword: NEW_PASSWORD },
     });
 
     expect(error.message).toBe(ResetLinkMessage.expired);
     await expect(
       client().data(RESET_PASSWORD, {
-        input: { token: tokenFromEmail(email), newPassword: NEW_PASSWORD },
+        input: {
+          token: tokenFromEmail(email),
+          newPassword: NEW_PASSWORD,
+          confirmPassword: NEW_PASSWORD,
+        },
       }),
     ).resolves.toEqual({ resetPassword: true });
   });

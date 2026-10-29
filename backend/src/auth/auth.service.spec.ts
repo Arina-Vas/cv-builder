@@ -28,7 +28,7 @@ const user: User = {
   createdAt: new Date('2026-01-01T00:00:00.000Z'),
 };
 
-const input = { email: user.email, password: 'secret123' };
+const input = { email: user.email, password: 'secret123', confirmPassword: 'secret123' };
 
 const errorOf = async (promise: Promise<unknown>): Promise<GraphQLError> => {
   const error: unknown = await promise.catch((caught: unknown) => caught);

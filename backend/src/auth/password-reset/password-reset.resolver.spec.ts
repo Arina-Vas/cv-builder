@@ -33,9 +33,13 @@ describe('PasswordResetResolver', () => {
   });
 
   it('resets the password with the token from the link', async () => {
-    await expect(resolver.resetPassword({ token: TOKEN, newPassword: 'new-secret' })).resolves.toBe(
-      true,
-    );
+    await expect(
+      resolver.resetPassword({
+        token: TOKEN,
+        newPassword: 'new-secret',
+        confirmPassword: 'new-secret',
+      }),
+    ).resolves.toBe(true);
     expect(passwordReset.reset).toHaveBeenCalledWith(TOKEN, 'new-secret');
   });
 });
@@ -63,14 +67,24 @@ describe('RequestPasswordResetInput', () => {
 describe('ResetPasswordInput', () => {
   it('accepts a token from the link and a valid password', async () => {
     await expect(
-      validate(plainToInstance(ResetPasswordInput, { token: TOKEN, newPassword: 'new-secret' })),
+      validate(
+        plainToInstance(ResetPasswordInput, {
+          token: TOKEN,
+          newPassword: 'new-secret',
+          confirmPassword: 'new-secret',
+        }),
+      ),
     ).resolves.toHaveLength(0);
   });
 
   it.each(['', 'short', `${TOKEN}x`, 'x'.repeat(42) + '!'])(
     'treats a malformed token "%s" as an invalid link',
     async (token) => {
-      const messages = await messagesFor(ResetPasswordInput, { token, newPassword: 'new-secret' });
+      const messages = await messagesFor(ResetPasswordInput, {
+        token,
+        newPassword: 'new-secret',
+        confirmPassword: 'new-secret',
+      });
 
       expect(messages['token']).toEqual([ResetLinkMessage.invalid]);
     },
@@ -78,16 +92,29 @@ describe('ResetPasswordInput', () => {
 
   it('requires a new password of 6 to 128 characters', async () => {
     const check = (newPassword: string) =>
-      messagesFor(ResetPasswordInput, { token: TOKEN, newPassword });
+      messagesFor(ResetPasswordInput, { token: TOKEN, newPassword, confirmPassword: newPassword });
 
     await expect(check('')).resolves.toEqual({
       newPassword: expect.arrayContaining(['New password is required']) as unknown,
+      confirmPassword: expect.arrayContaining(['Confirm Password is required']) as unknown,
     });
     await expect(check('12345')).resolves.toEqual({
       newPassword: ['Password must be at least 6 characters long'],
     });
     await expect(check('x'.repeat(129))).resolves.toEqual({
       newPassword: ['Password must not exceed 128 characters'],
+    });
+  });
+
+  it('requires a confirmation equal to the new password', async () => {
+    const check = (confirmPassword?: string) =>
+      messagesFor(ResetPasswordInput, { token: TOKEN, newPassword: 'new-secret', confirmPassword });
+
+    await expect(check()).resolves.toEqual({
+      confirmPassword: expect.arrayContaining(['Confirm Password is required']) as unknown,
+    });
+    await expect(check('new-secreT')).resolves.toEqual({
+      confirmPassword: ['Passwords do not match'],
     });
   });
 });

@@ -48,6 +48,7 @@ input RequestPasswordResetInput {
 }
 
 input ResetPasswordInput {
+  confirmPassword: String!
   newPassword: String!
   token: String!
 }
@@ -58,6 +59,7 @@ input SignInInput {
 }
 
 input SignUpInput {
+  confirmPassword: String!
   email: String!
   password: String!
 }

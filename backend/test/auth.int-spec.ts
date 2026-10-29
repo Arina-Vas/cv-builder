@@ -43,7 +43,7 @@ describe('Auth (integration)', () => {
       const email = uniqueEmail();
 
       const { signUp } = await browser.data<{ signUp: GqlUser }>(SIGN_UP, {
-        input: { email, password: PASSWORD },
+        input: { email, password: PASSWORD, confirmPassword: PASSWORD },
       });
 
       expect(signUp).toMatchObject({ email, role: UserRole.EMPLOYEE, emailVerifiedAt: null });
@@ -60,7 +60,7 @@ describe('Auth (integration)', () => {
       const { email } = await createUser(t.prisma);
 
       const error = await client().error(SIGN_UP, {
-        input: { email: email.toUpperCase(), password: PASSWORD },
+        input: { email: email.toUpperCase(), password: PASSWORD, confirmPassword: PASSWORD },
       });
 
       expect(error.extensions).toMatchObject({ code: 'CONFLICT', field: 'email' });
@@ -68,13 +68,16 @@ describe('Auth (integration)', () => {
     });
 
     it('validates the input on the server with field errors', async () => {
-      const error = await client().error(SIGN_UP, { input: { email: 'nope', password: '123' } });
+      const error = await client().error(SIGN_UP, {
+        input: { email: 'nope', password: '123', confirmPassword: '124' },
+      });
 
       expect(error.extensions.code).toBe('BAD_USER_INPUT');
       expect(error.extensions['fields']).toEqual(
         expect.arrayContaining([
           { field: 'email', message: 'Please enter a valid email address' },
           { field: 'password', message: 'Password must be at least 6 characters long' },
+          { field: 'confirmPassword', message: 'Passwords do not match' },
         ]),
       );
     });
@@ -82,7 +85,9 @@ describe('Auth (integration)', () => {
     it('keeps an unverified user read-only until the code is confirmed', async () => {
       const browser = client();
       const email = uniqueEmail();
-      await browser.data(SIGN_UP, { input: { email, password: PASSWORD } });
+      await browser.data(SIGN_UP, {
+        input: { email, password: PASSWORD, confirmPassword: PASSWORD },
+      });
 
       const blocked = await browser.error(VERIFIED_PROBE);
       expect(blocked.extensions.code).toBe('EMAIL_NOT_VERIFIED');
@@ -106,7 +111,9 @@ describe('Auth (integration)', () => {
     it('invalidates the previous code when a new one is sent', async () => {
       const browser = client();
       const email = uniqueEmail();
-      await browser.data(SIGN_UP, { input: { email, password: PASSWORD } });
+      await browser.data(SIGN_UP, {
+        input: { email, password: PASSWORD, confirmPassword: PASSWORD },
+      });
       const first = t.mail.last(email, 'verification');
       // The resend cooldown counts from the newest code; move it out of the way
       await t.prisma.authToken.updateMany({ data: { createdAt: new Date(Date.now() - 120_000) } });
@@ -126,7 +133,9 @@ describe('Auth (integration)', () => {
 
     it('rate-limits resending the code per account', async () => {
       const browser = client();
-      await browser.data(SIGN_UP, { input: { email: uniqueEmail(), password: PASSWORD } });
+      await browser.data(SIGN_UP, {
+        input: { email: uniqueEmail(), password: PASSWORD, confirmPassword: PASSWORD },
+      });
 
       const error = await browser.error(RESEND_CODE);
 

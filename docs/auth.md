@@ -54,6 +54,8 @@ Email Verification pages. Tables are described in [data-model.md](data-model.md)
 - Input validation (both inputs): email required and valid (trimmed), password 6–128 characters. Messages match
   the wiki: `Email is required`, `Please enter a valid email address`, `Password is required`,
   `Password must be at least 6 characters long`.
+- `SignUpInput` also has `confirmPassword`, checked on the server too (`@MatchesField('password')` from
+  `common/validation`): `Confirm Password is required`, `Passwords do not match` (field `confirmPassword`).
 - `signIn` with a wrong email or password returns `UNAUTHENTICATED` with `Invalid email or password`. An unknown
   email still runs a password check against a dummy hash, so the response time does not reveal which emails exist.
   The frontend must not try `refresh` on this error.
@@ -111,7 +113,7 @@ Email Verification pages. Tables are described in [data-model.md](data-model.md)
 
 ## Password reset
 
-Mutations (both public): `requestPasswordReset(input: { email })` and `resetPassword(input: { token, newPassword })`,
+Mutations (both public): `requestPasswordReset(input: { email })` and `resetPassword(input: { token, newPassword, confirmPassword })`,
 code in `backend/src/auth/password-reset/`.
 
 - The forgot-password response is the same whether the email exists or not (no account enumeration): it always
