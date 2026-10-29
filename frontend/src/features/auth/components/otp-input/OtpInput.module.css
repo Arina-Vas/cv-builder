@@ -1,0 +1,53 @@
+.root {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-4);
+}
+
+.cell {
+  width: var(--otp-cell-size);
+  height: var(--otp-cell-size);
+  padding: 0;
+  border: var(--input-border-width) solid var(--input-border);
+  border-radius: var(--input-radius);
+  background: var(--input-bg);
+  color: var(--text);
+  font-family: var(--font-family);
+  font-size: var(--type-input-size);
+  line-height: var(--type-input-lh);
+  text-align: center;
+  transition: border-color var(--duration-shorter) var(--ease-in-out);
+}
+
+.cell:hover {
+  border-color: var(--input-border-hover);
+}
+
+.cell:focus {
+  border-color: var(--input-border-focus);
+  outline: none;
+}
+
+.root[data-error] > .cell {
+  border-color: var(--input-border-error);
+}
+
+.cell:disabled {
+  background: var(--input-disabled-bg);
+  color: var(--text-disabled);
+}
+
+.error {
+  margin: var(--space-2) 0 0;
+  color: var(--input-helper-error);
+  font-size: var(--type-helper-size);
+  line-height: var(--type-helper-lh);
+  letter-spacing: var(--type-helper-ls);
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cell {
+    transition: none;
+  }
+}
