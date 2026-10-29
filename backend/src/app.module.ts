@@ -11,6 +11,7 @@ import { DepartmentModule } from '@/departments/department.module';
 import { PositionModule } from '@/positions/position.module';
 import { LanguageModule } from '@/languages/language.module';
 import { SkillModule } from '@/skills/skill.module';
+import { ProjectModule } from '@/projects/project.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { SkillModule } from '@/skills/skill.module';
     PositionModule,
     LanguageModule,
     SkillModule,
+    ProjectModule,
   ],
   controllers: [AppController],
 })

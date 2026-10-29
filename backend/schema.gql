@@ -16,10 +16,22 @@ input CreatePositionInput {
   name: String!
 }
 
+input CreateProjectInput {
+  description: String!
+  domain: String!
+  endDate: Date!
+  name: String!
+  startDate: Date!
+  technologyIds: [ID!]! = []
+}
+
 input CreateSkillInput {
   categoryId: ID!
   name: String!
 }
+
+"""Calendar date without time and time zone, format YYYY-MM-DD"""
+scalar Date
 
 type Department {
   id: ID!
@@ -72,6 +84,7 @@ type Mutation {
   createDepartment(input: CreateDepartmentInput!): Department!
   createLanguage(input: CreateLanguageInput!): Language!
   createPosition(input: CreatePositionInput!): Position!
+  createProject(input: CreateProjectInput!): Project!
   createSkill(input: CreateSkillInput!): Skill!
 
   """Fails with ENTITY_IN_USE if the department is assigned to users"""
@@ -83,6 +96,9 @@ type Mutation {
   """Fails with ENTITY_IN_USE if the position is assigned to users"""
   deletePosition(id: ID!): ID!
 
+  """Fails with ENTITY_IN_USE if the project is used in CVs"""
+  deleteProject(id: ID!): ID!
+
   """
   Fails with ENTITY_IN_USE if the skill is assigned to users, projects or CVs
   """
@@ -90,6 +106,7 @@ type Mutation {
   updateDepartment(input: UpdateDepartmentInput!): Department!
   updateLanguage(input: UpdateLanguageInput!): Language!
   updatePosition(input: UpdatePositionInput!): Position!
+  updateProject(input: UpdateProjectInput!): Project!
   updateSkill(input: UpdateSkillInput!): Skill!
 }
 
@@ -111,6 +128,31 @@ type PositionPage {
 
 enum PositionSortField {
   name
+}
+
+type Project {
+  description: String!
+  domain: String!
+  endDate: Date!
+  id: ID!
+  name: String!
+  startDate: Date!
+
+  """Technologies used on the project ("Environment" in the UI)"""
+  technologies: [Skill!]!
+}
+
+type ProjectList {
+  items: [Project!]!
+
+  """Items matching the search"""
+  total: Int!
+}
+
+enum ProjectSortField {
+  endDate
+  name
+  startDate
 }
 
 type Query {
@@ -145,6 +187,7 @@ type Query {
     sortBy: PositionSortField! = name
     sortOrder: SortOrder! = ASC
   ): PositionPage!
+  projects(search: String, sortBy: ProjectSortField! = name, sortOrder: SortOrder! = ASC): ProjectList!
   skillCategories: [SkillCategory!]!
   skills(
     """1-based page number"""
@@ -156,6 +199,9 @@ type Query {
     sortBy: SkillSortField! = name
     sortOrder: SortOrder! = ASC
   ): SkillPage!
+
+  """Skills available as project technologies ("Environment")"""
+  technologies: [Skill!]!
 }
 
 type Skill {
@@ -205,6 +251,16 @@ input UpdateLanguageInput {
 input UpdatePositionInput {
   id: ID!
   name: String!
+}
+
+input UpdateProjectInput {
+  description: String!
+  domain: String!
+  endDate: Date!
+  id: ID!
+  name: String!
+  startDate: Date!
+  technologyIds: [ID!]! = []
 }
 
 input UpdateSkillInput {
