@@ -1,0 +1,27 @@
+enum UserRole {
+  EMPLOYEE
+  ADMIN
+}
+
+enum Mastery {
+  NOVICE
+  ADVANCED
+  COMPETENT
+  PROFICIENT
+  EXPERT
+}
+
+enum Proficiency {
+  A1
+  A2
+  B1
+  B2
+  C1
+  C2
+  NATIVE
+}
+
+enum AuthTokenType {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+}

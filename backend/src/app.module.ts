@@ -1,22 +1,39 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { PrismaModule } from './prisma/prisma.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { HealthModule } from './health/health.module';
+import { Environment, EnvironmentVariables, validate } from './config/env.validation';
+import { join } from 'node:path';
+import { createGqlContext } from './common/graphql/graphql.context';
+import { UsersModule } from './users/users.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({ isGlobal: true, validate }),
     PrismaModule,
-    GraphQLModule.forRoot<ApolloDriverConfig>({
+    GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,
-      autoSchemaFile: true,
-      sortSchema: true,
-      introspection: process.env['NODE_ENV'] !== 'production',
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService<EnvironmentVariables, true>) => {
+        const nodeEnv = configService.get('NODE_ENV', { infer: true });
+        const isProduction = nodeEnv === Environment.Production;
+
+        return {
+          autoSchemaFile: nodeEnv === Environment.Test ? true : join(process.cwd(), 'schema.gql'),
+          sortSchema: true,
+          introspection: !isProduction,
+          includeStacktraceInErrorResponses: !isProduction,
+          context: createGqlContext,
+        };
+      },
     }),
     HealthModule,
+    UsersModule,
+    AuthModule,
   ],
   controllers: [AppController],
 })
