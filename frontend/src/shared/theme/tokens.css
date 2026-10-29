@@ -192,6 +192,9 @@
   --content-padding-x: 24px; /* [M] Container gutters ≥600px */
   --settings-max-width: 720px; /* [A] */
   --auth-form-max-width: 220px; /* [A] */
+  --auth-form-width: 560px; /* [F] auth pages "Form" frame */
+  --auth-actions-offset: 44px; /* [F] last field → primary button */
+  --otp-cell-size: 48px; /* [F] Email verification code cell */
   --modal-width-sm: 600px; /* [A] maxWidth "sm" */
   --modal-width-md: 900px; /* [A] maxWidth "md" (project / user forms) */
   --icon-size: 24px; /* [M] SvgIcon medium */

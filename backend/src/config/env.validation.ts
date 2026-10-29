@@ -57,6 +57,10 @@ export class EnvironmentVariables {
   @IsString()
   @IsNotEmpty()
   MAIL_FROM!: string;
+
+  @IsInt()
+  @Min(0)
+  TRUST_PROXY_HOPS: number = 0;
 }
 
 export function validate(config: Record<string, unknown>): EnvironmentVariables {
