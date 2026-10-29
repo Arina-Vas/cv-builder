@@ -1,10 +1,10 @@
 import { ErrorLink } from '@apollo/client/link/error';
-import { from, switchMap, type Observable } from 'rxjs';
+import { from, switchMap, throwError, type Observable } from 'rxjs';
 import type { ApolloLink } from '@apollo/client';
 import { hasErrorCode } from './graphql-errors';
 
 const SIGN_IN_ROUTE = '/login';
-const NO_REFRESH_OPERATIONS = new Set(['SignIn', 'SignUp', 'Logout']);
+const NO_REFRESH_OPERATION = 'SignIn';
 const REFRESH_MUTATION = 'mutation Refresh { refresh }';
 
 let refreshInFlight: Promise<boolean> | null = null;
@@ -29,11 +29,10 @@ function refreshSession(graphqlUrl: string): Promise<boolean> {
 export function createRefreshLink(graphqlUrl: string): ApolloLink {
   return new ErrorLink(({ error, operation, forward }) => {
     const isBrowser = typeof window !== 'undefined';
-    const operationName = operation.operationName ?? '';
 
     if (
       !isBrowser ||
-      NO_REFRESH_OPERATIONS.has(operationName) ||
+      operation.operationName === NO_REFRESH_OPERATION ||
       !hasErrorCode(error, 'UNAUTHENTICATED')
     ) {
       return;
@@ -41,10 +40,11 @@ export function createRefreshLink(graphqlUrl: string): ApolloLink {
 
     return from(refreshSession(graphqlUrl)).pipe(
       switchMap((refreshed): Observable<ApolloLink.Result> => {
-        if (!refreshed) {
-          window.location.assign(new URL(SIGN_IN_ROUTE, window.location.origin));
+        if (refreshed) {
+          return forward(operation);
         }
-        return forward(operation);
+        window.location.assign(new URL(SIGN_IN_ROUTE, window.location.origin));
+        return throwError(() => error);
       }),
     );
   });

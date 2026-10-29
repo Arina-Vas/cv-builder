@@ -7,7 +7,7 @@ import { emailNotVerified, unauthenticated } from '@/common/errors/app-errors';
 import type { User } from '@/users/models/user.model';
 import { UsersService } from '@/users/users.service';
 import { AccessTokenService } from '../sessions/access-token.service';
-import { ACCESS_TOKEN_COOKIE } from '../sessions/auth-cookies';
+import { ACCESS_TOKEN_COOKIE, readCookie } from '../sessions/auth-cookies';
 import { SessionsService } from '../sessions/sessions.service';
 
 @Injectable()
@@ -25,7 +25,7 @@ export class AuthGuard implements CanActivate {
     }
 
     const request = getRequest(context);
-    const authenticated = await this.authenticate(request.cookies?.[ACCESS_TOKEN_COOKIE]);
+    const authenticated = await this.authenticate(readCookie(request, ACCESS_TOKEN_COOKIE));
     if (!authenticated) {
       throw unauthenticated();
     }
@@ -43,8 +43,10 @@ export class AuthGuard implements CanActivate {
     return true;
   }
 
-  private async authenticate(token: unknown): Promise<{ user: User; sessionId: string } | null> {
-    if (typeof token !== 'string') {
+  private async authenticate(
+    token: string | undefined,
+  ): Promise<{ user: User; sessionId: string } | null> {
+    if (!token) {
       return null;
     }
 

@@ -18,7 +18,7 @@ Status: **draft for review.** Operation tables are added together with the resol
 - **Verified email**: a user whose email is not verified can run queries, but mutations are rejected (except the ones
   marked `@AllowUnverified()`). The wiki does not list which features need a verified email, so this is a team
   decision, see [auth.md](../auth.md#unverified-users-are-read-only).
-- **Admin-only** operations are marked with `@Roles(UserRole.ADMIN)`; the roles guard (Auth task) checks them.
+- **Admin-only** operations are marked with `@Roles(UserRole.ADMIN)`; the global roles guard (`backend/src/common/auth/roles.guard.ts`) checks them.
 - **Own or Admin**: an Employee may change only their own data; an Admin may change anyone's. The service compares
   the owner with the current user from the request. A user id or CV id sent by the client is never proof of
   ownership (wiki: "The backend must determine the ownership of the CV using the authenticated user rather than

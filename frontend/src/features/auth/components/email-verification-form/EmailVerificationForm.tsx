@@ -13,8 +13,8 @@ import { validateCode } from '../../lib/validation';
 import { AuthForm } from '../auth-form/AuthForm';
 import { OtpInput } from '../otp-input/OtpInput';
 
-function useCooldown() {
-  const [secondsLeft, setSecondsLeft] = useState(0);
+function useCooldown(initialSeconds: number) {
+  const [secondsLeft, setSecondsLeft] = useState(initialSeconds);
 
   useEffect(() => {
     if (secondsLeft <= 0) return;
@@ -25,7 +25,11 @@ function useCooldown() {
   return [secondsLeft, setSecondsLeft] as const;
 }
 
-export function EmailVerificationForm() {
+export interface EmailVerificationFormProps {
+  codeJustSent?: boolean;
+}
+
+export function EmailVerificationForm({ codeJustSent = false }: EmailVerificationFormProps) {
   const router = useRouter();
   const toast = useToast();
   const [verifyEmail, { loading }] = useMutation(VERIFY_EMAIL);
@@ -33,7 +37,7 @@ export function EmailVerificationForm() {
 
   const [code, setCode] = useState('');
   const [serverError, setServerError] = useState<string>();
-  const [cooldown, setCooldown] = useCooldown();
+  const [cooldown, setCooldown] = useCooldown(codeJustSent ? RESEND_CODE_COOLDOWN_SECONDS : 0);
 
   const isValid = !validateCode(code);
 

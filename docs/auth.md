@@ -13,7 +13,9 @@ Email Verification pages. Tables are described in [data-model.md](data-model.md)
 - Cookies use `SameSite=Lax`, `Secure` in production only. CORS allows the frontend origin (`FRONTEND_URL`)
   with credentials. The frontend and the API run on different ports of the same host, which is still one site,
   so `Lax` cookies are sent.
-- The Next.js middleware uses the cookie to redirect between auth pages and the app.
+- The frontend route guard (`frontend/src/proxy.ts`, Next.js 16 Proxy, formerly Middleware) checks whether the
+  refresh cookie exists to redirect between auth pages and the app. It is an optimistic check: the API still
+  validates the session on every request.
 
 | Token   | Format                                                      | Lifetime                              | Stored in the DB                 |
 | ------- | ----------------------------------------------------------- | ------------------------------------- | -------------------------------- |
@@ -103,7 +105,8 @@ Email Verification pages. Tables are described in [data-model.md](data-model.md)
 ### Unverified users are read-only
 
 - They can run queries, but every mutation is rejected with `EMAIL_NOT_VERIFIED` except the ones marked
-  `@AllowUnverified()`: verify email, resend code, refresh, logout, theme and language.
+  `@AllowUnverified()` (verify email, resend code; theme and language when they are added) and the public ones
+  (refresh, logout, password reset).
 - Changing the password in Settings is also blocked. Forgot / Reset password still works.
 - The spec does not list which features need a verified email (Email Verification AC-16), so this rule is a
   team decision.

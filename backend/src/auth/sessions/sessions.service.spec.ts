@@ -164,30 +164,12 @@ describe('SessionsService', () => {
     });
   });
 
-  describe('revoke', () => {
-    it('revokes one session that is not revoked yet', async () => {
-      await service.revoke('session-1');
-
-      expect(prisma.session.updateMany).toHaveBeenCalledWith({
-        where: { id: 'session-1', revokedAt: null },
-        data: { revokedAt: NOW },
-      });
-    });
-
+  describe('revokeByRefreshToken', () => {
     it('revokes the session of a refresh token', async () => {
       await service.revokeByRefreshToken('old-token');
 
       expect(prisma.session.updateMany).toHaveBeenCalledWith({
         where: { tokenHash: hashToken('old-token'), revokedAt: null },
-        data: { revokedAt: NOW },
-      });
-    });
-
-    it('revokes every active session of a user', async () => {
-      await service.revokeAllForUser('user-1');
-
-      expect(prisma.session.updateMany).toHaveBeenCalledWith({
-        where: { userId: 'user-1', revokedAt: null },
         data: { revokedAt: NOW },
       });
     });

@@ -3,11 +3,12 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
+import { AuthRoute } from '../../auth.constants';
 import styles from './AuthTabs.module.css';
 
 const TABS = [
-  { href: '/login', label: 'SIGN IN' },
-  { href: '/register', label: 'SIGN UP' },
+  { href: AuthRoute.signIn, label: 'SIGN IN' },
+  { href: AuthRoute.signUp, label: 'SIGN UP' },
 ];
 
 export function AuthTabs() {

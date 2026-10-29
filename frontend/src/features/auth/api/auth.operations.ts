@@ -1,20 +1,11 @@
 import { graphql } from '@/gql';
 
-
 graphql(`
   fragment AuthUserFields on User {
     id
     email
     role
     emailVerifiedAt
-  }
-`);
-
-export const ME = graphql(`
-  query Me {
-    me {
-      ...AuthUserFields
-    }
   }
 `);
 

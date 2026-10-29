@@ -41,7 +41,7 @@ export function SignUpForm() {
         },
       });
       // signUp starts a session and sends the code: the user verifies while signed in.
-      router.replace(AuthRoute.verifyEmail);
+      router.replace(`${AuthRoute.verifyEmail}?sent=1`);
     } catch (error) {
       const { code, message, fieldErrors } = parseError(error);
 

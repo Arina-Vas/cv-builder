@@ -88,23 +88,9 @@ export class SessionsService {
     return session && isActive(session) ? { id: session.id, userId: session.userId } : null;
   }
 
-  async revoke(sessionId: string): Promise<void> {
-    await this.prisma.session.updateMany({
-      where: { id: sessionId, revokedAt: null },
-      data: { revokedAt: new Date() },
-    });
-  }
-
   async revokeByRefreshToken(refreshToken: string): Promise<void> {
     await this.prisma.session.updateMany({
       where: { tokenHash: hashToken(refreshToken), revokedAt: null },
-      data: { revokedAt: new Date() },
-    });
-  }
-
-  async revokeAllForUser(userId: string): Promise<void> {
-    await this.prisma.session.updateMany({
-      where: { userId, revokedAt: null },
       data: { revokedAt: new Date() },
     });
   }
