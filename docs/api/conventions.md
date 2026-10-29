@@ -228,6 +228,17 @@ avoid a column-key → enum map in every table.
 - `update*` inputs contain `id` and only the fields the user can change.
 - Inputs are always validated on the backend, even if the frontend validates them too
   (wiki: "Client-side validation is intended for user experience and must not replace server-side validation").
+- **One error per field.** The `ValidationPipe` uses `stopAtFirstError` (`common/validation/validator-options.ts`), so
+  `fields` has at most one message per field. class-validator runs a property's decorators **bottom-up**, so order
+  them by priority from the bottom: `@IsNotEmpty` lowest (it also catches `null`/`undefined`), `@IsString` above it,
+  then format and length checks. Otherwise an empty value can answer "invalid format" instead of "is required".
+  ```ts
+  @MaxLength(254, { message: 'Please enter a valid email address' }) // 4th
+  @IsEmail({}, { message: 'Please enter a valid email address' })    // 3rd
+  @IsString()                                                         // 2nd
+  @IsNotEmpty({ message: 'Email is required' })                       // 1st
+  email!: string;
+  ```
 - The UI treats a mutation as successful only after the response arrives (no optimistic updates without a rollback).
 
 ## Errors

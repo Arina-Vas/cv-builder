@@ -1,5 +1,6 @@
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
+import { VALIDATOR_OPTIONS } from '@/common/validation/validator-options';
 import type { User } from '@/users/models/user.model';
 import { VerifyEmailInput } from './dto/verify-email.input';
 import { EmailVerificationResolver } from './email-verification.resolver';
@@ -31,7 +32,7 @@ describe('EmailVerificationResolver', () => {
 
 describe('VerifyEmailInput', () => {
   const messagesFor = async (code: unknown) => {
-    const [error] = await validate(plainToInstance(VerifyEmailInput, { code }));
+    const [error] = await validate(plainToInstance(VerifyEmailInput, { code }), VALIDATOR_OPTIONS);
     return Object.values(error?.constraints ?? {});
   };
 
@@ -43,11 +44,12 @@ describe('VerifyEmailInput', () => {
   });
 
   it('requires the code', async () => {
-    await expect(messagesFor('')).resolves.toContain('Verification code is required');
+    await expect(messagesFor('')).resolves.toEqual(['Verification code is required']);
+    await expect(messagesFor('   ')).resolves.toEqual(['Verification code is required']);
   });
 
   it('rejects a code sent as a number', async () => {
-    await expect(messagesFor(42917)).resolves.toContain('Please enter a valid 6-digit code');
+    await expect(messagesFor(42917)).resolves.toEqual(['Please enter a valid 6-digit code']);
   });
 
   it.each(['12345', '1234567', '12a456'])('rejects "%s"', async (code) => {

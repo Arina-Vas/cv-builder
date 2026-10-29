@@ -1,5 +1,6 @@
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
+import { VALIDATOR_OPTIONS } from '@/common/validation/validator-options';
 import { RequestPasswordResetInput } from './dto/request-password-reset.input';
 import { ResetPasswordInput } from './dto/reset-password.input';
 import { ResetLinkMessage } from './password-reset.messages';
@@ -15,7 +16,7 @@ const messagesFor = async <T extends object>(
   type: new () => T,
   plain: Record<string, unknown>,
 ): Promise<Record<string, string[]>> => {
-  const errors = await validate(plainToInstance(type, plain));
+  const errors = await validate(plainToInstance(type, plain), VALIDATOR_OPTIONS);
   return Object.fromEntries(
     errors.map((error) => [error.property, Object.values(error.constraints ?? {})]),
   );
@@ -56,7 +57,7 @@ describe('RequestPasswordResetInput', () => {
 
   it('requires a valid email', async () => {
     await expect(messagesFor(RequestPasswordResetInput, { email: '' })).resolves.toEqual({
-      email: expect.arrayContaining(['Email is required']) as unknown,
+      email: ['Email is required'],
     });
     await expect(messagesFor(RequestPasswordResetInput, { email: 'nope' })).resolves.toEqual({
       email: ['Please enter a valid email address'],
@@ -95,8 +96,8 @@ describe('ResetPasswordInput', () => {
       messagesFor(ResetPasswordInput, { token: TOKEN, newPassword, confirmPassword: newPassword });
 
     await expect(check('')).resolves.toEqual({
-      newPassword: expect.arrayContaining(['New password is required']) as unknown,
-      confirmPassword: expect.arrayContaining(['Confirm Password is required']) as unknown,
+      newPassword: ['New password is required'],
+      confirmPassword: ['Confirm Password is required'],
     });
     await expect(check('12345')).resolves.toEqual({
       newPassword: ['Password must be at least 6 characters long'],
@@ -111,7 +112,7 @@ describe('ResetPasswordInput', () => {
       messagesFor(ResetPasswordInput, { token: TOKEN, newPassword: 'new-secret', confirmPassword });
 
     await expect(check()).resolves.toEqual({
-      confirmPassword: expect.arrayContaining(['Confirm Password is required']) as unknown,
+      confirmPassword: ['Confirm Password is required'],
     });
     await expect(check('new-secreT')).resolves.toEqual({
       confirmPassword: ['Passwords do not match'],

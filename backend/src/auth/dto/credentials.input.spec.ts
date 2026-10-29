@@ -1,12 +1,13 @@
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
+import { VALIDATOR_OPTIONS } from '@/common/validation/validator-options';
 import { SignInInput, SignUpInput } from './credentials.input';
 
 const messagesFor = async (
   type: typeof SignInInput | typeof SignUpInput,
   plain: Record<string, unknown>,
 ): Promise<Record<string, string[]>> => {
-  const errors = await validate(plainToInstance(type, plain));
+  const errors = await validate(plainToInstance(type, plain), VALIDATOR_OPTIONS);
   return Object.fromEntries(
     errors.map((error) => [error.property, Object.values(error.constraints ?? {})]),
   );
@@ -24,23 +25,29 @@ describe.each([SignInInput, SignUpInput])('%p', (type) => {
     expect(instance.email).toBe('employee@cv-builder.local');
   });
 
-  it('requires both fields', async () => {
-    const messages = await messagesFor(type, { email: '', password: '' });
+  it('gives only the "required" message for empty fields', async () => {
+    const messages = await messagesFor(type, { email: '', password: '', confirmPassword: '' });
 
-    expect(messages['email']).toContain('Email is required');
-    expect(messages['password']).toContain('Password is required');
+    expect(messages['email']).toEqual(['Email is required']);
+    expect(messages['password']).toEqual(['Password is required']);
+  });
+
+  it('gives only the "required" message for an email of spaces', async () => {
+    const messages = await messagesFor(type, { email: '   ', password: 'secret123' });
+
+    expect(messages['email']).toEqual(['Email is required']);
   });
 
   it('rejects a non-string email without trying to trim it', async () => {
     const messages = await messagesFor(type, { email: 42, password: 'secret123' });
 
-    expect(messages['email']).toContain('Please enter a valid email address');
+    expect(messages['email']).toEqual(['Please enter a valid email address']);
   });
 
   it('rejects an invalid email', async () => {
     const messages = await messagesFor(type, { email: 'em ployee@x', password: 'secret123' });
 
-    expect(messages['email']).toContain('Please enter a valid email address');
+    expect(messages['email']).toEqual(['Please enter a valid email address']);
   });
 
   it('rejects a password shorter than 6 characters', async () => {
@@ -64,7 +71,7 @@ describe('SignUpInput confirmPassword', () => {
       confirmPassword: '',
     });
 
-    expect(messages['confirmPassword']).toContain('Confirm Password is required');
+    expect(messages['confirmPassword']).toEqual(['Confirm Password is required']);
   });
 
   it('must match the password', async () => {

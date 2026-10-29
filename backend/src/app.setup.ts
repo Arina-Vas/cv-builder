@@ -4,13 +4,18 @@ import type { NestExpressApplication } from '@nestjs/platform-express';
 import cookieParser from 'cookie-parser';
 import { GraphqlExceptionFilter } from '@/common/errors/graphql-exception.filter';
 import { validationExceptionFactory } from '@/common/errors/validation-exception.factory';
+import { VALIDATOR_OPTIONS } from '@/common/validation/validator-options';
 import type { EnvironmentVariables } from '@/config/env.validation';
 
 export const configureApp = (app: NestExpressApplication): void => {
   const config = app.get<ConfigService<EnvironmentVariables, true>>(ConfigService);
 
   app.useGlobalPipes(
-    new ValidationPipe({ transform: true, exceptionFactory: validationExceptionFactory }),
+    new ValidationPipe({
+      ...VALIDATOR_OPTIONS,
+      transform: true,
+      exceptionFactory: validationExceptionFactory,
+    }),
   );
   app.useGlobalFilters(new GraphqlExceptionFilter());
   app.use(cookieParser());

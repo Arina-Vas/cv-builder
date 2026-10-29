@@ -83,6 +83,22 @@ describe('Auth (integration)', () => {
       );
     });
 
+    it('returns one message per field: "required" for empty fields', async () => {
+      const error = await client().error(SIGN_UP, {
+        input: { email: '', password: '', confirmPassword: '' },
+      });
+
+      // The order of the fields does not matter; one message per field does
+      expect(error.extensions['fields']).toHaveLength(3);
+      expect(error.extensions['fields']).toEqual(
+        expect.arrayContaining([
+          { field: 'email', message: 'Email is required' },
+          { field: 'password', message: 'Password is required' },
+          { field: 'confirmPassword', message: 'Confirm Password is required' },
+        ]),
+      );
+    });
+
     it('keeps an unverified user read-only until the code is confirmed', async () => {
       const browser = client();
       const email = uniqueEmail();

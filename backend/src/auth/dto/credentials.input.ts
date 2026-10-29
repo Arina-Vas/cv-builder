@@ -13,17 +13,17 @@ const EMAIL_MAX_LENGTH = 254;
 abstract class CredentialsInput {
   @Field()
   @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
-  @IsString()
-  @IsNotEmpty({ message: 'Email is required' })
-  @IsEmail({}, { message: 'Please enter a valid email address' })
   @MaxLength(EMAIL_MAX_LENGTH, { message: 'Please enter a valid email address' })
+  @IsEmail({}, { message: 'Please enter a valid email address' })
+  @IsString({ message: 'Please enter a valid email address' })
+  @IsNotEmpty({ message: 'Email is required' })
   email!: string;
 
   @Field()
+  @MaxLength(PASSWORD_MAX_LENGTH, { message: 'Password must not exceed 128 characters' })
+  @MinLength(PASSWORD_MIN_LENGTH, { message: 'Password must be at least 6 characters long' })
   @IsString()
   @IsNotEmpty({ message: 'Password is required' })
-  @MinLength(PASSWORD_MIN_LENGTH, { message: 'Password must be at least 6 characters long' })
-  @MaxLength(PASSWORD_MAX_LENGTH, { message: 'Password must not exceed 128 characters' })
   password!: string;
 }
 
@@ -33,8 +33,8 @@ export class SignInInput extends CredentialsInput {}
 @InputType()
 export class SignUpInput extends CredentialsInput {
   @Field()
+  @MatchesField<SignUpInput>('password', { message: PASSWORDS_DO_NOT_MATCH_MESSAGE })
   @IsString()
   @IsNotEmpty({ message: CONFIRM_PASSWORD_REQUIRED_MESSAGE })
-  @MatchesField<SignUpInput>('password', { message: PASSWORDS_DO_NOT_MATCH_MESSAGE })
   confirmPassword!: string;
 }

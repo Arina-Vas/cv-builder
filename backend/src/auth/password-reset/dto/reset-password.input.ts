@@ -14,20 +14,20 @@ const RESET_TOKEN_PATTERN = /^[\w-]{43}$/;
 @InputType()
 export class ResetPasswordInput {
   @Field()
-  @IsString({ message: ResetLinkMessage.invalid })
   @Matches(RESET_TOKEN_PATTERN, { message: ResetLinkMessage.invalid })
+  @IsString({ message: ResetLinkMessage.invalid })
   token!: string;
 
   @Field()
+  @MaxLength(PASSWORD_MAX_LENGTH, { message: 'Password must not exceed 128 characters' })
+  @MinLength(PASSWORD_MIN_LENGTH, { message: 'Password must be at least 6 characters long' })
   @IsString()
   @IsNotEmpty({ message: 'New password is required' })
-  @MinLength(PASSWORD_MIN_LENGTH, { message: 'Password must be at least 6 characters long' })
-  @MaxLength(PASSWORD_MAX_LENGTH, { message: 'Password must not exceed 128 characters' })
   newPassword!: string;
 
   @Field()
+  @MatchesField<ResetPasswordInput>('newPassword', { message: PASSWORDS_DO_NOT_MATCH_MESSAGE })
   @IsString()
   @IsNotEmpty({ message: CONFIRM_PASSWORD_REQUIRED_MESSAGE })
-  @MatchesField<ResetPasswordInput>('newPassword', { message: PASSWORDS_DO_NOT_MATCH_MESSAGE })
   confirmPassword!: string;
 }
