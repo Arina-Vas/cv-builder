@@ -13,6 +13,11 @@ export const forbidden = (
   message = 'You are not authorized to perform this action',
 ): GraphQLError => new GraphQLError(message, { extensions: { code: ErrorCode.FORBIDDEN } });
 
+export const emailNotVerified = (
+  message = 'Please verify your email to perform this action',
+): GraphQLError =>
+  new GraphQLError(message, { extensions: { code: ErrorCode.EMAIL_NOT_VERIFIED } });
+
 export const notFound = (message = 'Not found'): GraphQLError =>
   new GraphQLError(message, { extensions: { code: ErrorCode.NOT_FOUND } });
 

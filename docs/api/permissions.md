@@ -114,13 +114,14 @@ by changing a client-supplied user ID").
 
 ### Authentication and settings
 
-| Action                                               | Access                                           |
-| ---------------------------------------------------- | ------------------------------------------------ |
-| Sign up, sign in, refresh, forgot and reset password | Public                                           |
-| Verify email, resend code                            | authenticated, email not verified yet (own only) |
-| Current user (`me`), sign out                        | authenticated, verified or not                   |
-| Theme and language preferences                       | authenticated, own only, verified or not         |
-| Change password                                      | authenticated, own only, verified email          |
+| Action                                               | Access                                            |
+| ---------------------------------------------------- | ------------------------------------------------- |
+| Sign up, sign in, refresh, forgot and reset password | Public                                            |
+| Sign out                                             | Public, revokes the session of the refresh cookie |
+| Verify email, resend code                            | authenticated, email not verified yet (own only)  |
+| Current user (`me`)                                  | authenticated, verified or not                    |
+| Theme and language preferences                       | authenticated, own only, verified or not          |
+| Change password                                      | authenticated, own only, verified email           |
 
 "Public" for the Email Verification page in the wiki access table means no role is required; the verify and resend
 operations still need the session started at sign-up, because the backend takes the user from the auth context

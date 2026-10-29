@@ -7,6 +7,8 @@
     "build": "nest build",
     "start": "node dist/main",
     "test": "jest",
+    "test:cov": "jest --coverage",
+    "test:int": "jest --config test/jest-int.json --runInBand",
     "typecheck": "tsc --noEmit",
     "postinstall": "prisma generate --no-hints",
     "db:generate": "prisma generate --no-hints",
@@ -25,13 +27,17 @@
     "@nestjs/config": "^12.0.1",
     "@nestjs/core": "^11.2.7",
     "@nestjs/graphql": "^13.4.5",
+    "@nestjs/jwt": "^12.0.3",
     "@nestjs/platform-express": "^11.2.7",
+    "@nestjs/throttler": "^6.7.1",
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "^7.10.0",
     "argon2": "^0.45.1",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
+    "cookie-parser": "^1.4.7",
     "graphql": "^16.14.2",
+    "nodemailer": "^10.2.1",
     "pg": "^8.23.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2"
@@ -39,11 +45,16 @@
   "devDependencies": {
     "@nestjs/cli": "^11.0.24",
     "@nestjs/testing": "^11.2.7",
+    "@types/cookie-parser": "^1.4.10",
+    "@types/express": "^5.0.6",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.0.0",
+    "@types/nodemailer": "^8.0.2",
     "@types/pg": "^8.23.1",
+    "@types/supertest": "^7.2.1",
     "jest": "^30.0.5",
     "prisma": "^7.10.0",
+    "supertest": "^7.3.1",
     "ts-jest": "^29.4.1",
     "tsx": "^4.23.15",
     "typescript": "~5.9.3"
@@ -57,6 +68,22 @@
     "testEnvironment": "node",
     "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/$1"
+    },
+    "collectCoverageFrom": [
+      "**/*.ts",
+      "!**/*.spec.ts",
+      "!generated/**",
+      "!main.ts",
+      "!**/*.module.ts"
+    ],
+    "coverageDirectory": "../coverage",
+    "coverageThreshold": {
+      "global": {
+        "statements": 80,
+        "branches": 80,
+        "functions": 80,
+        "lines": 80
+      }
     }
   }
 }

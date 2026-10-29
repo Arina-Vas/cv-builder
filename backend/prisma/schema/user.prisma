@@ -32,13 +32,16 @@ model User {
 }
 
 model Session {
-  id        String    @id @default(uuid()) @db.Uuid
-  userId    String    @map("user_id") @db.Uuid
-  tokenHash String    @unique @map("token_hash")
-  userAgent String?   @map("user_agent")
-  expiresAt DateTime  @map("expires_at")
-  revokedAt DateTime? @map("revoked_at")
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                String    @id @default(uuid()) @db.Uuid
+  userId            String    @map("user_id") @db.Uuid
+  tokenHash         String    @unique @map("token_hash")
+  // The token replaced by the last rotation: a parallel refresh that lost the race still sends it
+  previousTokenHash String?   @unique @map("previous_token_hash")
+  rotatedAt         DateTime? @map("rotated_at")
+  userAgent         String?   @map("user_agent")
+  expiresAt         DateTime  @map("expires_at")
+  revokedAt         DateTime? @map("revoked_at")
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -55,11 +58,14 @@ model AuthToken {
 
   expiresAt DateTime  @map("expires_at")
   usedAt    DateTime? @map("used_at")
+  // Wrong codes entered for this token; the email verification code stops working after 5
+  attempts  Int       @default(0)
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@index([userId, type])
+  @@index([type, codeHash])
   @@map("auth_tokens")
 }

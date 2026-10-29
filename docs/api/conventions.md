@@ -228,6 +228,17 @@ avoid a column-key → enum map in every table.
 - `update*` inputs contain `id` and only the fields the user can change.
 - Inputs are always validated on the backend, even if the frontend validates them too
   (wiki: "Client-side validation is intended for user experience and must not replace server-side validation").
+- **One error per field.** The `ValidationPipe` uses `stopAtFirstError` (`common/validation/validator-options.ts`), so
+  `fields` has at most one message per field. class-validator runs a property's decorators **bottom-up**, so order
+  them by priority from the bottom: `@IsNotEmpty` lowest (it also catches `null`/`undefined`), `@IsString` above it,
+  then format and length checks. Otherwise an empty value can answer "invalid format" instead of "is required".
+  ```ts
+  @MaxLength(254, { message: 'Please enter a valid email address' }) // 4th
+  @IsEmail({}, { message: 'Please enter a valid email address' })    // 3rd
+  @IsString()                                                         // 2nd
+  @IsNotEmpty({ message: 'Email is required' })                       // 1st
+  email!: string;
+  ```
 - The UI treats a mutation as successful only after the response arrives (no optimistic updates without a rollback).
 
 ## Errors
@@ -248,30 +259,32 @@ helpers in `backend/src/common/errors/app-errors.ts`; a global exception filter 
 
 ### Codes
 
-| Code                    | When                                                 | Extra fields                   | Frontend                                |
-| ----------------------- | ---------------------------------------------------- | ------------------------------ | --------------------------------------- |
-| `UNAUTHENTICATED`       | no token, invalid or expired token                   | —                              | try `refresh`, otherwise go to Sign In  |
-| `FORBIDDEN`             | role or ownership check failed                       | —                              | "not authorized" state                  |
-| `NOT_FOUND`             | the entity does not exist (or was deleted meanwhile) | —                              | not-found state, refresh stale data     |
-| `BAD_USER_INPUT`        | validation failed                                    | `fields: [{ field, message }]` | inline errors under the fields          |
-| `CONFLICT`              | a unique value is already taken                      | `field` (when known)           | inline error under `field`              |
-| `ENTITY_IN_USE`         | delete blocked because the item is referenced        | —                              | toast                                   |
-| `RATE_LIMITED`          | too many requests (e.g. resend verification code)    | `retryAfter` (seconds)         | "please wait" message                   |
-| `INTERNAL_SERVER_ERROR` | unexpected error                                     | —                              | generic error toast with a retry option |
+| Code                    | When                                                 | Extra fields                   | Frontend                                                 |
+| ----------------------- | ---------------------------------------------------- | ------------------------------ | -------------------------------------------------------- |
+| `UNAUTHENTICATED`       | no token, invalid or expired token                   | —                              | try `refresh`, otherwise go to Sign In                   |
+| `FORBIDDEN`             | role or ownership check failed                       | —                              | "not authorized" state                                   |
+| `EMAIL_NOT_VERIFIED`    | mutation by a user whose email is not verified       | —                              | "verify your email" message + link to Email Verification |
+| `NOT_FOUND`             | the entity does not exist (or was deleted meanwhile) | —                              | not-found state, refresh stale data                      |
+| `BAD_USER_INPUT`        | validation failed                                    | `fields: [{ field, message }]` | inline errors under the fields                           |
+| `CONFLICT`              | a unique value is already taken                      | `field` (when known)           | inline error under `field`                               |
+| `ENTITY_IN_USE`         | delete blocked because the item is referenced        | —                              | toast                                                    |
+| `RATE_LIMITED`          | too many requests (per IP or e.g. resend code)       | `retryAfter` (seconds)         | "please wait" message                                    |
+| `INTERNAL_SERVER_ERROR` | unexpected error                                     | —                              | generic error toast with a retry option                  |
 
 The codes cover the error categories the wiki asks the frontend to handle:
 
-| Wiki category                        | Code                                                                            |
-| ------------------------------------ | ------------------------------------------------------------------------------- |
-| Validation errors                    | `BAD_USER_INPUT`                                                                |
-| Unauthorized / authentication errors | `UNAUTHENTICATED`                                                               |
-| Forbidden / authorization errors     | `FORBIDDEN`                                                                     |
-| Not-found errors                     | `NOT_FOUND`                                                                     |
-| Conflict errors                      | `CONFLICT`                                                                      |
-| Dependency / business-rule errors    | `ENTITY_IN_USE`                                                                 |
-| Unexpected server errors             | `INTERNAL_SERVER_ERROR`                                                         |
-| Rate limiting (Verification page)    | `RATE_LIMITED`                                                                  |
-| Network errors                       | no code: the request did not reach the server (`networkError` in Apollo Client) |
+| Wiki category                        | Code                                                                               |
+| ------------------------------------ | ---------------------------------------------------------------------------------- |
+| Validation errors                    | `BAD_USER_INPUT`                                                                   |
+| Unauthorized / authentication errors | `UNAUTHENTICATED`                                                                  |
+| Forbidden / authorization errors     | `FORBIDDEN`                                                                        |
+| Feature requires a verified email    | `EMAIL_NOT_VERIFIED` ([read-only rule](../auth.md#unverified-users-are-read-only)) |
+| Not-found errors                     | `NOT_FOUND`                                                                        |
+| Conflict errors                      | `CONFLICT`                                                                         |
+| Dependency / business-rule errors    | `ENTITY_IN_USE`                                                                    |
+| Unexpected server errors             | `INTERNAL_SERVER_ERROR`                                                            |
+| Rate limiting (auth pages)           | `RATE_LIMITED`                                                                     |
+| Network errors                       | no code: the request did not reach the server (`networkError` in Apollo Client)    |
 
 `UNAUTHENTICATED`, `FORBIDDEN`, `BAD_USER_INPUT` and `INTERNAL_SERVER_ERROR` follow Apollo Server conventions;
 the other codes are ours.
@@ -345,8 +358,10 @@ Frontend side:
   `credentials: 'include'` and never reads them. No `Authorization` header is used. Details in
   [auth.md](../auth.md).
 - Users with an unverified email are read-only: mutations are rejected unless marked `@AllowUnverified()`.
-- Admin-only operations are marked with `@Roles(UserRole.ADMIN)`. The decorator only stores metadata; the guard that
-  checks it is added by the Auth task, and a failed check returns `FORBIDDEN`.
+- Admin-only operations are marked with `@Roles(UserRole.ADMIN)`; a failed check returns `FORBIDDEN`.
+- Two global guards run on every operation: `AuthGuard` (`backend/src/auth/guards/auth.guard.ts`: access token, session,
+  user, read-only rule) and `RolesGuard` (`backend/src/common/auth/roles.guard.ts`). Resolvers get the current user
+  with `@CurrentUser()` and the current session with `@CurrentSessionId()` (`common/auth/current-user.decorator.ts`).
 - "Own data or Admin" checks (profile, user skills and languages, CVs) cannot be expressed with `@Roles`. Services
   do them, using the current user from the request, never a user id sent by the client as proof of ownership.
 - Catalogs (departments, positions, skills, languages, projects) are readable by every authenticated user, because

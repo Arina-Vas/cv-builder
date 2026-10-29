@@ -15,11 +15,11 @@ admins also manage users and global catalogs (skills, languages, departments, po
 | Backend       | NestJS 11, TypeScript                         |
 | API           | GraphQL, code-first (NestJS + Apollo Server)  |
 | Database      | PostgreSQL 17 (Docker), Prisma ORM 7          |
-| Backend tests | Jest + @nestjs/testing                        |
+| Backend tests | Jest + @nestjs/testing, Supertest             |
 | Code quality  | ESLint 9 (flat config), Prettier              |
 
 Planned (to be added): GraphQL Code Generator, MUI, react-hook-form + zod, next-intl,
-Vitest + React Testing Library, Supertest.
+Vitest + React Testing Library.
 
 ## 📚 Documentation & Project Structure
 
@@ -176,6 +176,7 @@ Backend variables live in `backend/.env` (git-ignored). The template is `backend
 | `SMTP_HOST`              | Mail server host                                    | `localhost` (Mailpit)                                                        |
 | `SMTP_PORT`              | Mail server port                                    | `1025` (Mailpit)                                                             |
 | `MAIL_FROM`              | Sender of outgoing emails                           | `CV Builder <no-reply@cv-builder.local>`                                     |
+| `TRUST_PROXY_HOPS`       | Number of reverse proxies in front of the API       | `0`                                                                          |
 | `SEED_*`                 | Accounts created by `pnpm db:seed`                  | see [Seed data](#seed-data)                                                  |
 
 The backend validates these variables on startup (`backend/src/config/env.validation.ts`) and does not start if
