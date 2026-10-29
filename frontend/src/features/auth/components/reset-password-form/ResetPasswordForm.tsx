@@ -35,12 +35,23 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
     if (!isValid || loading) return;
 
     try {
-      await resetPassword({ variables: { input: { token, newPassword: values.password } } });
+      await resetPassword({
+        variables: {
+          input: {
+            token,
+            newPassword: values.password,
+            confirmPassword: values.confirmPassword,
+          },
+        },
+      });
     } catch (error) {
       const { code, message, fieldErrors } = parseError(error);
 
       if (code === 'BAD_USER_INPUT' && !fieldErrors.token) {
-        setServerErrors({ password: fieldErrors.newPassword });
+        setServerErrors({
+          password: fieldErrors.newPassword,
+          confirmPassword: fieldErrors.confirmPassword,
+        });
       } else {
         toast.error(fieldErrors.token ?? message);
       }

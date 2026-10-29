@@ -32,7 +32,13 @@ export function SignUpForm() {
 
     try {
       await signUp({
-        variables: { input: { email: values.email.trim(), password: values.password } },
+        variables: {
+          input: {
+            email: values.email.trim(),
+            password: values.password,
+            confirmPassword: values.confirmPassword,
+          },
+        },
       });
       // signUp starts a session and sends the code: the user verifies while signed in.
       router.replace(AuthRoute.verifyEmail);

@@ -21,6 +21,10 @@ export interface CredentialsInput {
   password: string;
 }
 
+export interface SignUpInput extends CredentialsInput {
+  confirmPassword: string;
+}
+
 const AUTH_USER_FIELDS = gql`
   fragment AuthUserFields on User {
     id
@@ -51,10 +55,7 @@ export const SIGN_IN: TypedDocumentNode<
   ${AUTH_USER_FIELDS}
 `;
 
-export const SIGN_UP: TypedDocumentNode<
-  { signUp: AuthUser },
-  InputVariables<CredentialsInput>
-> = gql`
+export const SIGN_UP: TypedDocumentNode<{ signUp: AuthUser }, InputVariables<SignUpInput>> = gql`
   mutation SignUp($input: SignUpInput!) {
     signUp(input: $input) {
       ...AuthUserFields
@@ -92,7 +93,7 @@ export const REQUEST_PASSWORD_RESET: TypedDocumentNode<
 
 export const RESET_PASSWORD: TypedDocumentNode<
   { resetPassword: boolean },
-  InputVariables<{ token: string; newPassword: string }>
+  InputVariables<{ token: string; newPassword: string; confirmPassword: string }>
 > = gql`
   mutation ResetPassword($input: ResetPasswordInput!) {
     resetPassword(input: $input)
