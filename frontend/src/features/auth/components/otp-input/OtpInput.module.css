@@ -28,6 +28,24 @@
   outline: none;
 }
 
+.root[data-error] > .cell {
+  border-color: var(--input-border-error);
+}
+
+.cell:disabled {
+  background: var(--input-disabled-bg);
+  color: var(--text-disabled);
+}
+
+.error {
+  margin: var(--space-2) 0 0;
+  color: var(--input-helper-error);
+  font-size: var(--type-helper-size);
+  line-height: var(--type-helper-lh);
+  letter-spacing: var(--type-helper-ls);
+  text-align: center;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .cell {
     transition: none;
