@@ -23,6 +23,9 @@
     "rxjs": "^7.8.2"
   },
   "devDependencies": {
+    "@graphql-codegen/cli": "^7.4.6",
+    "@graphql-codegen/client-preset": "^6.2.3",
+    "@graphql-typed-document-node/core": "^3.2.0",
     "@storybook/addon-a11y": "^10.6.2",
     "@storybook/addon-docs": "^10.6.2",
     "@storybook/addon-vitest": "^10.6.2",
