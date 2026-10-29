@@ -5,6 +5,7 @@ import type { EnvironmentVariables } from '@/config/env.validation';
 import { PrismaService } from '@/prisma/prisma.service';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
+export const REFRESH_GRACE_SECONDS = 30;
 
 export interface IssuedSession {
   sessionId: string;
@@ -51,12 +52,31 @@ export class SessionsService {
     const nextToken = generateToken();
     const { count } = await this.prisma.session.updateMany({
       where: { id: session.id, tokenHash, revokedAt: null },
-      data: { tokenHash: hashToken(nextToken), expiresAt: this.expiresAt() },
+      data: {
+        tokenHash: hashToken(nextToken),
+        previousTokenHash: tokenHash,
+        rotatedAt: new Date(),
+        expiresAt: this.expiresAt(),
+      },
     });
 
     return count === 1
       ? { sessionId: session.id, userId: session.userId, refreshToken: nextToken }
       : null;
+  }
+
+  async wasJustRotated(refreshToken: string): Promise<boolean> {
+    const session = await this.prisma.session.findUnique({
+      where: { previousTokenHash: hashToken(refreshToken) },
+      select: { expiresAt: true, revokedAt: true, rotatedAt: true },
+    });
+
+    return (
+      session !== null &&
+      isActive(session) &&
+      session.rotatedAt !== null &&
+      Date.now() - session.rotatedAt.getTime() < REFRESH_GRACE_SECONDS * 1000
+    );
   }
 
   async findActive(sessionId: string): Promise<ActiveSession | null> {

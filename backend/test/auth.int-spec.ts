@@ -1,4 +1,5 @@
 import { ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE } from '@/auth/sessions/auth-cookies';
+import { REFRESH_GRACE_SECONDS } from '@/auth/sessions/sessions.service';
 import { AUTH_THROTTLE_LIMIT } from '@/common/throttling/throttle.decorators';
 import { UserRole } from '@/common/graphql/enums';
 import {
@@ -162,7 +163,7 @@ describe('Auth (integration)', () => {
       expect(unknownEmail.extensions.code).toBe(wrongPassword.extensions.code);
     });
 
-    it('rotates the refresh token and rejects the old one', async () => {
+    it('rotates the refresh token and rejects the old one after the grace period', async () => {
       const browser = client();
       const { email } = await createUser(t.prisma);
       await signIn(browser, email);
@@ -172,11 +173,35 @@ describe('Auth (integration)', () => {
       expect(browser.cookie(REFRESH_TOKEN_COOKIE)).not.toBe(oldRefresh);
       await expect(browser.data(ME)).resolves.toBeDefined();
 
+      await t.prisma.session.updateMany({
+        data: { rotatedAt: new Date(Date.now() - REFRESH_GRACE_SECONDS * 1000) },
+      });
       const replay = client();
       replay.setCookie(REFRESH_TOKEN_COOKIE, oldRefresh);
       const error = await replay.error(REFRESH);
       expect(error.extensions.code).toBe('UNAUTHENTICATED');
       expect(replay.cookie(REFRESH_TOKEN_COOKIE)).toBeUndefined();
+    });
+
+    it('keeps the session when two tabs refresh with the same token at once', async () => {
+      const browser = client();
+      const { email } = await createUser(t.prisma);
+      await signIn(browser, email);
+      const sharedRefresh = browser.cookie(REFRESH_TOKEN_COOKIE) ?? '';
+      const otherTab = client();
+      otherTab.setCookie(REFRESH_TOKEN_COOKIE, sharedRefresh);
+
+      await expect(Promise.all([browser.send(REFRESH), otherTab.send(REFRESH)])).resolves.toEqual([
+        { data: { refresh: true } },
+        { data: { refresh: true } },
+      ]);
+
+      // Exactly one request rotated and set new cookies; the other one did not clear or replace them
+      const tokens = [browser, otherTab].map((tab) => tab.cookie(REFRESH_TOKEN_COOKIE));
+      expect(tokens).not.toContain(undefined);
+      expect(tokens.filter((token) => token === sharedRefresh)).toHaveLength(1);
+      const winner = tokens[0] === sharedRefresh ? otherTab : browser;
+      await expect(winner.data(ME)).resolves.toMatchObject({ me: { email } });
     });
 
     it('logs out: clears the cookies and ends the session on the server', async () => {

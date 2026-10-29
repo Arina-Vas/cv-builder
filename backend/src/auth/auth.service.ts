@@ -65,9 +65,16 @@ export class AuthService {
     return { user, tokens: await this.startSession(user.id, userAgent) };
   }
 
-  async refresh(refreshToken: string | undefined): Promise<AuthTokens> {
-    const rotated = refreshToken ? await this.sessions.rotate(refreshToken) : null;
+  async refresh(refreshToken: string | undefined): Promise<AuthTokens | null> {
+    if (!refreshToken) {
+      throw unauthenticated();
+    }
+
+    const rotated = await this.sessions.rotate(refreshToken);
     if (!rotated) {
+      if (await this.sessions.wasJustRotated(refreshToken)) {
+        return null;
+      }
       throw unauthenticated();
     }
 

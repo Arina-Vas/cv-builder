@@ -2,7 +2,7 @@ import { ConfigService } from '@nestjs/config';
 import { hashToken } from '@/common/crypto/tokens';
 import type { EnvironmentVariables } from '@/config/env.validation';
 import { PrismaService } from '@/prisma/prisma.service';
-import { SessionsService } from './sessions.service';
+import { REFRESH_GRACE_SECONDS, SessionsService } from './sessions.service';
 
 jest.mock('@/prisma/prisma.service', () => ({ PrismaService: class PrismaService {} }));
 jest.mock('@nestjs/config', () => ({ ConfigService: class ConfigService {} }));
@@ -76,6 +76,8 @@ describe('SessionsService', () => {
         where: { id: 'session-1', tokenHash: hashToken('old-token'), revokedAt: null },
         data: {
           tokenHash: hashToken(rotated!.refreshToken),
+          previousTokenHash: hashToken('old-token'),
+          rotatedAt: new Date('2026-10-27T18:00:00.000Z'),
           expiresAt: new Date('2026-10-28T18:00:00.000Z'),
         },
       });
@@ -103,6 +105,41 @@ describe('SessionsService', () => {
       prisma.session.updateMany.mockResolvedValue({ count: 0 });
 
       await expect(service.rotate('old-token')).resolves.toBeNull();
+    });
+  });
+
+  describe('wasJustRotated', () => {
+    const rotatedSession = (
+      overrides: Partial<{ revokedAt: Date | null; rotatedAt: Date | null }>,
+    ) => ({
+      expiresAt: IN_ONE_DAY,
+      revokedAt: null,
+      rotatedAt: new Date(NOW.getTime() - (REFRESH_GRACE_SECONDS - 1) * 1000),
+      ...overrides,
+    });
+
+    it('is true for the replaced token of an active session within the grace period', async () => {
+      prisma.session.findUnique.mockResolvedValue(rotatedSession({}));
+
+      await expect(service.wasJustRotated('old-token')).resolves.toBe(true);
+      expect(prisma.session.findUnique).toHaveBeenCalledWith({
+        where: { previousTokenHash: hashToken('old-token') },
+        select: { expiresAt: true, revokedAt: true, rotatedAt: true },
+      });
+    });
+
+    it.each([
+      ['unknown token', null],
+      [
+        'grace period is over',
+        rotatedSession({ rotatedAt: new Date(NOW.getTime() - REFRESH_GRACE_SECONDS * 1000) }),
+      ],
+      ['revoked session', rotatedSession({ revokedAt: NOW })],
+      ['never rotated', rotatedSession({ rotatedAt: null })],
+    ])('is false for %s', async (_, row) => {
+      prisma.session.findUnique.mockResolvedValue(row);
+
+      await expect(service.wasJustRotated('old-token')).resolves.toBe(false);
     });
   });
 

@@ -24,7 +24,12 @@ Email Verification pages. Tables are described in [data-model.md](data-model.md)
 - Every refresh **rotates** the refresh token (new value, new expiry), so an old refresh token stops working.
   Rotation is a conditional update on the old hash, so two parallel refreshes with the same token cannot both
   succeed.
-  An active user stays signed in; a user who is inactive for more than a day signs in again.
+- **Parallel refresh (two tabs share the cookies).** The session also keeps the hash of the replaced token
+  (`previous_token_hash`, `rotated_at`). If a refresh comes with that token within 30 seconds of the rotation
+  (`REFRESH_GRACE_SECONDS`), another request has just rotated it and the browser already has the new cookies:
+  `refresh` returns `true` and leaves the cookies alone. It issues nothing new, so a stolen old token gains nothing.
+  After 30 seconds the old token is rejected as usual.
+- An active user stays signed in; a user who is inactive for more than a day signs in again.
 
 ## Sessions and the auth guard
 
@@ -54,7 +59,9 @@ Email Verification pages. Tables are described in [data-model.md](data-model.md)
   The frontend must not try `refresh` on this error.
 - `signUp` with a taken email returns `CONFLICT` with `field: "email"` and
   `An account with this email already exists`.
-- `refresh` without a valid session returns `UNAUTHENTICATED` and clears both cookies.
+- `refresh` without a valid session returns `UNAUTHENTICATED` and clears both cookies (a dead refresh cookie
+  would make the frontend proxy treat the user as signed in). Exception: the token was replaced less than
+  30 seconds ago by a parallel refresh — see "Parallel refresh" above.
 - `logout` is public so it works after the access token has expired; otherwise the browser would keep httpOnly
   cookies the frontend cannot delete.
 

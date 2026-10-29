@@ -96,6 +96,15 @@ describe('AuthResolver', () => {
     expect(res.cookie).toHaveBeenCalledWith(REFRESH_TOKEN_COOKIE, 'refresh-2', expect.any(Object));
   });
 
+  it('refresh keeps the cookies when a parallel refresh has just rotated the token', async () => {
+    auth.refresh.mockResolvedValue(null);
+    const { res, context } = createContext({ [REFRESH_TOKEN_COOKIE]: 'previous' });
+
+    await expect(resolver.refresh(context)).resolves.toBe(true);
+    expect(res.cookie).not.toHaveBeenCalled();
+    expect(res.clearCookie).not.toHaveBeenCalled();
+  });
+
   it('refresh clears the cookies when the session is gone', async () => {
     auth.refresh.mockRejectedValue(new Error('UNAUTHENTICATED'));
     const { res, context } = createContext({ [REFRESH_TOKEN_COOKIE]: 'stale' });

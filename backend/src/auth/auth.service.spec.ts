@@ -45,7 +45,12 @@ describe('AuthService', () => {
     create: jest.fn(),
     findWithPasswordHashByEmail: jest.fn(),
   };
-  const sessions = { create: jest.fn(), rotate: jest.fn(), revokeByRefreshToken: jest.fn() };
+  const sessions = {
+    create: jest.fn(),
+    rotate: jest.fn(),
+    wasJustRotated: jest.fn(),
+    revokeByRefreshToken: jest.fn(),
+  };
   const accessTokens = { sign: jest.fn() };
   const verification = { sendCode: jest.fn() };
   const service = new AuthService(
@@ -198,10 +203,20 @@ describe('AuthService', () => {
 
     it('rejects a refresh token that cannot be rotated', async () => {
       sessions.rotate.mockResolvedValue(null);
+      sessions.wasJustRotated.mockResolvedValue(false);
 
       const error = await errorOf(service.refresh('stale'));
 
       expect(error.extensions['code']).toBe(ErrorCode.UNAUTHENTICATED);
+      expect(sessions.wasJustRotated).toHaveBeenCalledWith('stale');
+    });
+
+    it('returns null without new tokens when a parallel refresh has just rotated the token', async () => {
+      sessions.rotate.mockResolvedValue(null);
+      sessions.wasJustRotated.mockResolvedValue(true);
+
+      await expect(service.refresh('previous')).resolves.toBeNull();
+      expect(accessTokens.sign).not.toHaveBeenCalled();
     });
   });
 

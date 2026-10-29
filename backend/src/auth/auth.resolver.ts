@@ -52,7 +52,9 @@ export class AuthResolver {
   async refresh(@Context() { req, res }: GqlContext): Promise<boolean> {
     try {
       const tokens = await this.auth.refresh(readCookie(req, REFRESH_TOKEN_COOKIE));
-      setAuthCookies(res, tokens, this.cookieSettings());
+      if (tokens) {
+        setAuthCookies(res, tokens, this.cookieSettings());
+      }
       return true;
     } catch (error) {
       clearAuthCookies(res, this.cookieSettings());
