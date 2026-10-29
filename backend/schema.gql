@@ -2,16 +2,6 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-"""
-A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-"""
-scalar DateTime
-
-type Department {
-  id: ID!
-  name: String!
-}
-
 input CreateDepartmentInput {
   name: String!
 }
@@ -43,6 +33,11 @@ input CreateSkillInput {
 """Calendar date without time and time zone, format YYYY-MM-DD"""
 scalar Date
 
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
 type Department {
   id: ID!
   name: String!
@@ -65,28 +60,6 @@ enum DepartmentSortField {
 
 type Health {
   status: String!
-}
-
-type Mutation {
-  logout: Boolean!
-  refresh: Boolean!
-
-  """Always returns true, whether or not the email belongs to an account"""
-  requestPasswordReset(input: RequestPasswordResetInput!): Boolean!
-  resendVerificationCode: Boolean!
-
-  """
-  Fails with BAD_USER_INPUT (field "token") when the link is invalid, used or expired. Signs out every session of the user; the client signs in again with the new password.
-  """
-  resetPassword(input: ResetPasswordInput!): Boolean!
-  signIn(input: SignInInput!): User!
-  signUp(input: SignUpInput!): User!
-  verifyEmail(input: VerifyEmailInput!): User!
-}
-
-type Position {
-  id: ID!
-  name: String!
 }
 
 type Language {
@@ -135,11 +108,25 @@ type Mutation {
   Fails with ENTITY_IN_USE if the skill is assigned to users, projects or CVs
   """
   deleteSkill(id: ID!): ID!
+  logout: Boolean!
+  refresh: Boolean!
+
+  """Always returns true, whether or not the email belongs to an account"""
+  requestPasswordReset(input: RequestPasswordResetInput!): Boolean!
+  resendVerificationCode: Boolean!
+
+  """
+  Fails with BAD_USER_INPUT (field "token") when the link is invalid, used or expired. Signs out every session of the user; the client signs in again with the new password.
+  """
+  resetPassword(input: ResetPasswordInput!): Boolean!
+  signIn(input: SignInInput!): User!
+  signUp(input: SignUpInput!): User!
   updateDepartment(input: UpdateDepartmentInput!): Department!
   updateLanguage(input: UpdateLanguageInput!): Language!
   updatePosition(input: UpdatePositionInput!): Position!
   updateProject(input: UpdateProjectInput!): Project!
   updateSkill(input: UpdateSkillInput!): Skill!
+  verifyEmail(input: VerifyEmailInput!): User!
 }
 
 type Position {
@@ -199,50 +186,6 @@ type Query {
     sortOrder: SortOrder! = ASC
   ): DepartmentPage!
   health: Health!
-  me: User!
-}
-
-input RequestPasswordResetInput {
-  email: String!
-}
-
-input ResetPasswordInput {
-  confirmPassword: String!
-  newPassword: String!
-  token: String!
-}
-
-input SignInInput {
-  email: String!
-  password: String!
-}
-
-input SignUpInput {
-  confirmPassword: String!
-  email: String!
-  password: String!
-}
-
-type User {
-  avatarUrl: String
-  createdAt: DateTime!
-  department: Department
-  email: String!
-  emailVerifiedAt: DateTime
-  firstName: String
-  id: ID!
-  lastName: String
-  position: Position
-  role: UserRole!
-}
-
-enum UserRole {
-  ADMIN
-  EMPLOYEE
-}
-
-input VerifyEmailInput {
-  code: String!
   languages(
     """1-based page number"""
     page: Int! = 1
@@ -253,6 +196,7 @@ input VerifyEmailInput {
     sortBy: LanguageSortField! = name
     sortOrder: SortOrder! = ASC
   ): LanguagePage!
+  me: User!
   positions(
     """1-based page number"""
     page: Int! = 1
@@ -278,6 +222,27 @@ input VerifyEmailInput {
 
   """Skills available as project technologies ("Environment")"""
   technologies: [Skill!]!
+}
+
+input RequestPasswordResetInput {
+  email: String!
+}
+
+input ResetPasswordInput {
+  confirmPassword: String!
+  newPassword: String!
+  token: String!
+}
+
+input SignInInput {
+  email: String!
+  password: String!
+}
+
+input SignUpInput {
+  confirmPassword: String!
+  email: String!
+  password: String!
 }
 
 type Skill {
@@ -343,4 +308,26 @@ input UpdateSkillInput {
   categoryId: ID!
   id: ID!
   name: String!
+}
+
+type User {
+  avatarUrl: String
+  createdAt: DateTime!
+  department: Department
+  email: String!
+  emailVerifiedAt: DateTime
+  firstName: String
+  id: ID!
+  lastName: String
+  position: Position
+  role: UserRole!
+}
+
+enum UserRole {
+  ADMIN
+  EMPLOYEE
+}
+
+input VerifyEmailInput {
+  code: String!
 }

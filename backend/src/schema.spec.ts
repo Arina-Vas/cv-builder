@@ -7,14 +7,29 @@ import { buildSchema, type GraphQLSchema, lexicographicSortSchema, printSchema }
 import { AuthResolver } from '@/auth/auth.resolver';
 import { EmailVerificationResolver } from '@/auth/email-verification/email-verification.resolver';
 import { PasswordResetResolver } from '@/auth/password-reset/password-reset.resolver';
+import { DepartmentResolver } from '@/departments/department.resolver';
 import { HealthResolver } from '@/health/health.resolver';
+import { LanguageResolver } from '@/languages/language.resolver';
+import { PositionResolver } from '@/positions/position.resolver';
+import { ProjectResolver } from '@/projects/project.resolver';
+import { SkillResolver } from '@/skills/skill.resolver';
 
 jest.mock('@/prisma/prisma.service', () => ({ PrismaService: class PrismaService {} }));
 jest.mock('@nestjs/config', () => ({ ConfigService: class ConfigService {} }));
 jest.mock('@nestjs/jwt', () => ({ JwtService: class JwtService {} }));
 
 // Every resolver registered in AppModule. A resolver missing here makes the schemas differ.
-const RESOLVERS = [AuthResolver, EmailVerificationResolver, PasswordResetResolver, HealthResolver];
+const RESOLVERS = [
+  AuthResolver,
+  EmailVerificationResolver,
+  PasswordResetResolver,
+  HealthResolver,
+  DepartmentResolver,
+  PositionResolver,
+  LanguageResolver,
+  SkillResolver,
+  ProjectResolver,
+];
 
 const print = (schema: GraphQLSchema): string => printSchema(lexicographicSortSchema(schema));
 
