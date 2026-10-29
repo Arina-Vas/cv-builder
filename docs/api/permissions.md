@@ -167,3 +167,13 @@ Operation-level tables are added by each module together with its resolvers: the
 | `createSkill`     | Admin  |
 | `updateSkill`     | Admin  |
 | `deleteSkill`     | Admin  |
+
+### Projects
+
+| Operation       | Access |
+| --------------- | ------ |
+| `projects`      | All    |
+| `technologies`  | All    |
+| `createProject` | Admin  |
+| `updateProject` | Admin  |
+| `deleteProject` | Admin  |
