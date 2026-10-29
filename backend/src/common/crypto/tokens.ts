@@ -1,4 +1,4 @@
-import { createHash, randomBytes, randomInt } from 'node:crypto';
+import { createHash, randomBytes, randomInt, timingSafeEqual } from 'node:crypto';
 
 const TOKEN_BYTES = 32;
 const CODE_LENGTH = 6;
@@ -12,3 +12,9 @@ export const generateVerificationCode = (): string =>
 
 export const hashToken = (value: string): string =>
   createHash('sha256').update(value).digest('hex');
+
+export const matchesHash = (value: string, hash: string): boolean => {
+  const actual = Buffer.from(hashToken(value), 'hex');
+  const expected = Buffer.from(hash, 'hex');
+  return actual.length === expected.length && timingSafeEqual(actual, expected);
+};

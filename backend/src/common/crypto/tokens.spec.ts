@@ -1,5 +1,5 @@
 import * as nodeCrypto from 'node:crypto';
-import { generateToken, generateVerificationCode, hashToken } from './tokens';
+import { generateToken, generateVerificationCode, hashToken, matchesHash } from './tokens';
 
 jest.mock('node:crypto', () => ({
   ...jest.requireActual<typeof import('node:crypto')>('node:crypto'),
@@ -59,6 +59,20 @@ describe('tokens', () => {
 
     it('never returns the original value', () => {
       expect(hashToken('token')).not.toContain('token');
+    });
+  });
+
+  describe('matchesHash', () => {
+    it('is true for the value the hash was made from', () => {
+      expect(matchesHash('042917', hashToken('042917'))).toBe(true);
+    });
+
+    it('is false for another value', () => {
+      expect(matchesHash('042918', hashToken('042917'))).toBe(false);
+    });
+
+    it('is false for a malformed stored hash instead of throwing', () => {
+      expect(matchesHash('042917', 'not-a-hash')).toBe(false);
     });
   });
 });

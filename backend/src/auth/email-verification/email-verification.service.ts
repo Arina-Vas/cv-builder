@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { generateVerificationCode, hashToken } from '@/common/crypto/tokens';
+import { generateVerificationCode, hashToken, matchesHash } from '@/common/crypto/tokens';
 import { badUserInput, conflict, rateLimited } from '@/common/errors/app-errors';
 import { AuthTokenType } from '@/generated/prisma/enums';
 import { MailService } from '@/mail/mail.service';
@@ -9,6 +9,7 @@ import { UsersService } from '@/users/users.service';
 
 export const CODE_TTL_MINUTES = 10;
 export const RESEND_COOLDOWN_SECONDS = 60;
+export const MAX_CODE_ATTEMPTS = 5;
 
 export const VerificationMessage = {
   invalid: 'Invalid verification code',
@@ -83,14 +84,11 @@ export class EmailVerificationService {
       throw conflict('email', VerificationMessage.alreadyVerified);
     }
 
+    // Only the newest code counts, so wrong guesses can be counted against it
     const token = await this.prisma.authToken.findFirst({
-      where: {
-        userId: user.id,
-        type: AuthTokenType.EMAIL_VERIFICATION,
-        codeHash: hashToken(code),
-      },
+      where: { userId: user.id, type: AuthTokenType.EMAIL_VERIFICATION },
       orderBy: { createdAt: 'desc' },
-      select: { id: true, expiresAt: true, usedAt: true },
+      select: { id: true, codeHash: true, expiresAt: true, usedAt: true, attempts: true },
     });
 
     if (!token) {
@@ -99,14 +97,27 @@ export class EmailVerificationService {
     if (token.usedAt) {
       throw codeError(VerificationMessage.used);
     }
-    if (token.expiresAt <= new Date()) {
+    if (token.expiresAt <= new Date() || token.attempts >= MAX_CODE_ATTEMPTS) {
       throw codeError(VerificationMessage.expired);
+    }
+    if (!matchesHash(code, token.codeHash)) {
+      await this.prisma.authToken.update({
+        where: { id: token.id },
+        data: { attempts: { increment: 1 } },
+      });
+      throw codeError(VerificationMessage.invalid);
     }
 
     await this.prisma.$transaction(async (tx) => {
       const now = new Date();
+      // Re-checked in the update itself: parallel wrong guesses may have used up the attempts
       const { count } = await tx.authToken.updateMany({
-        where: { id: token.id, usedAt: null },
+        where: {
+          id: token.id,
+          usedAt: null,
+          expiresAt: { gt: now },
+          attempts: { lt: MAX_CODE_ATTEMPTS },
+        },
         data: { usedAt: now },
       });
       if (count === 0) {

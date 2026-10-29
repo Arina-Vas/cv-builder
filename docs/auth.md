@@ -79,18 +79,23 @@ Email Verification pages. Tables are described in [data-model.md](data-model.md)
 - **Codes** are 6 digits, generated with a secure random source, stored as hashes in `auth_tokens`, valid for
   10 minutes and single-use. A new code invalidates the previous one. Verify and resend are rate-limited.
 - Verifying sets `users.email_verified_at` and `auth_tokens.used_at` in one transaction.
-- A new code expires the previous unused ones, so an old code answers `Verification code has expired`.
+- Only the **newest** code is checked; an older code answers `Invalid verification code`.
+- **5 wrong attempts per code** (`MAX_CODE_ATTEMPTS`, counted in `auth_tokens.attempts`). After that even the right
+  code answers `Verification code has expired` and the user asks for a new one. The limit is per code, not per IP,
+  so changing IPs does not help: with a new code at most once a minute, guessing is at most 5 tries a minute
+  against a million values. The spec has no "too many attempts" text, so the existing expired message is reused.
+- The code is compared with the stored hash in constant time (`matchesHash`).
 - If the email cannot be sent during sign up, the account and the session are still created (the failure is
   logged without the code); the user asks for a new code on the verification page.
 - Errors of `verifyEmail` (the frontend maps them by `fields[0].message`):
 
-  | Case                   | Code             | Message                                                               |
-  | ---------------------- | ---------------- | --------------------------------------------------------------------- |
-  | empty / not 6 digits   | `BAD_USER_INPUT` | `Verification code is required` / `Please enter a valid 6-digit code` |
-  | wrong code             | `BAD_USER_INPUT` | `Invalid verification code`                                           |
-  | expired or replaced    | `BAD_USER_INPUT` | `Verification code has expired`                                       |
-  | already used           | `BAD_USER_INPUT` | `Verification code has already been used`                             |
-  | email already verified | `CONFLICT`       | `Email is already verified`                                           |
+  | Case                    | Code             | Message                                                               |
+  | ----------------------- | ---------------- | --------------------------------------------------------------------- |
+  | empty / not 6 digits    | `BAD_USER_INPUT` | `Verification code is required` / `Please enter a valid 6-digit code` |
+  | wrong code              | `BAD_USER_INPUT` | `Invalid verification code`                                           |
+  | expired / 5 wrong tries | `BAD_USER_INPUT` | `Verification code has expired`                                       |
+  | already used            | `BAD_USER_INPUT` | `Verification code has already been used`                             |
+  | email already verified  | `CONFLICT`       | `Email is already verified`                                           |
 
 - `resendVerificationCode` within 60 seconds of the previous code returns `RATE_LIMITED` with `retryAfter`
   (seconds) and `Please wait before requesting another code`.

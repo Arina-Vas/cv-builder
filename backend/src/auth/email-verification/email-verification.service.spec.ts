@@ -7,7 +7,11 @@ import type { MailService } from '@/mail/mail.service';
 import type { PrismaService } from '@/prisma/prisma.service';
 import type { User } from '@/users/models/user.model';
 import type { UsersService } from '@/users/users.service';
-import { EmailVerificationService, VerificationMessage } from './email-verification.service';
+import {
+  EmailVerificationService,
+  MAX_CODE_ATTEMPTS,
+  VerificationMessage,
+} from './email-verification.service';
 
 jest.mock('@/prisma/prisma.service', () => ({ PrismaService: class PrismaService {} }));
 jest.mock('@nestjs/config', () => ({ ConfigService: class ConfigService {} }));
@@ -38,7 +42,12 @@ const errorOf = async (promise: Promise<unknown>): Promise<GraphQLError> => {
 describe('EmailVerificationService', () => {
   const tx = { authToken: { updateMany: jest.fn() }, user: { update: jest.fn() } };
   const prisma = {
-    authToken: { updateMany: jest.fn(), create: jest.fn(), findFirst: jest.fn() },
+    authToken: {
+      updateMany: jest.fn(),
+      update: jest.fn(),
+      create: jest.fn(),
+      findFirst: jest.fn(),
+    },
     $transaction: jest.fn(),
   };
   const users = { findById: jest.fn() };
@@ -123,10 +132,14 @@ describe('EmailVerificationService', () => {
   });
 
   describe('verify', () => {
-    const token = (overrides: Partial<{ expiresAt: Date; usedAt: Date | null }> = {}) => ({
+    const token = (
+      overrides: Partial<{ expiresAt: Date; usedAt: Date | null; attempts: number }> = {},
+    ) => ({
       id: 'token-1',
+      codeHash: hashToken('042917'),
       expiresAt: new Date('2026-10-27T12:05:00.000Z'),
       usedAt: null,
+      attempts: 0,
       ...overrides,
     });
 
@@ -139,15 +152,17 @@ describe('EmailVerificationService', () => {
       await expect(service.verify(user, '042917')).resolves.toBe(verified);
       expect(prisma.authToken.findFirst).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: {
-            userId: 'user-1',
-            type: AuthTokenType.EMAIL_VERIFICATION,
-            codeHash: hashToken('042917'),
-          },
+          where: { userId: 'user-1', type: AuthTokenType.EMAIL_VERIFICATION },
+          orderBy: { createdAt: 'desc' },
         }),
       );
       expect(tx.authToken.updateMany).toHaveBeenCalledWith({
-        where: { id: 'token-1', usedAt: null },
+        where: {
+          id: 'token-1',
+          usedAt: null,
+          expiresAt: { gt: NOW },
+          attempts: { lt: MAX_CODE_ATTEMPTS },
+        },
         data: { usedAt: NOW },
       });
       expect(tx.user.update).toHaveBeenCalledWith({
@@ -156,11 +171,29 @@ describe('EmailVerificationService', () => {
       });
     });
 
+    it('counts a wrong code against the newest code', async () => {
+      prisma.authToken.findFirst.mockResolvedValue(token({ attempts: 2 }));
+
+      const error = await errorOf(service.verify(user, '000000'));
+
+      expect(error.message).toBe(VerificationMessage.invalid);
+      expect(prisma.authToken.update).toHaveBeenCalledWith({
+        where: { id: 'token-1' },
+        data: { attempts: { increment: 1 } },
+      });
+      expect(prisma.$transaction).not.toHaveBeenCalled();
+    });
+
     it.each([
-      ['an unknown code', null, VerificationMessage.invalid],
-      ['a used code', token({ usedAt: NOW }), VerificationMessage.used],
-      ['an expired code', token({ expiresAt: NOW }), VerificationMessage.expired],
-    ])('rejects %s', async (_, found, message) => {
+      ['no code was sent', null, VerificationMessage.invalid],
+      ['the code is used', token({ usedAt: NOW }), VerificationMessage.used],
+      ['the code is expired', token({ expiresAt: NOW }), VerificationMessage.expired],
+      [
+        'the attempts are used up',
+        token({ attempts: MAX_CODE_ATTEMPTS }),
+        VerificationMessage.expired,
+      ],
+    ])('rejects even the right code when %s', async (_, found, message) => {
       prisma.authToken.findFirst.mockResolvedValue(found);
 
       const error = await errorOf(service.verify(user, '042917'));
@@ -169,6 +202,7 @@ describe('EmailVerificationService', () => {
         code: ErrorCode.BAD_USER_INPUT,
         fields: [{ field: 'code', message }],
       });
+      expect(prisma.authToken.update).not.toHaveBeenCalled();
       expect(tx.user.update).not.toHaveBeenCalled();
     });
 

@@ -1,4 +1,5 @@
 import { ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE } from '@/auth/sessions/auth-cookies';
+import { MAX_CODE_ATTEMPTS } from '@/auth/email-verification/email-verification.service';
 import { REFRESH_GRACE_SECONDS } from '@/auth/sessions/sessions.service';
 import { AUTH_THROTTLE_LIMIT } from '@/common/throttling/throttle.decorators';
 import { UserRole } from '@/common/graphql/enums';
@@ -129,6 +130,29 @@ describe('Auth (integration)', () => {
       expect(t.mail.sent.filter((mail) => mail.to === email)).toHaveLength(2);
       expect(first).toMatch(/^\d{6}$/);
       await expect(browser.data(VERIFY_EMAIL, { input: { code: second } })).resolves.toBeDefined();
+    });
+
+    it('stops accepting a code after 5 wrong attempts, until a new code is sent', async () => {
+      const browser = client();
+      const email = uniqueEmail();
+      await browser.data(SIGN_UP, {
+        input: { email, password: PASSWORD, confirmPassword: PASSWORD },
+      });
+      const code = t.mail.last(email, 'verification');
+      const wrongCode = code === '000000' ? '111111' : '000000';
+
+      for (let attempt = 1; attempt <= MAX_CODE_ATTEMPTS; attempt += 1) {
+        const wrong = await browser.error(VERIFY_EMAIL, { input: { code: wrongCode } });
+        expect(wrong.message).toBe('Invalid verification code');
+      }
+      const blocked = await browser.error(VERIFY_EMAIL, { input: { code } });
+      expect(blocked.message).toBe('Verification code has expired');
+
+      await t.prisma.authToken.updateMany({ data: { createdAt: new Date(Date.now() - 120_000) } });
+      await browser.data(RESEND_CODE);
+      await expect(
+        browser.data(VERIFY_EMAIL, { input: { code: t.mail.last(email, 'verification') } }),
+      ).resolves.toBeDefined();
     });
 
     it('rate-limits resending the code per account', async () => {

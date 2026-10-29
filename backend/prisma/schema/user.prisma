@@ -58,6 +58,8 @@ model AuthToken {
 
   expiresAt DateTime  @map("expires_at")
   usedAt    DateTime? @map("used_at")
+  // Wrong codes entered for this token; the email verification code stops working after 5
+  attempts  Int       @default(0)
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
