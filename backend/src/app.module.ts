@@ -10,6 +10,7 @@ import { join } from 'node:path';
 import { DepartmentModule } from '@/departments/department.module';
 import { PositionModule } from '@/positions/position.module';
 import { LanguageModule } from '@/languages/language.module';
+import { SkillModule } from '@/skills/skill.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { LanguageModule } from '@/languages/language.module';
     DepartmentModule,
     PositionModule,
     LanguageModule,
+    SkillModule,
   ],
   controllers: [AppController],
 })
