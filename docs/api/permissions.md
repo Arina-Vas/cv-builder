@@ -157,3 +157,13 @@ Operation-level tables are added by each module together with its resolvers: the
 | `createLanguage` | Admin  |
 | `updateLanguage` | Admin  |
 | `deleteLanguage` | Admin  |
+
+### Skills
+
+| Operation         | Access |
+| ----------------- | ------ |
+| `skills`          | All    |
+| `skillCategories` | All    |
+| `createSkill`     | Admin  |
+| `updateSkill`     | Admin  |
+| `deleteSkill`     | Admin  |

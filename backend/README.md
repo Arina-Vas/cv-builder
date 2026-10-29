@@ -58,6 +58,7 @@ src/                  # main.ts, app.module.ts, app.controller.ts
   departments/        # feature module, see Module layout
   positions/          # feature module, same layout
   languages/          # feature module, same layout
+  skills/             # feature module, same layout; also the skillCategories lookup
   generated/prisma/   # generated Prisma Client (git-ignored)
 ```
 
