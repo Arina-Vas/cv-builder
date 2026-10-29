@@ -50,9 +50,9 @@ prisma.config.ts      # Prisma CLI config
 schema.gql            # generated GraphQL schema (committed)
 src/                  # main.ts, app.module.ts, app.controller.ts
   common/
-    graphql/          # list args, pagination, SortOrder, Date scalar, GraphQL enums, constants
+    graphql/          # list args and responses, SortOrder, Date scalar, GraphQL enums, constants
     errors/           # error codes, helpers, validation errors, global exception filter
-    validation/       # input transforms: @NormalizeText(), @TrimText(), @ToUpperCaseText()
+    validation/       # input transforms (@NormalizeText(), …), @IsNotBeforeDate()
     auth/             # @Roles() decorator
   prisma/             # PrismaService (global module), isPrismaError()
   departments/        # feature module, see Module layout

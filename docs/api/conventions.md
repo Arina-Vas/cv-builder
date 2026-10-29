@@ -28,19 +28,21 @@ GraphQL schema from them.
 
 Modules import these instead of writing their own:
 
-| What                                                    | File                                               |
-| ------------------------------------------------------- | -------------------------------------------------- |
-| `ListArgs` (search + sortOrder)                         | `backend/src/common/graphql/list.args.ts`          |
-| `PaginatedListArgs` (+ page, pageSize)                  | `backend/src/common/graphql/list.args.ts`          |
-| `Paginated(Type)`, `PaginatedResult<T>`                 | `backend/src/common/graphql/paginated.response.ts` |
-| `SortOrder`                                             | `backend/src/common/graphql/sort-order.enum.ts`    |
-| Pagination defaults, page sizes, `MAX_NAME_LENGTH`      | `backend/src/common/graphql/constants.ts`          |
-| `DateScalar`                                            | `backend/src/common/graphql/date.scalar.ts`        |
-| `UserRole`, `Mastery`, `Proficiency`                    | `backend/src/common/graphql/enums.ts`              |
-| `ErrorCode` and error helpers                           | `backend/src/common/errors/`                       |
-| `@Roles()`                                              | `backend/src/common/auth/roles.decorator.ts`       |
-| `@NormalizeText()`, `@TrimText()`, `@ToUpperCaseText()` | `backend/src/common/validation/transforms.ts`      |
-| `isPrismaError(error, code)`                            | `backend/src/prisma/prisma-errors.ts`              |
+| What                                                    | File                                                  |
+| ------------------------------------------------------- | ----------------------------------------------------- |
+| `ListArgs` (search + sortOrder)                         | `backend/src/common/graphql/list.args.ts`             |
+| `PaginatedListArgs` (+ page, pageSize)                  | `backend/src/common/graphql/list.args.ts`             |
+| `Paginated(Type)`, `PaginatedResult<T>`                 | `backend/src/common/graphql/paginated.response.ts`    |
+| `Listed(Type)`, `ListedResult<T>`                       | `backend/src/common/graphql/list.response.ts`         |
+| `SortOrder`                                             | `backend/src/common/graphql/sort-order.enum.ts`       |
+| Pagination defaults, page sizes, `MAX_NAME_LENGTH`      | `backend/src/common/graphql/constants.ts`             |
+| `DateScalar`                                            | `backend/src/common/graphql/date.scalar.ts`           |
+| `UserRole`, `Mastery`, `Proficiency`                    | `backend/src/common/graphql/enums.ts`                 |
+| `ErrorCode` and error helpers                           | `backend/src/common/errors/`                          |
+| `@Roles()`                                              | `backend/src/common/auth/roles.decorator.ts`          |
+| `@NormalizeText()`, `@TrimText()`, `@ToUpperCaseText()` | `backend/src/common/validation/transforms.ts`         |
+| `@IsNotBeforeDate(property)`                            | `backend/src/common/validation/is-not-before-date.ts` |
+| `isPrismaError(error, code)`                            | `backend/src/prisma/prisma-errors.ts`                 |
 
 Prisma enums are always imported from `common/graphql/enums.ts`, not from `src/generated/prisma`: that file
 registers them for GraphQL.
@@ -52,6 +54,10 @@ uniqueness checks get the stored form:
   single-line values;
 - `@TrimText()` only trims the ends and keeps line breaks: multiline values such as a project description;
 - `@ToUpperCaseText()` upper-cases the value (language ISO code), placed together with `@NormalizeText()`.
+
+Date ranges are checked in the DTO too: `@IsNotBeforeDate('startDate', { message })` on the end date fails when
+it is earlier than the start date (equal dates pass). A missing or invalid date is left to `@IsDate` on its own
+field, so the client gets one error per cause.
 
 ### Shared entity types
 
@@ -164,7 +170,8 @@ export class DepartmentsArgs extends PaginatedListArgs {
 export class DepartmentPage extends Paginated(Department) {}
 ```
 
-Lists without pagination extend `ListArgs` instead of `PaginatedListArgs`.
+Lists without pagination extend `ListArgs` instead of `PaginatedListArgs` and return
+`class ProjectList extends Listed(Project) {}` (`{ items, total }`).
 
 ### Defaults and rules
 
@@ -196,7 +203,7 @@ Lists without pagination extend `ListArgs` instead of `PaginatedListArgs`.
 | user skills / languages, CV skills                                         | —                | grouped by category, by name inside a group       | —                            | no        |
 | lookups for selects (`skillCategories`, `technologies`, `projectRoles`, …) | `name`           | —                                                 | —                            | no        |
 
-Lists without pagination return `{ items, total }` or a plain list for lookups.
+Lists without pagination return `{ items, total }` (`Listed`) or a plain list for lookups.
 
 Sort and search fields come from the Sorting and Search sections of each wiki page.
 
@@ -236,6 +243,9 @@ avoid a column-key → enum map in every table.
   `deleteUserSkills(userId: ID!, skillIds: [ID!]!): [ID!]!`.
 - Mutations take one argument named `input` of an `@InputType`, except deletes, which take ids directly.
 - `update*` inputs contain `id` and only the fields the user can change.
+- `update*` is a full update: `Update<Entity>Input extends Create<Entity>Input` and adds `id`, so the form sends
+  every field. A list of ids (`technologyIds`) replaces the whole set; an omitted list defaults to `[]` and
+  clears it.
 - Inputs are always validated on the backend, even if the frontend validates them too
   (wiki: "Client-side validation is intended for user experience and must not replace server-side validation").
 - The UI treats a mutation as successful only after the response arrives (no optimistic updates without a rollback).
