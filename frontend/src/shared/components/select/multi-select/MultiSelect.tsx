@@ -8,6 +8,7 @@ import { ChevronIcon } from '@/shared/components/icons/ChevronIcon';
 import { useControllableState } from '@/shared/lib/useControllableState';
 import type { SelectOption } from '../Select.types';
 import s from './MultiSelect.module.css';
+import { useTranslations } from 'next-intl';
 
 export interface MultiSelectProps {
   options: SelectOption[];
@@ -48,9 +49,10 @@ export function MultiSelect({
   defaultOpen,
   onOpenChange,
   filter = defaultFilter,
-  emptyText = 'No options',
+  emptyText,
   ref,
 }: MultiSelectProps) {
+  const t = useTranslations('common.select');
   const autoId = useId();
   const inputId = id ?? autoId;
   const listId = `${inputId}-listbox`;
@@ -273,7 +275,7 @@ export function MultiSelect({
                 );
               })}
             </ul>
-            {filtered.length === 0 && <p className={s.empty}>{emptyText}</p>}
+            {filtered.length === 0 && <p className={s.empty}>{emptyText ?? t('noOptions')}</p>}
           </Popover.Content>
         </Popover.Portal>
       </Popover.Root>

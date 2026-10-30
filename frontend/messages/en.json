@@ -1,7 +1,41 @@
 {
   "common": {
-    "notFound": {
-      "title": "Not Found"
+    "notFound": { "title": "Not Found" },
+    "pagination": {
+      "label": "Pagination",
+      "previous": "Previous page",
+      "next": "Next page",
+      "page": "Page {page}",
+      "rowsPerPage": "Rows per page"
+    },
+    "table": {
+      "actions": "Actions",
+      "rowActions": "Actions for {name}",
+      "openRow": "Open {name}",
+      "row": "row {id}",
+      "loadingRows": "Loading rows",
+      "retry": "Retry"
+    },
+    "toast": {
+      "region": "Notifications",
+      "viewport": "Notifications ({hotkey})",
+      "close": "Close",
+      "types": { "success": "Success", "error": "Error", "warning": "Warning", "info": "Info" }
+    },
+    "input": { "showPassword": "Show password", "hidePassword": "Hide password" },
+    "datePicker": {
+      "placeholder": "Select date",
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "select": { "noOptions": "No options" },
+    "chip": { "remove": "Remove {label}" },
+    "avatarUploader": {
+      "upload": "Upload avatar image",
+      "hint": "png, jpg or gif no more than {maxSize}",
+      "remove": "Remove avatar",
+      "invalidType": "Only png, jpg or gif allowed",
+      "tooLarge": "File is larger than {maxSize}"
     }
   }
 }

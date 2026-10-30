@@ -5,6 +5,7 @@ import { EyeIcon } from '../../icons/EyeIcon';
 import { EyeOffIcon } from '../../icons/EyeOffIcon';
 import { Field, getErrorId } from '@/shared/components/field/Field';
 import styles from './Input.module.css';
+import { useTranslations } from 'next-intl';
 
 export interface InputProps extends ComponentProps<'input'> {
   label: string;
@@ -12,6 +13,7 @@ export interface InputProps extends ComponentProps<'input'> {
 }
 
 export function Input({ label, error, id, type, disabled, className, ...rest }: InputProps) {
+  const t = useTranslations('common.input');
   const autoId = useId();
   const inputId = id ?? autoId;
 
@@ -35,7 +37,7 @@ export function Input({ label, error, id, type, disabled, className, ...rest }: 
       />
       {isPassword && (
         <IconButton
-          aria-label={isPasswordVisible ? 'Hide password' : 'Show password'}
+          aria-label={isPasswordVisible ? t('hidePassword') : t('showPassword')}
           aria-controls={inputId}
           disabled={disabled}
           onClick={() => setIsPasswordVisible((visible) => !visible)}

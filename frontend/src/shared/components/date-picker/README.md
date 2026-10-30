@@ -6,6 +6,12 @@ the calendar itself is [`react-datepicker`](https://reactdatepicker.com) in `inl
 dates are formatted with `date-fns`.
 Live examples of every state, Light and Dark: Storybook → **Shared/DatePicker**.
 
+The default placeholder and the ← / → names come from `common.datePicker` in `messages/en.json`, so
+the picker needs `NextIntlClientProvider` above it: the root layout mounts it in the app,
+`.storybook/preview.tsx` in Storybook. Month names, week days and the `dd.MM.yyyy` format are not
+translated yet: `date-fns` and `react-datepicker` run without a locale (English) until a second
+language is added.
+
 ## Files
 
 | File                     | What                                                     |
@@ -35,15 +41,15 @@ const [endDate, setEndDate] = useState<Date | null>(null);
 <DatePicker value={date} onChange={setDate} disabled />
 ```
 
-| Prop           | Values                         | Default         |
-| -------------- | ------------------------------ | --------------- |
-| `value`        | `Date` · `null` = empty        | required ⚠️     |
-| `onChange`     | `(date: Date \| null) => void` | required        |
-| `placeholder`  | `string`                       | `'Select date'` |
-| `minDate`      | `Date`: earlier days disabled  | —               |
-| `maxDate`      | `Date`: later days disabled    | —               |
-| `excludeDates` | `Date[]`: single days disabled | —               |
-| `disabled`     | `boolean`                      | `false`         |
+| Prop           | Values                         | Default                                         |
+| -------------- | ------------------------------ | ----------------------------------------------- |
+| `value`        | `Date` · `null` = empty        | required ⚠️                                     |
+| `onChange`     | `(date: Date \| null) => void` | required                                        |
+| `placeholder`  | `string`                       | `common.datePicker.placeholder` (`Select date`) |
+| `minDate`      | `Date`: earlier days disabled  | —                                               |
+| `maxDate`      | `Date`: later days disabled    | —                                               |
+| `excludeDates` | `Date[]`: single days disabled | —                                               |
+| `disabled`     | `boolean`                      | `false`                                         |
 
 - ⚠️ **Controlled only**: there is no `defaultValue`, the parent always owns the date. Empty is `null`, not `undefined`.
 - `onChange` is called only when a **day** is clicked; it gets a local `Date` at 00:00. The popover closes after it.
@@ -63,6 +69,8 @@ The calendar has three views, switched from the header:
 | `month` | the month name in the header | goes to `day` of that month         | year            |
 | `year`  | the year in the header       | goes to `month` of that year        | year range (12) |
 
+- ← / → are named `Previous` / `Next` (`common.datePicker.previous` / `next`) in every view; what
+  they move is in the table above, and the header says where the calendar is after a click.
 - Every open starts from the `day` view on the month of `value`, or today when it's empty.
   Switching views or months without picking a day changes nothing outside.
 - The week starts on **Sunday**, week days are shown as one letter (`S M T W T F S`).

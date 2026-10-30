@@ -34,7 +34,9 @@ import { Input, Textarea } from '@/shared/components/inputs';
 Plus every native `<input>` attribute (`type`, `name`, `value`, `defaultValue`, `onChange`, `onBlur`,
 `maxLength`, `autoComplete`, `ref`, `aria-*`).
 
-- `type="password"` renders a show / hide button inside the field (`Show password` / `Hide password`).
+- `type="password"` renders a show / hide button inside the field (`Show password` / `Hide password`,
+  keys `common.input.showPassword` / `hidePassword` in `messages/en.json`; `Input` needs
+  `NextIntlClientProvider` above it: root layout in the app, `.storybook/preview.tsx` in Storybook).
   It is `type="button"`, so it never submits the form. The state is local to the field.
 - Do **not** pass `placeholder`: the field sets `placeholder=" "` itself, the floating label depends on it.
   The label plays the placeholder role in the empty state.
@@ -102,4 +104,4 @@ To change a size or colour, change the token, not the component CSS.
 - [x] `Textarea`
 - [x] Storybook stories
 - [ ] Unit tests (`Input.test.tsx`, `Textarea.test.tsx`)
-- [ ] `Show password` / `Hide password` texts: move to i18n when it is set up
+- [x] `Show password` / `Hide password` texts: moved to i18n (`common.input`)
