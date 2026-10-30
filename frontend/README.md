@@ -45,14 +45,88 @@ or stores them.
 - `src/shared/lib/apollo/refresh-link.ts`: on `UNAUTHENTICATED` (except `signIn`) it calls `refresh` once, shared by
   parallel requests, and retries; if the refresh fails it goes to `/login`.
 - Auth pages, forms, operations and validation live in `src/features/auth/`. Backend errors are read with
-  `parseError` (`src/shared/lib/apollo/graphql-errors.ts`): `BAD_USER_INPUT` / `CONFLICT` field messages go under
-  the fields, everything else is a toast.
+  `parseError` (`src/shared/lib/apollo/graphql-errors.ts`) and shown with our own texts (see
+  [Errors](#errors) below): wrong credentials and a taken email go under the field, everything else is a toast.
+  Field-level `BAD_USER_INPUT` is caught by the client validation first (`lib/validation.ts` repeats the backend
+  rules and limits), so only the verification code and the reset link can fail on the server.
+
+## Internationalization (i18n)
+
+[next-intl](https://next-intl.dev) without i18n routing: the locale is not part of the URL and `src/proxy.ts`
+does not deal with it. Only English for now.
+
+- **Messages** live in `messages/<locale>.json`. `src/i18n/request.ts` picks the locale for a request and loads
+  its messages; `src/i18n/config.ts` lists the supported locales.
+- **Provider.** The root layout mounts `NextIntlClientProvider`; `.storybook/preview.tsx` mounts it with the
+  messages imported directly (Storybook has no server). Any component that calls `useTranslations` needs it.
+- **Usage.** Server components: `const t = await getTranslations('auth.signIn')`. Client components and
+  non-async server components: `const t = useTranslations('auth.signIn')`. Values go in ICU placeholders:
+  `t('page', { page: 2 })` for `"Page {page}"`; plurals use `{seconds, plural, one {…} other {…}}`.
+- **Typed keys.** `src/i18n/next-intl.d.ts` types the messages from `messages/en.json`, so a missing key fails
+  the type-check. Placeholders are **not** checked: `t('hint')` for `"… {maxSize}"` type-checks and renders the
+  key name at runtime with a `FORMATTING_ERROR` in the console. Check a new placeholder in the browser or
+  Storybook.
+- **No hardcoded UI text.** Everything a user sees or a screen reader reads (`aria-label`, titles, toasts)
+  goes through a key. Exceptions: ARIA tokens such as `aria-sort="ascending"` (never translated) and
+  `app/global-error.tsx`, which replaces the root layout and so has no provider.
+- Write texts in normal case: `Button` and the auth tabs upper-case them in CSS.
+
+### Key naming
+
+`namespace.section.key`, all parts in camelCase: `auth.signIn.submit`, `common.pagination.rowsPerPage`.
+
+| Namespace    | What goes there                                                                  |
+| ------------ | -------------------------------------------------------------------------------- |
+| `common`     | Shared components, one section per component (`common.table`, `common.toast`, …) |
+| `errors`     | API errors by `extensions.code`, see [Errors](#errors)                           |
+| `validation` | Client-side form validation messages, one section per field (`validation.email`) |
+| `auth`, …    | One namespace per feature: a section per form / page, plus `<feature>.errors`    |
+
+Add a namespace together with the first UI that uses it, not in advance. The one exception to camelCase is
+`errors.*`: those keys are the backend codes as is (`errors.RATE_LIMITED`).
+
+### Errors
+
+The frontend shows its own text for an API error, chosen by `extensions.code` (and `field` where the form
+needs more), never the backend `message` ([conventions](../docs/api/conventions.md#messages)).
+
+- `parseError(error)` returns `{ code, fieldErrors, retryAfter, message }`; `message` is the backend text, for
+  logs only.
+- `useErrorMessage()` (`src/shared/lib/apollo/useErrorMessage.ts`) returns a function that turns that result
+  into the `errors.<code>` text; no code (network error) falls back to `errors.INTERNAL_SERVER_ERROR`.
+  `RATE_LIMITED` gets the seconds from `retryAfter`. A new `ErrorCode` without a key fails the type-check.
+- A form checks the cases it knows better first and takes the text from `<feature>.errors`
+  (`auth.errors.emailTaken` for `CONFLICT` on sign-up), then falls back to `errorMessage(appError)`.
+
+```tsx
+const errorMessage = useErrorMessage(); // a hook: call it in the component body
+// …
+catch (error) {
+  const appError = parseError(error);
+  if (appError.code === 'CONFLICT') setServerErrors({ email: t('errors.emailTaken') });
+  else toast.error(errorMessage(appError));
+}
+```
+
+### Validation
+
+Validators in `src/features/auth/lib/validation.ts` take the `validation` translator and return the text:
+`validateEmail(value, t)`. `useFormFields` calls `useTranslations('validation')` once and passes it as the
+second argument of `validate`, so forms don't need their own hook:
+
+```tsx
+useFormFields({ email: '' }, ({ email }, tValidation) => ({
+  email: validateEmail(email, tValidation),
+}));
+```
 
 ## Structure
 
 ```
+messages/       # translations, one JSON per locale
 src/app/        # App Router: (auth) pages, (main) app pages, layouts
 src/features/   # feature code (auth: api, components, hooks, lib)
+src/i18n/       # next-intl: locales, request config, typed message keys
 src/shared/     # shared components, hooks, theme, Apollo setup
 src/gql/        # generated GraphQL types (pnpm codegen)
 src/proxy.ts    # route guard

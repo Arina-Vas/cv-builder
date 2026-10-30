@@ -1,0 +1,123 @@
+{
+  "common": {
+    "notFound": { "title": "Not Found" },
+    "pagination": {
+      "label": "Pagination",
+      "previous": "Previous page",
+      "next": "Next page",
+      "page": "Page {page}",
+      "rowsPerPage": "Rows per page"
+    },
+    "table": {
+      "actions": "Actions",
+      "rowActions": "Actions for {name}",
+      "openRow": "Open {name}",
+      "row": "row {id}",
+      "loadingRows": "Loading rows",
+      "retry": "Retry"
+    },
+    "toast": {
+      "region": "Notifications",
+      "viewport": "Notifications ({hotkey})",
+      "close": "Close",
+      "types": { "success": "Success", "error": "Error", "warning": "Warning", "info": "Info" }
+    },
+    "input": { "showPassword": "Show password", "hidePassword": "Hide password" },
+    "datePicker": {
+      "placeholder": "Select date",
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "select": { "noOptions": "No options" },
+    "chip": { "remove": "Remove {label}" },
+    "avatarUploader": {
+      "upload": "Upload avatar image",
+      "hint": "png, jpg or gif no more than {maxSize}",
+      "remove": "Remove avatar",
+      "invalidType": "Only png, jpg or gif allowed",
+      "tooLarge": "File is larger than {maxSize}"
+    }
+  },
+  "errors": {
+    "UNAUTHENTICATED": "Your session has expired. Please sign in again",
+    "FORBIDDEN": "You don't have permission to do this",
+    "EMAIL_NOT_VERIFIED": "Verify your email to do this",
+    "NOT_FOUND": "This item no longer exists",
+    "BAD_USER_INPUT": "Check the entered data",
+    "CONFLICT": "This value is already taken",
+    "ENTITY_IN_USE": "This item is in use and can't be deleted",
+    "RATE_LIMITED": "{seconds, plural, =0 {Too many attempts. Try again later} one {Too many attempts. Try again in # second} other {Too many attempts. Try again in # seconds}}",
+    "INTERNAL_SERVER_ERROR": "Something went wrong. Please try again later"
+  },
+  "validation": {
+    "email": {
+      "required": "Email is required",
+      "invalid": "Please enter a valid email address"
+    },
+    "password": {
+      "required": "Password is required",
+      "newRequired": "New password is required",
+      "minLength": "Password must be at least {min} characters long",
+      "maxLength": "Password must not exceed {max} characters"
+    },
+    "confirmPassword": {
+      "required": "Confirm Password is required",
+      "mismatch": "Passwords do not match"
+    },
+    "code": {
+      "required": "Verification code is required",
+      "invalid": "Please enter a valid 6-digit code"
+    }
+  },
+  "auth": {
+    "tabs": { "label": "Authentication", "signIn": "Sign in", "signUp": "Sign up" },
+    "fields": { "email": "Email", "password": "Password", "confirmPassword": "Confirm Password" },
+    "signIn": {
+      "title": "Welcome back",
+      "subtitle": "Hello again! Sign in to continue",
+      "submit": "Sign in",
+      "forgotPassword": "Forgot password"
+    },
+    "signUp": {
+      "title": "Sign up now",
+      "subtitle": "Welcome! Sign up to continue",
+      "submit": "Create account",
+      "haveAccount": "I have an account"
+    },
+    "forgotPassword": {
+      "title": "Forgot password",
+      "subtitle": "We will send you an email with further instructions",
+      "submit": "Reset password",
+      "cancel": "Cancel",
+      "sent": "If an account with this email exists, you will receive password reset instructions."
+    },
+    "resetPassword": {
+      "title": "Reset password",
+      "subtitle": "Here you should write a new password and confirm it",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm password",
+      "submit": "Submit",
+      "goToSignIn": "Go to sign in",
+      "success": "Your password has been reset. Please sign in."
+    },
+    "verifyEmail": {
+      "title": "Email verification",
+      "subtitle": "Enter the verification code we sent to your email.",
+      "codeLabel": "Verification code",
+      "digit": "Digit {index} of {length}",
+      "confirm": "Confirm",
+      "resend": "{seconds, plural, =0 {Resend code} other {Resend code (#s)}}",
+      "later": "Later",
+      "verified": "Email verified",
+      "codeSent": "Verification code sent"
+    },
+    "logout": "Logout",
+    "errors": {
+      "invalidCredentials": "Invalid email or password",
+      "emailTaken": "An account with this email already exists",
+      "codeInvalid": "The code is invalid or has expired. Request a new one",
+      "alreadyVerified": "Email is already verified",
+      "resetLinkInvalid": "This password reset link is invalid or has expired"
+    }
+  }
+}

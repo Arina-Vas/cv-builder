@@ -4,8 +4,10 @@ import type { ChangeEvent } from 'react';
 import { Avatar } from '@/shared/components/avatar/Avatar';
 import { CloseIcon } from '@/shared/components/icons/CloseIcon';
 import { IconButton } from '@/shared/components/buttons';
+import { useTranslations } from 'next-intl';
 
 const MAX_SIZE = 0.5 * 1024 * 1024; // 0.5MB
+const MAX_SIZE_LABEL = '0.5MB';
 const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/gif'];
 
 export interface AvatarUploaderProps {
@@ -25,17 +27,19 @@ export const AvatarUploader = ({
   onError,
   disabled,
 }: AvatarUploaderProps) => {
+  const t = useTranslations('common.avatarUploader');
+
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = '';
     if (!file) return;
 
     if (!ALLOWED_TYPES.includes(file.type)) {
-      onError?.('Only png, jpg or gif allowed');
+      onError?.(t('invalidType'));
       return;
     }
     if (file.size > MAX_SIZE) {
-      onError?.('File is larger than 0.5MB');
+      onError?.(t('tooLarge', { maxSize: MAX_SIZE_LABEL }));
       return;
     }
     onChange?.(file);
@@ -46,7 +50,7 @@ export const AvatarUploader = ({
       <div className={s.avatar}>
         <Avatar src={src} fallback={fallback} size="lg" />
         {src && !disabled && (
-          <IconButton aria-label={'Remove avatar'} onClick={onRemove} className={s.removeButton}>
+          <IconButton aria-label={t('remove')} onClick={onRemove} className={s.removeButton}>
             <CloseIcon />
           </IconButton>
         )}
@@ -61,9 +65,9 @@ export const AvatarUploader = ({
         />
         <span className={s.title}>
           <UploadIcon />
-          Upload avatar image
+          {t('upload')}
         </span>
-        <span className={s.hint}>png, jpg or gif no more than 0.5MB</span>
+        <span className={s.hint}>{t('hint', { maxSize: MAX_SIZE_LABEL })}</span>
       </label>
     </div>
   );

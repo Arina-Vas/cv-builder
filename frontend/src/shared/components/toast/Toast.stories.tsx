@@ -5,10 +5,10 @@ import { expect, userEvent, waitFor, within } from 'storybook/test';
 
 import { Toast } from './Toast';
 import { ToastProvider, useToast } from './ToastProvider';
-import { type ToastType, TITLES } from './Toast.types';
+import { TOAST_TYPES } from './Toast.types';
 
-// from TITLES, so a new type shows up here without editing the stories
-const TYPES = Object.keys(TITLES) as ToastType[];
+// from TOAST_TYPES, so a new type shows up here without editing the stories
+const TYPES = TOAST_TYPES;
 
 // RadixToast.Root renders into RadixToast.Viewport, so every story needs a Provider + Viewport.
 // The viewport here is static (not fixed in a corner) so toasts sit right in the canvas.

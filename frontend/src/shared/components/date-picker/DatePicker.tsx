@@ -6,6 +6,7 @@ import { DatePicker as ReactDatePicker } from 'react-datepicker';
 import { useState } from 'react';
 import { ChevronIcon } from '@/shared/components/icons/ChevronIcon';
 import { CalendarIcon } from '@/shared/components/icons/CalendarIcon';
+import { useTranslations } from 'next-intl';
 
 type Props = {
   value: Date | null;
@@ -22,12 +23,13 @@ type View = 'day' | 'month' | 'year';
 export const DatePicker = ({
   value,
   onChange,
-  placeholder = 'Select date',
+  placeholder,
   minDate,
   maxDate,
   excludeDates,
   disabled,
 }: Props) => {
+  const t = useTranslations('common.datePicker');
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<View>('day');
   const [viewDate, setViewDate] = useState<Date>(value ?? new Date());
@@ -61,7 +63,7 @@ export const DatePicker = ({
     <Popover.Root open={open} onOpenChange={handleOpenChange}>
       <Popover.Trigger asChild disabled={disabled}>
         <button type="button" className={s.trigger} data-empty={!value}>
-          <span>{value ? format(value, 'dd.MM.yyyy') : placeholder}</span>
+          <span>{value ? format(value, 'dd.MM.yyyy') : (placeholder ?? t('placeholder'))}</span>
           <CalendarIcon className={s.icon} />
         </button>
       </Popover.Trigger>
@@ -113,7 +115,7 @@ export const DatePicker = ({
                   <button
                     type="button"
                     className={s.navButton}
-                    aria-label="Previous"
+                    aria-label={t('previous')}
                     onClick={view === 'day' ? decreaseMonth : decreaseYear}
                   >
                     <ChevronIcon direction="left" />
@@ -121,7 +123,7 @@ export const DatePicker = ({
                   <button
                     type="button"
                     className={s.navButton}
-                    aria-label="Next"
+                    aria-label={t('next')}
                     onClick={view === 'day' ? increaseMonth : increaseYear}
                   >
                     <ChevronIcon direction="right" />
