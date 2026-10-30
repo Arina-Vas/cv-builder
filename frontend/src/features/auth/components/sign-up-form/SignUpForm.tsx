@@ -22,10 +22,10 @@ export function SignUpForm() {
 
   const { values, isValid, register, setServerErrors } = useFormFields(
     { email: '', password: '', confirmPassword: '' },
-    ({ email, password, confirmPassword }) => ({
-      email: validateEmail(email),
-      password: validatePassword(password),
-      confirmPassword: validateConfirmPassword(password, confirmPassword),
+    ({ email, password, confirmPassword }, t) => ({
+      email: validateEmail(email, t),
+      password: validatePassword(password, t),
+      confirmPassword: validateConfirmPassword(password, confirmPassword, t),
     }),
   );
 

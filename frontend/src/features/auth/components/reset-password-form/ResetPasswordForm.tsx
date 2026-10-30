@@ -27,9 +27,9 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
 
   const { values, isValid, register, setServerErrors } = useFormFields(
     { password: '', confirmPassword: '' },
-    ({ password, confirmPassword }) => ({
-      password: validatePassword(password, 'New password is required'),
-      confirmPassword: validateConfirmPassword(password, confirmPassword),
+    ({ password, confirmPassword }, t) => ({
+      password: validatePassword(password, t, t('password.newRequired')),
+      confirmPassword: validateConfirmPassword(password, confirmPassword, t),
     }),
   );
 

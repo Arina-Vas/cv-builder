@@ -25,7 +25,7 @@ export function ForgotPasswordForm() {
 
   const { values, isValid, register, setServerErrors } = useFormFields(
     { email: '' },
-    ({ email }) => ({ email: validateEmail(email) }),
+    ({ email }, t) => ({ email: validateEmail(email, t) }),
   );
 
   const handleSubmit = async () => {

@@ -48,5 +48,24 @@
     "ENTITY_IN_USE": "This item is in use and can't be deleted",
     "RATE_LIMITED": "{seconds, plural, =0 {Too many attempts. Try again later} one {Too many attempts. Try again in # second} other {Too many attempts. Try again in # seconds}}",
     "INTERNAL_SERVER_ERROR": "Something went wrong. Please try again later"
+  },
+  "validation": {
+    "email": {
+      "required": "Email is required",
+      "invalid": "Please enter a valid email address"
+    },
+    "password": {
+      "required": "Password is required",
+      "newRequired": "New password is required",
+      "minLength": "Password must be at least {min} characters long"
+    },
+    "confirmPassword": {
+      "required": "Confirm Password is required",
+      "mismatch": "Passwords do not match"
+    },
+    "code": {
+      "required": "Verification code is required",
+      "invalid": "Please enter a valid 6-digit code"
+    }
   }
 }
