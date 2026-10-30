@@ -4,10 +4,10 @@ enum UserRole {
 }
 
 enum Mastery {
-  NOVICE
+  BEGINNER
+  ELEMENTARY
+  INTERMEDIATE
   ADVANCED
-  COMPETENT
-  PROFICIENT
   EXPERT
 }
 
