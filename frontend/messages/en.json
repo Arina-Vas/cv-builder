@@ -68,5 +68,56 @@
       "required": "Verification code is required",
       "invalid": "Please enter a valid 6-digit code"
     }
+  },
+  "auth": {
+    "tabs": { "label": "Authentication", "signIn": "Sign in", "signUp": "Sign up" },
+    "fields": { "email": "Email", "password": "Password", "confirmPassword": "Confirm Password" },
+    "signIn": {
+      "title": "Welcome back",
+      "subtitle": "Hello again! Sign in to continue",
+      "submit": "Sign in",
+      "forgotPassword": "Forgot password"
+    },
+    "signUp": {
+      "title": "Sign up now",
+      "subtitle": "Welcome! Sign up to continue",
+      "submit": "Create account",
+      "haveAccount": "I have an account"
+    },
+    "forgotPassword": {
+      "title": "Forgot password",
+      "subtitle": "We will send you an email with further instructions",
+      "submit": "Reset password",
+      "cancel": "Cancel",
+      "sent": "If an account with this email exists, you will receive password reset instructions."
+    },
+    "resetPassword": {
+      "title": "Reset password",
+      "subtitle": "Here you should write a new password and confirm it",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm password",
+      "submit": "Submit",
+      "goToSignIn": "Go to sign in",
+      "success": "Your password has been reset. Please sign in."
+    },
+    "verifyEmail": {
+      "title": "Email verification",
+      "subtitle": "Enter the verification code we sent to your email.",
+      "codeLabel": "Verification code",
+      "digit": "Digit {index} of {length}",
+      "confirm": "Confirm",
+      "resend": "{seconds, plural, =0 {Resend code} other {Resend code (#s)}}",
+      "later": "Later",
+      "verified": "Email verified",
+      "codeSent": "Verification code sent"
+    },
+    "logout": "Logout",
+    "errors": {
+      "invalidCredentials": "Invalid email or password",
+      "emailTaken": "An account with this email already exists",
+      "codeInvalid": "The code is invalid or has expired. Request a new one",
+      "alreadyVerified": "Email is already verified",
+      "resetLinkInvalid": "This password reset link is invalid or has expired"
+    }
   }
 }

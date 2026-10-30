@@ -2,30 +2,32 @@
 
 import { useMutation } from '@apollo/client/react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 import { Button } from '@/shared/components/buttons';
 import { Input } from '@/shared/components/inputs';
 import { useToast } from '@/shared/components/toast/ToastProvider';
 import { parseError } from '@/shared/lib/apollo/graphql-errors';
+import { useErrorMessage } from '@/shared/lib/apollo/useErrorMessage';
 import { SIGN_UP } from '../../api/auth.operations';
 import { AuthRoute } from '../../auth.constants';
 import { useFormFields } from '../../lib/useFormFields';
 import { validateConfirmPassword, validateEmail, validatePassword } from '../../lib/validation';
 import { AuthForm } from '../auth-form/AuthForm';
-import { useErrorMessage } from '@/shared/lib/apollo/useErrorMessage';
 
 export function SignUpForm() {
   const router = useRouter();
+  const t = useTranslations('auth');
   const errorMessage = useErrorMessage();
   const toast = useToast();
   const [signUp, { loading }] = useMutation(SIGN_UP);
 
   const { values, isValid, register, setServerErrors } = useFormFields(
     { email: '', password: '', confirmPassword: '' },
-    ({ email, password, confirmPassword }, t) => ({
-      email: validateEmail(email, t),
-      password: validatePassword(password, t),
-      confirmPassword: validateConfirmPassword(password, confirmPassword, t),
+    ({ email, password, confirmPassword }, tValidation) => ({
+      email: validateEmail(email, tValidation),
+      password: validatePassword(password, tValidation),
+      confirmPassword: validateConfirmPassword(password, confirmPassword, tValidation),
     }),
   );
 
@@ -47,8 +49,9 @@ export function SignUpForm() {
     } catch (error) {
       const appError = parseError(error);
 
-      if (appError.code === 'BAD_USER_INPUT' || appError.code === 'CONFLICT') {
-        setServerErrors(appError.fieldErrors);
+      // field errors (BAD_USER_INPUT) are caught by the client validation first, so they go to the toast
+      if (appError.code === 'CONFLICT') {
+        setServerErrors({ email: t('errors.emailTaken') });
       } else {
         toast.error(errorMessage(appError));
       }
@@ -57,29 +60,29 @@ export function SignUpForm() {
 
   return (
     <AuthForm
-      title="Sign up now"
-      subtitle="Welcome! Sign up to continue"
+      title={t('signUp.title')}
+      subtitle={t('signUp.subtitle')}
       onSubmit={handleSubmit}
       actions={
         <>
           <Button type="submit" disabled={!isValid} loading={loading}>
-            CREATE ACCOUNT
+            {t('signUp.submit')}
           </Button>
           <Button variant="ghost" onClick={() => router.push(AuthRoute.signIn)}>
-            I HAVE AN ACCOUNT
+            {t('signUp.haveAccount')}
           </Button>
         </>
       }
     >
-      <Input label="Email" type="email" autoComplete="email" {...register('email')} />
+      <Input label={t('fields.email')} type="email" autoComplete="email" {...register('email')} />
       <Input
-        label="Password"
+        label={t('fields.password')}
         type="password"
         autoComplete="new-password"
         {...register('password')}
       />
       <Input
-        label="Confirm Password"
+        label={t('fields.confirmPassword')}
         type="password"
         autoComplete="new-password"
         {...register('confirmPassword')}

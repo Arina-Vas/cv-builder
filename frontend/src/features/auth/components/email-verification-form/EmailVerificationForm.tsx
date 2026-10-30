@@ -2,18 +2,18 @@
 
 import { useMutation } from '@apollo/client/react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 
 import { Button } from '@/shared/components/buttons';
 import { useToast } from '@/shared/components/toast/ToastProvider';
 import { parseError } from '@/shared/lib/apollo/graphql-errors';
+import { useErrorMessage } from '@/shared/lib/apollo/useErrorMessage';
 import { RESEND_VERIFICATION_CODE, VERIFY_EMAIL } from '../../api/auth.operations';
 import { AuthRoute, RESEND_CODE_COOLDOWN_SECONDS } from '../../auth.constants';
 import { validateCode } from '../../lib/validation';
 import { AuthForm } from '../auth-form/AuthForm';
 import { OtpInput } from '../otp-input/OtpInput';
-import { useErrorMessage } from '@/shared/lib/apollo/useErrorMessage';
-import { useTranslations } from 'next-intl';
 
 function useCooldown(initialSeconds: number) {
   const [secondsLeft, setSecondsLeft] = useState(initialSeconds);
@@ -33,6 +33,7 @@ export interface EmailVerificationFormProps {
 
 export function EmailVerificationForm({ codeJustSent = false }: EmailVerificationFormProps) {
   const router = useRouter();
+  const t = useTranslations('auth');
   const tValidation = useTranslations('validation');
   const errorMessage = useErrorMessage();
   const toast = useToast();
@@ -55,15 +56,15 @@ export function EmailVerificationForm({ codeJustSent = false }: EmailVerificatio
 
     try {
       await verifyEmail({ variables: { input: { code } } });
-      toast.success('Email verified');
+      toast.success(t('verifyEmail.verified'));
       router.replace(AuthRoute.home);
     } catch (error) {
       const appError = parseError(error);
 
       if (appError.code === 'BAD_USER_INPUT') {
-        setServerError(appError.fieldErrors.code ?? appError.message);
+        setServerError(t('errors.codeInvalid'));
       } else if (appError.code === 'CONFLICT') {
-        toast.info(appError.message);
+        toast.info(t('errors.alreadyVerified'));
         router.replace(AuthRoute.home);
       } else {
         toast.error(errorMessage(appError));
@@ -78,7 +79,7 @@ export function EmailVerificationForm({ codeJustSent = false }: EmailVerificatio
       await resendCode();
       handleCodeChange('');
       setCooldown(RESEND_CODE_COOLDOWN_SECONDS);
-      toast.success('Verification code sent');
+      toast.success(t('verifyEmail.codeSent'));
     } catch (error) {
       const appError = parseError(error);
 
@@ -93,19 +94,19 @@ export function EmailVerificationForm({ codeJustSent = false }: EmailVerificatio
 
   return (
     <AuthForm
-      title="Email verification"
-      subtitle="Enter the verification code we sent to your email."
+      title={t('verifyEmail.title')}
+      subtitle={t('verifyEmail.subtitle')}
       onSubmit={handleSubmit}
       actions={
         <>
           <Button type="submit" disabled={!isValid} loading={loading}>
-            CONFIRM
+            {t('verifyEmail.confirm')}
           </Button>
           <Button variant="text" disabled={cooldown > 0} loading={resending} onClick={handleResend}>
-            {cooldown > 0 ? `RESEND CODE (${cooldown}s)` : 'RESEND CODE'}
+            {t('verifyEmail.resend', { seconds: cooldown })}
           </Button>
           <Button variant="ghost" onClick={() => router.push(AuthRoute.home)}>
-            LATER
+            {t('verifyEmail.later')}
           </Button>
         </>
       }

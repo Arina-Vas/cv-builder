@@ -2,17 +2,18 @@
 
 import { useMutation } from '@apollo/client/react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 import { Button } from '@/shared/components/buttons';
 import { Input } from '@/shared/components/inputs';
 import { useToast } from '@/shared/components/toast/ToastProvider';
 import { parseError } from '@/shared/lib/apollo/graphql-errors';
+import { useErrorMessage } from '@/shared/lib/apollo/useErrorMessage';
 import { LOGOUT, RESET_PASSWORD } from '../../api/auth.operations';
 import { AuthRoute } from '../../auth.constants';
 import { useFormFields } from '../../lib/useFormFields';
 import { validateConfirmPassword, validatePassword } from '../../lib/validation';
 import { AuthForm } from '../auth-form/AuthForm';
-import { useErrorMessage } from '@/shared/lib/apollo/useErrorMessage';
 
 export interface ResetPasswordFormProps {
   token: string;
@@ -21,15 +22,16 @@ export interface ResetPasswordFormProps {
 export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
   const router = useRouter();
   const toast = useToast();
+  const t = useTranslations('auth');
   const errorMessage = useErrorMessage();
   const [resetPassword, { loading }] = useMutation(RESET_PASSWORD);
   const [logout] = useMutation(LOGOUT);
 
-  const { values, isValid, register, setServerErrors } = useFormFields(
+  const { values, isValid, register } = useFormFields(
     { password: '', confirmPassword: '' },
-    ({ password, confirmPassword }, t) => ({
-      password: validatePassword(password, t, t('password.newRequired')),
-      confirmPassword: validateConfirmPassword(password, confirmPassword, t),
+    ({ password, confirmPassword }, tValidation) => ({
+      password: validatePassword(password, tValidation, tValidation('password.newRequired')),
+      confirmPassword: validateConfirmPassword(password, confirmPassword, tValidation),
     }),
   );
 
@@ -49,46 +51,43 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
     } catch (error) {
       const appError = parseError(error);
 
-      if (appError.code === 'BAD_USER_INPUT' && !appError.fieldErrors.token) {
-        setServerErrors({
-          password: appError.fieldErrors.newPassword,
-          confirmPassword: appError.fieldErrors.confirmPassword,
-        });
-      } else {
-        toast.error(appError.fieldErrors.token ?? errorMessage(appError));
-      }
+      // the backend does not say whether the link is invalid or expired, so one text covers both;
+      // password field errors are caught by the client validation first, so they go to the toast
+      toast.error(
+        appError.fieldErrors.token ? t('errors.resetLinkInvalid') : errorMessage(appError),
+      );
       return;
     }
 
     await logout().catch(() => undefined);
-    toast.success('Your password has been reset. Please sign in.');
+    toast.success(t('resetPassword.success'));
     router.replace(AuthRoute.signIn);
   };
 
   return (
     <AuthForm
-      title="Reset password"
-      subtitle="Here you should write a new password and confirm it"
+      title={t('resetPassword.title')}
+      subtitle={t('resetPassword.subtitle')}
       onSubmit={handleSubmit}
       actions={
         <>
           <Button type="submit" disabled={!isValid} loading={loading}>
-            SUBMIT
+            {t('resetPassword.submit')}
           </Button>
           <Button variant="ghost" onClick={() => router.push(AuthRoute.signIn)}>
-            GO TO SIGN IN
+            {t('resetPassword.goToSignIn')}
           </Button>
         </>
       }
     >
       <Input
-        label="New password"
+        label={t('resetPassword.newPassword')}
         type="password"
         autoComplete="new-password"
         {...register('password')}
       />
       <Input
-        label="Confirm password"
+        label={t('resetPassword.confirmPassword')}
         type="password"
         autoComplete="new-password"
         {...register('confirmPassword')}
