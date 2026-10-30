@@ -37,5 +37,16 @@
       "invalidType": "Only png, jpg or gif allowed",
       "tooLarge": "File is larger than {maxSize}"
     }
+  },
+  "errors": {
+    "UNAUTHENTICATED": "Your session has expired. Please sign in again",
+    "FORBIDDEN": "You don't have permission to do this",
+    "EMAIL_NOT_VERIFIED": "Verify your email to do this",
+    "NOT_FOUND": "This item no longer exists",
+    "BAD_USER_INPUT": "Check the entered data",
+    "CONFLICT": "This value is already taken",
+    "ENTITY_IN_USE": "This item is in use and can't be deleted",
+    "RATE_LIMITED": "{seconds, plural, =0 {Too many attempts. Try again later} one {Too many attempts. Try again in # second} other {Too many attempts. Try again in # seconds}}",
+    "INTERNAL_SERVER_ERROR": "Something went wrong. Please try again later"
   }
 }

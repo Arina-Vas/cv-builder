@@ -12,10 +12,12 @@ import { AuthRoute } from '../../auth.constants';
 import { useFormFields } from '../../lib/useFormFields';
 import { validateEmail, validatePassword } from '../../lib/validation';
 import { AuthForm } from '../auth-form/AuthForm';
+import { useErrorMessage } from '@/shared/lib/apollo/useErrorMessage';
 
 export function SignInForm() {
   const router = useRouter();
   const toast = useToast();
+  const errorMessage = useErrorMessage();
   const [signIn, { loading }] = useMutation(SIGN_IN);
 
   const { values, isValid, register, setServerErrors } = useFormFields(
@@ -35,14 +37,14 @@ export function SignInForm() {
       });
       router.replace(AuthRoute.home);
     } catch (error) {
-      const { code, message, fieldErrors } = parseError(error);
+      const appError = parseError(error);
 
-      if (code === 'BAD_USER_INPUT') {
-        setServerErrors(fieldErrors);
-      } else if (code === 'UNAUTHENTICATED') {
-        setServerErrors({ password: message });
+      if (appError.code === 'BAD_USER_INPUT') {
+        setServerErrors(appError.fieldErrors);
+      } else if (appError.code === 'UNAUTHENTICATED') {
+        setServerErrors({ password: appError.message });
       } else {
-        toast.error(message);
+        toast.error(errorMessage(appError));
       }
     }
   };

@@ -12,6 +12,7 @@ import { AuthRoute } from '../../auth.constants';
 import { useFormFields } from '../../lib/useFormFields';
 import { validateConfirmPassword, validatePassword } from '../../lib/validation';
 import { AuthForm } from '../auth-form/AuthForm';
+import { useErrorMessage } from '@/shared/lib/apollo/useErrorMessage';
 
 export interface ResetPasswordFormProps {
   token: string;
@@ -20,6 +21,7 @@ export interface ResetPasswordFormProps {
 export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
   const router = useRouter();
   const toast = useToast();
+  const errorMessage = useErrorMessage();
   const [resetPassword, { loading }] = useMutation(RESET_PASSWORD);
   const [logout] = useMutation(LOGOUT);
 
@@ -45,15 +47,15 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         },
       });
     } catch (error) {
-      const { code, message, fieldErrors } = parseError(error);
+      const appError = parseError(error);
 
-      if (code === 'BAD_USER_INPUT' && !fieldErrors.token) {
+      if (appError.code === 'BAD_USER_INPUT' && !appError.fieldErrors.token) {
         setServerErrors({
-          password: fieldErrors.newPassword,
-          confirmPassword: fieldErrors.confirmPassword,
+          password: appError.fieldErrors.newPassword,
+          confirmPassword: appError.fieldErrors.confirmPassword,
         });
       } else {
-        toast.error(fieldErrors.token ?? message);
+        toast.error(appError.fieldErrors.token ?? errorMessage(appError));
       }
       return;
     }

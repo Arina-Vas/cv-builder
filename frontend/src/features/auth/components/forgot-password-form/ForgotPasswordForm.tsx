@@ -12,12 +12,14 @@ import { AuthRoute } from '../../auth.constants';
 import { useFormFields } from '../../lib/useFormFields';
 import { validateEmail } from '../../lib/validation';
 import { AuthForm } from '../auth-form/AuthForm';
+import { useErrorMessage } from '@/shared/lib/apollo/useErrorMessage';
 
 const CONFIRMATION_MESSAGE =
   'If an account with this email exists, you will receive password reset instructions.';
 
 export function ForgotPasswordForm() {
   const router = useRouter();
+  const errorMessage = useErrorMessage();
   const toast = useToast();
   const [requestPasswordReset, { loading }] = useMutation(REQUEST_PASSWORD_RESET);
 
@@ -33,14 +35,14 @@ export function ForgotPasswordForm() {
       await requestPasswordReset({ variables: { input: { email: values.email.trim() } } });
       toast.success(CONFIRMATION_MESSAGE);
     } catch (error) {
-      const { code, message, fieldErrors } = parseError(error);
+      const appError = parseError(error);
 
-      if (code === 'BAD_USER_INPUT') {
-        setServerErrors(fieldErrors);
-      } else if (code === 'RATE_LIMITED') {
-        toast.warning(message);
+      if (appError.code === 'BAD_USER_INPUT') {
+        setServerErrors(appError.fieldErrors);
+      } else if (appError.code === 'RATE_LIMITED') {
+        toast.warning(errorMessage(appError));
       } else {
-        toast.error(message);
+        toast.error(errorMessage(appError));
       }
     }
   };

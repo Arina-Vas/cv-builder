@@ -12,9 +12,11 @@ import { AuthRoute } from '../../auth.constants';
 import { useFormFields } from '../../lib/useFormFields';
 import { validateConfirmPassword, validateEmail, validatePassword } from '../../lib/validation';
 import { AuthForm } from '../auth-form/AuthForm';
+import { useErrorMessage } from '@/shared/lib/apollo/useErrorMessage';
 
 export function SignUpForm() {
   const router = useRouter();
+  const errorMessage = useErrorMessage();
   const toast = useToast();
   const [signUp, { loading }] = useMutation(SIGN_UP);
 
@@ -43,12 +45,12 @@ export function SignUpForm() {
       // signUp starts a session and sends the code: the user verifies while signed in.
       router.replace(`${AuthRoute.verifyEmail}?sent=1`);
     } catch (error) {
-      const { code, message, fieldErrors } = parseError(error);
+      const appError = parseError(error);
 
-      if (code === 'BAD_USER_INPUT' || code === 'CONFLICT') {
-        setServerErrors(fieldErrors);
+      if (appError.code === 'BAD_USER_INPUT' || appError.code === 'CONFLICT') {
+        setServerErrors(appError.fieldErrors);
       } else {
-        toast.error(message);
+        toast.error(errorMessage(appError));
       }
     }
   };

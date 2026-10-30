@@ -12,6 +12,7 @@ import { AuthRoute, RESEND_CODE_COOLDOWN_SECONDS } from '../../auth.constants';
 import { validateCode } from '../../lib/validation';
 import { AuthForm } from '../auth-form/AuthForm';
 import { OtpInput } from '../otp-input/OtpInput';
+import { useErrorMessage } from '@/shared/lib/apollo/useErrorMessage';
 
 function useCooldown(initialSeconds: number) {
   const [secondsLeft, setSecondsLeft] = useState(initialSeconds);
@@ -31,6 +32,7 @@ export interface EmailVerificationFormProps {
 
 export function EmailVerificationForm({ codeJustSent = false }: EmailVerificationFormProps) {
   const router = useRouter();
+  const errorMessage = useErrorMessage();
   const toast = useToast();
   const [verifyEmail, { loading }] = useMutation(VERIFY_EMAIL);
   const [resendCode, { loading: resending }] = useMutation(RESEND_VERIFICATION_CODE);
@@ -54,15 +56,15 @@ export function EmailVerificationForm({ codeJustSent = false }: EmailVerificatio
       toast.success('Email verified');
       router.replace(AuthRoute.home);
     } catch (error) {
-      const { code: errorCode, message, fieldErrors } = parseError(error);
+      const appError = parseError(error);
 
-      if (errorCode === 'BAD_USER_INPUT') {
-        setServerError(fieldErrors.code ?? message);
-      } else if (errorCode === 'CONFLICT') {
-        toast.info(message);
+      if (appError.code === 'BAD_USER_INPUT') {
+        setServerError(appError.fieldErrors.code ?? appError.message);
+      } else if (appError.code === 'CONFLICT') {
+        toast.info(appError.message);
         router.replace(AuthRoute.home);
       } else {
-        toast.error(message);
+        toast.error(errorMessage(appError));
       }
     }
   };
@@ -76,13 +78,13 @@ export function EmailVerificationForm({ codeJustSent = false }: EmailVerificatio
       setCooldown(RESEND_CODE_COOLDOWN_SECONDS);
       toast.success('Verification code sent');
     } catch (error) {
-      const { code: errorCode, message, retryAfter } = parseError(error);
+      const appError = parseError(error);
 
-      if (errorCode === 'RATE_LIMITED') {
-        setCooldown(retryAfter ?? RESEND_CODE_COOLDOWN_SECONDS);
-        toast.warning(message);
+      if (appError.code === 'RATE_LIMITED') {
+        setCooldown(appError.retryAfter ?? RESEND_CODE_COOLDOWN_SECONDS);
+        toast.warning(errorMessage(appError));
       } else {
-        toast.error(message);
+        toast.error(errorMessage(appError));
       }
     }
   };
