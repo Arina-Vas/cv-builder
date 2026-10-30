@@ -14,7 +14,6 @@ const dirname =
 
 // More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
 export default defineConfig({
-  plugins: [react()],
   resolve: {
     tsconfigPaths: true,
   },
@@ -26,23 +25,24 @@ export default defineConfig({
       include: ['src/**/*.{ts,tsx}'],
       exclude: [
         'src/app/**',
-        'src/proxy.ts',
         'src/gql/**',
         'src/test/**',
         'src/**/*.stories.tsx',
         'src/**/*.test.{ts,tsx}',
         'src/**/__fixtures__/**',
         'src/**/*.d.ts',
-        'src/**/*.types.ts',
-        'src/**/types.ts',
       ],
       thresholds: {
         lines: 80,
+        statements: 80,
+        functions: 80,
+        branches: 80,
       },
     },
     projects: [
       {
         extends: true,
+        plugins: [react()],
         test: {
           name: 'unit',
           environment: 'jsdom',

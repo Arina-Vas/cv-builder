@@ -1,12 +1,18 @@
-import { ApolloClient, ApolloLink, InMemoryCache, gql } from '@apollo/client';
+import {
+  ApolloClient,
+  ApolloLink,
+  InMemoryCache,
+  gql,
+  type TypedDocumentNode,
+} from '@apollo/client';
 import { CombinedGraphQLErrors } from '@apollo/client/errors';
-import { Observable, of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createRefreshLink } from './refresh-link';
 
 const GRAPHQL_URL = 'http://localhost:4000/graphql';
 
-const ME = gql`
+const ME: TypedDocumentNode<{ me: string }> = gql`
   query Me {
     me
   }
@@ -26,11 +32,12 @@ function mockRefreshResponse(refresh: boolean) {
   return vi.fn(async () => Response.json({ data: { refresh } }));
 }
 
-// Terminating link: answers each request with the next response from the list
+// Terminating link: answers each request with the next response from the list.
+// An extra request (e.g. a second retry) fails loudly instead of hanging until the test times out.
 function createClient(responses: ApolloLink.Result[], onSessionExpired = vi.fn()) {
   const backend = vi.fn(() => {
     const response = responses.shift();
-    return response ? of(response) : new Observable<ApolloLink.Result>();
+    return response ? of(response) : throwError(() => new Error('Unexpected extra request'));
   });
 
   const client = new ApolloClient({
@@ -69,24 +76,32 @@ describe('createRefreshLink', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock).toHaveBeenCalledWith(
       GRAPHQL_URL,
-      expect.objectContaining({ method: 'POST', credentials: 'include' }),
+      expect.objectContaining({
+        method: 'POST',
+        credentials: 'include',
+        body: expect.stringContaining('refresh'),
+      }),
     );
     expect(onSessionExpired).not.toHaveBeenCalled();
   });
 
   it('shares one refresh between parallel requests', async () => {
-    const { client } = createClient([
+    const { client, backend } = createClient([
       unauthenticated,
       unauthenticated,
       { data: { me: 'a' } },
       { data: { me: 'b' } },
     ]);
 
-    await Promise.all([
+    // Different variables keep Apollo from deduplicating the two queries into one request;
+    // without them this test would pass even if every request ran its own refresh.
+    const results = await Promise.all([
       client.query({ query: ME, fetchPolicy: 'no-cache', variables: { n: 1 } }),
       client.query({ query: ME, fetchPolicy: 'no-cache', variables: { n: 2 } }),
     ]);
 
+    expect(results.map((result) => result.data?.me).sort()).toEqual(['a', 'b']);
+    expect(backend).toHaveBeenCalledTimes(4);
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 

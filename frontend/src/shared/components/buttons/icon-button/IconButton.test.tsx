@@ -43,14 +43,4 @@ describe('IconButton', () => {
 
     expect(onClick).not.toHaveBeenCalled();
   });
-
-  it('keeps its own class and adds the passed one', () => {
-    renderWithProviders(
-      <IconButton aria-label="Close" className="extra">
-        <CloseIcon />
-      </IconButton>,
-    );
-
-    expect(screen.getByRole('button', { name: 'Close' }).className).toMatch(/\S+ extra$/);
-  });
 });

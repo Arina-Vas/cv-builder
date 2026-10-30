@@ -1,5 +1,5 @@
-import { screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 import { mockRouter } from '@/test/next-navigation';
 import { renderWithProviders } from '@/test/render';
 import { SIGN_IN } from '../../api/auth.operations';
@@ -120,5 +120,20 @@ describe('SignInForm', () => {
     await ui.click(screen.getByRole('button', { name: 'FORGOT PASSWORD' }));
 
     expect(mockRouter.push).toHaveBeenCalledWith('/forgot-password');
+  });
+
+  it('sends one request even if the form is submitted again while signing in', async () => {
+    const result = vi.fn(() => ({ data: { signIn: user } }));
+    const { user: ui } = renderWithProviders(<SignInForm />, {
+      mocks: [{ request, result, delay: 50, maxUsageCount: 2 }],
+    });
+
+    await fillAndSubmit(ui);
+    const submit = screen.getByRole('button', { name: 'SIGN IN' });
+    expect(submit).toHaveAttribute('aria-busy', 'true');
+    fireEvent.submit(submit.closest('form')!);
+
+    await waitFor(() => expect(mockRouter.replace).toHaveBeenCalledWith('/'));
+    expect(result).toHaveBeenCalledTimes(1);
   });
 });

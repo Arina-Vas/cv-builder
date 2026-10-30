@@ -10,6 +10,7 @@ function renderSkeleton(props: { columnCount: number; rowCount?: number }) {
   );
 }
 
+// The skeleton is aria-hidden, so it has no roles to query by: the tests read the DOM directly
 describe('TableSkeleton', () => {
   it('renders 5 placeholder rows by default', () => {
     const { container } = renderSkeleton({ columnCount: 3 });

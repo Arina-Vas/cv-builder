@@ -1,5 +1,5 @@
-import { screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { fireEvent, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 import { mockRouter } from '@/test/next-navigation';
 import { renderWithProviders } from '@/test/render';
 import { REQUEST_PASSWORD_RESET } from '../../api/auth.operations';
@@ -24,7 +24,7 @@ describe('ForgotPasswordForm', () => {
     expect(submit).toBeDisabled();
   });
 
-  it('sends the request and shows the same confirmation for any email', async () => {
+  it('sends the request and shows the neutral confirmation (no account enumeration)', async () => {
     const { user } = renderWithProviders(<ForgotPasswordForm />, {
       mocks: [{ request, result: { data: { requestPasswordReset: true } } }],
     });
@@ -73,5 +73,21 @@ describe('ForgotPasswordForm', () => {
     await user.click(screen.getByRole('button', { name: 'CANCEL' }));
 
     expect(mockRouter.push).toHaveBeenCalledWith('/login');
+  });
+
+  it('sends one request even if the form is submitted again while sending', async () => {
+    const result = vi.fn(() => ({ data: { requestPasswordReset: true } }));
+    const { user } = renderWithProviders(<ForgotPasswordForm />, {
+      mocks: [{ request, result, delay: 50, maxUsageCount: 2 }],
+    });
+
+    await user.type(screen.getByLabelText('Email'), EMAIL);
+    const submit = screen.getByRole('button', { name: 'RESET PASSWORD' });
+    await user.click(submit);
+    expect(submit).toHaveAttribute('aria-busy', 'true');
+    fireEvent.submit(submit.closest('form')!);
+
+    expect(await screen.findByText(CONFIRMATION)).toBeInTheDocument();
+    expect(result).toHaveBeenCalledTimes(1);
   });
 });

@@ -1,5 +1,5 @@
-import { screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 import { mockRouter } from '@/test/next-navigation';
 import { renderWithProviders } from '@/test/render';
 import { SIGN_UP } from '../../api/auth.operations';
@@ -108,5 +108,31 @@ describe('SignUpForm', () => {
     await user.click(screen.getByRole('button', { name: 'I HAVE AN ACCOUNT' }));
 
     expect(mockRouter.push).toHaveBeenCalledWith('/login');
+  });
+
+  it('sends one request even if the form is submitted again while creating the account', async () => {
+    const result = vi.fn(() => ({
+      data: {
+        signUp: {
+          __typename: 'User',
+          id: '2',
+          email: EMAIL,
+          role: 'EMPLOYEE',
+          emailVerifiedAt: null,
+        },
+      },
+    }));
+    const { user } = renderWithProviders(<SignUpForm />, {
+      mocks: [{ request, result, delay: 50, maxUsageCount: 2 }],
+    });
+
+    await fill(user);
+    const submit = screen.getByRole('button', { name: 'CREATE ACCOUNT' });
+    await user.click(submit);
+    expect(submit).toHaveAttribute('aria-busy', 'true');
+    fireEvent.submit(submit.closest('form')!);
+
+    await waitFor(() => expect(mockRouter.replace).toHaveBeenCalled());
+    expect(result).toHaveBeenCalledTimes(1);
   });
 });

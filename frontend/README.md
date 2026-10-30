@@ -51,18 +51,25 @@ Unit tests:
 - `next/navigation` is mocked for every test (`src/test/next-navigation.ts`). Check navigation with
   `expect(mockRouter.push).toHaveBeenCalledWith('/login')`; change the current path with
   `usePathname.mockReturnValue('/register')`. Mocks are reset after each test.
-- Global setup is in `src/test/setup.ts`: jest-dom matchers, DOM cleanup, a `matchMedia` stub for jsdom.
+- Global setup is in `src/test/setup.ts`: jest-dom matchers, DOM cleanup, a `matchMedia` stub for jsdom (a `vi.fn`,
+  so a test can return `matches: true`), and after each test it resets mocks, `localStorage` and `data-theme`.
+- To check that a mutation was sent, pass `result` as a `vi.fn` and assert on it; a plain object only says what to
+  answer. A mock is used once; set `maxUsageCount` when a test must see a second request.
 - Query elements the way a user finds them: `getByRole`, `getByLabelText`, `getByText`; avoid class names and test ids.
 
 ### Coverage
 
 `pnpm test:coverage` runs both projects and merges their coverage, prints a summary and writes
-`coverage/index.html` and `coverage/lcov.info` (git-ignored). It counts every file in `src/` except Next.js route
-files (`src/app/`, `src/proxy.ts`, covered by E2E), generated GraphQL types, stories, fixtures and type-only files.
-Files without tests count as 0%.
+`coverage/index.html` and `coverage/lcov.info` (git-ignored). It counts every file in `src/` except the App Router
+files in `src/app/` (thin page and layout wrappers; there are no E2E tests for them yet), generated GraphQL types,
+stories, test helpers, fixtures and `.d.ts` files. Files without tests count as 0%.
 
-The run fails when line coverage is below `coverage.thresholds.lines` in `vitest.config.ts` (80%, the project
-target).
+The run fails when lines, statements, functions or branches drop below 80% (`coverage.thresholds` in
+`vitest.config.ts`, the project target).
+
+A story without a `play` function still counts as coverage: rendering it executes the component's code without
+asserting anything. Coverage shows what has not been run at all; it does not prove a behaviour is checked. Give
+stories of interactive components a `play` function with `expect`, or cover them with a unit test.
 
 ## GraphQL types (codegen)
 
