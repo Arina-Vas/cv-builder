@@ -11,16 +11,43 @@ Copy `.env.example` to `.env.local`. `NEXT_PUBLIC_GRAPHQL_URL` points to the bac
 
 Run from the repo root (`pnpm --filter frontend <script>`) or from this folder.
 
-| Command          | Description                                        |
-| ---------------- | -------------------------------------------------- |
-| `pnpm dev`       | Start the dev server (port 3000)                   |
-| `pnpm build`     | Production build                                   |
-| `pnpm start`     | Run the production build                           |
-| `pnpm typecheck` | Type-check with `tsc --noEmit`                     |
-| `pnpm codegen`   | Generate GraphQL types into `src/gql/` (see below) |
-| `pnpm storybook` | Start Storybook (port 6006)                        |
+| Command              | Description                                              |
+| -------------------- | -------------------------------------------------------- |
+| `pnpm dev`           | Start the dev server (port 3000)                         |
+| `pnpm build`         | Production build                                         |
+| `pnpm start`         | Run the production build                                 |
+| `pnpm typecheck`     | Type-check with `tsc --noEmit`                           |
+| `pnpm codegen`       | Generate GraphQL types into `src/gql/` (see below)       |
+| `pnpm storybook`     | Start Storybook (port 6006)                              |
+| `pnpm test`          | Run unit tests once                                      |
+| `pnpm test:watch`    | Run unit tests in watch mode                             |
+| `pnpm test:coverage` | Run unit tests with coverage (fails below the threshold) |
 
 Linting and formatting are configured at the repo root (`pnpm lint`, `pnpm format`).
+
+## Tests
+
+Vitest + React Testing Library in jsdom (the `unit` project in `vitest.config.ts`). The `storybook` project in the
+same config runs stories in a real browser and needs `pnpm exec playwright install` once; `pnpm test` does not run it.
+
+- Put a test next to the code it covers and name it `<Name>.test.ts(x)`, e.g. `Button.tsx` → `Button.test.tsx`.
+- Render with `renderWithProviders` from `@/test/render`: it wraps the UI in `ThemeProvider`, `ToastProvider` and
+  Apollo `MockedProvider`, and returns a `user` from `@testing-library/user-event`. Pass GraphQL responses as
+  `mocks` (see `ForgotPasswordForm.test.tsx`).
+- `next/navigation` is mocked for every test (`src/test/next-navigation.ts`). Check navigation with
+  `expect(mockRouter.push).toHaveBeenCalledWith('/login')`; change the current path with
+  `usePathname.mockReturnValue('/register')`. Mocks are reset after each test.
+- Global setup is in `src/test/setup.ts`: jest-dom matchers, DOM cleanup, a `matchMedia` stub for jsdom.
+- Query elements the way a user finds them: `getByRole`, `getByLabelText`, `getByText`; avoid class names and test ids.
+
+### Coverage
+
+`pnpm test:coverage` prints a summary and writes `coverage/index.html` and `coverage/lcov.info` (git-ignored).
+It counts every file in `src/` except Next.js route files (`src/app/`, `src/proxy.ts`, covered by E2E), generated
+GraphQL types, stories, fixtures and type-only files. Files without tests count as 0%.
+
+The run fails when line coverage is below `coverage.thresholds.lines` in `vitest.config.ts`. It starts at the current
+level (35%) and is raised as tests are added; the project target is above 80%.
 
 ## GraphQL types (codegen)
 
