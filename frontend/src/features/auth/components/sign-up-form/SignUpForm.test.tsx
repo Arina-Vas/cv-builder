@@ -87,6 +87,8 @@ describe('SignUpForm', () => {
       'An account with this email already exists',
     );
     expect(screen.getByLabelText('Email')).toHaveValue(EMAIL);
+    expect(screen.getByLabelText('Password')).toHaveValue(PASSWORD);
+    expect(screen.getByLabelText('Confirm Password')).toHaveValue(PASSWORD);
   });
 
   it('shows the generic message on other errors', async () => {

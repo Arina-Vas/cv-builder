@@ -48,31 +48,33 @@ describe('ResetPasswordForm', () => {
     expect(mockRouter.replace).toHaveBeenCalledWith('/login');
   });
 
-  it('shows the token error as a toast and stays on the page', async () => {
-    const { user } = renderWithProviders(<ResetPasswordForm token={TOKEN} />, {
-      mocks: [
-        {
-          request,
-          result: {
-            errors: [
-              {
-                message: 'Validation failed',
-                extensions: {
-                  code: 'BAD_USER_INPUT',
-                  fields: [{ field: 'token', message: 'This password reset link has expired' }],
+  it.each(['This password reset link is invalid', 'This password reset link has expired'])(
+    'shows "%s", keeps the passwords and stays on the page',
+    async (message) => {
+      const { user } = renderWithProviders(<ResetPasswordForm token={TOKEN} />, {
+        mocks: [
+          {
+            request,
+            result: {
+              errors: [
+                {
+                  message: 'Validation failed',
+                  extensions: { code: 'BAD_USER_INPUT', fields: [{ field: 'token', message }] },
                 },
-              },
-            ],
+              ],
+            },
           },
-        },
-      ],
-    });
+        ],
+      });
 
-    await fillAndSubmit(user);
+      await fillAndSubmit(user);
 
-    expect(await screen.findByText('This password reset link has expired')).toBeInTheDocument();
-    expect(mockRouter.replace).not.toHaveBeenCalled();
-  });
+      expect(await screen.findByText(message)).toBeInTheDocument();
+      expect(screen.getByLabelText('New password')).toHaveValue(PASSWORD);
+      expect(screen.getByLabelText('Confirm password')).toHaveValue(PASSWORD);
+      expect(mockRouter.replace).not.toHaveBeenCalled();
+    },
+  );
 
   it('maps password errors from the backend to the fields', async () => {
     const { user } = renderWithProviders(<ResetPasswordForm token={TOKEN} />, {

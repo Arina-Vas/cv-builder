@@ -15,6 +15,12 @@ const cooldownButton = (seconds: number) =>
     name: new RegExp(`^RESEND CODE \\((${seconds}|${seconds - 1}|${seconds - 2})s\\)$`),
   });
 
+const enteredCode = () =>
+  screen
+    .getAllByRole('textbox')
+    .map((cell) => (cell as HTMLInputElement).value)
+    .join('');
+
 async function enterCodeAndConfirm(ui: ReturnType<typeof renderWithProviders>['user']) {
   await ui.click(screen.getByLabelText('Digit 1 of 6'));
   await ui.paste(CODE);
@@ -60,7 +66,7 @@ describe('EmailVerificationForm', () => {
     expect(mockRouter.replace).toHaveBeenCalledWith('/');
   });
 
-  it('shows an invalid code under the input', async () => {
+  it('shows an invalid code under the input and keeps the entered code', async () => {
     const { user } = renderWithProviders(<EmailVerificationForm />, {
       mocks: [
         {
@@ -80,6 +86,7 @@ describe('EmailVerificationForm', () => {
     await enterCodeAndConfirm(user);
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Invalid verification code');
+    expect(enteredCode()).toBe(CODE);
     expect(mockRouter.replace).not.toHaveBeenCalled();
   });
 
@@ -151,7 +158,7 @@ describe('EmailVerificationForm', () => {
     expect(mockRouter.push).toHaveBeenCalledWith('/');
   });
 
-  it('sends one request even if the code is confirmed again while verifying', async () => {
+  it('locks the code and sends one request even if confirmed again while verifying', async () => {
     const result = vi.fn(() => ({
       data: {
         verifyEmail: {
@@ -170,6 +177,7 @@ describe('EmailVerificationForm', () => {
     await enterCodeAndConfirm(user);
     const confirm = screen.getByRole('button', { name: 'CONFIRM' });
     expect(confirm).toHaveAttribute('aria-busy', 'true');
+    screen.getAllByRole('textbox').forEach((cell) => expect(cell).toBeDisabled());
     fireEvent.submit(confirm.closest('form')!);
 
     await waitFor(() => expect(mockRouter.replace).toHaveBeenCalledWith('/'));

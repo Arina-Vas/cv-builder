@@ -54,7 +54,7 @@ describe('ForgotPasswordForm', () => {
     expect(screen.getByLabelText('Email')).toHaveValue(EMAIL);
   });
 
-  it('shows the generic message on a network error', async () => {
+  it('shows the generic message on a network error and keeps the email', async () => {
     const { user } = renderWithProviders(<ForgotPasswordForm />, {
       mocks: [{ request, error: new Error('Network down') }],
     });
@@ -65,6 +65,7 @@ describe('ForgotPasswordForm', () => {
     expect(
       await screen.findByText('Something went wrong. Please try again later'),
     ).toBeInTheDocument();
+    expect(screen.getByLabelText('Email')).toHaveValue(EMAIL);
   });
 
   it('goes back to Sign In on CANCEL', async () => {
