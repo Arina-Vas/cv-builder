@@ -12,7 +12,7 @@ const resendRequest = { query: RESEND_VERIFICATION_CODE };
 // The cooldown ticks with a real 1 s timer, so on a slow runner the label can already be a second or two lower
 const cooldownButton = (seconds: number) =>
   screen.getByRole('button', {
-    name: new RegExp(`^RESEND CODE \\((${seconds}|${seconds - 1}|${seconds - 2})s\\)$`),
+    name: new RegExp(`^Resend code \\((${seconds}|${seconds - 1}|${seconds - 2})s\\)$`),
   });
 
 const enteredCode = () =>
@@ -24,13 +24,13 @@ const enteredCode = () =>
 async function enterCodeAndConfirm(ui: ReturnType<typeof renderWithProviders>['user']) {
   await ui.click(screen.getByLabelText('Digit 1 of 6'));
   await ui.paste(CODE);
-  await ui.click(screen.getByRole('button', { name: 'CONFIRM' }));
+  await ui.click(screen.getByRole('button', { name: 'Confirm' }));
 }
 
 describe('EmailVerificationForm', () => {
-  it('keeps CONFIRM disabled until 6 digits are entered', async () => {
+  it('keeps Confirm disabled until 6 digits are entered', async () => {
     const { user } = renderWithProviders(<EmailVerificationForm />);
-    const confirm = screen.getByRole('button', { name: 'CONFIRM' });
+    const confirm = screen.getByRole('button', { name: 'Confirm' });
 
     expect(confirm).toBeDisabled();
 
@@ -85,7 +85,9 @@ describe('EmailVerificationForm', () => {
 
     await enterCodeAndConfirm(user);
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('Invalid verification code');
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'The code is invalid or has expired. Request a new one',
+    );
     expect(enteredCode()).toBe(CODE);
     expect(mockRouter.replace).not.toHaveBeenCalled();
   });
@@ -119,7 +121,7 @@ describe('EmailVerificationForm', () => {
       mocks: [{ request: resendRequest, result: { data: { resendVerificationCode: true } } }],
     });
 
-    await user.click(screen.getByRole('button', { name: 'RESEND CODE' }));
+    await user.click(screen.getByRole('button', { name: 'Resend code' }));
 
     expect(await screen.findByText('Verification code sent')).toBeInTheDocument();
     expect(cooldownButton(60)).toBeDisabled();
@@ -133,7 +135,7 @@ describe('EmailVerificationForm', () => {
           result: {
             errors: [
               {
-                message: 'Please wait before requesting another code',
+                message: 'Please wait',
                 extensions: { code: 'RATE_LIMITED', retryAfter: 30 },
               },
             ],
@@ -142,18 +144,18 @@ describe('EmailVerificationForm', () => {
       ],
     });
 
-    await user.click(screen.getByRole('button', { name: 'RESEND CODE' }));
+    await user.click(screen.getByRole('button', { name: 'Resend code' }));
 
     expect(
-      await screen.findByText('Please wait before requesting another code'),
+      await screen.findByText('Too many attempts. Try again in 30 seconds'),
     ).toBeInTheDocument();
     expect(cooldownButton(30)).toBeDisabled();
   });
 
-  it('lets the user skip verification with LATER', async () => {
+  it('lets the user skip verification with Later', async () => {
     const { user } = renderWithProviders(<EmailVerificationForm />);
 
-    await user.click(screen.getByRole('button', { name: 'LATER' }));
+    await user.click(screen.getByRole('button', { name: 'Later' }));
 
     expect(mockRouter.push).toHaveBeenCalledWith('/');
   });
@@ -175,7 +177,7 @@ describe('EmailVerificationForm', () => {
     });
 
     await enterCodeAndConfirm(user);
-    const confirm = screen.getByRole('button', { name: 'CONFIRM' });
+    const confirm = screen.getByRole('button', { name: 'Confirm' });
     expect(confirm).toHaveAttribute('aria-busy', 'true');
     screen.getAllByRole('textbox').forEach((cell) => expect(cell).toBeDisabled());
     fireEvent.submit(confirm.closest('form')!);

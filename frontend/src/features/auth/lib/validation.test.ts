@@ -1,11 +1,21 @@
+import { createTranslator } from 'next-intl';
 import { describe, expect, it } from 'vitest';
+import { DEFAULT_LOCALE } from '@/i18n/config';
+import messages from '../../../../messages/en.json';
 import {
   hasErrors,
   validateCode,
   validateConfirmPassword,
   validateEmail,
   validatePassword,
+  type ValidationT,
 } from './validation';
+
+const t = createTranslator({
+  locale: DEFAULT_LOCALE,
+  messages,
+  namespace: 'validation',
+}) as unknown as ValidationT;
 
 describe('auth validation', () => {
   it.each([
@@ -13,21 +23,24 @@ describe('auth validation', () => {
     ['   ', 'Email is required'],
     ['user@', 'Please enter a valid email address'],
     ['user@example', 'Please enter a valid email address'],
+    [`${'a'.repeat(250)}@x.io`, 'Please enter a valid email address'],
     [' user@example.com ', undefined],
   ])('validateEmail(%j) → %s', (value, expected) => {
-    expect(validateEmail(value)).toBe(expected);
+    expect(validateEmail(value, t)).toBe(expected);
   });
 
   it.each([
     ['', 'Password is required'],
     ['12345', 'Password must be at least 6 characters long'],
     ['123456', undefined],
+    ['a'.repeat(128), undefined],
+    ['a'.repeat(129), 'Password must not exceed 128 characters'],
   ])('validatePassword(%j) → %s', (value, expected) => {
-    expect(validatePassword(value)).toBe(expected);
+    expect(validatePassword(value, t)).toBe(expected);
   });
 
   it('validatePassword uses a custom required message', () => {
-    expect(validatePassword('', 'New password is required')).toBe('New password is required');
+    expect(validatePassword('', t, 'New password is required')).toBe('New password is required');
   });
 
   it.each([
@@ -35,7 +48,7 @@ describe('auth validation', () => {
     ['secret1', 'secret2', 'Passwords do not match'],
     ['secret1', 'secret1', undefined],
   ])('validateConfirmPassword(%j, %j) → %s', (password, confirm, expected) => {
-    expect(validateConfirmPassword(password, confirm)).toBe(expected);
+    expect(validateConfirmPassword(password, confirm, t)).toBe(expected);
   });
 
   it.each([
@@ -45,7 +58,7 @@ describe('auth validation', () => {
     ['1234567', 'Please enter a valid 6-digit code'],
     ['123456', undefined],
   ])('validateCode(%j) → %s', (value, expected) => {
-    expect(validateCode(value)).toBe(expected);
+    expect(validateCode(value, t)).toBe(expected);
   });
 
   it('hasErrors is true only when some message is set', () => {

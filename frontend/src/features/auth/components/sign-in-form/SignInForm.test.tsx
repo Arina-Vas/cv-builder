@@ -21,7 +21,7 @@ const user = {
 async function fillAndSubmit(ui: ReturnType<typeof renderWithProviders>['user']) {
   await ui.type(screen.getByLabelText('Email'), EMAIL);
   await ui.type(screen.getByLabelText('Password'), PASSWORD);
-  await ui.click(screen.getByRole('button', { name: 'SIGN IN' }));
+  await ui.click(screen.getByRole('button', { name: 'Sign in' }));
 }
 
 describe('SignInForm', () => {
@@ -32,7 +32,7 @@ describe('SignInForm', () => {
     expect(screen.getByText('Hello again! Sign in to continue')).toBeInTheDocument();
   });
 
-  it('validates the fields after leaving them and keeps SIGN IN disabled', async () => {
+  it('validates the fields after leaving them and keeps Sign in disabled', async () => {
     const { user: ui } = renderWithProviders(<SignInForm />);
 
     await ui.click(screen.getByLabelText('Email'));
@@ -42,7 +42,7 @@ describe('SignInForm', () => {
 
     expect(screen.getByText('Email is required')).toBeInTheDocument();
     expect(screen.getByText('Password must be at least 6 characters long')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'SIGN IN' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Sign in' })).toBeDisabled();
   });
 
   it('signs in and goes to the app', async () => {
@@ -71,13 +71,17 @@ describe('SignInForm', () => {
 
     await fillAndSubmit(ui);
 
-    expect(await screen.findByText('Invalid email or password')).toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.getByLabelText('Password')).toHaveAccessibleDescription(
+        'Invalid email or password',
+      ),
+    );
     expect(screen.getByLabelText('Email')).toHaveValue(EMAIL);
     expect(screen.getByLabelText('Password')).toHaveValue(PASSWORD);
     expect(mockRouter.replace).not.toHaveBeenCalled();
   });
 
-  it('maps BAD_USER_INPUT field errors to the fields', async () => {
+  it('shows a backend validation error as a toast (the client validation runs first)', async () => {
     const { user: ui } = renderWithProviders(<SignInForm />, {
       mocks: [
         {
@@ -99,7 +103,7 @@ describe('SignInForm', () => {
 
     await fillAndSubmit(ui);
 
-    expect(await screen.findByText('Please enter a valid email address')).toBeInTheDocument();
+    expect(await screen.findByText('Check the entered data')).toBeInTheDocument();
   });
 
   it('shows the generic message on a network error', async () => {
@@ -117,7 +121,7 @@ describe('SignInForm', () => {
   it('opens Forgot Password', async () => {
     const { user: ui } = renderWithProviders(<SignInForm />);
 
-    await ui.click(screen.getByRole('button', { name: 'FORGOT PASSWORD' }));
+    await ui.click(screen.getByRole('button', { name: 'Forgot password' }));
 
     expect(mockRouter.push).toHaveBeenCalledWith('/forgot-password');
   });
@@ -129,7 +133,7 @@ describe('SignInForm', () => {
     });
 
     await fillAndSubmit(ui);
-    const submit = screen.getByRole('button', { name: 'SIGN IN' });
+    const submit = screen.getByRole('button', { name: 'Sign in' });
     expect(submit).toHaveAttribute('aria-busy', 'true');
     fireEvent.submit(submit.closest('form')!);
 

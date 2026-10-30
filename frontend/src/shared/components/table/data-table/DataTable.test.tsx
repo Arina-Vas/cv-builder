@@ -46,12 +46,12 @@ describe('DataTable', () => {
     expect(screen.getByText('No departments found')).toBeInTheDocument();
   });
 
-  it('shows the error with a working RETRY button', async () => {
+  it('shows the error with a working Retry button', async () => {
     const onRetry = vi.fn();
     const { user } = renderTable({ error: 'Failed to load departments', onRetry });
 
     expect(screen.getByRole('alert')).toHaveTextContent('Failed to load departments');
-    await user.click(screen.getByRole('button', { name: 'RETRY' }));
+    await user.click(screen.getByRole('button', { name: 'Retry' }));
 
     expect(onRetry).toHaveBeenCalledTimes(1);
   });

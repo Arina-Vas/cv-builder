@@ -16,7 +16,7 @@ const request = {
 async function fillAndSubmit(ui: ReturnType<typeof renderWithProviders>['user']) {
   await ui.type(screen.getByLabelText('New password'), PASSWORD);
   await ui.type(screen.getByLabelText('Confirm password'), PASSWORD);
-  await ui.click(screen.getByRole('button', { name: 'SUBMIT' }));
+  await ui.click(screen.getByRole('button', { name: 'Submit' }));
 }
 
 describe('ResetPasswordForm', () => {
@@ -27,7 +27,7 @@ describe('ResetPasswordForm', () => {
     await user.tab();
 
     expect(screen.getByText('New password is required')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'SUBMIT' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Submit' })).toBeDisabled();
   });
 
   it('resets the password, ends the old session and goes to Sign In with a message', async () => {
@@ -48,8 +48,9 @@ describe('ResetPasswordForm', () => {
     expect(mockRouter.replace).toHaveBeenCalledWith('/login');
   });
 
+  // The backend does not say which of the two it is, so the form shows one text for both
   it.each(['This password reset link is invalid', 'This password reset link has expired'])(
-    'shows "%s", keeps the passwords and stays on the page',
+    'on "%s" from the backend shows the link error, keeps the passwords and stays on the page',
     async (message) => {
       const { user } = renderWithProviders(<ResetPasswordForm token={TOKEN} />, {
         mocks: [
@@ -69,14 +70,16 @@ describe('ResetPasswordForm', () => {
 
       await fillAndSubmit(user);
 
-      expect(await screen.findByText(message)).toBeInTheDocument();
+      expect(
+        await screen.findByText('This password reset link is invalid or has expired'),
+      ).toBeInTheDocument();
       expect(screen.getByLabelText('New password')).toHaveValue(PASSWORD);
       expect(screen.getByLabelText('Confirm password')).toHaveValue(PASSWORD);
       expect(mockRouter.replace).not.toHaveBeenCalled();
     },
   );
 
-  it('maps password errors from the backend to the fields', async () => {
+  it('shows a backend password error as a toast (the client validation runs first)', async () => {
     const { user } = renderWithProviders(<ResetPasswordForm token={TOKEN} />, {
       mocks: [
         {
@@ -103,15 +106,14 @@ describe('ResetPasswordForm', () => {
 
     await fillAndSubmit(user);
 
-    expect(
-      await screen.findByText('Password does not meet the security requirements'),
-    ).toBeInTheDocument();
+    expect(await screen.findByText('Check the entered data')).toBeInTheDocument();
+    expect(screen.getByLabelText('New password')).toHaveValue(PASSWORD);
   });
 
-  it('goes to Sign In with GO TO SIGN IN', async () => {
+  it('goes to Sign In with Go to sign in', async () => {
     const { user } = renderWithProviders(<ResetPasswordForm token={TOKEN} />);
 
-    await user.click(screen.getByRole('button', { name: 'GO TO SIGN IN' }));
+    await user.click(screen.getByRole('button', { name: 'Go to sign in' }));
 
     expect(mockRouter.push).toHaveBeenCalledWith('/login');
   });
@@ -126,7 +128,7 @@ describe('ResetPasswordForm', () => {
     });
 
     await fillAndSubmit(user);
-    const submit = screen.getByRole('button', { name: 'SUBMIT' });
+    const submit = screen.getByRole('button', { name: 'Submit' });
     expect(submit).toHaveAttribute('aria-busy', 'true');
     fireEvent.submit(submit.closest('form')!);
 

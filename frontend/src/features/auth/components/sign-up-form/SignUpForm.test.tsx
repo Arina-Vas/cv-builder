@@ -34,7 +34,7 @@ describe('SignUpForm', () => {
     await user.tab();
 
     expect(screen.getByText('Passwords do not match')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'CREATE ACCOUNT' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Create account' })).toBeDisabled();
   });
 
   it('creates the account and goes to email verification', async () => {
@@ -58,7 +58,7 @@ describe('SignUpForm', () => {
     });
 
     await fill(user);
-    await user.click(screen.getByRole('button', { name: 'CREATE ACCOUNT' }));
+    await user.click(screen.getByRole('button', { name: 'Create account' }));
 
     await expect.poll(() => mockRouter.replace).toHaveBeenCalledWith('/verify-email?sent=1');
   });
@@ -81,10 +81,12 @@ describe('SignUpForm', () => {
     });
 
     await fill(user);
-    await user.click(screen.getByRole('button', { name: 'CREATE ACCOUNT' }));
+    await user.click(screen.getByRole('button', { name: 'Create account' }));
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(
-      'An account with this email already exists',
+    await waitFor(() =>
+      expect(screen.getByLabelText('Email')).toHaveAccessibleDescription(
+        'An account with this email already exists',
+      ),
     );
     expect(screen.getByLabelText('Email')).toHaveValue(EMAIL);
     expect(screen.getByLabelText('Password')).toHaveValue(PASSWORD);
@@ -97,17 +99,17 @@ describe('SignUpForm', () => {
     });
 
     await fill(user);
-    await user.click(screen.getByRole('button', { name: 'CREATE ACCOUNT' }));
+    await user.click(screen.getByRole('button', { name: 'Create account' }));
 
     expect(
       await screen.findByText('Something went wrong. Please try again later'),
     ).toBeInTheDocument();
   });
 
-  it('goes to Sign In with I HAVE AN ACCOUNT', async () => {
+  it('goes to Sign In with I have an account', async () => {
     const { user } = renderWithProviders(<SignUpForm />);
 
-    await user.click(screen.getByRole('button', { name: 'I HAVE AN ACCOUNT' }));
+    await user.click(screen.getByRole('button', { name: 'I have an account' }));
 
     expect(mockRouter.push).toHaveBeenCalledWith('/login');
   });
@@ -129,7 +131,7 @@ describe('SignUpForm', () => {
     });
 
     await fill(user);
-    const submit = screen.getByRole('button', { name: 'CREATE ACCOUNT' });
+    const submit = screen.getByRole('button', { name: 'Create account' });
     await user.click(submit);
     expect(submit).toHaveAttribute('aria-busy', 'true');
     fireEvent.submit(submit.closest('form')!);

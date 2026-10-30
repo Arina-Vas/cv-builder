@@ -14,7 +14,7 @@ describe('LogoutButton', () => {
       mocks: [{ request: { query: LOGOUT }, result: logoutResult }],
     });
 
-    await user.click(screen.getByRole('button', { name: 'LOGOUT' }));
+    await user.click(screen.getByRole('button', { name: 'Logout' }));
 
     await waitFor(() => expect(mockRouter.replace).toHaveBeenCalledWith('/login'));
     expect(logoutResult).toHaveBeenCalledTimes(1);
@@ -27,7 +27,7 @@ describe('LogoutButton', () => {
       mocks: [{ request: { query: LOGOUT }, error: new Error('Network down') }],
     });
 
-    await user.click(screen.getByRole('button', { name: 'LOGOUT' }));
+    await user.click(screen.getByRole('button', { name: 'Logout' }));
 
     await waitFor(() => expect(mockRouter.replace).toHaveBeenCalledWith('/login'));
     expect(clearStore).toHaveBeenCalledTimes(1);

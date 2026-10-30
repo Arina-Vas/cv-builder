@@ -5,19 +5,19 @@ import { renderWithProviders } from '@/test/render';
 import { AuthTabs } from './AuthTabs';
 
 describe('AuthTabs', () => {
-  it('marks SIGN IN as the current page on /login', () => {
+  it('marks Sign in as the current page on /login', () => {
     usePathname.mockReturnValue('/login');
     renderWithProviders(<AuthTabs />);
 
-    expect(screen.getByRole('link', { name: 'SIGN IN' })).toHaveAttribute('aria-current', 'page');
-    expect(screen.getByRole('link', { name: 'SIGN UP' })).not.toHaveAttribute('aria-current');
+    expect(screen.getByRole('link', { name: 'Sign in' })).toHaveAttribute('aria-current', 'page');
+    expect(screen.getByRole('link', { name: 'Sign up' })).not.toHaveAttribute('aria-current');
   });
 
-  it('links SIGN UP to the registration page', () => {
+  it('links Sign up to the registration page', () => {
     usePathname.mockReturnValue('/register');
     renderWithProviders(<AuthTabs />);
 
-    const signUp = screen.getByRole('link', { name: 'SIGN UP' });
+    const signUp = screen.getByRole('link', { name: 'Sign up' });
     expect(signUp).toHaveAttribute('href', '/register');
     expect(signUp).toHaveAttribute('aria-current', 'page');
   });

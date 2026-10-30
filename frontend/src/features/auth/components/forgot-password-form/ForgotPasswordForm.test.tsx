@@ -12,9 +12,9 @@ const CONFIRMATION =
 const request = { query: REQUEST_PASSWORD_RESET, variables: { input: { email: EMAIL } } };
 
 describe('ForgotPasswordForm', () => {
-  it('keeps RESET PASSWORD disabled until the email is valid', async () => {
+  it('keeps Reset password disabled until the email is valid', async () => {
     const { user } = renderWithProviders(<ForgotPasswordForm />);
-    const submit = screen.getByRole('button', { name: 'RESET PASSWORD' });
+    const submit = screen.getByRole('button', { name: 'Reset password' });
 
     expect(submit).toBeDisabled();
 
@@ -30,27 +30,34 @@ describe('ForgotPasswordForm', () => {
     });
 
     await user.type(screen.getByLabelText('Email'), EMAIL);
-    await user.click(screen.getByRole('button', { name: 'RESET PASSWORD' }));
+    await user.click(screen.getByRole('button', { name: 'Reset password' }));
 
     expect(await screen.findByText(CONFIRMATION)).toBeInTheDocument();
   });
 
-  it('keeps the email and shows the rate-limit message from the backend', async () => {
+  it('keeps the email and shows how long to wait when rate limited', async () => {
     const { user } = renderWithProviders(<ForgotPasswordForm />, {
       mocks: [
         {
           request,
           result: {
-            errors: [{ message: 'Too many requests', extensions: { code: 'RATE_LIMITED' } }],
+            errors: [
+              {
+                message: 'Too many requests',
+                extensions: { code: 'RATE_LIMITED', retryAfter: 30 },
+              },
+            ],
           },
         },
       ],
     });
 
     await user.type(screen.getByLabelText('Email'), EMAIL);
-    await user.click(screen.getByRole('button', { name: 'RESET PASSWORD' }));
+    await user.click(screen.getByRole('button', { name: 'Reset password' }));
 
-    expect(await screen.findByText('Too many requests')).toBeInTheDocument();
+    expect(
+      await screen.findByText('Too many attempts. Try again in 30 seconds'),
+    ).toBeInTheDocument();
     expect(screen.getByLabelText('Email')).toHaveValue(EMAIL);
   });
 
@@ -60,7 +67,7 @@ describe('ForgotPasswordForm', () => {
     });
 
     await user.type(screen.getByLabelText('Email'), EMAIL);
-    await user.click(screen.getByRole('button', { name: 'RESET PASSWORD' }));
+    await user.click(screen.getByRole('button', { name: 'Reset password' }));
 
     expect(
       await screen.findByText('Something went wrong. Please try again later'),
@@ -68,10 +75,10 @@ describe('ForgotPasswordForm', () => {
     expect(screen.getByLabelText('Email')).toHaveValue(EMAIL);
   });
 
-  it('goes back to Sign In on CANCEL', async () => {
+  it('goes back to Sign In on Cancel', async () => {
     const { user } = renderWithProviders(<ForgotPasswordForm />);
 
-    await user.click(screen.getByRole('button', { name: 'CANCEL' }));
+    await user.click(screen.getByRole('button', { name: 'Cancel' }));
 
     expect(mockRouter.push).toHaveBeenCalledWith('/login');
   });
@@ -83,7 +90,7 @@ describe('ForgotPasswordForm', () => {
     });
 
     await user.type(screen.getByLabelText('Email'), EMAIL);
-    const submit = screen.getByRole('button', { name: 'RESET PASSWORD' });
+    const submit = screen.getByRole('button', { name: 'Reset password' });
     await user.click(submit);
     expect(submit).toHaveAttribute('aria-busy', 'true');
     fireEvent.submit(submit.closest('form')!);

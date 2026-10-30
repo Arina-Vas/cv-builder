@@ -45,9 +45,13 @@ Where to write a test:
 Unit tests:
 
 - Put a test next to the code it covers and name it `<Name>.test.ts(x)`, e.g. `Button.tsx` → `Button.test.tsx`.
-- Render with `renderWithProviders` from `@/test/render`: it wraps the UI in `ThemeProvider`, `ToastProvider` and
-  Apollo `MockedProvider`, and returns a `user` from `@testing-library/user-event`. Pass GraphQL responses as
-  `mocks` (see `ForgotPasswordForm.test.tsx`).
+- Render with `renderWithProviders` from `@/test/render`: it wraps the UI in `NextIntlClientProvider` (English,
+  real `messages/en.json`), `ThemeProvider`, `ToastProvider` and Apollo `MockedProvider`, and returns a `user` from
+  `@testing-library/user-event`. Pass GraphQL responses as `mocks` (see `ForgotPasswordForm.test.tsx`). For a hook
+  that calls `useTranslations`, use `renderHook(..., { wrapper: IntlProvider })` from the same file.
+- Write the expected texts as plain English strings, not `t('...')`: the test then also checks that the key points to
+  the text from the spec. Buttons are upper-cased by CSS only, so their accessible name is the text from `en.json`
+  (`'Sign in'`, not `'SIGN IN'`).
 - `next/navigation` is mocked for every test (`src/test/next-navigation.ts`). Check navigation with
   `expect(mockRouter.push).toHaveBeenCalledWith('/login')`; change the current path with
   `usePathname.mockReturnValue('/register')`. Mocks are reset after each test.

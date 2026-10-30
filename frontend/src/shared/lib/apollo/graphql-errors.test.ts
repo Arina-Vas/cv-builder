@@ -1,17 +1,14 @@
 import { CombinedGraphQLErrors } from '@apollo/client/errors';
 import { describe, expect, it } from 'vitest';
-import { GENERIC_ERROR_MESSAGE, hasErrorCode, parseError } from './graphql-errors';
+import { hasErrorCode, parseError } from './graphql-errors';
 
 function graphQLError(message: string, extensions: Record<string, unknown>) {
   return new CombinedGraphQLErrors({ errors: [{ message, extensions }] });
 }
 
 describe('parseError', () => {
-  it('falls back to the generic message for non-GraphQL errors', () => {
-    expect(parseError(new Error('Failed to fetch'))).toEqual({
-      message: GENERIC_ERROR_MESSAGE,
-      fieldErrors: {},
-    });
+  it('returns no code for non-GraphQL errors (network), so the UI shows the generic text', () => {
+    expect(parseError(new Error('Failed to fetch'))).toEqual({ message: '', fieldErrors: {} });
   });
 
   it('collects field messages from extensions.fields, first message per field wins', () => {
@@ -41,12 +38,15 @@ describe('parseError', () => {
     });
   });
 
-  it('hides the raw message of internal server errors', () => {
+  it('keeps the backend message for developers; the UI text comes from useErrorMessage', () => {
     const error = graphQLError('relation "users" does not exist', {
       code: 'INTERNAL_SERVER_ERROR',
     });
 
-    expect(parseError(error).message).toBe(GENERIC_ERROR_MESSAGE);
+    expect(parseError(error)).toMatchObject({
+      code: 'INTERNAL_SERVER_ERROR',
+      message: 'relation "users" does not exist',
+    });
   });
 
   it('passes retryAfter through for rate limits', () => {
