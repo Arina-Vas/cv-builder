@@ -89,7 +89,7 @@ All tables have `id` (uuid), `created_at` and `updated_at`. Only the meaningful 
 
 - **Skill type** is a column of the category (e.g. category "Databases" has type "Backend"). The Skills table
   shows it as `skill.category.type`; the admin picks only the category, and the type follows from it.
-- **Language ISO** is normalized to upper case (`EN`) by the service before saving.
+- **Language ISO** is normalized to upper case (`EN`) by the input DTO before validation and saving.
 - **Project roles** ("Frontend Developer", "Team Lead") are a seed-only catalog: the spec has no admin page for them.
 
 ### Assignments
@@ -179,10 +179,11 @@ or checked in services.
 | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | `citext` extension must exist                                                | First line of the initial `migration.sql`: `CREATE EXTENSION IF NOT EXISTS citext;`                                            |
 | Project `start_date <= end_date`                                             | `ALTER TABLE "projects" ADD CONSTRAINT "projects_dates_check" CHECK ("start_date" <= "end_date");`                             |
+| Project end date is not earlier than the start date                          | Input DTO (`@IsNotBeforeDate()`, see [conventions](api/conventions.md#shared-building-blocks))                                 |
 | CV project `start_date <= end_date` (if end date is set)                     | `ALTER TABLE "cv_projects" ADD CONSTRAINT "cv_projects_dates_check" CHECK ("end_date" IS NULL OR "start_date" <= "end_date");` |
 | CV project dates are within the project's dates                              | Service (a CHECK cannot reference another table)                                                                               |
 | CV skills belong to the CV owner's skills                                    | Service                                                                                                                        |
-| Names are trimmed, repeated spaces collapsed; ISO upper-cased                | Service (normalization before save)                                                                                            |
+| Names are trimmed, repeated spaces collapsed; ISO upper-cased                | Input DTO (`@NormalizeText()`, `@ToUpperCaseText()`, see [conventions](api/conventions.md#shared-building-blocks))             |
 | A new verification code invalidates the previous one; resend is rate-limited | Service                                                                                                                        |
 
 Create the initial migration without applying it, add the SQL above, then apply it:
@@ -205,5 +206,9 @@ pnpm db:migrate
 - **Project technologies reference `skills`.** Technologies come from a managed catalog; skills already are one.
   The relation is named `technologies` (as in the wiki GraphQL examples); "Environment" is only the UI label.
 - **Project name is not unique.** The spec requires it only to be present. Revisit if the team decides otherwise.
+- **Language native name is not unique.** The spec requires uniqueness only for name and ISO code; variants of one
+  language share a native name (Portuguese / Brazilian Portuguese → "Português").
+- **Language ISO format** is checked by the input DTO: 2–3 letters with an optional 2-letter region (`EN`, `ENG`,
+  `PT-BR`). The spec only says "a language ISO code, max 5 characters".
 - **User preferences (theme, language) are not stored.** The spec allows keeping them on the client.
 - **`responsibilities` is a single text field** (a textarea in the spec), not an array.

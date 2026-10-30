@@ -131,3 +131,50 @@ operations still need the session started at sign-up, because the backend takes 
 
 Operation-level tables are added by each module together with its resolvers: the operation name and its access
 (**All**, **Admin**, **Own or Admin**, **Public**), matching the rules above.
+
+### Departments
+
+| Operation          | Access |
+| ------------------ | ------ |
+| `departments`      | All    |
+| `createDepartment` | Admin  |
+| `updateDepartment` | Admin  |
+| `deleteDepartment` | Admin  |
+
+### Positions
+
+| Operation        | Access |
+| ---------------- | ------ |
+| `positions`      | All    |
+| `createPosition` | Admin  |
+| `updatePosition` | Admin  |
+| `deletePosition` | Admin  |
+
+### Languages
+
+| Operation        | Access |
+| ---------------- | ------ |
+| `languages`      | All    |
+| `createLanguage` | Admin  |
+| `updateLanguage` | Admin  |
+| `deleteLanguage` | Admin  |
+
+### Skills
+
+| Operation         | Access |
+| ----------------- | ------ |
+| `skills`          | All    |
+| `skillCategories` | All    |
+| `createSkill`     | Admin  |
+| `updateSkill`     | Admin  |
+| `deleteSkill`     | Admin  |
+
+### Projects
+
+| Operation       | Access |
+| --------------- | ------ |
+| `projects`      | All    |
+| `technologies`  | All    |
+| `createProject` | Admin  |
+| `updateProject` | Admin  |
+| `deleteProject` | Admin  |

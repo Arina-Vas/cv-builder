@@ -28,20 +28,36 @@ GraphQL schema from them.
 
 Modules import these instead of writing their own:
 
-| What                                    | File                                               |
-| --------------------------------------- | -------------------------------------------------- |
-| `ListArgs` (search + sortOrder)         | `backend/src/common/graphql/list.args.ts`          |
-| `PaginatedListArgs` (+ page, pageSize)  | `backend/src/common/graphql/list.args.ts`          |
-| `Paginated(Type)`, `PaginatedResult<T>` | `backend/src/common/graphql/paginated.response.ts` |
-| `SortOrder`                             | `backend/src/common/graphql/sort-order.enum.ts`    |
-| Pagination defaults, page sizes         | `backend/src/common/graphql/constants.ts`          |
-| `DateScalar`                            | `backend/src/common/graphql/date.scalar.ts`        |
-| `UserRole`, `Mastery`, `Proficiency`    | `backend/src/common/graphql/enums.ts`              |
-| `ErrorCode` and error helpers           | `backend/src/common/errors/`                       |
-| `@Roles()`                              | `backend/src/common/auth/roles.decorator.ts`       |
+| What                                                    | File                                                  |
+| ------------------------------------------------------- | ----------------------------------------------------- |
+| `ListArgs` (search + sortOrder)                         | `backend/src/common/graphql/list.args.ts`             |
+| `PaginatedListArgs` (+ page, pageSize)                  | `backend/src/common/graphql/list.args.ts`             |
+| `Paginated(Type)`, `PaginatedResult<T>`                 | `backend/src/common/graphql/paginated.response.ts`    |
+| `Listed(Type)`, `ListedResult<T>`                       | `backend/src/common/graphql/list.response.ts`         |
+| `SortOrder`                                             | `backend/src/common/graphql/sort-order.enum.ts`       |
+| Pagination defaults, page sizes, `MAX_NAME_LENGTH`      | `backend/src/common/graphql/constants.ts`             |
+| `DateScalar`                                            | `backend/src/common/graphql/date.scalar.ts`           |
+| `UserRole`, `Mastery`, `Proficiency`                    | `backend/src/common/graphql/enums.ts`                 |
+| `ErrorCode` and error helpers                           | `backend/src/common/errors/`                          |
+| `@Roles()`                                              | `backend/src/common/auth/roles.decorator.ts`          |
+| `@NormalizeText()`, `@TrimText()`, `@ToUpperCaseText()` | `backend/src/common/validation/transforms.ts`         |
+| `@IsNotBeforeDate(property)`                            | `backend/src/common/validation/is-not-before-date.ts` |
+| `isPrismaError(error, code)`                            | `backend/src/prisma/prisma-errors.ts`                 |
 
 Prisma enums are always imported from `common/graphql/enums.ts`, not from `src/generated/prisma`: that file
 registers them for GraphQL.
+
+Text inputs are normalized in the DTO, before validation, so a blank value fails `@IsNotEmpty` and services and
+uniqueness checks get the stored form:
+
+- `@NormalizeText()` trims and collapses repeated whitespace (`"  Big   Data "` → `"Big Data"`): names and other
+  single-line values;
+- `@TrimText()` only trims the ends and keeps line breaks: multiline values such as a project description;
+- `@ToUpperCaseText()` upper-cases the value (language ISO code), placed together with `@NormalizeText()`.
+
+Date ranges are checked in the DTO too: `@IsNotBeforeDate('startDate', { message })` on the end date fails when
+it is earlier than the start date (equal dates pass). A missing or invalid date is left to `@IsDate` on its own
+field, so the client gets one error per cause.
 
 ### Shared entity types
 
@@ -154,7 +170,8 @@ export class DepartmentsArgs extends PaginatedListArgs {
 export class DepartmentPage extends Paginated(Department) {}
 ```
 
-Lists without pagination extend `ListArgs` instead of `PaginatedListArgs`.
+Lists without pagination extend `ListArgs` instead of `PaginatedListArgs` and return
+`class ProjectList extends Listed(Project) {}` (`{ items, total }`).
 
 ### Defaults and rules
 
@@ -186,7 +203,7 @@ Lists without pagination extend `ListArgs` instead of `PaginatedListArgs`.
 | user skills / languages, CV skills                                         | —                | grouped by category, by name inside a group       | —                            | no        |
 | lookups for selects (`skillCategories`, `technologies`, `projectRoles`, …) | `name`           | —                                                 | —                            | no        |
 
-Lists without pagination return `{ items, total }` or a plain list for lookups.
+Lists without pagination return `{ items, total }` (`Listed`) or a plain list for lookups.
 
 Sort and search fields come from the Sorting and Search sections of each wiki page.
 
@@ -226,6 +243,9 @@ avoid a column-key → enum map in every table.
   `deleteUserSkills(userId: ID!, skillIds: [ID!]!): [ID!]!`.
 - Mutations take one argument named `input` of an `@InputType`, except deletes, which take ids directly.
 - `update*` inputs contain `id` and only the fields the user can change.
+- `update*` is a full update: `Update<Entity>Input extends Create<Entity>Input` and adds `id`, so the form sends
+  every field. A list of ids (`technologyIds`) replaces the whole set; an omitted list defaults to `[]` and
+  clears it.
 - Inputs are always validated on the backend, even if the frontend validates them too
   (wiki: "Client-side validation is intended for user experience and must not replace server-side validation").
 - **One error per field.** The `ValidationPipe` uses `stopAtFirstError` (`common/validation/validator-options.ts`), so
@@ -319,12 +339,57 @@ Rules for services:
 - **Uniqueness.** A service that knows the field catches Prisma `P2002` and throws
   `conflict('<input field>', '<message>')`. Prisma reports database columns (`native_name`), not input fields
   (`nativeName`), so the filter's `CONFLICT` has no `field` and is only a fallback.
+- **Several unique fields.** A `P2002` does not say which unique field was taken (with the driver adapter there is
+  no `meta.target`), so when an entity has more than one (`Language`: `name`, `iso`) the service checks each field
+  with `findUnique` before `create` / `update` and throws `conflict` for that field. The record being updated is
+  excluded by its `id` (wiki: "saving an unchanged language must not produce a duplicate error"). The service does
+  not catch `P2002`: it only happens when two requests write the same value at once, and the filter returns
+  `CONFLICT` without `field`.
 - **References.** Before `create` / `update`, a service checks that referenced records exist (`departmentId`,
   `categoryId`, `technologyIds`, …) and throws `badUserInput([{ field, message }])` otherwise (wiki: "Backend validates
   the selected department"). That is why a Prisma `P2003` reaching the filter means a blocked delete.
 - **Blocked delete.** Catalogs use `onDelete: Restrict` ([data model](../data-model.md#deletion-policy)), so the
   database rejects deleting a referenced item and the filter returns `ENTITY_IN_USE`.
 - **Rate limits.** A service that knows the cooldown throws `rateLimited(<seconds>, '<message>')`.
+
+Which Prisma errors a service catches (with `isPrismaError(error, code)`); everything else is rethrown for the
+global filter:
+
+| Code    | Where                                          | Service throws                               | If not caught                     |
+| ------- | ---------------------------------------------- | -------------------------------------------- | --------------------------------- |
+| `P2002` | `create` / `update` of one unique field        | `conflict('<input field>', '<message>')`     | `CONFLICT` without `field`        |
+| `P2003` | `create` / `update` whose input references ids | `badUserInput([{ field: '<id field>', … }])` | `ENTITY_IN_USE`, wrong for a form |
+| `P2025` | not caught                                     | —                                            | `NOT_FOUND` (filter)              |
+| `P2003` | `delete`: not caught                           | —                                            | `ENTITY_IN_USE` (filter)          |
+
+`P2003` on `create` / `update` happens when a referenced record is deleted between the existence check and the
+write. `P2025` is caught only when the frontend needs a specific message (e.g. `notFound('CV not found')`).
+
+```ts
+async update({ id, name }: UpdateDepartmentInput): Promise<Department> {
+  try {
+    return toDepartment(await this.prisma.department.update({ where: { id }, data: { name } }));
+  } catch (error) {
+    if (isPrismaError(error, 'P2002')) throw conflict('name', 'Department already exists');
+    throw error;
+  }
+}
+```
+
+With several unique fields:
+
+```ts
+// The language being updated (`id`) does not count as a duplicate of itself
+private async assertUnique({ name, iso }: CreateLanguageInput, id?: string): Promise<void> {
+  const [byName, byIso] = await Promise.all([
+    this.prisma.language.findUnique({ where: { name }, select: { id: true } }),
+    this.prisma.language.findUnique({ where: { iso }, select: { id: true } }),
+  ]);
+
+  if (byName && byName.id !== id) throw conflict('name', 'Language already exists');
+  if (byIso && byIso.id !== id) throw conflict('iso', 'ISO code already exists');
+}
+```
 
 Errors found by Apollo before a resolver runs (`GRAPHQL_PARSE_FAILED`, `GRAPHQL_VALIDATION_FAILED`, a variable of
 the wrong type) do not pass through the filter. They are developer errors; frontend codegen catches most of them at

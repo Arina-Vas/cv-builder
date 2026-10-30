@@ -10,6 +10,11 @@ import { join } from 'node:path';
 import { createGqlContext } from './common/graphql/graphql.context';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { DepartmentModule } from '@/departments/department.module';
+import { PositionModule } from '@/positions/position.module';
+import { LanguageModule } from '@/languages/language.module';
+import { SkillModule } from '@/skills/skill.module';
+import { ProjectModule } from '@/projects/project.module';
 
 @Module({
   imports: [
@@ -34,6 +39,11 @@ import { AuthModule } from './auth/auth.module';
     HealthModule,
     UsersModule,
     AuthModule,
+    DepartmentModule,
+    PositionModule,
+    LanguageModule,
+    SkillModule,
+    ProjectModule,
   ],
   controllers: [AppController],
 })

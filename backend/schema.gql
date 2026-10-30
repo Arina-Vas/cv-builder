@@ -2,6 +2,37 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+input CreateDepartmentInput {
+  name: String!
+}
+
+input CreateLanguageInput {
+  iso: String!
+  name: String!
+  nativeName: String!
+}
+
+input CreatePositionInput {
+  name: String!
+}
+
+input CreateProjectInput {
+  description: String!
+  domain: String!
+  endDate: Date!
+  name: String!
+  startDate: Date!
+  technologyIds: [ID!]! = []
+}
+
+input CreateSkillInput {
+  categoryId: ID!
+  name: String!
+}
+
+"""Calendar date without time and time zone, format YYYY-MM-DD"""
+scalar Date
+
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
@@ -12,11 +43,71 @@ type Department {
   name: String!
 }
 
+type DepartmentPage {
+  items: [Department!]!
+
+  """Current page, 1-based"""
+  page: Int!
+  pageSize: Int!
+
+  """Items matching the search, not the page size"""
+  total: Int!
+}
+
+enum DepartmentSortField {
+  name
+}
+
 type Health {
   status: String!
 }
 
+type Language {
+  id: ID!
+  iso: String!
+  name: String!
+  nativeName: String!
+}
+
+type LanguagePage {
+  items: [Language!]!
+
+  """Current page, 1-based"""
+  page: Int!
+  pageSize: Int!
+
+  """Items matching the search, not the page size"""
+  total: Int!
+}
+
+enum LanguageSortField {
+  iso
+  name
+}
+
 type Mutation {
+  createDepartment(input: CreateDepartmentInput!): Department!
+  createLanguage(input: CreateLanguageInput!): Language!
+  createPosition(input: CreatePositionInput!): Position!
+  createProject(input: CreateProjectInput!): Project!
+  createSkill(input: CreateSkillInput!): Skill!
+
+  """Fails with ENTITY_IN_USE if the department is assigned to users"""
+  deleteDepartment(id: ID!): ID!
+
+  """Fails with ENTITY_IN_USE if the language is assigned to users"""
+  deleteLanguage(id: ID!): ID!
+
+  """Fails with ENTITY_IN_USE if the position is assigned to users"""
+  deletePosition(id: ID!): ID!
+
+  """Fails with ENTITY_IN_USE if the project is used in CVs"""
+  deleteProject(id: ID!): ID!
+
+  """
+  Fails with ENTITY_IN_USE if the skill is assigned to users, projects or CVs
+  """
+  deleteSkill(id: ID!): ID!
   logout: Boolean!
   refresh: Boolean!
 
@@ -30,6 +121,11 @@ type Mutation {
   resetPassword(input: ResetPasswordInput!): Boolean!
   signIn(input: SignInInput!): User!
   signUp(input: SignUpInput!): User!
+  updateDepartment(input: UpdateDepartmentInput!): Department!
+  updateLanguage(input: UpdateLanguageInput!): Language!
+  updatePosition(input: UpdatePositionInput!): Position!
+  updateProject(input: UpdateProjectInput!): Project!
+  updateSkill(input: UpdateSkillInput!): Skill!
   verifyEmail(input: VerifyEmailInput!): User!
 }
 
@@ -38,9 +134,94 @@ type Position {
   name: String!
 }
 
+type PositionPage {
+  items: [Position!]!
+
+  """Current page, 1-based"""
+  page: Int!
+  pageSize: Int!
+
+  """Items matching the search, not the page size"""
+  total: Int!
+}
+
+enum PositionSortField {
+  name
+}
+
+type Project {
+  description: String!
+  domain: String!
+  endDate: Date!
+  id: ID!
+  name: String!
+  startDate: Date!
+
+  """Technologies used on the project ("Environment" in the UI)"""
+  technologies: [Skill!]!
+}
+
+type ProjectList {
+  items: [Project!]!
+
+  """Items matching the search"""
+  total: Int!
+}
+
+enum ProjectSortField {
+  endDate
+  name
+  startDate
+}
+
 type Query {
+  departments(
+    """1-based page number"""
+    page: Int! = 1
+
+    """One of 10, 20, 50"""
+    pageSize: Int! = 10
+    search: String
+    sortBy: DepartmentSortField! = name
+    sortOrder: SortOrder! = ASC
+  ): DepartmentPage!
   health: Health!
+  languages(
+    """1-based page number"""
+    page: Int! = 1
+
+    """One of 10, 20, 50"""
+    pageSize: Int! = 10
+    search: String
+    sortBy: LanguageSortField! = name
+    sortOrder: SortOrder! = ASC
+  ): LanguagePage!
   me: User!
+  positions(
+    """1-based page number"""
+    page: Int! = 1
+
+    """One of 10, 20, 50"""
+    pageSize: Int! = 10
+    search: String
+    sortBy: PositionSortField! = name
+    sortOrder: SortOrder! = ASC
+  ): PositionPage!
+  projects(search: String, sortBy: ProjectSortField! = name, sortOrder: SortOrder! = ASC): ProjectList!
+  skillCategories: [SkillCategory!]!
+  skills(
+    """1-based page number"""
+    page: Int! = 1
+
+    """One of 10, 20, 50"""
+    pageSize: Int! = 10
+    search: String
+    sortBy: SkillSortField! = name
+    sortOrder: SortOrder! = ASC
+  ): SkillPage!
+
+  """Skills available as project technologies ("Environment")"""
+  technologies: [Skill!]!
 }
 
 input RequestPasswordResetInput {
@@ -62,6 +243,71 @@ input SignUpInput {
   confirmPassword: String!
   email: String!
   password: String!
+}
+
+type Skill {
+  category: SkillCategory!
+  id: ID!
+  name: String!
+}
+
+type SkillCategory {
+  id: ID!
+  name: String!
+  type: String!
+}
+
+type SkillPage {
+  items: [Skill!]!
+
+  """Current page, 1-based"""
+  page: Int!
+  pageSize: Int!
+
+  """Items matching the search, not the page size"""
+  total: Int!
+}
+
+enum SkillSortField {
+  name
+}
+
+enum SortOrder {
+  ASC
+  DESC
+}
+
+input UpdateDepartmentInput {
+  id: ID!
+  name: String!
+}
+
+input UpdateLanguageInput {
+  id: ID!
+  iso: String!
+  name: String!
+  nativeName: String!
+}
+
+input UpdatePositionInput {
+  id: ID!
+  name: String!
+}
+
+input UpdateProjectInput {
+  description: String!
+  domain: String!
+  endDate: Date!
+  id: ID!
+  name: String!
+  startDate: Date!
+  technologyIds: [ID!]! = []
+}
+
+input UpdateSkillInput {
+  categoryId: ID!
+  id: ID!
+  name: String!
 }
 
 type User {

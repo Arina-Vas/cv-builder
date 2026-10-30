@@ -4,7 +4,10 @@ import type { Project } from '@/projects/models/project.model';
 import { skillInclude, toSkill } from '@/skills/skill.mapper';
 
 export const projectInclude = {
-  technologies: { include: { skill: { include: skillInclude } } },
+  technologies: {
+    include: { skill: { include: skillInclude } },
+    orderBy: { skill: { name: 'asc' } },
+  },
 } satisfies Prisma.ProjectInclude;
 export type ProjectWithTechnologies = Prisma.ProjectGetPayload<{ include: typeof projectInclude }>;
 
