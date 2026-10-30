@@ -1,0 +1,112 @@
+import { screen } from '@testing-library/react';
+import { describe, expect, it } from 'vitest';
+import { mockRouter } from '@/test/next-navigation';
+import { renderWithProviders } from '@/test/render';
+import { LOGOUT, RESET_PASSWORD } from '../../api/auth.operations';
+import { ResetPasswordForm } from './ResetPasswordForm';
+
+const TOKEN = 'reset-token';
+const PASSWORD = 'newSecret1';
+
+const request = {
+  query: RESET_PASSWORD,
+  variables: { input: { token: TOKEN, newPassword: PASSWORD, confirmPassword: PASSWORD } },
+};
+const logoutMock = { request: { query: LOGOUT }, result: { data: { logout: true } } };
+
+async function fillAndSubmit(ui: ReturnType<typeof renderWithProviders>['user']) {
+  await ui.type(screen.getByLabelText('New password'), PASSWORD);
+  await ui.type(screen.getByLabelText('Confirm password'), PASSWORD);
+  await ui.click(screen.getByRole('button', { name: 'SUBMIT' }));
+}
+
+describe('ResetPasswordForm', () => {
+  it('validates the new password', async () => {
+    const { user } = renderWithProviders(<ResetPasswordForm token={TOKEN} />);
+
+    await user.click(screen.getByLabelText('New password'));
+    await user.tab();
+
+    expect(screen.getByText('New password is required')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'SUBMIT' })).toBeDisabled();
+  });
+
+  it('resets the password, ends the old session and goes to Sign In with a message', async () => {
+    const { user } = renderWithProviders(<ResetPasswordForm token={TOKEN} />, {
+      mocks: [{ request, result: { data: { resetPassword: true } } }, logoutMock],
+    });
+
+    await fillAndSubmit(user);
+
+    expect(
+      await screen.findByText('Your password has been reset. Please sign in.'),
+    ).toBeInTheDocument();
+    expect(mockRouter.replace).toHaveBeenCalledWith('/login');
+  });
+
+  it('shows the token error as a toast and stays on the page', async () => {
+    const { user } = renderWithProviders(<ResetPasswordForm token={TOKEN} />, {
+      mocks: [
+        {
+          request,
+          result: {
+            errors: [
+              {
+                message: 'Validation failed',
+                extensions: {
+                  code: 'BAD_USER_INPUT',
+                  fields: [{ field: 'token', message: 'This password reset link has expired' }],
+                },
+              },
+            ],
+          },
+        },
+      ],
+    });
+
+    await fillAndSubmit(user);
+
+    expect(await screen.findByText('This password reset link has expired')).toBeInTheDocument();
+    expect(mockRouter.replace).not.toHaveBeenCalled();
+  });
+
+  it('maps password errors from the backend to the fields', async () => {
+    const { user } = renderWithProviders(<ResetPasswordForm token={TOKEN} />, {
+      mocks: [
+        {
+          request,
+          result: {
+            errors: [
+              {
+                message: 'Validation failed',
+                extensions: {
+                  code: 'BAD_USER_INPUT',
+                  fields: [
+                    {
+                      field: 'newPassword',
+                      message: 'Password does not meet the security requirements',
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      ],
+    });
+
+    await fillAndSubmit(user);
+
+    expect(
+      await screen.findByText('Password does not meet the security requirements'),
+    ).toBeInTheDocument();
+  });
+
+  it('goes to Sign In with GO TO SIGN IN', async () => {
+    const { user } = renderWithProviders(<ResetPasswordForm token={TOKEN} />);
+
+    await user.click(screen.getByRole('button', { name: 'GO TO SIGN IN' }));
+
+    expect(mockRouter.push).toHaveBeenCalledWith('/login');
+  });
+});

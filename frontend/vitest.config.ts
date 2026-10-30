@@ -37,7 +37,7 @@ export default defineConfig({
         'src/**/types.ts',
       ],
       thresholds: {
-        lines: 35,
+        lines: 80,
       },
     },
     projects: [

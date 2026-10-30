@@ -12,7 +12,8 @@
     "codegen": "graphql-codegen",
     "test": "vitest run --project unit",
     "test:watch": "vitest --project unit",
-    "test:coverage": "vitest run --project unit --coverage"
+    "test:storybook": "vitest run --project storybook",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@apollo/client": "^4.3.4",

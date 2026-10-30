@@ -11,24 +11,38 @@ Copy `.env.example` to `.env.local`. `NEXT_PUBLIC_GRAPHQL_URL` points to the bac
 
 Run from the repo root (`pnpm --filter frontend <script>`) or from this folder.
 
-| Command              | Description                                              |
-| -------------------- | -------------------------------------------------------- |
-| `pnpm dev`           | Start the dev server (port 3000)                         |
-| `pnpm build`         | Production build                                         |
-| `pnpm start`         | Run the production build                                 |
-| `pnpm typecheck`     | Type-check with `tsc --noEmit`                           |
-| `pnpm codegen`       | Generate GraphQL types into `src/gql/` (see below)       |
-| `pnpm storybook`     | Start Storybook (port 6006)                              |
-| `pnpm test`          | Run unit tests once                                      |
-| `pnpm test:watch`    | Run unit tests in watch mode                             |
-| `pnpm test:coverage` | Run unit tests with coverage (fails below the threshold) |
+| Command               | Description                                                      |
+| --------------------- | ---------------------------------------------------------------- |
+| `pnpm dev`            | Start the dev server (port 3000)                                 |
+| `pnpm build`          | Production build                                                 |
+| `pnpm start`          | Run the production build                                         |
+| `pnpm typecheck`      | Type-check with `tsc --noEmit`                                   |
+| `pnpm codegen`        | Generate GraphQL types into `src/gql/` (see below)               |
+| `pnpm storybook`      | Start Storybook (port 6006)                                      |
+| `pnpm test`           | Run unit tests once (fast, no browser)                           |
+| `pnpm test:watch`     | Run unit tests in watch mode                                     |
+| `pnpm test:storybook` | Run story tests in headless Chromium                             |
+| `pnpm test:coverage`  | Run both test projects with coverage (fails below the threshold) |
 
 Linting and formatting are configured at the repo root (`pnpm lint`, `pnpm format`).
 
 ## Tests
 
-Vitest + React Testing Library in jsdom (the `unit` project in `vitest.config.ts`). The `storybook` project in the
-same config runs stories in a real browser and needs `pnpm exec playwright install` once; `pnpm test` does not run it.
+`vitest.config.ts` has two projects:
+
+- `unit`: Vitest + React Testing Library in jsdom, files `src/**/*.test.ts(x)`.
+- `storybook`: every story is a test, run in headless Chromium; `play` functions with `expect` are the assertions.
+  Install the browser once with `pnpm exec playwright install chromium` (CI needs
+  `pnpm exec playwright install --with-deps chromium` before `pnpm test:coverage`).
+
+Where to write a test:
+
+- `src/features/**`, hooks and `src/shared/lib/**`: unit tests only.
+- `src/shared/components/**`: either a `play` function in the component's stories or a unit test, not both for the
+  same behaviour. Use a unit test for logic and states, a story test when a real browser matters (focus, Radix
+  portals, positioning).
+
+Unit tests:
 
 - Put a test next to the code it covers and name it `<Name>.test.ts(x)`, e.g. `Button.tsx` → `Button.test.tsx`.
 - Render with `renderWithProviders` from `@/test/render`: it wraps the UI in `ThemeProvider`, `ToastProvider` and
@@ -42,12 +56,13 @@ same config runs stories in a real browser and needs `pnpm exec playwright insta
 
 ### Coverage
 
-`pnpm test:coverage` prints a summary and writes `coverage/index.html` and `coverage/lcov.info` (git-ignored).
-It counts every file in `src/` except Next.js route files (`src/app/`, `src/proxy.ts`, covered by E2E), generated
-GraphQL types, stories, fixtures and type-only files. Files without tests count as 0%.
+`pnpm test:coverage` runs both projects and merges their coverage, prints a summary and writes
+`coverage/index.html` and `coverage/lcov.info` (git-ignored). It counts every file in `src/` except Next.js route
+files (`src/app/`, `src/proxy.ts`, covered by E2E), generated GraphQL types, stories, fixtures and type-only files.
+Files without tests count as 0%.
 
-The run fails when line coverage is below `coverage.thresholds.lines` in `vitest.config.ts`. It starts at the current
-level (35%) and is raised as tests are added; the project target is above 80%.
+The run fails when line coverage is below `coverage.thresholds.lines` in `vitest.config.ts` (80%, the project
+target).
 
 ## GraphQL types (codegen)
 
