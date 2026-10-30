@@ -7,6 +7,7 @@ import {
   type KeyboardEvent,
   type MouseEvent,
 } from 'react';
+import { useTranslations } from 'next-intl';
 
 import styles from './OtpInput.module.css';
 
@@ -21,14 +22,8 @@ export interface OtpInputProps {
 
 const onlyDigits = (text: string) => text.replace(/\D/g, '');
 
-export function OtpInput({
-  value,
-  onChange,
-  length = 6,
-  label = 'Verification code',
-  error,
-  disabled,
-}: OtpInputProps) {
+export function OtpInput({ value, onChange, length = 6, label, error, disabled }: OtpInputProps) {
+  const t = useTranslations('auth.verifyEmail');
   const errorId = useId();
   const cells = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -80,7 +75,7 @@ export function OtpInput({
       <div
         className={styles.root}
         role="group"
-        aria-label={label}
+        aria-label={label ?? t('codeLabel')}
         aria-describedby={error ? errorId : undefined}
         data-error={error ? true : undefined}
       >
@@ -97,7 +92,7 @@ export function OtpInput({
             value={value[index] ?? ''}
             disabled={disabled}
             aria-invalid={error ? true : undefined}
-            aria-label={`Digit ${index + 1} of ${length}`}
+            aria-label={t('digit', { index: index + 1, length })}
             onChange={handleInput(index)}
             onKeyDown={handleKeyDown(index)}
             onPaste={handlePaste(index)}

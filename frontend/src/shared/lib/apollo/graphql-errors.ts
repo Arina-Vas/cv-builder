@@ -13,8 +13,6 @@ export type ErrorCode =
   | 'RATE_LIMITED'
   | 'INTERNAL_SERVER_ERROR';
 
-export const GENERIC_ERROR_MESSAGE = 'Something went wrong. Please try again later';
-
 interface AppErrorExtensions {
   code?: ErrorCode;
   field?: string;
@@ -24,6 +22,7 @@ interface AppErrorExtensions {
 
 export interface AppError {
   code?: ErrorCode;
+  // backend text for developers and logs; the UI shows useErrorMessage() instead
   message: string;
   fieldErrors: Record<string, string>;
   retryAfter?: number;
@@ -33,7 +32,7 @@ export function parseError(error: unknown): AppError {
   const first = CombinedGraphQLErrors.is(error) ? error.errors[0] : undefined;
 
   if (!first) {
-    return { message: GENERIC_ERROR_MESSAGE, fieldErrors: {} };
+    return { message: '', fieldErrors: {} };
   }
 
   const extensions = (first.extensions ?? {}) as AppErrorExtensions;
@@ -48,7 +47,7 @@ export function parseError(error: unknown): AppError {
 
   return {
     code: extensions.code,
-    message: extensions.code === 'INTERNAL_SERVER_ERROR' ? GENERIC_ERROR_MESSAGE : first.message,
+    message: first.message,
     fieldErrors,
     retryAfter: extensions.retryAfter,
   };

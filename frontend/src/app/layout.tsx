@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import { Roboto } from 'next/font/google';
+import { getLocale } from 'next-intl/server';
+import { NextIntlClientProvider } from 'next-intl';
 import type { ReactNode } from 'react';
 import { ApolloWrapper } from '@/shared/lib/apollo/apollo-provider';
 import { ThemeProvider } from '@/shared/theme/theme-provider';
@@ -19,18 +21,22 @@ export const metadata: Metadata = {
   title: 'CV Builder',
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  const locale = await getLocale();
+
   return (
-    <html lang="en" className={roboto.variable} suppressHydrationWarning>
+    <html lang={locale} className={roboto.variable} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body>
-        <ThemeProvider>
-          <ToastProvider>
-            <ApolloWrapper>{children}</ApolloWrapper>
-          </ToastProvider>
-        </ThemeProvider>
+        <NextIntlClientProvider>
+          <ThemeProvider>
+            <ToastProvider>
+              <ApolloWrapper>{children}</ApolloWrapper>
+            </ToastProvider>
+          </ThemeProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

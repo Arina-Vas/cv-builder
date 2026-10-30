@@ -2,11 +2,13 @@
 
 import { useMutation } from '@apollo/client/react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 
 import { Button } from '@/shared/components/buttons';
 import { useToast } from '@/shared/components/toast/ToastProvider';
 import { parseError } from '@/shared/lib/apollo/graphql-errors';
+import { useErrorMessage } from '@/shared/lib/apollo/useErrorMessage';
 import { RESEND_VERIFICATION_CODE, VERIFY_EMAIL } from '../../api/auth.operations';
 import { AuthRoute, RESEND_CODE_COOLDOWN_SECONDS } from '../../auth.constants';
 import { validateCode } from '../../lib/validation';
@@ -31,6 +33,9 @@ export interface EmailVerificationFormProps {
 
 export function EmailVerificationForm({ codeJustSent = false }: EmailVerificationFormProps) {
   const router = useRouter();
+  const t = useTranslations('auth');
+  const tValidation = useTranslations('validation');
+  const errorMessage = useErrorMessage();
   const toast = useToast();
   const [verifyEmail, { loading }] = useMutation(VERIFY_EMAIL);
   const [resendCode, { loading: resending }] = useMutation(RESEND_VERIFICATION_CODE);
@@ -39,7 +44,7 @@ export function EmailVerificationForm({ codeJustSent = false }: EmailVerificatio
   const [serverError, setServerError] = useState<string>();
   const [cooldown, setCooldown] = useCooldown(codeJustSent ? RESEND_CODE_COOLDOWN_SECONDS : 0);
 
-  const isValid = !validateCode(code);
+  const isValid = !validateCode(code, tValidation);
 
   const handleCodeChange = (value: string) => {
     setCode(value);
@@ -51,18 +56,18 @@ export function EmailVerificationForm({ codeJustSent = false }: EmailVerificatio
 
     try {
       await verifyEmail({ variables: { input: { code } } });
-      toast.success('Email verified');
+      toast.success(t('verifyEmail.verified'));
       router.replace(AuthRoute.home);
     } catch (error) {
-      const { code: errorCode, message, fieldErrors } = parseError(error);
+      const appError = parseError(error);
 
-      if (errorCode === 'BAD_USER_INPUT') {
-        setServerError(fieldErrors.code ?? message);
-      } else if (errorCode === 'CONFLICT') {
-        toast.info(message);
+      if (appError.code === 'BAD_USER_INPUT') {
+        setServerError(t('errors.codeInvalid'));
+      } else if (appError.code === 'CONFLICT') {
+        toast.info(t('errors.alreadyVerified'));
         router.replace(AuthRoute.home);
       } else {
-        toast.error(message);
+        toast.error(errorMessage(appError));
       }
     }
   };
@@ -74,34 +79,34 @@ export function EmailVerificationForm({ codeJustSent = false }: EmailVerificatio
       await resendCode();
       handleCodeChange('');
       setCooldown(RESEND_CODE_COOLDOWN_SECONDS);
-      toast.success('Verification code sent');
+      toast.success(t('verifyEmail.codeSent'));
     } catch (error) {
-      const { code: errorCode, message, retryAfter } = parseError(error);
+      const appError = parseError(error);
 
-      if (errorCode === 'RATE_LIMITED') {
-        setCooldown(retryAfter ?? RESEND_CODE_COOLDOWN_SECONDS);
-        toast.warning(message);
+      if (appError.code === 'RATE_LIMITED') {
+        setCooldown(appError.retryAfter ?? RESEND_CODE_COOLDOWN_SECONDS);
+        toast.warning(errorMessage(appError));
       } else {
-        toast.error(message);
+        toast.error(errorMessage(appError));
       }
     }
   };
 
   return (
     <AuthForm
-      title="Email verification"
-      subtitle="Enter the verification code we sent to your email."
+      title={t('verifyEmail.title')}
+      subtitle={t('verifyEmail.subtitle')}
       onSubmit={handleSubmit}
       actions={
         <>
           <Button type="submit" disabled={!isValid} loading={loading}>
-            CONFIRM
+            {t('verifyEmail.confirm')}
           </Button>
           <Button variant="text" disabled={cooldown > 0} loading={resending} onClick={handleResend}>
-            {cooldown > 0 ? `RESEND CODE (${cooldown}s)` : 'RESEND CODE'}
+            {t('verifyEmail.resend', { seconds: cooldown })}
           </Button>
           <Button variant="ghost" onClick={() => router.push(AuthRoute.home)}>
-            LATER
+            {t('verifyEmail.later')}
           </Button>
         </>
       }

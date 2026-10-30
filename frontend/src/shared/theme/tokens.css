@@ -434,8 +434,8 @@
   --toast-info-fg: #145b7b; /* [F] */
 
   /* Skill mastery / language proficiency: fill + track  [F] Level 0–5,
-     mapping [A]: Novice|A1|A2 → 1, Advanced|B1 → 2, Competent|B2 → 3,
-     Proficient|C1|C2 → 4, Expert|Native → 5; value = index × 20% */
+     mapping [A]: Beginner|A1|A2 → 1, Elementary|B1 → 2, Intermediate|B2 → 3,
+     Advanced|C1|C2 → 4, Expert|Native → 5; value = index × 20% */
   --level-0-track: #454545;
   --level-1-fill: #626262;
   --level-1-track: #454545;

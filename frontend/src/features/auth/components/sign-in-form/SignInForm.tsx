@@ -2,11 +2,13 @@
 
 import { useMutation } from '@apollo/client/react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 import { Button } from '@/shared/components/buttons';
 import { Input } from '@/shared/components/inputs';
 import { useToast } from '@/shared/components/toast/ToastProvider';
 import { parseError } from '@/shared/lib/apollo/graphql-errors';
+import { useErrorMessage } from '@/shared/lib/apollo/useErrorMessage';
 import { SIGN_IN } from '../../api/auth.operations';
 import { AuthRoute } from '../../auth.constants';
 import { useFormFields } from '../../lib/useFormFields';
@@ -16,13 +18,15 @@ import { AuthForm } from '../auth-form/AuthForm';
 export function SignInForm() {
   const router = useRouter();
   const toast = useToast();
+  const t = useTranslations('auth');
+  const errorMessage = useErrorMessage();
   const [signIn, { loading }] = useMutation(SIGN_IN);
 
   const { values, isValid, register, setServerErrors } = useFormFields(
     { email: '', password: '' },
-    ({ email, password }) => ({
-      email: validateEmail(email),
-      password: validatePassword(password),
+    ({ email, password }, tValidation) => ({
+      email: validateEmail(email, tValidation),
+      password: validatePassword(password, tValidation),
     }),
   );
 
@@ -35,37 +39,36 @@ export function SignInForm() {
       });
       router.replace(AuthRoute.home);
     } catch (error) {
-      const { code, message, fieldErrors } = parseError(error);
+      const appError = parseError(error);
 
-      if (code === 'BAD_USER_INPUT') {
-        setServerErrors(fieldErrors);
-      } else if (code === 'UNAUTHENTICATED') {
-        setServerErrors({ password: message });
+      // field errors (BAD_USER_INPUT) are caught by the client validation first, so they go to the toast
+      if (appError.code === 'UNAUTHENTICATED') {
+        setServerErrors({ password: t('errors.invalidCredentials') });
       } else {
-        toast.error(message);
+        toast.error(errorMessage(appError));
       }
     }
   };
 
   return (
     <AuthForm
-      title="Welcome back"
-      subtitle="Hello again! Sign in to continue"
+      title={t('signIn.title')}
+      subtitle={t('signIn.subtitle')}
       onSubmit={handleSubmit}
       actions={
         <>
           <Button type="submit" disabled={!isValid} loading={loading}>
-            SIGN IN
+            {t('signIn.submit')}
           </Button>
           <Button variant="ghost" onClick={() => router.push(AuthRoute.forgotPassword)}>
-            FORGOT PASSWORD
+            {t('signIn.forgotPassword')}
           </Button>
         </>
       }
     >
-      <Input label="Email" type="email" autoComplete="email" {...register('email')} />
+      <Input label={t('fields.email')} type="email" autoComplete="email" {...register('email')} />
       <Input
-        label="Password"
+        label={t('fields.password')}
         type="password"
         autoComplete="current-password"
         {...register('password')}

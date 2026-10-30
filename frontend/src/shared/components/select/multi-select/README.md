@@ -6,6 +6,10 @@ Selected values are shown as [`Chip`](../../chip/README.md)s inside the field, t
 typing filters the list.
 Live examples of every state, Light and Dark: Storybook → **Shared/MultiSelect**.
 
+The default `emptyText` comes from `common.select` in `messages/en.json`, and the chips' ⊗ names from
+`common.chip`, so it needs `NextIntlClientProvider` above it: the root layout mounts it in the app,
+`.storybook/preview.tsx` in Storybook.
+
 Radix `Select` has no multi mode, so this one is built on Radix
 [`Popover`](https://www.radix-ui.com/primitives/docs/components/popover) (portal, positioning, outside click,
 Escape) with an own listbox. Label, border and error come from [`Field`](../../field/README.md).
@@ -37,25 +41,25 @@ const POSITIONS = [
 <MultiSelect label="Position" options={POSITIONS} defaultValue={['se']} disabled />
 ```
 
-| Prop            | Values                                                 | Default                                |
-| --------------- | ------------------------------------------------------ | -------------------------------------- |
-| `options`       | `{ value, label, disabled? }[]` (`SelectOption`)       | required                               |
-| `label`         | `string`: also the placeholder of the empty field      | required                               |
-| `value`         | `string[]` · `[]` = nothing selected ⚠️                | —                                      |
-| `defaultValue`  | `string[]`                                             | `[]`                                   |
-| `onValueChange` | `(value: string[]) => void`                            | —                                      |
-| `error`         | `string`: red border + chevron + text                  | —                                      |
-| `disabled`      | `boolean`: grey field, chips with disabled ⊗           | `false`                                |
-| `required`      | `boolean`: `aria-required` only, no native validation  | `false`                                |
-| `name`          | `string`: one hidden `<input name>` per selected value | —                                      |
-| `id`            | `string`: input id, auto via `useId`                   | auto                                   |
-| `open`          | `boolean`                                              | —                                      |
-| `defaultOpen`   | `boolean`                                              | `false`                                |
-| `onOpenChange`  | `(open: boolean) => void`                              | —                                      |
-| `filter`        | `(option, query) => boolean`                           | label contains query, case-insensitive |
-| `emptyText`     | `string`: shown when nothing matches                   | `'No options'`                         |
-| `ref`           | `Ref<HTMLInputElement>`: the search input              | —                                      |
-| `className`     | on the `Field` root (label + field + error)            | —                                      |
+| Prop            | Values                                                 | Default                                  |
+| --------------- | ------------------------------------------------------ | ---------------------------------------- |
+| `options`       | `{ value, label, disabled? }[]` (`SelectOption`)       | required                                 |
+| `label`         | `string`: also the placeholder of the empty field      | required                                 |
+| `value`         | `string[]` · `[]` = nothing selected ⚠️                | —                                        |
+| `defaultValue`  | `string[]`                                             | `[]`                                     |
+| `onValueChange` | `(value: string[]) => void`                            | —                                        |
+| `error`         | `string`: red border + chevron + text                  | —                                        |
+| `disabled`      | `boolean`: grey field, chips with disabled ⊗           | `false`                                  |
+| `required`      | `boolean`: `aria-required` only, no native validation  | `false`                                  |
+| `name`          | `string`: one hidden `<input name>` per selected value | —                                        |
+| `id`            | `string`: input id, auto via `useId`                   | auto                                     |
+| `open`          | `boolean`                                              | —                                        |
+| `defaultOpen`   | `boolean`                                              | `false`                                  |
+| `onOpenChange`  | `(open: boolean) => void`                              | —                                        |
+| `filter`        | `(option, query) => boolean`                           | label contains query, case-insensitive   |
+| `emptyText`     | `string`: shown when nothing matches                   | `common.select.noOptions` (`No options`) |
+| `ref`           | `Ref<HTMLInputElement>`: the search input              | —                                        |
+| `className`     | on the `Field` root (label + field + error)            | —                                        |
 
 - ⚠️ **Controlled vs uncontrolled:** `value === undefined` → uncontrolled. To clear a controlled select pass
   `value={[]}`, **not** `undefined`. Start the state as `useState<string[]>([])`. Same for `open` / `defaultOpen`.

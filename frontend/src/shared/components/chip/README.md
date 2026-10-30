@@ -29,7 +29,9 @@ Plus every native `<span>` attribute (`aria-*`, `data-*`, `style`), except `chil
 - `onRemove` gets **no arguments**: the parent already knows which value it removes
   (`onRemove={() => toggle(option.value)}`). Don't key chips by their label: labels can repeat.
 - The ⊗ is the shared [`IconButton`](../buttons/README.md), `type="button"` (never submits a form)
-  with `aria-label="Remove {label}"`. The chip CSS overrides its look: 12px, grey, no fill on press,
+  with `aria-label="Remove {label}"` (`common.chip.remove` in `messages/en.json`, so the chip needs
+  `NextIntlClientProvider` above it: root layout in the app, `.storybook/preview.tsx` in Storybook).
+  The chip CSS overrides its look: 12px, grey, no fill on press,
   same grey when disabled.
 - Clicking ⊗ calls `stopPropagation()`, so the click doesn't reach the parent (e.g. doesn't open a select list).
 - ⊗ has `onMouseDown` → `preventDefault()`: focus stays where it was, e.g. in the `MultiSelect` input.
