@@ -96,7 +96,7 @@ All tables have `id` (uuid), `created_at` and `updated_at`. Only the meaningful 
 
 | Table              | Columns                                                                         |
 | ------------------ | ------------------------------------------------------------------------------- |
-| `user_skills`      | `user_id`, `skill_id`, `mastery` (`NOVICE` … `EXPERT`)                          |
+| `user_skills`      | `user_id`, `skill_id`, `mastery` (`BEGINNER` … `EXPERT`)                        |
 | `user_languages`   | `user_id`, `language_id`, `proficiency` (`A1` … `C2`, `NATIVE`)                 |
 | `project_skills`   | `project_id`, `skill_id` (project technologies)                                 |
 | `cvs`              | `user_id`, `name` varchar(255), `education` varchar(255), `description`         |
@@ -212,3 +212,6 @@ pnpm db:migrate
   `PT-BR`). The spec only says "a language ISO code, max 5 characters".
 - **User preferences (theme, language) are not stored.** The spec allows keeping them on the client.
 - **`responsibilities` is a single text field** (a textarea in the spec), not an array.
+- **Skill mastery values follow the wiki**: `BEGINNER`, `ELEMENTARY`, `INTERMEDIATE`, `ADVANCED`, `EXPERT`
+  (Add / Update Skill modals). The initial schema used other names; they were renamed in place
+  (`ALTER TYPE … RENAME VALUE`), so the order of the levels is kept.
