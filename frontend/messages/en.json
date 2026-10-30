@@ -57,7 +57,8 @@
     "password": {
       "required": "Password is required",
       "newRequired": "New password is required",
-      "minLength": "Password must be at least {min} characters long"
+      "minLength": "Password must be at least {min} characters long",
+      "maxLength": "Password must not exceed {max} characters"
     },
     "confirmPassword": {
       "required": "Confirm Password is required",
