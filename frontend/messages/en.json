@@ -73,7 +73,8 @@
     "appName": "CV Builder",
     "collapseSidebar": "Collapse sidebar",
     "expandSidebar": "Expand sidebar",
-    "navigation": "Main navigation"
+    "navigation": "Main navigation",
+    "notAuthorized": "You are not authorized to access this page"
   },
   "nav": {
     "employees": "Employees",
