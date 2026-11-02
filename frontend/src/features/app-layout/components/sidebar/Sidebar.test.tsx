@@ -84,4 +84,28 @@ describe('Sidebar', () => {
     expect(screen.queryByRole('link', { name: 'Departments' })).not.toBeInTheDocument();
     expect(screen.queryByRole('separator')).not.toBeInTheDocument();
   });
+
+  it('shows a placeholder for the profile while the user is loading', () => {
+    renderWithProviders(<Sidebar defaultCollapsed={false} />, { mocks: [meMock('EMPLOYEE')] });
+
+    expect(screen.queryByRole('button', { name: /Ada Lovelace/ })).not.toBeInTheDocument();
+    expect(screen.getByRole('complementary').querySelector('[aria-busy="true"]')).not.toBeNull();
+  });
+
+  it('shows the profile menu trigger once the user is loaded', async () => {
+    renderWithProviders(<Sidebar defaultCollapsed={false} />, { mocks: [meMock('EMPLOYEE')] });
+
+    expect(await screen.findByRole('button', { name: /Ada Lovelace/ })).toBeInTheDocument();
+  });
+
+  it('offers a retry when the user fails to load and recovers after it', async () => {
+    const { user } = renderWithProviders(<Sidebar defaultCollapsed={false} />, {
+      mocks: [{ request: { query: ME }, error: new Error('Network down') }, meMock('ADMIN')],
+    });
+
+    await user.click(await screen.findByRole('button', { name: 'Profile not loaded. Retry' }));
+
+    expect(await screen.findByRole('button', { name: /Ada Lovelace/ })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Departments' })).toBeInTheDocument();
+  });
 });

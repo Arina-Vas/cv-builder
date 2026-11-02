@@ -19,7 +19,7 @@ interface SidebarProps {
 export function Sidebar({ defaultCollapsed }: SidebarProps) {
   const t = useTranslations('layout');
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
-  const { user } = useCurrentUser();
+  const { user, error, refetch } = useCurrentUser();
 
   const toggleCollapsed = () => {
     const next = !collapsed;
@@ -36,7 +36,23 @@ export function Sidebar({ defaultCollapsed }: SidebarProps) {
 
       <SidebarNav groups={getNavItems(user?.role ?? null)} />
 
-      <div className={s.footer}>{user && <ProfileMenu user={user} collapsed={collapsed} />}</div>
+      <div className={s.footer} aria-busy={!user && !error}>
+        {user ? (
+          <ProfileMenu user={user} collapsed={collapsed} />
+        ) : error ? (
+          <button type="button" className={s.retry} onClick={() => void refetch()}>
+            <span className={s.retryBadge} aria-hidden>
+              !
+            </span>
+            <span className={s.retryText}>{t('profileRetry')}</span>
+          </button>
+        ) : (
+          <div className={s.skeleton} aria-hidden>
+            <span className={s.skeletonAvatar} />
+            <span className={s.skeletonName} />
+          </div>
+        )}
+      </div>
 
       <IconButton
         className={s.toggle}

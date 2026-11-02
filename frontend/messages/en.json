@@ -77,7 +77,8 @@
     "notAuthorized": "You are not authorized to access this page",
     "profile": "Profile",
     "settings": "Settings",
-    "logout": "Logout"
+    "logout": "Logout",
+    "profileRetry": "Profile not loaded. Retry"
   },
   "nav": {
     "employees": "Employees",
