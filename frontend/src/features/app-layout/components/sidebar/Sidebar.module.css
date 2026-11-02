@@ -35,6 +35,12 @@
   white-space: nowrap;
 }
 
+.footer {
+  flex-shrink: 0;
+  min-height: var(--sidebar-item-height);
+  padding-bottom: var(--sidebar-padding-bottom);
+}
+
 /* Centred in the gap between the header and the first tab, half outside the right edge */
 .toggle {
   --icon-button-size: 24px;

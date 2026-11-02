@@ -8,6 +8,7 @@ import { ChevronIcon } from '@/shared/components/icons/ChevronIcon';
 import { LogoIcon } from '@/shared/components/icons/LogoIcon';
 import { getNavItems } from '../../navigation';
 import { SIDEBAR_COOKIE } from '../../sidebar.constants';
+import { ProfileMenu } from '../profile-menu/ProfileMenu';
 import { SidebarNav } from '../sidebar-nav/SidebarNav';
 import s from './Sidebar.module.css';
 
@@ -34,6 +35,8 @@ export function Sidebar({ defaultCollapsed }: SidebarProps) {
       </div>
 
       <SidebarNav groups={getNavItems(user?.role ?? null)} />
+
+      <div className={s.footer}>{user && <ProfileMenu user={user} collapsed={collapsed} />}</div>
 
       <IconButton
         className={s.toggle}
