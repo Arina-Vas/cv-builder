@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { getNavItems } from './navigation';
 
-const MAIN_HREFS = ['/users', '/cvs', '/skills', '/languages'];
+const MAIN_HREFS = ['/users', '/skills', '/languages', '/cvs'];
 const ADMIN_HREFS = ['/departments', '/positions', '/projects'];
 
 const hrefs = (items: { href: string }[]) => items.map((item) => item.href);
