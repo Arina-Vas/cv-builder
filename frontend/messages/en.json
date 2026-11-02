@@ -69,6 +69,15 @@
       "invalid": "Please enter a valid 6-digit code"
     }
   },
+  "nav": {
+    "employees": "Employees",
+    "cvs": "CVs",
+    "skills": "Skills",
+    "languages": "Languages",
+    "departments": "Departments",
+    "positions": "Positions",
+    "projects": "Projects"
+  },
   "auth": {
     "tabs": { "label": "Authentication", "signIn": "Sign in", "signUp": "Sign up" },
     "fields": { "email": "Email", "password": "Password", "confirmPassword": "Confirm Password" },
