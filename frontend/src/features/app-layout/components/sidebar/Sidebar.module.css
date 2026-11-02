@@ -1,6 +1,7 @@
 .root {
   position: sticky;
   top: 0;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   width: var(--sidebar-width);
@@ -9,12 +10,17 @@
   transition: width var(--duration-standard) var(--ease-in-out);
 }
 
+.root[data-collapsed='true'] {
+  width: var(--sidebar-width-collapsed);
+}
+
 .header {
   display: flex;
   align-items: center;
   gap: var(--sidebar-item-gap);
   height: var(--sidebar-item-height);
   padding: 0 var(--space-4);
+  overflow: hidden;
 }
 
 .logo {
@@ -27,4 +33,16 @@
   font-size: var(--type-subtitle1-size);
   font-weight: var(--font-weight-medium);
   white-space: nowrap;
+}
+
+/* [F] 24×24 at top 51, half outside the right edge */
+.toggle {
+  --icon-button-size: 24px;
+  --icon-size: 24px;
+
+  position: absolute;
+  top: 51px;
+  right: -12px;
+  background: var(--sidebar-bg);
+  color: var(--text-muted);
 }

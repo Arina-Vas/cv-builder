@@ -70,7 +70,9 @@
     }
   },
   "layout": {
-    "appName": "CV Builder"
+    "appName": "CV Builder",
+    "collapseSidebar": "Collapse sidebar",
+    "expandSidebar": "Expand sidebar"
   },
   "nav": {
     "employees": "Employees",
