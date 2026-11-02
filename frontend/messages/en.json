@@ -69,6 +69,9 @@
       "invalid": "Please enter a valid 6-digit code"
     }
   },
+  "layout": {
+    "appName": "CV Builder"
+  },
   "nav": {
     "employees": "Employees",
     "cvs": "CVs",
