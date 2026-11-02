@@ -119,5 +119,23 @@
       "alreadyVerified": "Email is already verified",
       "resetLinkInvalid": "This password reset link is invalid or has expired"
     }
+  },
+  "users": {
+    "tabs": {
+      "label": "Employee sections",
+      "profile": "Profile",
+      "skills": "Skills",
+      "languages": "Languages",
+      "cvs": "CVs"
+    }
+  },
+  "cvs": {
+    "tabs": {
+      "label": "CV sections",
+      "details": "Details",
+      "skills": "Skills",
+      "projects": "Projects",
+      "preview": "Preview"
+    }
   }
 }

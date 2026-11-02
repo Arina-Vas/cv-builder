@@ -1,33 +1,24 @@
 'use client';
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import type { ReactNode } from 'react';
+
+import { Tabs } from '@/shared/components/tabs';
 
 import { AuthRoute } from '../../auth.constants';
-import styles from './AuthTabs.module.css';
 
 const TABS = [
   { href: AuthRoute.signIn, label: 'signIn' },
   { href: AuthRoute.signUp, label: 'signUp' },
 ] as const;
 
-export function AuthTabs() {
-  const pathname = usePathname();
+export function AuthTabs({ children }: { children: ReactNode }) {
   const t = useTranslations('auth.tabs');
+  const items = TABS.map(({ href, label }) => ({ href, label: t(label) }));
 
   return (
-    <nav className={styles.tabs} aria-label={t('label')}>
-      {TABS.map(({ href, label }) => (
-        <Link
-          key={href}
-          href={href}
-          className={styles.tab}
-          aria-current={pathname === href ? 'page' : undefined}
-        >
-          {t(label)}
-        </Link>
-      ))}
-    </nav>
+    <Tabs items={items} label={t('label')} align="center">
+      {children}
+    </Tabs>
   );
 }
