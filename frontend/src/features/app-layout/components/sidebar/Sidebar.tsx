@@ -2,10 +2,13 @@
 
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
+import { useCurrentUser } from '@/features/auth/hooks/useCurrentUser';
 import { IconButton } from '@/shared/components/buttons';
 import { ChevronIcon } from '@/shared/components/icons/ChevronIcon';
 import { LogoIcon } from '@/shared/components/icons/LogoIcon';
+import { getNavItems } from '../../navigation';
 import { SIDEBAR_COOKIE } from '../../sidebar.constants';
+import { SidebarNav } from '../sidebar-nav/SidebarNav';
 import s from './Sidebar.module.css';
 
 interface SidebarProps {
@@ -15,6 +18,7 @@ interface SidebarProps {
 export function Sidebar({ defaultCollapsed }: SidebarProps) {
   const t = useTranslations('layout');
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
+  const { user } = useCurrentUser();
 
   const toggleCollapsed = () => {
     const next = !collapsed;
@@ -28,6 +32,8 @@ export function Sidebar({ defaultCollapsed }: SidebarProps) {
         <LogoIcon className={s.logo} />
         <span className={s.title}>{t('appName')}</span>
       </div>
+
+      <SidebarNav groups={getNavItems(user?.role ?? null)} />
 
       <IconButton
         className={s.toggle}

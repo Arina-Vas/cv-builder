@@ -28,6 +28,10 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { href: '/projects', labelKey: 'projects', icon: ProjectsIcon, adminOnly: true },
 ];
 
+export function isActivePath(pathname: string, href: string): boolean {
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
 export interface NavGroups {
   main: NavItem[];
   admin: NavItem[];

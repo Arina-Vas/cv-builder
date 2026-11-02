@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getNavItems } from './navigation';
+import { getNavItems, isActivePath } from './navigation';
 
 const MAIN_HREFS = ['/users', '/skills', '/languages', '/cvs'];
 const ADMIN_HREFS = ['/departments', '/positions', '/projects'];
@@ -26,5 +26,23 @@ describe('getNavItems', () => {
 
     expect(hrefs(main)).toEqual(MAIN_HREFS);
     expect(admin).toEqual([]);
+  });
+});
+
+describe('isActivePath', () => {
+  it('matches the tab page itself', () => {
+    expect(isActivePath('/users', '/users')).toBe(true);
+  });
+
+  it('matches pages nested under the tab', () => {
+    expect(isActivePath('/users/42/skills', '/users')).toBe(true);
+  });
+
+  it('does not match a different page that only starts with the same letters', () => {
+    expect(isActivePath('/users-archive', '/users')).toBe(false);
+  });
+
+  it('does not match other tabs', () => {
+    expect(isActivePath('/cvs', '/users')).toBe(false);
   });
 });

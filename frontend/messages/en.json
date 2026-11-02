@@ -72,7 +72,8 @@
   "layout": {
     "appName": "CV Builder",
     "collapseSidebar": "Collapse sidebar",
-    "expandSidebar": "Expand sidebar"
+    "expandSidebar": "Expand sidebar",
+    "navigation": "Main navigation"
   },
   "nav": {
     "employees": "Employees",

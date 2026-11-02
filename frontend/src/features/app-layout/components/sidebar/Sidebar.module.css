@@ -35,14 +35,18 @@
   white-space: nowrap;
 }
 
-/* [F] 24×24 at top 51, half outside the right edge */
+/* Centred in the gap between the header and the first tab, half outside the right edge */
 .toggle {
   --icon-button-size: 24px;
   --icon-size: 24px;
+  --button-ghost-hover-border: transparent;
+  --button-ghost-pressed-border: transparent;
 
   position: absolute;
-  top: 51px;
-  right: -12px;
+  top: calc(
+    var(--sidebar-item-height) + var(--sidebar-item-spacing) / 2 - var(--icon-button-size) / 2
+  );
+  right: calc(var(--icon-button-size) / -2);
   background: var(--sidebar-bg);
   color: var(--text-muted);
 }
