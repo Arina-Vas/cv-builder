@@ -11,16 +11,69 @@ Copy `.env.example` to `.env.local`. `NEXT_PUBLIC_GRAPHQL_URL` points to the bac
 
 Run from the repo root (`pnpm --filter frontend <script>`) or from this folder.
 
-| Command          | Description                                        |
-| ---------------- | -------------------------------------------------- |
-| `pnpm dev`       | Start the dev server (port 3000)                   |
-| `pnpm build`     | Production build                                   |
-| `pnpm start`     | Run the production build                           |
-| `pnpm typecheck` | Type-check with `tsc --noEmit`                     |
-| `pnpm codegen`   | Generate GraphQL types into `src/gql/` (see below) |
-| `pnpm storybook` | Start Storybook (port 6006)                        |
+| Command               | Description                                                      |
+| --------------------- | ---------------------------------------------------------------- |
+| `pnpm dev`            | Start the dev server (port 3000)                                 |
+| `pnpm build`          | Production build                                                 |
+| `pnpm start`          | Run the production build                                         |
+| `pnpm typecheck`      | Type-check with `tsc --noEmit`                                   |
+| `pnpm codegen`        | Generate GraphQL types into `src/gql/` (see below)               |
+| `pnpm storybook`      | Start Storybook (port 6006)                                      |
+| `pnpm test`           | Run unit tests once (fast, no browser)                           |
+| `pnpm test:watch`     | Run unit tests in watch mode                                     |
+| `pnpm test:storybook` | Run story tests in headless Chromium                             |
+| `pnpm test:coverage`  | Run both test projects with coverage (fails below the threshold) |
 
 Linting and formatting are configured at the repo root (`pnpm lint`, `pnpm format`).
+
+## Tests
+
+`vitest.config.ts` has two projects:
+
+- `unit`: Vitest + React Testing Library in jsdom, files `src/**/*.test.ts(x)`.
+- `storybook`: every story is a test, run in headless Chromium; `play` functions with `expect` are the assertions.
+  Install the browser once with `pnpm exec playwright install chromium` (CI needs
+  `pnpm exec playwright install --with-deps chromium` before `pnpm test:coverage`).
+
+Where to write a test:
+
+- `src/features/**`, hooks and `src/shared/lib/**`: unit tests only.
+- `src/shared/components/**`: either a `play` function in the component's stories or a unit test, not both for the
+  same behaviour. Use a unit test for logic and states, a story test when a real browser matters (focus, Radix
+  portals, positioning).
+
+Unit tests:
+
+- Put a test next to the code it covers and name it `<Name>.test.ts(x)`, e.g. `Button.tsx` → `Button.test.tsx`.
+- Render with `renderWithProviders` from `@/test/render`: it wraps the UI in `NextIntlClientProvider` (English,
+  real `messages/en.json`), `ThemeProvider`, `ToastProvider` and Apollo `MockedProvider`, and returns a `user` from
+  `@testing-library/user-event`. Pass GraphQL responses as `mocks` (see `ForgotPasswordForm.test.tsx`). For a hook
+  that calls `useTranslations`, use `renderHook(..., { wrapper: IntlProvider })` from the same file.
+- Write the expected texts as plain English strings, not `t('...')`: the test then also checks that the key points to
+  the text from the spec. Buttons are upper-cased by CSS only, so their accessible name is the text from `en.json`
+  (`'Sign in'`, not `'SIGN IN'`).
+- `next/navigation` is mocked for every test (`src/test/next-navigation.ts`). Check navigation with
+  `expect(mockRouter.push).toHaveBeenCalledWith('/login')`; change the current path with
+  `usePathname.mockReturnValue('/register')`. Mocks are reset after each test.
+- Global setup is in `src/test/setup.ts`: jest-dom matchers, DOM cleanup, a `matchMedia` stub for jsdom (a `vi.fn`,
+  so a test can return `matches: true`), and after each test it resets mocks, `localStorage` and `data-theme`.
+- To check that a mutation was sent, pass `result` as a `vi.fn` and assert on it; a plain object only says what to
+  answer. A mock is used once; set `maxUsageCount` when a test must see a second request.
+- Query elements the way a user finds them: `getByRole`, `getByLabelText`, `getByText`; avoid class names and test ids.
+
+### Coverage
+
+`pnpm test:coverage` runs both projects and merges their coverage, prints a summary and writes
+`coverage/index.html` and `coverage/lcov.info` (git-ignored). It counts every file in `src/` except the App Router
+files in `src/app/` (thin page and layout wrappers; there are no E2E tests for them yet), generated GraphQL types,
+stories, test helpers, fixtures and `.d.ts` files. Files without tests count as 0%.
+
+The run fails when lines, statements, functions or branches drop below 80% (`coverage.thresholds` in
+`vitest.config.ts`, the project target).
+
+A story without a `play` function still counts as coverage: rendering it executes the component's code without
+asserting anything. Coverage shows what has not been run at all; it does not prove a behaviour is checked. Give
+stories of interactive components a `play` function with `expect`, or cover them with a unit test.
 
 ## GraphQL types (codegen)
 

@@ -26,7 +26,14 @@ function refreshSession(graphqlUrl: string): Promise<boolean> {
   return refreshInFlight;
 }
 
-export function createRefreshLink(graphqlUrl: string): ApolloLink {
+function redirectToSignIn() {
+  window.location.assign(new URL(SIGN_IN_ROUTE, window.location.origin));
+}
+
+export function createRefreshLink(
+  graphqlUrl: string,
+  onSessionExpired: () => void = redirectToSignIn,
+): ApolloLink {
   return new ErrorLink(({ error, operation, forward }) => {
     const isBrowser = typeof window !== 'undefined';
 
@@ -43,7 +50,7 @@ export function createRefreshLink(graphqlUrl: string): ApolloLink {
         if (refreshed) {
           return forward(operation);
         }
-        window.location.assign(new URL(SIGN_IN_ROUTE, window.location.origin));
+        onSessionExpired();
         return throwError(() => error);
       }),
     );
