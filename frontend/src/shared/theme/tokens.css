@@ -248,6 +248,7 @@
   --sidebar-item-height: 56px; /* [A] (40px < 900px) */
   --sidebar-item-padding: 9px 16px; /* [A] */
   --sidebar-item-gap: 16px; /* [A] icon ↔ label */
+  --sidebar-item-spacing: 15px; /* [F] between nav items */
   --sidebar-item-radius: 0 var(--radius-nav) var(--radius-nav) 0; /* [A] */
 
   --table-cell-padding: 16px; /* [M] TableCell normal */
@@ -280,6 +281,8 @@
   --toast-radius: var(--radius-toast); /* [F] */
   --toast-border-width: 1px; /* [F] */
   --toast-padding: 8px 16px; /* [F] title top 8, left 16 */
+  --z-sidebar-backdrop: 20; /* tablet: dims the page under the open sidebar */
+  --z-sidebar: 30; /* below popovers (50) */
   --z-toast: 9999;
   /* Provide default values for Radix Toast dynamic variables */
   --radix-toast-swipe-move-x: 0px;
@@ -334,6 +337,7 @@
 
   --focus-ring: #626262; /* [F] = focused input border. TODO: no dedicated ring in Figma */
   --overlay: rgba(0, 0, 0, 0.5); /* [M] Backdrop */
+  --sidebar-backdrop: rgba(18, 18, 18, 0.6); /* [F] 768w "shadow" #121212, 60%; same in dark */
 
   --action-hover: rgba(0, 0, 0, 0.04); /* [M] */
   --action-selected: rgba(0, 0, 0, 0.08); /* [M] */
@@ -407,8 +411,9 @@
   /* Sidebar */
   --sidebar-item-text: var(--text-secondary); /* [A] */
   --sidebar-item-hover-bg: var(--action-hover); /* [A] */
-  --sidebar-item-active-bg: var(--action-hover); /* [A] */
+  --sidebar-item-active-bg: var(--color-grey-100); /* [F] #E2E2E4 */
   --sidebar-item-active-text: var(--text); /* [A] */
+  --sidebar-divider: var(--color-disabled); /* [F] #AEAEAE */
   --sidebar-avatar-bg: #c63031; /* [A] */
   --bottom-nav-border: #515151; /* [A] */
 
@@ -519,6 +524,9 @@
   --action-active: #ffffff;
   --action-disabled: rgba(255, 255, 255, 0.3);
   --action-disabled-bg: rgba(255, 255, 255, 0.12);
+
+  --sidebar-item-active-bg: var(--action-selected); /* TODO: dark value not measured in Figma */
+  --sidebar-divider: var(--border); /* TODO: dark value not measured in Figma */
 
   --avatar-bg: #626262; /* [F] */
   --avatar-fallback-text: #2e2e2e; /* [F] */

@@ -1,0 +1,18 @@
+.root {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  min-height: 100dvh;
+}
+
+.main {
+  grid-column: 2;
+  min-width: 0;
+}
+
+/* Tablet: the sidebar is fixed over the page, the page keeps only the rail's width.
+   Breakpoint = SIDEBAR_OVERLAY_QUERY */
+@media (max-width: 1023.98px) {
+  .root {
+    grid-template-columns: var(--sidebar-width-collapsed) 1fr;
+  }
+}

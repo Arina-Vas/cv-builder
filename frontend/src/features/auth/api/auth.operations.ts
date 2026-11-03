@@ -51,6 +51,17 @@ export const RESET_PASSWORD = graphql(`
   }
 `);
 
+export const ME = graphql(`
+  query Me {
+    me {
+      ...AuthUserFields
+      firstName
+      lastName
+      avatarUrl
+    }
+  }
+`);
+
 export const LOGOUT = graphql(`
   mutation Logout {
     logout
