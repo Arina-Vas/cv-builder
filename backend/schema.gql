@@ -30,6 +30,12 @@ input CreateSkillInput {
   name: String!
 }
 
+input CreateUserLanguageInput {
+  languageId: ID!
+  proficiency: Proficiency!
+  userId: ID!
+}
+
 input CreateUserSkillInput {
   mastery: Mastery!
   skillId: ID!
@@ -105,6 +111,7 @@ type Mutation {
   createPosition(input: CreatePositionInput!): Position!
   createProject(input: CreateProjectInput!): Project!
   createSkill(input: CreateSkillInput!): Skill!
+  createUserLanguage(input: CreateUserLanguageInput!): UserLanguage!
   createUserSkill(input: CreateUserSkillInput!): UserSkill!
 
   """Fails with ENTITY_IN_USE if the department is assigned to users"""
@@ -123,6 +130,11 @@ type Mutation {
   Fails with ENTITY_IN_USE if the skill is assigned to users, projects or CVs
   """
   deleteSkill(id: ID!): ID!
+
+  """
+  Own profile or Admin. Removes the given UserLanguage ids of the user; returns the removed ids
+  """
+  deleteUserLanguages(ids: [ID!]!, userId: ID!): [ID!]!
 
   """
   Own profile or Admin. Removes the given UserSkill ids of the user; returns the removed ids
@@ -146,6 +158,7 @@ type Mutation {
   updatePosition(input: UpdatePositionInput!): Position!
   updateProject(input: UpdateProjectInput!): Project!
   updateSkill(input: UpdateSkillInput!): Skill!
+  updateUserLanguage(input: UpdateUserLanguageInput!): UserLanguage!
   updateUserSkill(input: UpdateUserSkillInput!): UserSkill!
   verifyEmail(input: VerifyEmailInput!): User!
 }
@@ -168,6 +181,16 @@ type PositionPage {
 
 enum PositionSortField {
   name
+}
+
+enum Proficiency {
+  A1
+  A2
+  B1
+  B2
+  C1
+  C2
+  NATIVE
 }
 
 type Project {
@@ -196,6 +219,7 @@ enum ProjectSortField {
 }
 
 type Query {
+  availableUserLanguages(userId: ID!): [Language!]!
   availableUserSkills(userId: ID!): [Skill!]!
   departments(
     """1-based page number"""
@@ -244,6 +268,7 @@ type Query {
 
   """Skills available as project technologies ("Environment")"""
   technologies: [Skill!]!
+  userLanguages(userId: ID!): [UserLanguage!]!
   userSkills(userId: ID!): [UserSkill!]!
 }
 
@@ -333,6 +358,12 @@ input UpdateSkillInput {
   name: String!
 }
 
+input UpdateUserLanguageInput {
+  id: ID!
+  proficiency: Proficiency!
+  userId: ID!
+}
+
 input UpdateUserSkillInput {
   id: ID!
   mastery: Mastery!
@@ -350,6 +381,12 @@ type User {
   lastName: String
   position: Position
   role: UserRole!
+}
+
+type UserLanguage {
+  id: ID!
+  language: Language!
+  proficiency: Proficiency!
 }
 
 enum UserRole {
