@@ -1,5 +1,14 @@
 import type { ReactNode } from 'react';
 
-export default function UserLayout({ children }: { children: ReactNode }) {
-  return children;
+import { UserDetailsTabs } from '@/features/users/components/user-details-tabs/UserDetailsTabs';
+
+interface UserDetailsLayoutProps {
+  children: ReactNode;
+  params: Promise<{ userId: string }>;
+}
+
+export default async function UserDetailsLayout({ children, params }: UserDetailsLayoutProps) {
+  const { userId } = await params;
+
+  return <UserDetailsTabs userId={userId}>{children}</UserDetailsTabs>;
 }
