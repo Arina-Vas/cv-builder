@@ -12,7 +12,7 @@ interface UserDetailsTabsProps {
 
 export function UserDetailsTabs({ userId, children }: UserDetailsTabsProps) {
   const t = useTranslations('users.tabs');
-  const {  user  } = useCurrentUser();
+  const { user } = useCurrentUser();
   const base = `/users/${userId}`;
 
   const items = [
