@@ -1,9 +1,9 @@
 import { screen } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { UserRole } from '@/gql/graphql';
 import { ME } from '@/features/auth/api/auth.operations';
 import { renderWithProviders } from '@/test/render';
-import { SIDEBAR_COOKIE } from '../../sidebar.constants';
+import { SIDEBAR_COOKIE, SIDEBAR_OVERLAY_QUERY } from '../../sidebar.constants';
 import { Sidebar } from './Sidebar';
 
 const meMock = (role: UserRole) => ({
@@ -96,6 +96,82 @@ describe('Sidebar', () => {
     renderWithProviders(<Sidebar defaultCollapsed={false} />, { mocks: [meMock('EMPLOYEE')] });
 
     expect(await screen.findByRole('button', { name: /Ada Lovelace/ })).toBeInTheDocument();
+  });
+
+  describe('on a tablet', () => {
+    const useTabletWidth = () =>
+      vi.mocked(window.matchMedia).mockImplementation(
+        (query) =>
+          ({
+            matches: query === SIDEBAR_OVERLAY_QUERY,
+            media: query,
+            addEventListener: () => {},
+            removeEventListener: () => {},
+          }) as unknown as MediaQueryList,
+      );
+
+    it('starts as a closed rail even if the desktop cookie says expanded', () => {
+      useTabletWidth();
+      renderWithProviders(<Sidebar defaultCollapsed={false} />, { mocks: [meMock('EMPLOYEE')] });
+
+      expect(screen.getByRole('button', { name: 'Expand sidebar' })).toHaveAttribute(
+        'aria-expanded',
+        'false',
+      );
+      expect(screen.getByRole('complementary')).toHaveAttribute('data-overlay-open', 'false');
+      expect(screen.queryByTestId('sidebar-backdrop')).not.toBeInTheDocument();
+    });
+
+    it('opens over the page with a backdrop and does not touch the cookie', async () => {
+      useTabletWidth();
+      const { user } = renderWithProviders(<Sidebar defaultCollapsed />, {
+        mocks: [meMock('EMPLOYEE')],
+      });
+
+      await user.click(screen.getByRole('button', { name: 'Expand sidebar' }));
+
+      expect(screen.getByRole('complementary')).toHaveAttribute('data-overlay-open', 'true');
+      expect(screen.getByTestId('sidebar-backdrop')).toBeInTheDocument();
+      expect(document.cookie).not.toContain(SIDEBAR_COOKIE);
+    });
+
+    it('closes on a backdrop click', async () => {
+      useTabletWidth();
+      const { user } = renderWithProviders(<Sidebar defaultCollapsed />, {
+        mocks: [meMock('EMPLOYEE')],
+      });
+
+      await user.click(screen.getByRole('button', { name: 'Expand sidebar' }));
+      await user.click(screen.getByTestId('sidebar-backdrop'));
+
+      expect(screen.getByRole('complementary')).toHaveAttribute('data-overlay-open', 'false');
+      expect(screen.queryByTestId('sidebar-backdrop')).not.toBeInTheDocument();
+    });
+
+    it('closes on Escape and returns to the collapse toggle state', async () => {
+      useTabletWidth();
+      const { user } = renderWithProviders(<Sidebar defaultCollapsed />, {
+        mocks: [meMock('EMPLOYEE')],
+      });
+
+      await user.click(screen.getByRole('button', { name: 'Expand sidebar' }));
+      await user.keyboard('{Escape}');
+
+      expect(screen.getByRole('button', { name: 'Expand sidebar' })).toHaveFocus();
+      expect(screen.queryByTestId('sidebar-backdrop')).not.toBeInTheDocument();
+    });
+
+    it('closes after following a nav link', async () => {
+      useTabletWidth();
+      const { user } = renderWithProviders(<Sidebar defaultCollapsed />, {
+        mocks: [meMock('EMPLOYEE')],
+      });
+
+      await user.click(screen.getByRole('button', { name: 'Expand sidebar' }));
+      await user.click(screen.getByRole('link', { name: 'Skills' }));
+
+      expect(screen.getByRole('complementary')).toHaveAttribute('data-overlay-open', 'false');
+    });
   });
 
   it('offers a retry when the user fails to load and recovers after it', async () => {

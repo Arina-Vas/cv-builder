@@ -281,6 +281,8 @@
   --toast-radius: var(--radius-toast); /* [F] */
   --toast-border-width: 1px; /* [F] */
   --toast-padding: 8px 16px; /* [F] title top 8, left 16 */
+  --z-sidebar-backdrop: 20; /* tablet: dims the page under the open sidebar */
+  --z-sidebar: 30; /* below popovers (50) */
   --z-toast: 9999;
   /* Provide default values for Radix Toast dynamic variables */
   --radix-toast-swipe-move-x: 0px;
@@ -335,6 +337,7 @@
 
   --focus-ring: #626262; /* [F] = focused input border. TODO: no dedicated ring in Figma */
   --overlay: rgba(0, 0, 0, 0.5); /* [M] Backdrop */
+  --sidebar-backdrop: rgba(18, 18, 18, 0.6); /* [F] 768w "shadow" #121212, 60%; same in dark */
 
   --action-hover: rgba(0, 0, 0, 0.04); /* [M] */
   --action-selected: rgba(0, 0, 0, 0.08); /* [M] */

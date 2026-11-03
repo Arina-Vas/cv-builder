@@ -14,6 +14,35 @@
   width: var(--sidebar-width-collapsed);
 }
 
+/* [F] 768w: a collapsed rail; opened, it lies over the page and dims the rest.
+   Breakpoint = SIDEBAR_OVERLAY_QUERY */
+@media (max-width: 1023.98px) {
+  .root {
+    position: fixed;
+    left: 0;
+    z-index: var(--z-sidebar);
+    width: var(--sidebar-width-collapsed);
+  }
+
+  .root[data-overlay-open='true'] {
+    width: var(--sidebar-width);
+  }
+}
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-sidebar-backdrop);
+  background: var(--sidebar-backdrop);
+  animation: fade-in var(--duration-standard) var(--ease-in-out);
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
 .header {
   display: flex;
   align-items: center;
@@ -113,7 +142,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   .skeletonAvatar,
-  .skeletonName {
+  .skeletonName,
+  .backdrop {
     animation: none;
   }
 }
