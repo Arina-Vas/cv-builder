@@ -206,15 +206,17 @@ Lists without pagination extend `ListArgs` instead of `PaginatedListArgs` and re
 | `projects`                                                                 | `name`           | `name`, `startDate`, `endDate`                    | name, domain                 | no        |
 | `cvProjects`                                                               | `name`           | `name`, `startDate`, `endDate`                    | name, domain                 | no        |
 | `userSkills`, CV skills                                                    | —                | category name, then skill name                    | —                            | no        |
-| user languages                                                             | —                | language name                                     | —                            | no        |
+| `userLanguages`                                                            | —                | language name                                     | —                            | no        |
 | lookups for selects (`skillCategories`, `technologies`, `projectRoles`, …) | `name`           | —                                                 | —                            | no        |
 | `availableUserSkills` (skills not yet assigned to the user)                | `name`           | —                                                 | —                            | no        |
+| `availableUserLanguages` (languages not yet assigned to the user)          | `name`           | —                                                 | —                            | no        |
 
 Lists without pagination return `{ items, total }` (`Listed`) or a plain list for lookups.
 
 User skills are returned as one flat list, sorted so that the skills of a category come together; the frontend
 groups them by `skill.category` (the wiki shows a category only when it has skills). A nested group type is not
-used: a flat list of `UserSkill` normalizes in the Apollo cache by `id`.
+used: a flat list of `UserSkill` normalizes in the Apollo cache by `id`. User languages are one list sorted by
+language name (wiki: a single "Current Languages" section).
 
 Sort and search fields come from the Sorting and Search sections of each wiki page.
 
@@ -251,17 +253,19 @@ avoid a column-key → enum map in every table.
   Apollo updates the cached entity by `id` automatically.
 - `delete*` returns the deleted `ID!`. The frontend removes it from the cache (`cache.evict`) and refetches the list.
 - Bulk deletes take a list of ids and return the deleted ids:
-  `deleteUserSkills(userId: ID!, ids: [ID!]!): [ID!]!`. The ids are the assignment ids (`UserSkill.id`), not skill
-  ids (wiki: the selection uses the ids of the assignments). Ids that are already removed or belong to another user
+  `deleteUserSkills(userId: ID!, ids: [ID!]!): [ID!]!` (same for `deleteUserLanguages`). The ids are the assignment
+  ids (`UserSkill.id`, `UserLanguage.id`), not skill or language ids (wiki: the selection uses the ids of the
+  assignments). Ids that are already removed or belong to another user
   are skipped, so the result can be shorter than the input; the frontend evicts the returned ids and refetches.
 - Mutations take one argument named `input` of an `@InputType`, except deletes, which take ids directly.
 - `update*` inputs contain `id` and only the fields the user can change.
 - `update*` is a full update: `Update<Entity>Input extends Create<Entity>Input` and adds `id`, so the form sends
   every field. A list of ids (`technologyIds`) replaces the whole set; an omitted list defaults to `[]` and
   clears it.
-- Exception: when a reference cannot be changed after creation (the skill of a `UserSkill`, wiki: "Skill field is
-  disabled"), the update input takes `PickType(Create<Entity>Input, [...])` without it and adds `id`
-  (`UpdateUserSkillInput`: `id`, `userId`, `mastery`).
+- Exception: when a reference cannot be changed after creation (the skill of a `UserSkill`, the language of a
+  `UserLanguage`; wiki: the field is disabled in the Update modal), the update input takes
+  `PickType(Create<Entity>Input, [...])` without it and adds `id` (`UpdateUserSkillInput`: `id`, `userId`,
+  `mastery`; `UpdateUserLanguageInput`: `id`, `userId`, `proficiency`).
 - Inputs are always validated on the backend, even if the frontend validates them too
   (wiki: "Client-side validation is intended for user experience and must not replace server-side validation").
 - **One error per field.** The `ValidationPipe` uses `stopAtFirstError` (`common/validation/validator-options.ts`), so
