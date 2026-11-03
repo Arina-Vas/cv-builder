@@ -57,8 +57,8 @@ From the wiki Module Page Access table.
 
 \* Two different pages share the name. The user version manages the current user's own skills / languages
 (`user_skills`, `user_languages`); Management manages the global catalog (`skills`, `languages`). The table shows
-which page the menu opens for each role. API access does not depend on the page: user skill and language operations
-are "own or Admin", catalog changes are Admin-only.
+which page the menu opens for each role. API access does not depend on the page: user skills and languages are
+readable by every authenticated user and changed "own or Admin"; catalog changes are Admin-only.
 
 ## Rules per feature
 
@@ -168,6 +168,31 @@ Operation-level tables are added by each module together with its resolvers: the
 | `createSkill`     | Admin  |
 | `updateSkill`     | Admin  |
 | `deleteSkill`     | Admin  |
+
+### User skills
+
+| Operation             | Access          |
+| --------------------- | --------------- |
+| `userSkills`          | All             |
+| `availableUserSkills` | All             |
+| `createUserSkill`     | Own or Admin \* |
+| `updateUserSkill`     | Own or Admin \* |
+| `deleteUserSkills`    | Own or Admin \* |
+
+### User languages
+
+| Operation                | Access          |
+| ------------------------ | --------------- |
+| `userLanguages`          | All             |
+| `availableUserLanguages` | All             |
+| `createUserLanguage`     | Own or Admin \* |
+| `updateUserLanguage`     | Own or Admin \* |
+| `deleteUserLanguages`    | Own or Admin \* |
+
+\* The owner is the `userId` of the input, compared with the current user from the request
+(`canManageUser`, `backend/src/common/auth/can-manage-user.ts`); the client-sent id is never proof of ownership.
+Like every mutation, these need a verified email. An Employee changing another user's skills or languages gets
+`FORBIDDEN` before the user is looked up, so the response does not reveal whether that user exists.
 
 ### Projects
 
