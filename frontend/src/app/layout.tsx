@@ -9,6 +9,8 @@ import { themeScript } from '@/shared/theme/theme-script';
 import '@/shared/theme/tokens.css';
 import './globals.css';
 import { ToastProvider } from '@/shared/components/toast/ToastProvider';
+import { DeviceGuard } from '@/features/system-pages/components/device-guard/DeviceGuard';
+import { NetworkStatusGate } from '@/features/system-pages/components/network-status-gate/NetworkStatusGate';
 
 const roboto = Roboto({
   subsets: ['latin', 'cyrillic'],
@@ -33,7 +35,11 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         <NextIntlClientProvider>
           <ThemeProvider>
             <ToastProvider>
-              <ApolloWrapper>{children}</ApolloWrapper>
+              <ApolloWrapper>
+                <DeviceGuard>
+                  <NetworkStatusGate>{children}</NetworkStatusGate>
+                </DeviceGuard>
+              </ApolloWrapper>
             </ToastProvider>
           </ThemeProvider>
         </NextIntlClientProvider>

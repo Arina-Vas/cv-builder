@@ -1,0 +1,8 @@
+.app {
+  display: contents;
+}
+
+/* Hidden, not unmounted: forms keep their values and failed queries stay active for RETRY. */
+.hidden {
+  display: none;
+}

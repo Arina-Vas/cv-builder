@@ -173,6 +173,26 @@ useFormFields({ email: '' }, ({ email }, tValidation) => ({
 }));
 ```
 
+## System pages
+
+Not Found, No Internet and Device Error share one layout, `shared/components/error-state/ErrorState`
+(Figma "ERROR PAGE": monitor illustration, h4 title, body1 text, optional 220px button).
+The code is in `src/features/system-pages`.
+
+| Page         | When it shows                                                               | Button                                                    |
+| ------------ | --------------------------------------------------------------------------- | --------------------------------------------------------- |
+| Not Found    | unknown URL or `notFound()` (`app/not-found.tsx`)                           | GO BACK: `router.back()`, or `/` when there is no history |
+| No Internet  | browser offline, or a **query** failed to reach the backend (`fetch` threw) | RETRY: `client.refetchObservableQueries()`                |
+| No Internet  | a page crashed while rendering (`app/error.tsx`, `app/global-error.tsx`)    | RETRY: `reset()`                                          |
+| Device Error | viewport < 768px, also after a resize                                       | none                                                      |
+
+- `DeviceGuard` and `NetworkStatusGate` wrap the app in the root layout.
+- Device Error: CSS media query picks what the first paint shows; after hydration `useMediaQuery`
+  unmounts the app on narrow screens.
+- No Internet: `network-error-link` sets the flag in `shared/lib/network/network-status`. The app is
+  hidden, not unmounted, so form values survive and the failed queries are refetched on RETRY.
+  Failed mutations don't open the page: forms show their own "Something went wrong" message.
+
 ## Structure
 
 ```

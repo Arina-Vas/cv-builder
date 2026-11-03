@@ -1,0 +1,17 @@
+.app {
+  display: contents;
+}
+
+.deviceError {
+  display: none;
+}
+
+@media (max-width: 767.98px) {
+  .app {
+    display: none;
+  }
+
+  .deviceError {
+    display: contents;
+  }
+}

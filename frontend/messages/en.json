@@ -1,6 +1,21 @@
 {
   "common": {
-    "notFound": { "title": "Not Found" },
+    "errorPages": {
+      "notFound": {
+        "title": "Hmm...",
+        "message": "This doesn't seem to be the page you were looking for. Let's get you back on track.",
+        "goBack": "Go back"
+      },
+      "noInternet": {
+        "title": "Oops",
+        "message": "Something went wrong. We're already working on fixing it. Please try again.",
+        "retry": "Retry"
+      },
+      "deviceError": {
+        "title": "Oops",
+        "message": "This app isn't supported on mobile devices. Please open it on a desktop or tablet to continue."
+      }
+    },
     "pagination": {
       "label": "Pagination",
       "previous": "Previous page",

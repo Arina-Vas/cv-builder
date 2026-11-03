@@ -1,7 +1,5 @@
-import { getTranslations } from 'next-intl/server';
+import { NotFoundPage } from '@/features/system-pages/components/not-found-page/NotFoundPage';
 
-export default async function NotFoundPage() {
-  const t = await getTranslations('common.notFound');
-
-  return <h1>{t('title')}</h1>;
+export default function NotFound() {
+  return <NotFoundPage />;
 }
