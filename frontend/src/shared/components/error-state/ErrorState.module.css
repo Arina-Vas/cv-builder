@@ -1,0 +1,47 @@
+/* Figma "ERROR PAGE" (1440w + 768w, light/dark): one centered column, 24px between items. */
+.root {
+  display: flex;
+  min-height: 100dvh;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.content {
+  display: flex;
+  width: 100%;
+  max-width: 560px;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  text-align: center;
+}
+
+/* 160×120 group + 1px of stroke on each side, as in the SVG export */
+.illustration {
+  width: 162px;
+  height: 122px;
+  margin: -1px;
+}
+
+.title {
+  margin: 0;
+  font-size: var(--type-h4-size);
+  font-weight: var(--type-h4-weight);
+  line-height: var(--type-h4-lh);
+  letter-spacing: var(--type-h4-ls);
+}
+
+.message {
+  margin: 0;
+  font-size: var(--type-body1-size);
+  font-weight: var(--type-body1-weight);
+  line-height: var(--type-body1-lh);
+  letter-spacing: var(--type-body1-ls);
+}
+
+.action {
+  width: 220px;
+}
