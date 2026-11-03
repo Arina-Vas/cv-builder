@@ -2,7 +2,7 @@ import { ApolloClient, ApolloLink, InMemoryCache, gql } from '@apollo/client';
 import { ApolloProvider, useQuery } from '@apollo/client/react';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { throwError } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { networkStatus } from '@/shared/lib/network/network-status';
 import { createNetworkErrorLink } from '@/shared/lib/apollo/network-error-link';
@@ -76,6 +76,34 @@ describe('NetworkStatusGate', () => {
 
     await waitFor(() => expect(screen.queryByText(NO_INTERNET_MESSAGE)).not.toBeInTheDocument());
     expect(screen.getByRole('textbox', { name: 'Name' })).toHaveValue('Ada');
+  });
+
+  it('refetches failed queries when the browser comes back online', async () => {
+    const backend = vi
+      .fn()
+      .mockImplementationOnce(() => throwError(() => new TypeError('Failed to fetch')))
+      .mockImplementation(() => of({ data: { me: 'ada' } }));
+    const client = new ApolloClient({
+      cache: new InMemoryCache(),
+      link: ApolloLink.from([createNetworkErrorLink(), new ApolloLink(backend)]),
+    });
+    render(
+      <IntlProvider>
+        <ApolloProvider client={client}>
+          <NetworkStatusGate>
+            <MeQuery />
+          </NetworkStatusGate>
+        </ApolloProvider>
+      </IntlProvider>,
+    );
+
+    await screen.findByText(NO_INTERNET_MESSAGE);
+    expect(backend).toHaveBeenCalledOnce();
+
+    setBrowserOnline(true);
+
+    await waitFor(() => expect(backend).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(screen.queryByText(NO_INTERNET_MESSAGE)).not.toBeInTheDocument());
   });
 
   it('stays on the page if the retried query fails again', async () => {
