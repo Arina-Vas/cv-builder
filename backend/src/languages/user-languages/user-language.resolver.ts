@@ -13,21 +13,33 @@ import { DeleteUserLanguagesArgs } from '@/languages/user-languages/dto/delete-u
 export class UserLanguageResolver {
   constructor(private readonly userLanguageService: UserLanguageService) {}
 
-  @Query(() => [UserLanguage])
+  @Query(() => [UserLanguage], {
+    description:
+      'Languages of the user, readable by any authenticated user; sorted by language name. ' +
+      'Fails with NOT_FOUND if the user does not exist',
+  })
   userLanguages(
     @Args('userId', { type: () => ID }, ParseUUIDPipe) userId: string,
   ): Promise<UserLanguage[]> {
     return this.userLanguageService.findByUser(userId);
   }
 
-  @Query(() => [Language])
+  @Query(() => [Language], {
+    description:
+      'Languages not yet assigned to the user, for the Add Language modal; sorted by name. ' +
+      'Fails with NOT_FOUND if the user does not exist',
+  })
   availableUserLanguages(
     @Args('userId', { type: () => ID }, ParseUUIDPipe) userId: string,
   ): Promise<Language[]> {
     return this.userLanguageService.findAvailable(userId);
   }
 
-  @Mutation(() => UserLanguage)
+  @Mutation(() => UserLanguage, {
+    description:
+      'Own profile or Admin. Fails with BAD_USER_INPUT (languageId) if the language does not exist ' +
+      'and with CONFLICT (languageId) if it is already assigned',
+  })
   createUserLanguage(
     @CurrentUser() currentUser: User,
     @Args('input') input: CreateUserLanguageInput,
@@ -35,7 +47,11 @@ export class UserLanguageResolver {
     return this.userLanguageService.create(currentUser, input);
   }
 
-  @Mutation(() => UserLanguage)
+  @Mutation(() => UserLanguage, {
+    description:
+      'Own profile or Admin. Changes only the proficiency level; fails with NOT_FOUND ' +
+      'if the assignment does not exist or belongs to another user',
+  })
   updateUserLanguage(
     @CurrentUser() currentUser: User,
     @Args('input') input: UpdateUserLanguageInput,

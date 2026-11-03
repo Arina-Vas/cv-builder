@@ -13,21 +13,33 @@ import { CurrentUser } from '@/common/auth/current-user.decorator';
 export class UserSkillResolver {
   constructor(private readonly userSkillService: UserSkillService) {}
 
-  @Query(() => [UserSkill])
+  @Query(() => [UserSkill], {
+    description:
+      'Skills of the user, readable by any authenticated user; sorted by category name, then skill name. ' +
+      'Fails with NOT_FOUND if the user does not exist',
+  })
   userSkills(
     @Args('userId', { type: () => ID }, ParseUUIDPipe) userId: string,
   ): Promise<UserSkill[]> {
     return this.userSkillService.findByUser(userId);
   }
 
-  @Query(() => [Skill])
+  @Query(() => [Skill], {
+    description:
+      'Skills not yet assigned to the user, for the Add Skill modal; sorted by name. ' +
+      'Fails with NOT_FOUND if the user does not exist',
+  })
   availableUserSkills(
     @Args('userId', { type: () => ID }, ParseUUIDPipe) userId: string,
   ): Promise<Skill[]> {
     return this.userSkillService.findAvailable(userId);
   }
 
-  @Mutation(() => UserSkill)
+  @Mutation(() => UserSkill, {
+    description:
+      'Own profile or Admin. Fails with BAD_USER_INPUT (skillId) if the skill does not exist ' +
+      'and with CONFLICT (skillId) if it is already assigned',
+  })
   createUserSkill(
     @CurrentUser() currentUser: User,
     @Args('input') input: CreateUserSkillInput,
@@ -35,7 +47,11 @@ export class UserSkillResolver {
     return this.userSkillService.create(currentUser, input);
   }
 
-  @Mutation(() => UserSkill)
+  @Mutation(() => UserSkill, {
+    description:
+      'Own profile or Admin. Changes only the mastery level; fails with NOT_FOUND ' +
+      'if the assignment does not exist or belongs to another user',
+  })
   updateUserSkill(
     @CurrentUser() currentUser: User,
     @Args('input') input: UpdateUserSkillInput,

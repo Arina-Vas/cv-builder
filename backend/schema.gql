@@ -111,7 +111,15 @@ type Mutation {
   createPosition(input: CreatePositionInput!): Position!
   createProject(input: CreateProjectInput!): Project!
   createSkill(input: CreateSkillInput!): Skill!
+
+  """
+  Own profile or Admin. Fails with BAD_USER_INPUT (languageId) if the language does not exist and with CONFLICT (languageId) if it is already assigned
+  """
   createUserLanguage(input: CreateUserLanguageInput!): UserLanguage!
+
+  """
+  Own profile or Admin. Fails with BAD_USER_INPUT (skillId) if the skill does not exist and with CONFLICT (skillId) if it is already assigned
+  """
   createUserSkill(input: CreateUserSkillInput!): UserSkill!
 
   """Fails with ENTITY_IN_USE if the department is assigned to users"""
@@ -158,7 +166,15 @@ type Mutation {
   updatePosition(input: UpdatePositionInput!): Position!
   updateProject(input: UpdateProjectInput!): Project!
   updateSkill(input: UpdateSkillInput!): Skill!
+
+  """
+  Own profile or Admin. Changes only the proficiency level; fails with NOT_FOUND if the assignment does not exist or belongs to another user
+  """
   updateUserLanguage(input: UpdateUserLanguageInput!): UserLanguage!
+
+  """
+  Own profile or Admin. Changes only the mastery level; fails with NOT_FOUND if the assignment does not exist or belongs to another user
+  """
   updateUserSkill(input: UpdateUserSkillInput!): UserSkill!
   verifyEmail(input: VerifyEmailInput!): User!
 }
@@ -219,7 +235,14 @@ enum ProjectSortField {
 }
 
 type Query {
+  """
+  Languages not yet assigned to the user, for the Add Language modal; sorted by name. Fails with NOT_FOUND if the user does not exist
+  """
   availableUserLanguages(userId: ID!): [Language!]!
+
+  """
+  Skills not yet assigned to the user, for the Add Skill modal; sorted by name. Fails with NOT_FOUND if the user does not exist
+  """
   availableUserSkills(userId: ID!): [Skill!]!
   departments(
     """1-based page number"""
@@ -268,7 +291,15 @@ type Query {
 
   """Skills available as project technologies ("Environment")"""
   technologies: [Skill!]!
+
+  """
+  Languages of the user, readable by any authenticated user; sorted by language name. Fails with NOT_FOUND if the user does not exist
+  """
   userLanguages(userId: ID!): [UserLanguage!]!
+
+  """
+  Skills of the user, readable by any authenticated user; sorted by category name, then skill name. Fails with NOT_FOUND if the user does not exist
+  """
   userSkills(userId: ID!): [UserSkill!]!
 }
 

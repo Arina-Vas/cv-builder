@@ -57,8 +57,8 @@ From the wiki Module Page Access table.
 
 \* Two different pages share the name. The user version manages the current user's own skills / languages
 (`user_skills`, `user_languages`); Management manages the global catalog (`skills`, `languages`). The table shows
-which page the menu opens for each role. API access does not depend on the page: user skill and language operations
-are "own or Admin", catalog changes are Admin-only.
+which page the menu opens for each role. API access does not depend on the page: user skills and languages are
+readable by every authenticated user and changed "own or Admin"; catalog changes are Admin-only.
 
 ## Rules per feature
 
