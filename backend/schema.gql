@@ -30,6 +30,12 @@ input CreateSkillInput {
   name: String!
 }
 
+input CreateUserSkillInput {
+  mastery: Mastery!
+  skillId: ID!
+  userId: ID!
+}
+
 """Calendar date without time and time zone, format YYYY-MM-DD"""
 scalar Date
 
@@ -85,12 +91,21 @@ enum LanguageSortField {
   name
 }
 
+enum Mastery {
+  ADVANCED
+  BEGINNER
+  ELEMENTARY
+  EXPERT
+  INTERMEDIATE
+}
+
 type Mutation {
   createDepartment(input: CreateDepartmentInput!): Department!
   createLanguage(input: CreateLanguageInput!): Language!
   createPosition(input: CreatePositionInput!): Position!
   createProject(input: CreateProjectInput!): Project!
   createSkill(input: CreateSkillInput!): Skill!
+  createUserSkill(input: CreateUserSkillInput!): UserSkill!
 
   """Fails with ENTITY_IN_USE if the department is assigned to users"""
   deleteDepartment(id: ID!): ID!
@@ -108,6 +123,11 @@ type Mutation {
   Fails with ENTITY_IN_USE if the skill is assigned to users, projects or CVs
   """
   deleteSkill(id: ID!): ID!
+
+  """
+  Own profile or Admin. Removes the given UserSkill ids of the user; returns the removed ids
+  """
+  deleteUserSkills(ids: [ID!]!, userId: ID!): [ID!]!
   logout: Boolean!
   refresh: Boolean!
 
@@ -126,6 +146,7 @@ type Mutation {
   updatePosition(input: UpdatePositionInput!): Position!
   updateProject(input: UpdateProjectInput!): Project!
   updateSkill(input: UpdateSkillInput!): Skill!
+  updateUserSkill(input: UpdateUserSkillInput!): UserSkill!
   verifyEmail(input: VerifyEmailInput!): User!
 }
 
@@ -175,6 +196,7 @@ enum ProjectSortField {
 }
 
 type Query {
+  availableUserSkills(userId: ID!): [Skill!]!
   departments(
     """1-based page number"""
     page: Int! = 1
@@ -222,6 +244,7 @@ type Query {
 
   """Skills available as project technologies ("Environment")"""
   technologies: [Skill!]!
+  userSkills(userId: ID!): [UserSkill!]!
 }
 
 input RequestPasswordResetInput {
@@ -310,6 +333,12 @@ input UpdateSkillInput {
   name: String!
 }
 
+input UpdateUserSkillInput {
+  id: ID!
+  mastery: Mastery!
+  userId: ID!
+}
+
 type User {
   avatarUrl: String
   createdAt: DateTime!
@@ -326,6 +355,12 @@ type User {
 enum UserRole {
   ADMIN
   EMPLOYEE
+}
+
+type UserSkill {
+  id: ID!
+  mastery: Mastery!
+  skill: Skill!
 }
 
 input VerifyEmailInput {

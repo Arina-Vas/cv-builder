@@ -13,6 +13,7 @@ import { LanguageResolver } from '@/languages/language.resolver';
 import { PositionResolver } from '@/positions/position.resolver';
 import { ProjectResolver } from '@/projects/project.resolver';
 import { SkillResolver } from '@/skills/skill.resolver';
+import { UserSkillResolver } from '@/skills/user-skills/user-skill.resolver';
 
 jest.mock('@/prisma/prisma.service', () => ({ PrismaService: class PrismaService {} }));
 jest.mock('@nestjs/config', () => ({ ConfigService: class ConfigService {} }));
@@ -29,6 +30,7 @@ const RESOLVERS = [
   LanguageResolver,
   SkillResolver,
   ProjectResolver,
+  UserSkillResolver,
 ];
 
 const print = (schema: GraphQLSchema): string => printSchema(lexicographicSortSchema(schema));
