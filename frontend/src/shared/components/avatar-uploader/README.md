@@ -6,6 +6,10 @@ Live examples of every state: Storybook → **Shared/AvatarUploader**.
 The component shows the avatar (or the first letter of `fallback`), opens the native file dialog on
 click and checks the chosen file. Keeping the file, the preview and the upload belong to the parent.
 
+Its texts (the upload link, the hint, the remove button name, the `onError` messages) come from
+`common.avatarUploader` in `messages/en.json`, so it needs `NextIntlClientProvider` above it: the root
+layout mounts it in the app, `.storybook/preview.tsx` in Storybook.
+
 ```tsx
 import { AvatarUploader } from '@/shared/components/avatar-uploader/AvatarUploader';
 ```
@@ -37,17 +41,20 @@ the red × over it and the file input on the right.
   by Next, so they work as is; a link from another host has to be allowed in `images.remotePatterns`
   in `next.config.ts`.
 - `onChange` gets the chosen file only after it passes the checks below.
-- `onError` gets the message when the file fails a check. The component does not show it itself:
-  the parent decides how (toast, text under the field).
+- `onError` gets the message, already translated, when the file fails a check. The component does not
+  show it itself: the parent decides how (toast, text under the field).
 - `onRemove` is called by the red cross on the avatar. The cross is shown only while there is an image
   and the uploader is not disabled.
 
 ## File checks
 
-| Check | Rule                                     | `onError` message              |
-| ----- | ---------------------------------------- | ------------------------------ |
-| Type  | `image/png`, `image/jpeg`, `image/gif`   | `Only png, jpg or gif allowed` |
-| Size  | no more than 0.5MB (`0.5 * 1024 * 1024`) | `File is larger than 0.5MB`    |
+| Check | Rule                                     | `onError` message (key in `common.avatarUploader`) |
+| ----- | ---------------------------------------- | -------------------------------------------------- |
+| Type  | `image/png`, `image/jpeg`, `image/gif`   | `Only png, jpg or gif allowed` (`invalidType`)     |
+| Size  | no more than 0.5MB (`0.5 * 1024 * 1024`) | `File is larger than 0.5MB` (`tooLarge`)           |
+
+`tooLarge` and the hint under the link (`hint`: `png, jpg or gif no more than 0.5MB`) take the limit as
+`{maxSize}`: pass it as ready text (`0.5MB`), not as the byte count used for the check.
 
 `accept` on the input only filters the file dialog (the user can switch it to "All files"), so the type
 is checked again in code. The input value is reset after every choice, so choosing the same file again
@@ -85,7 +92,7 @@ useEffect(() => {
 | State        | Trigger                                                                       | Look                                                                                       |
 | ------------ | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
 | Default      | no `src`                                                                      | grey 120px circle with the letter                                                          |
-| Adding       | `:hover` / `:focus-within` on the text                                        | "Upload avatar image" is underlined                                                        |
+| Adding       | `:hover` / `:focus-within` on the text                                        | "Upload avatar image" (`upload`) is underlined                                             |
 | With image   | `src`                                                                         | round photo, `object-fit: cover`                                                           |
 | Remove image | `src` + `:hover` on the avatar / `:focus-visible` on the cross / touch screen | red cross with a white X in the top-right corner, fades in                                 |
 | Disabled     | `disabled` prop                                                               | grey text and icon, `not-allowed` cursor, no underline, no cross, the dialog does not open |
@@ -118,7 +125,8 @@ it to `--on-primary`, so the X is white and no background is needed behind the i
 ## Accessibility
 
 - The file input stays focusable; focus underlines the text the same way as hover.
-- The remove button is `type="button"` (never submits a form) and has `aria-label="Remove avatar"`.
+- The remove button is `type="button"` (never submits a form) and has `aria-label="Remove avatar"`
+  (`common.avatarUploader.remove`).
 - Keyboard focus on the cross (`:focus-visible`) shows it even without hover; there is no ring around it,
   the × appearing is the focus state.
 - Tab order: the remove button (when there is an image), then the file input.

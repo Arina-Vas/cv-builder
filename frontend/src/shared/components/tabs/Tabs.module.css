@@ -1,0 +1,79 @@
+.root,
+.content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.list {
+  display: flex;
+  flex-shrink: 0;
+  height: var(--tabs-height);
+  padding-top: var(--tabs-padding-top);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.list[data-align='center'] {
+  justify-content: center;
+}
+
+.tab {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--tab-min-width);
+  padding: 0 var(--space-4);
+  color: var(--tab-text);
+  font-size: var(--type-button-size);
+  font-weight: var(--type-button-weight);
+  line-height: var(--type-tab-lh);
+  letter-spacing: var(--type-button-ls);
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: color var(--duration-shorter) var(--ease-in-out);
+}
+
+.tab::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: var(--tab-indicator-height);
+  background: var(--tab-indicator);
+  transform: scaleX(0);
+  transition: transform var(--duration-shorter) var(--ease-in-out);
+}
+
+.tab:hover,
+.tab[data-state='active'] {
+  color: var(--tab-text-active);
+}
+
+.tab[data-state='active'] {
+  font-weight: var(--font-weight-semibold);
+}
+
+.tab[data-state='active']::after {
+  transform: scaleX(1);
+}
+
+.tab:focus,
+.content:focus {
+  outline: none;
+}
+
+.tab:focus-visible {
+  background: var(--action-focus);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tab,
+  .tab::after {
+    transition: none;
+  }
+}

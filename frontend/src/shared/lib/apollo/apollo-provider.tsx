@@ -1,12 +1,14 @@
 'use client';
 
-import { HttpLink } from '@apollo/client';
+import { ApolloLink, HttpLink } from '@apollo/client';
 import {
   ApolloClient,
   ApolloNextAppProvider,
   InMemoryCache,
 } from '@apollo/client-integration-nextjs';
 import type { ReactNode } from 'react';
+import { createNetworkErrorLink } from './network-error-link';
+import { createRefreshLink } from './refresh-link';
 
 function makeClient(): ApolloClient {
   const graphqlUrl = process.env.NEXT_PUBLIC_GRAPHQL_URL;
@@ -19,7 +21,11 @@ function makeClient(): ApolloClient {
 
   return new ApolloClient({
     cache: new InMemoryCache(),
-    link: new HttpLink({ uri: graphqlUrl }),
+    link: ApolloLink.from([
+      createNetworkErrorLink(),
+      createRefreshLink(graphqlUrl),
+      new HttpLink({ uri: graphqlUrl, credentials: 'include' }),
+    ]),
   });
 }
 

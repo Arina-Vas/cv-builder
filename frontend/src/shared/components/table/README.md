@@ -7,6 +7,12 @@ Paging is a separate component under the table: [`Pagination`](../pagination/REA
 Live examples, Light and Dark: Storybook → **Shared/DataTable** (states, scroll, pagination)
 and **Shared/DataTable/Figma** (one story per Figma frame).
 
+The table's own texts (Retry, hidden labels) come from `common.table` in `messages/en.json`, so it
+needs `NextIntlClientProvider` above it: the root layout mounts it in the app,
+`.storybook/preview.tsx` in Storybook. Texts the page passes (`caption`, `emptyMessage`, `error`,
+column headers, action labels) are translated by the page with its own keys; the English strings in
+the examples below stand in for them.
+
 ```tsx
 import { DataTable, type Column } from '@/shared/components/table';
 ```
@@ -31,24 +37,24 @@ import { DataTable, type Column } from '@/shared/components/table';
 />
 ```
 
-| Prop               | Type                      | What it does                                               |
-| ------------------ | ------------------------- | ---------------------------------------------------------- |
-| `columns`          | `Column<T>[]`             | columns, see below                                         |
-| `rows`             | `T[]`                     | rows from the backend, already sorted                      |
-| `getRowId`         | `(row) => string`         | React key of the row                                       |
-| `caption`          | `string`                  | table name for screen readers (hidden)                     |
-| `emptyMessage`     | `string`                  | text when `rows` is empty, e.g. `No users found`           |
-| `sort`             | `SortState`               | current sort: `{ field, order: 'ASC' \| 'DESC' }`          |
-| `onSortChange`     | `(sort) => void`          | header click; without it no column is sortable             |
-| `rowActions`       | `(row) => RowAction<T>[]` | ⋮ menu in the last column                                  |
-| `onRowClick`       | `(row) => void`           | › arrow in the last column (Employee on Users)             |
-| `getRowLabel`      | `(row) => string`         | row name in `Actions for …` / `Open …`; default `row {id}` |
-| `renderRowDetails` | `(row) => ReactNode`      | extra full-width row under the row, e.g. description       |
-| `isLoading`        | `boolean`                 | no rows yet (first load): skeleton                         |
-| `isRefreshing`     | `boolean`                 | page / sort / search changed: old rows dimmed and inert    |
-| `error`            | `string`                  | request failed: message + RETRY                            |
-| `onRetry`          | `() => void`              | RETRY: repeat the same request                             |
-| `scrollResetKey`   | `string \| number`        | on change the table scrolls to its first row               |
+| Prop               | Type                      | What it does                                                                    |
+| ------------------ | ------------------------- | ------------------------------------------------------------------------------- |
+| `columns`          | `Column<T>[]`             | columns, see below                                                              |
+| `rows`             | `T[]`                     | rows from the backend, already sorted                                           |
+| `getRowId`         | `(row) => string`         | React key of the row                                                            |
+| `caption`          | `string`                  | table name for screen readers (hidden)                                          |
+| `emptyMessage`     | `string`                  | text when `rows` is empty, e.g. `No users found`                                |
+| `sort`             | `SortState`               | current sort: `{ field, order: 'ASC' \| 'DESC' }`                               |
+| `onSortChange`     | `(sort) => void`          | header click; without it no column is sortable                                  |
+| `rowActions`       | `(row) => RowAction<T>[]` | ⋮ menu in the last column                                                       |
+| `onRowClick`       | `(row) => void`           | › arrow in the last column (Employee on Users)                                  |
+| `getRowLabel`      | `(row) => string`         | row name in `Actions for …` / `Open …`; default `common.table.row` (`row {id}`) |
+| `renderRowDetails` | `(row) => ReactNode`      | extra full-width row under the row, e.g. description                            |
+| `isLoading`        | `boolean`                 | no rows yet (first load): skeleton                                              |
+| `isRefreshing`     | `boolean`                 | page / sort / search changed: old rows dimmed and inert                         |
+| `error`            | `string`                  | request failed: message + Retry                                                 |
+| `onRetry`          | `() => void`              | Retry: repeat the same request                                                  |
+| `scrollResetKey`   | `string \| number`        | on change the table scrolls to its first row                                    |
 
 ## Columns
 
@@ -92,7 +98,7 @@ the description). The two rows share one bottom line and the hover background.
 | State      | When            | What is shown                               |
 | ---------- | --------------- | ------------------------------------------- |
 | loading    | `isLoading`     | 5 skeleton rows, `aria-busy` on the table   |
-| error      | `error`         | message + RETRY (`onRetry`), `role="alert"` |
+| error      | `error`         | message + Retry (`onRetry`), `role="alert"` |
 | empty      | `rows` is empty | `emptyMessage`                              |
 | rows       | otherwise       | the rows                                    |
 | refreshing | `isRefreshing`  | the old rows at half opacity, `inert`       |
@@ -122,13 +128,18 @@ at the pagination and sees the dimmed rows; a cached page scrolls at once. Not o
 
 ## Accessibility
 
+Names below are the English texts; the keys are in `common.table`.
+
 - `<caption>` (hidden) names the table; headers have `scope="col"`.
-- Sortable headers are buttons with `aria-sort` (`ascending` / `descending` / `none`).
-- The ⋮ and › buttons have names from `getRowLabel`; the menu works with the keyboard and Escape,
-  focus goes back to ⋮ on close.
+- Sortable headers are buttons with `aria-sort` (`ascending` / `descending` / `none`). These are
+  ARIA tokens, not text: they are never translated, the screen reader announces them in its own
+  language.
+- The ⋮ and › buttons are named `Actions for …` / `Open …` (`rowActions` / `openRow`) from
+  `getRowLabel`; the menu works with the keyboard and Escape, focus goes back to ⋮ on close.
+  The hidden header of that column is `Actions` (`actions`).
 - `aria-busy` while loading or refreshing; skeleton rows are `aria-hidden`.
-- Errors are `role="alert"`.
-- A hidden `role="status"` region says `Loading rows` while refreshing.
+- Errors are `role="alert"`; the button is `Retry` (`retry`, upper case comes from the Button CSS).
+- A hidden `role="status"` region says `Loading rows` (`loadingRows`) while refreshing.
 
 ## Files
 
@@ -138,6 +149,6 @@ at the pagination and sees the dimmed rows; a cached page scrolls at once. Not o
 | `sortable-header-cell/` | header cell with the sort button and arrow           |
 | `row-actions-menu/`     | ⋮ button and menu                                    |
 | `table-skeleton/`       | skeleton rows                                        |
-| `table-message/`        | empty / error row with RETRY                         |
+| `table-message/`        | empty / error row with Retry                         |
 | `__fixtures__/`         | sample rows for the stories                          |
 | `types.ts`              | `Column`, `RowAction`, `SortState`, `DataTableProps` |

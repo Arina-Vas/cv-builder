@@ -6,13 +6,18 @@ Live examples, Light and Dark: Storybook → **Shared/Toast** (`With Provider` s
 Built on [Radix Toast](https://www.radix-ui.com/primitives/docs/components/toast): it gives the timer,
 pause on hover / focus, swipe to dismiss, the F8 hotkey and screen reader announcements.
 
+The toasts' own texts (default titles, ✕ name, landmark names) come from `common.toast` in
+`messages/en.json`, so `ToastProvider` and `Toast` need `NextIntlClientProvider` above them: in the
+app it wraps `ToastProvider` in the root layout, in Storybook `.storybook/preview.tsx` mounts it.
+The `description` and a custom `title` are passed by the caller, already translated.
+
 ## Files
 
 | File                | Role                                                        |
 | ------------------- | ----------------------------------------------------------- |
 | `Toast.tsx`         | One toast: colours, title, description, ✕                   |
 | `ToastProvider.tsx` | `ToastProvider` (the list of toasts) + `useToast()` hook    |
-| `Toast.types.ts`    | `ToastType`, `ToastOptions`, `ToastApi`, default `TITLES`   |
+| `Toast.types.ts`    | `TOAST_TYPES`, `ToastType`, `ToastOptions`, `ToastApi`      |
 | `Toast.module.css`  | Toast and viewport styles, enter / leave / swipe animations |
 
 ## Usage
@@ -42,8 +47,10 @@ toast.show({ type: 'info', description: 'Same as toast.info' });
 | `success` / `error` / `warning` / `info` | `(description: string, options?: { title?, duration? })` |
 | `show`                                   | `({ type, description, title?, duration? })`             |
 
-- `title` replaces the default title of the type (`Success`, `Error`, `Warning`, `Info`).
-  An empty string falls back to the default.
+- `title` replaces the default title of the type (`Success`, `Error`, `Warning`, `Info`, keys
+  `common.toast.types.<type>`). An empty string falls back to the default.
+- The examples above use English strings for brevity; real callers pass texts from their own
+  translation keys.
 - `duration` is in ms, default **5000** for every type. `Infinity` keeps the toast until it is closed.
 - `useToast()` outside `ToastProvider` throws `useToast must be used within ToastProvider`.
 
@@ -56,7 +63,10 @@ toast.show({ type: 'info', description: 'Same as toast.info' });
 - **Pause:** the timer stops while the pointer is over the toasts or focus is inside them.
   After closing with ✕ focus stays on the toast list, so the other toasts wait until focus leaves it.
 - **Screen readers:** Error toasts are announced at once (`type="foreground"`), the others politely
-  (`type="background"`). The toast list is a landmark named "Notifications", F8 moves focus to it.
+  (`type="background"`). The toast list is a landmark named "Notifications (F8)"
+  (`common.toast.viewport`; Radix fills in `{hotkey}` itself), F8 moves focus to it. Each toast is
+  announced with the provider label "Notifications" (`common.toast.region`); ✕ is named "Close"
+  (`common.toast.close`).
 - **Animations:** slide in from the right (`--duration-enter`, `--ease-out`), short fade out
   (`--duration-leave`, `--ease-in`). With `prefers-reduced-motion: reduce` toasts appear and disappear
   without motion.
@@ -66,14 +76,14 @@ toast.show({ type: 'info', description: 'Same as toast.info' });
 Use it directly only in Storybook or tests; pages call `useToast()`.
 It renders a `Radix Toast.Root`, so it needs a `Toast.Provider` and a `Toast.Viewport` around it.
 
-| Prop           | Values                                           | Default             |
-| -------------- | ------------------------------------------------ | ------------------- |
-| `type`         | `'success'` · `'error'` · `'warning'` · `'info'` | required            |
-| `description`  | `string`                                         | required            |
-| `title`        | `string`                                         | `TITLES[type]`      |
-| `open`         | `boolean`                                        | uncontrolled (open) |
-| `onOpenChange` | `(open: boolean) => void`                        | —                   |
-| `duration`     | `number`, ms                                     | from the provider   |
+| Prop           | Values                                           | Default                     |
+| -------------- | ------------------------------------------------ | --------------------------- |
+| `type`         | `'success'` · `'error'` · `'warning'` · `'info'` | required                    |
+| `description`  | `string`                                         | required                    |
+| `title`        | `string`                                         | `common.toast.types.<type>` |
+| `open`         | `boolean`                                        | uncontrolled (open)         |
+| `onOpenChange` | `(open: boolean) => void`                        | —                           |
+| `duration`     | `number`, ms                                     | from the provider           |
 
 ## Tokens
 

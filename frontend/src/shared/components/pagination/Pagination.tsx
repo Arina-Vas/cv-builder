@@ -2,6 +2,7 @@ import { ChevronIcon } from '../icons/ChevronIcon';
 import { Select } from '../select/Select';
 import { getPageCount, getPageItems } from './getPageItems';
 import styles from './Pagination.module.css';
+import { useTranslations } from 'next-intl';
 
 export const DEFAULT_PAGE_SIZE_OPTIONS = [10, 20, 50];
 
@@ -22,8 +23,9 @@ export function Pagination({
   onPageChange,
   onPageSizeChange,
   pageSizeOptions = DEFAULT_PAGE_SIZE_OPTIONS,
-  label = 'Pagination',
+  label,
 }: PaginationProps) {
+  const t = useTranslations('common.pagination');
   const smallestPageSize = Math.min(...pageSizeOptions, pageSize);
   if (total <= smallestPageSize) {
     return null;
@@ -35,13 +37,13 @@ export function Pagination({
   const arrowClass = `${styles.item} ${styles.arrow}`;
 
   return (
-    <nav aria-label={label} className={styles.pagination}>
+    <nav aria-label={label ?? t('label')} className={styles.pagination}>
       <ul className={styles.pages}>
         <li>
           <button
             type="button"
             className={arrowClass}
-            aria-label="Previous page"
+            aria-label={t('previous')}
             disabled={page <= 1}
             onClick={() => onPageChange(page - 1)}
           >
@@ -55,7 +57,7 @@ export function Pagination({
               <button
                 type="button"
                 className={pageItemClass}
-                aria-label={`Page ${item}`}
+                aria-label={t('page', { page: item })}
                 aria-current={item === page ? 'page' : undefined}
                 onClick={() => item !== page && onPageChange(item)}
               >
@@ -73,7 +75,7 @@ export function Pagination({
           <button
             type="button"
             className={arrowClass}
-            aria-label="Next page"
+            aria-label={t('next')}
             disabled={page >= pageCount}
             onClick={() => onPageChange(page + 1)}
           >
@@ -83,7 +85,7 @@ export function Pagination({
       </ul>
 
       <Select
-        label="Rows per page"
+        label={t('rowsPerPage')}
         hideLabel
         options={pageSizeOptions.map((option) => ({
           value: String(option),

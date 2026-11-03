@@ -17,6 +17,7 @@ export default tseslint.config(
       '**/node_modules/**',
       '**/coverage/**',
       '**/next-env.d.ts',
+      'frontend/src/gql/**',
     ],
   },
   js.configs.recommended,

@@ -1,0 +1,21 @@
+{
+  "rootDir": "..",
+  "testRegex": "test/.*\\.int-spec\\.ts$",
+  "testEnvironment": "node",
+  "moduleNameMapper": {
+    "^@/(.*)$": "<rootDir>/src/$1"
+  },
+  "transform": {
+    "^.+\\.ts$": "ts-jest",
+    "^.+\\.js$": [
+      "ts-jest",
+      { "tsconfig": { "allowJs": true, "module": "commonjs" }, "isolatedModules": true }
+    ]
+  },
+  "transformIgnorePatterns": [
+    "/node_modules/(?!(\\.pnpm/[^/]+/node_modules/)?@nestjs/(config|jwt)/)"
+  ],
+  "globalSetup": "<rootDir>/test/global-setup.ts",
+  "setupFiles": ["<rootDir>/test/setup-env.ts"],
+  "testTimeout": 30000
+}

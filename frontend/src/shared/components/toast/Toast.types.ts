@@ -1,11 +1,6 @@
-export type ToastType = 'error' | 'info' | 'success' | 'warning';
-
-export const TITLES: Record<ToastType, string> = {
-  success: 'Success',
-  error: 'Error',
-  warning: 'Warning',
-  info: 'Info',
-};
+// default titles are common.toast.types.<type> in messages/en.json
+export const TOAST_TYPES = ['success', 'error', 'warning', 'info'] as const;
+export type ToastType = (typeof TOAST_TYPES)[number];
 
 export type ToastOptions = {
   type: ToastType;

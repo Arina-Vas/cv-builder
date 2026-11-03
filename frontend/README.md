@@ -1,24 +1,208 @@
 # Frontend
 
-Next.js 16 (App Router), React 19, TypeScript.
+Next.js 16 (App Router), React 19, TypeScript, Apollo Client 4.
+
+## Setup
+
+Copy `.env.example` to `.env.local`. `NEXT_PUBLIC_GRAPHQL_URL` points to the backend GraphQL endpoint
+(`http://localhost:4000/graphql` in local development).
 
 ## Scripts
 
-Run from the repo root (`pnpm <script>`) or from this folder.
+Run from the repo root (`pnpm --filter frontend <script>`) or from this folder.
 
-| Command          | Description                      |
-| ---------------- | -------------------------------- |
-| `pnpm dev`       | Start the dev server (port 3000) |
-| `pnpm build`     | Production build                 |
-| `pnpm start`     | Run the production build         |
-| `pnpm typecheck` | Type-check with `tsc --noEmit`   |
+| Command               | Description                                                      |
+| --------------------- | ---------------------------------------------------------------- |
+| `pnpm dev`            | Start the dev server (port 3000)                                 |
+| `pnpm build`          | Production build                                                 |
+| `pnpm start`          | Run the production build                                         |
+| `pnpm typecheck`      | Type-check with `tsc --noEmit`                                   |
+| `pnpm codegen`        | Generate GraphQL types into `src/gql/` (see below)               |
+| `pnpm storybook`      | Start Storybook (port 6006)                                      |
+| `pnpm test`           | Run unit tests once (fast, no browser)                           |
+| `pnpm test:watch`     | Run unit tests in watch mode                                     |
+| `pnpm test:storybook` | Run story tests in headless Chromium                             |
+| `pnpm test:coverage`  | Run both test projects with coverage (fails below the threshold) |
 
 Linting and formatting are configured at the repo root (`pnpm lint`, `pnpm format`).
+
+## Tests
+
+`vitest.config.ts` has two projects:
+
+- `unit`: Vitest + React Testing Library in jsdom, files `src/**/*.test.ts(x)`.
+- `storybook`: every story is a test, run in headless Chromium; `play` functions with `expect` are the assertions.
+  Install the browser once with `pnpm exec playwright install chromium` (CI needs
+  `pnpm exec playwright install --with-deps chromium` before `pnpm test:coverage`).
+
+Where to write a test:
+
+- `src/features/**`, hooks and `src/shared/lib/**`: unit tests only.
+- `src/shared/components/**`: either a `play` function in the component's stories or a unit test, not both for the
+  same behaviour. Use a unit test for logic and states, a story test when a real browser matters (focus, Radix
+  portals, positioning).
+
+Unit tests:
+
+- Put a test next to the code it covers and name it `<Name>.test.ts(x)`, e.g. `Button.tsx` → `Button.test.tsx`.
+- Render with `renderWithProviders` from `@/test/render`: it wraps the UI in `NextIntlClientProvider` (English,
+  real `messages/en.json`), `ThemeProvider`, `ToastProvider` and Apollo `MockedProvider`, and returns a `user` from
+  `@testing-library/user-event`. Pass GraphQL responses as `mocks` (see `ForgotPasswordForm.test.tsx`). For a hook
+  that calls `useTranslations`, use `renderHook(..., { wrapper: IntlProvider })` from the same file.
+- Write the expected texts as plain English strings, not `t('...')`: the test then also checks that the key points to
+  the text from the spec. Buttons are upper-cased by CSS only, so their accessible name is the text from `en.json`
+  (`'Sign in'`, not `'SIGN IN'`).
+- `next/navigation` is mocked for every test (`src/test/next-navigation.ts`). Check navigation with
+  `expect(mockRouter.push).toHaveBeenCalledWith('/login')`; change the current path with
+  `usePathname.mockReturnValue('/register')`. Mocks are reset after each test.
+- Global setup is in `src/test/setup.ts`: jest-dom matchers, DOM cleanup, a `matchMedia` stub for jsdom (a `vi.fn`,
+  so a test can return `matches: true`), and after each test it resets mocks, `localStorage` and `data-theme`.
+- To check that a mutation was sent, pass `result` as a `vi.fn` and assert on it; a plain object only says what to
+  answer. A mock is used once; set `maxUsageCount` when a test must see a second request.
+- Query elements the way a user finds them: `getByRole`, `getByLabelText`, `getByText`; avoid class names and test ids.
+
+### Coverage
+
+`pnpm test:coverage` runs both projects and merges their coverage, prints a summary and writes
+`coverage/index.html` and `coverage/lcov.info` (git-ignored). It counts every file in `src/` except the App Router
+files in `src/app/` (thin page and layout wrappers; there are no E2E tests for them yet), generated GraphQL types,
+stories, test helpers, fixtures and `.d.ts` files. Files without tests count as 0%.
+
+The run fails when lines, statements, functions or branches drop below 80% (`coverage.thresholds` in
+`vitest.config.ts`, the project target).
+
+A story without a `play` function still counts as coverage: rendering it executes the component's code without
+asserting anything. Coverage shows what has not been run at all; it does not prove a behaviour is checked. Give
+stories of interactive components a `play` function with `expect`, or cover them with a unit test.
+
+## GraphQL types (codegen)
+
+Operations are written with `graphql()` from `@/gql`; their result and variable types are generated by
+[GraphQL Code Generator](https://the-guild.dev/graphql/codegen) (`client` preset, config in `codegen.ts`).
+
+- The schema is read from `../backend/schema.gql`, so the backend does not need to be running.
+- Run `pnpm codegen` after adding or changing an operation and after the backend schema changes. Until then
+  `graphql()` returns `unknown` for that operation and the type-check fails.
+- `src/gql/` is generated and committed; do not edit it by hand. Prettier and ESLint skip it.
+- Fragments are spread by name (`...AuthUserFields`); codegen adds them to the documents that use them.
+
+## Authentication
+
+The backend keeps both tokens in httpOnly cookies (see [docs/auth.md](../docs/auth.md)); the frontend never reads
+or stores them.
+
+- `src/proxy.ts` (Next.js 16 Proxy, formerly Middleware) redirects by the presence of the `refresh_token` cookie:
+  `/login` and `/register` are for signed-out users, `/forgot-password` and `/reset-password` are open to
+  everyone, every other page needs a session. It is an optimistic check; the API validates the session.
+- Apollo sends cookies with `credentials: 'include'` (the API is on another origin).
+- `src/shared/lib/apollo/refresh-link.ts`: on `UNAUTHENTICATED` (except `signIn`) it calls `refresh` once, shared by
+  parallel requests, and retries; if the refresh fails it goes to `/login`.
+- Auth pages, forms, operations and validation live in `src/features/auth/`. Backend errors are read with
+  `parseError` (`src/shared/lib/apollo/graphql-errors.ts`) and shown with our own texts (see
+  [Errors](#errors) below): wrong credentials and a taken email go under the field, everything else is a toast.
+  Field-level `BAD_USER_INPUT` is caught by the client validation first (`lib/validation.ts` repeats the backend
+  rules and limits), so only the verification code and the reset link can fail on the server.
+
+## Internationalization (i18n)
+
+[next-intl](https://next-intl.dev) without i18n routing: the locale is not part of the URL and `src/proxy.ts`
+does not deal with it. Only English for now.
+
+- **Messages** live in `messages/<locale>.json`. `src/i18n/request.ts` picks the locale for a request and loads
+  its messages; `src/i18n/config.ts` lists the supported locales.
+- **Provider.** The root layout mounts `NextIntlClientProvider`; `.storybook/preview.tsx` mounts it with the
+  messages imported directly (Storybook has no server). Any component that calls `useTranslations` needs it.
+- **Usage.** Server components: `const t = await getTranslations('auth.signIn')`. Client components and
+  non-async server components: `const t = useTranslations('auth.signIn')`. Values go in ICU placeholders:
+  `t('page', { page: 2 })` for `"Page {page}"`; plurals use `{seconds, plural, one {…} other {…}}`.
+- **Typed keys.** `src/i18n/next-intl.d.ts` types the messages from `messages/en.json`, so a missing key fails
+  the type-check. Placeholders are **not** checked: `t('hint')` for `"… {maxSize}"` type-checks and renders the
+  key name at runtime with a `FORMATTING_ERROR` in the console. Check a new placeholder in the browser or
+  Storybook.
+- **No hardcoded UI text.** Everything a user sees or a screen reader reads (`aria-label`, titles, toasts)
+  goes through a key. Exceptions: ARIA tokens such as `aria-sort="ascending"` (never translated) and
+  `app/global-error.tsx`, which replaces the root layout and so has no provider.
+- Write texts in normal case: `Button` and the auth tabs upper-case them in CSS.
+
+### Key naming
+
+`namespace.section.key`, all parts in camelCase: `auth.signIn.submit`, `common.pagination.rowsPerPage`.
+
+| Namespace    | What goes there                                                                  |
+| ------------ | -------------------------------------------------------------------------------- |
+| `common`     | Shared components, one section per component (`common.table`, `common.toast`, …) |
+| `errors`     | API errors by `extensions.code`, see [Errors](#errors)                           |
+| `validation` | Client-side form validation messages, one section per field (`validation.email`) |
+| `auth`, …    | One namespace per feature: a section per form / page, plus `<feature>.errors`    |
+
+Add a namespace together with the first UI that uses it, not in advance. The one exception to camelCase is
+`errors.*`: those keys are the backend codes as is (`errors.RATE_LIMITED`).
+
+### Errors
+
+The frontend shows its own text for an API error, chosen by `extensions.code` (and `field` where the form
+needs more), never the backend `message` ([conventions](../docs/api/conventions.md#messages)).
+
+- `parseError(error)` returns `{ code, fieldErrors, retryAfter, message }`; `message` is the backend text, for
+  logs only.
+- `useErrorMessage()` (`src/shared/lib/apollo/useErrorMessage.ts`) returns a function that turns that result
+  into the `errors.<code>` text; no code (network error) falls back to `errors.INTERNAL_SERVER_ERROR`.
+  `RATE_LIMITED` gets the seconds from `retryAfter`. A new `ErrorCode` without a key fails the type-check.
+- A form checks the cases it knows better first and takes the text from `<feature>.errors`
+  (`auth.errors.emailTaken` for `CONFLICT` on sign-up), then falls back to `errorMessage(appError)`.
+
+```tsx
+const errorMessage = useErrorMessage(); // a hook: call it in the component body
+// …
+catch (error) {
+  const appError = parseError(error);
+  if (appError.code === 'CONFLICT') setServerErrors({ email: t('errors.emailTaken') });
+  else toast.error(errorMessage(appError));
+}
+```
+
+### Validation
+
+Validators in `src/features/auth/lib/validation.ts` take the `validation` translator and return the text:
+`validateEmail(value, t)`. `useFormFields` calls `useTranslations('validation')` once and passes it as the
+second argument of `validate`, so forms don't need their own hook:
+
+```tsx
+useFormFields({ email: '' }, ({ email }, tValidation) => ({
+  email: validateEmail(email, tValidation),
+}));
+```
+
+## System pages
+
+Not Found, No Internet and Device Error share one layout, `shared/components/error-state/ErrorState`
+(Figma "ERROR PAGE": monitor illustration, h4 title, body1 text, optional 220px button).
+The code is in `src/features/system-pages`.
+
+| Page         | When it shows                                                               | Button                                                    |
+| ------------ | --------------------------------------------------------------------------- | --------------------------------------------------------- |
+| Not Found    | unknown URL or `notFound()` (`app/not-found.tsx`)                           | GO BACK: `router.back()`, or `/` when there is no history |
+| No Internet  | browser offline, or a **query** failed to reach the backend (`fetch` threw) | RETRY: `client.refetchObservableQueries()`                |
+| No Internet  | a page crashed while rendering (`app/error.tsx`, `app/global-error.tsx`)    | RETRY: `reset()`                                          |
+| Device Error | viewport < 768px, also after a resize                                       | none                                                      |
+
+- `DeviceGuard` and `NetworkStatusGate` wrap the app in the root layout.
+- Device Error: CSS media query picks what the first paint shows; after hydration `useMediaQuery`
+  unmounts the app on narrow screens.
+- No Internet: `network-error-link` sets the flag in `shared/lib/network/network-status`. The app is
+  hidden, not unmounted, so form values survive and the failed queries are refetched on RETRY.
+  Failed mutations don't open the page: forms show their own "Something went wrong" message.
 
 ## Structure
 
 ```
-src/app/   # App Router: layout.tsx, page.tsx
+messages/       # translations, one JSON per locale
+src/app/        # App Router: (auth) pages, (main) app pages, layouts
+src/features/   # feature code (auth: api, components, hooks, lib)
+src/i18n/       # next-intl: locales, request config, typed message keys
+src/shared/     # shared components, hooks, theme, Apollo setup
+src/gql/        # generated GraphQL types (pnpm codegen)
+src/proxy.ts    # route guard
 ```
 
 Path alias: `@/*` → `src/*`.

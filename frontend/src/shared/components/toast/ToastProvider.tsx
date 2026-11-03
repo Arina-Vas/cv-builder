@@ -5,6 +5,7 @@ import { Toast as RadixToast } from 'radix-ui';
 import { createContext, useState, useContext, useMemo, useRef, type ReactNode } from 'react';
 import { Toast } from './Toast';
 import s from './Toast.module.css';
+import { useTranslations } from 'next-intl';
 
 const DEFAULT_DURATION = 5000;
 const EXIT_ANIMATION_MS = 200;
@@ -13,6 +14,7 @@ const MAX_TOASTS = 3;
 const ToastContext = createContext<ToastApi | null>(null);
 
 export const ToastProvider = ({ children }: { children: ReactNode }) => {
+  const t = useTranslations('common.toast');
   const [items, setItems] = useState<ToastItem[]>([]);
   const nextId = useRef(0);
 
@@ -40,7 +42,7 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <ToastContext.Provider value={api}>
-      <RadixToast.Provider label="Notifications" swipeDirection="right" duration={DEFAULT_DURATION}>
+      <RadixToast.Provider label={t('region')} swipeDirection="right" duration={DEFAULT_DURATION}>
         {children}
         {items.map(({ id, ...toast }) => (
           <Toast
@@ -51,7 +53,8 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
             }}
           />
         ))}
-        <RadixToast.Viewport className={s.viewport} />
+        {/* Radix replaces {hotkey} with the key name (F8) itself, so it is passed through as is */}
+        <RadixToast.Viewport className={s.viewport} label={t('viewport', { hotkey: '{hotkey}' })} />
       </RadixToast.Provider>
     </ToastContext.Provider>
   );

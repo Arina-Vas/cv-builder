@@ -9,6 +9,7 @@ import { TableSkeleton } from '../table-skeleton/TableSkeleton';
 import type { DataTableProps } from '../types';
 import styles from './DataTable.module.css';
 import { useScrollResetOnData } from './useScrollResetOnData';
+import { useTranslations } from 'next-intl';
 
 export function DataTable<T>({
   columns,
@@ -28,6 +29,7 @@ export function DataTable<T>({
   emptyMessage,
   scrollResetKey,
 }: DataTableProps<T>) {
+  const t = useTranslations('common.table');
   const rootRef = useRef<HTMLDivElement>(null);
   const isBusy = !!isLoading || isRefreshing;
 
@@ -36,7 +38,7 @@ export function DataTable<T>({
   const hasActionsColumn = !!rowActions || !!onRowClick;
   const columnCount = columns.length + (hasActionsColumn ? 1 : 0);
 
-  const getRowName = (row: T) => (getRowLabel ? getRowLabel(row) : `row ${getRowId(row)}`);
+  const getRowName = (row: T) => (getRowLabel ? getRowLabel(row) : t('row', { id: getRowId(row) }));
 
   const renderActionsCell = (row: T) => {
     if (rowActions) {
@@ -44,14 +46,17 @@ export function DataTable<T>({
         <RowActionsMenu
           row={row}
           actions={rowActions(row)}
-          label={`Actions for ${getRowName(row)}`}
+          label={t('rowActions', { name: getRowName(row) })}
         />
       );
     }
 
     if (onRowClick) {
       return (
-        <IconButton aria-label={`Open ${getRowName(row)}`} onClick={() => onRowClick(row)}>
+        <IconButton
+          aria-label={t('openRow', { name: getRowName(row) })}
+          onClick={() => onRowClick(row)}
+        >
           <ChevronIcon direction="right" />
         </IconButton>
       );
@@ -83,7 +88,7 @@ export function DataTable<T>({
         })}
         {hasActionsColumn && (
           <th scope="col" className={styles.actionsCell}>
-            <span className={styles.visuallyHidden}>Actions</span>
+            <span className={styles.visuallyHidden}>{t('actions')}</span>
           </th>
         )}
       </tr>
@@ -143,7 +148,7 @@ export function DataTable<T>({
       </table>
 
       <div role="status" className={styles.visuallyHidden}>
-        {isRefreshing && 'Loading rows'}
+        {isRefreshing && t('loadingRows')}
       </div>
     </div>
   );

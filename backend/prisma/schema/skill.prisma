@@ -1,0 +1,46 @@
+model Skill {
+  id   String @id @default(uuid()) @db.Uuid
+  name String @unique @db.Citext
+
+  categoryId String        @map("category_id") @db.Uuid
+  category   SkillCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+  users    UserSkill[]
+  projects ProjectSkill[]
+  cvs      CvSkill[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([categoryId])
+  @@map("skills")
+}
+
+model SkillCategory {
+  id   String @id @default(uuid()) @db.Uuid
+  name String @unique @db.Citext
+  // Skill type shown in the Skills table, e.g. "Backend"; determined by the category
+  type String @db.VarChar(100)
+
+  skills Skill[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("skill_categories")
+}
+
+model UserSkill {
+  id      String  @id @default(uuid()) @db.Uuid
+  userId  String  @map("user_id") @db.Uuid
+  skillId String  @map("skill_id") @db.Uuid
+  mastery Mastery
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skill   Skill   @relation(fields: [skillId], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([userId, skillId])
+  @@map("user_skills")
+}

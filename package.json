@@ -24,6 +24,7 @@
     "db:deploy": "pnpm --filter backend db:deploy",
     "db:status": "pnpm --filter backend db:status",
     "db:reset": "pnpm --filter backend db:reset",
+    "db:seed": "pnpm --filter backend db:seed",
     "db:studio": "pnpm --filter backend db:studio"
   },
   "devDependencies": {

@@ -6,3 +6,5 @@ pnpm-lock.yaml
 *.tsbuildinfo
 next-env.d.ts
 backend/src/generated
+backend/schema.gql
+frontend/src/gql

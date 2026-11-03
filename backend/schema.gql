@@ -1,0 +1,436 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+input CreateDepartmentInput {
+  name: String!
+}
+
+input CreateLanguageInput {
+  iso: String!
+  name: String!
+  nativeName: String!
+}
+
+input CreatePositionInput {
+  name: String!
+}
+
+input CreateProjectInput {
+  description: String!
+  domain: String!
+  endDate: Date!
+  name: String!
+  startDate: Date!
+  technologyIds: [ID!]! = []
+}
+
+input CreateSkillInput {
+  categoryId: ID!
+  name: String!
+}
+
+input CreateUserLanguageInput {
+  languageId: ID!
+  proficiency: Proficiency!
+  userId: ID!
+}
+
+input CreateUserSkillInput {
+  mastery: Mastery!
+  skillId: ID!
+  userId: ID!
+}
+
+"""Calendar date without time and time zone, format YYYY-MM-DD"""
+scalar Date
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Department {
+  id: ID!
+  name: String!
+}
+
+type DepartmentPage {
+  items: [Department!]!
+
+  """Current page, 1-based"""
+  page: Int!
+  pageSize: Int!
+
+  """Items matching the search, not the page size"""
+  total: Int!
+}
+
+enum DepartmentSortField {
+  name
+}
+
+type Health {
+  status: String!
+}
+
+type Language {
+  id: ID!
+  iso: String!
+  name: String!
+  nativeName: String!
+}
+
+type LanguagePage {
+  items: [Language!]!
+
+  """Current page, 1-based"""
+  page: Int!
+  pageSize: Int!
+
+  """Items matching the search, not the page size"""
+  total: Int!
+}
+
+enum LanguageSortField {
+  iso
+  name
+}
+
+enum Mastery {
+  ADVANCED
+  BEGINNER
+  ELEMENTARY
+  EXPERT
+  INTERMEDIATE
+}
+
+type Mutation {
+  createDepartment(input: CreateDepartmentInput!): Department!
+  createLanguage(input: CreateLanguageInput!): Language!
+  createPosition(input: CreatePositionInput!): Position!
+  createProject(input: CreateProjectInput!): Project!
+  createSkill(input: CreateSkillInput!): Skill!
+
+  """
+  Own profile or Admin. Fails with BAD_USER_INPUT (languageId) if the language does not exist and with CONFLICT (languageId) if it is already assigned
+  """
+  createUserLanguage(input: CreateUserLanguageInput!): UserLanguage!
+
+  """
+  Own profile or Admin. Fails with BAD_USER_INPUT (skillId) if the skill does not exist and with CONFLICT (skillId) if it is already assigned
+  """
+  createUserSkill(input: CreateUserSkillInput!): UserSkill!
+
+  """Fails with ENTITY_IN_USE if the department is assigned to users"""
+  deleteDepartment(id: ID!): ID!
+
+  """Fails with ENTITY_IN_USE if the language is assigned to users"""
+  deleteLanguage(id: ID!): ID!
+
+  """Fails with ENTITY_IN_USE if the position is assigned to users"""
+  deletePosition(id: ID!): ID!
+
+  """Fails with ENTITY_IN_USE if the project is used in CVs"""
+  deleteProject(id: ID!): ID!
+
+  """
+  Fails with ENTITY_IN_USE if the skill is assigned to users, projects or CVs
+  """
+  deleteSkill(id: ID!): ID!
+
+  """
+  Own profile or Admin. Removes the given UserLanguage ids of the user; returns the removed ids
+  """
+  deleteUserLanguages(ids: [ID!]!, userId: ID!): [ID!]!
+
+  """
+  Own profile or Admin. Removes the given UserSkill ids of the user; returns the removed ids
+  """
+  deleteUserSkills(ids: [ID!]!, userId: ID!): [ID!]!
+  logout: Boolean!
+  refresh: Boolean!
+
+  """Always returns true, whether or not the email belongs to an account"""
+  requestPasswordReset(input: RequestPasswordResetInput!): Boolean!
+  resendVerificationCode: Boolean!
+
+  """
+  Fails with BAD_USER_INPUT (field "token") when the link is invalid, used or expired. Signs out every session of the user; the client signs in again with the new password.
+  """
+  resetPassword(input: ResetPasswordInput!): Boolean!
+  signIn(input: SignInInput!): User!
+  signUp(input: SignUpInput!): User!
+  updateDepartment(input: UpdateDepartmentInput!): Department!
+  updateLanguage(input: UpdateLanguageInput!): Language!
+  updatePosition(input: UpdatePositionInput!): Position!
+  updateProject(input: UpdateProjectInput!): Project!
+  updateSkill(input: UpdateSkillInput!): Skill!
+
+  """
+  Own profile or Admin. Changes only the proficiency level; fails with NOT_FOUND if the assignment does not exist or belongs to another user
+  """
+  updateUserLanguage(input: UpdateUserLanguageInput!): UserLanguage!
+
+  """
+  Own profile or Admin. Changes only the mastery level; fails with NOT_FOUND if the assignment does not exist or belongs to another user
+  """
+  updateUserSkill(input: UpdateUserSkillInput!): UserSkill!
+  verifyEmail(input: VerifyEmailInput!): User!
+}
+
+type Position {
+  id: ID!
+  name: String!
+}
+
+type PositionPage {
+  items: [Position!]!
+
+  """Current page, 1-based"""
+  page: Int!
+  pageSize: Int!
+
+  """Items matching the search, not the page size"""
+  total: Int!
+}
+
+enum PositionSortField {
+  name
+}
+
+enum Proficiency {
+  A1
+  A2
+  B1
+  B2
+  C1
+  C2
+  NATIVE
+}
+
+type Project {
+  description: String!
+  domain: String!
+  endDate: Date!
+  id: ID!
+  name: String!
+  startDate: Date!
+
+  """Technologies used on the project ("Environment" in the UI)"""
+  technologies: [Skill!]!
+}
+
+type ProjectList {
+  items: [Project!]!
+
+  """Items matching the search"""
+  total: Int!
+}
+
+enum ProjectSortField {
+  endDate
+  name
+  startDate
+}
+
+type Query {
+  """
+  Languages not yet assigned to the user, for the Add Language modal; sorted by name. Fails with NOT_FOUND if the user does not exist
+  """
+  availableUserLanguages(userId: ID!): [Language!]!
+
+  """
+  Skills not yet assigned to the user, for the Add Skill modal; sorted by name. Fails with NOT_FOUND if the user does not exist
+  """
+  availableUserSkills(userId: ID!): [Skill!]!
+  departments(
+    """1-based page number"""
+    page: Int! = 1
+
+    """One of 10, 20, 50"""
+    pageSize: Int! = 10
+    search: String
+    sortBy: DepartmentSortField! = name
+    sortOrder: SortOrder! = ASC
+  ): DepartmentPage!
+  health: Health!
+  languages(
+    """1-based page number"""
+    page: Int! = 1
+
+    """One of 10, 20, 50"""
+    pageSize: Int! = 10
+    search: String
+    sortBy: LanguageSortField! = name
+    sortOrder: SortOrder! = ASC
+  ): LanguagePage!
+  me: User!
+  positions(
+    """1-based page number"""
+    page: Int! = 1
+
+    """One of 10, 20, 50"""
+    pageSize: Int! = 10
+    search: String
+    sortBy: PositionSortField! = name
+    sortOrder: SortOrder! = ASC
+  ): PositionPage!
+  projects(search: String, sortBy: ProjectSortField! = name, sortOrder: SortOrder! = ASC): ProjectList!
+  skillCategories: [SkillCategory!]!
+  skills(
+    """1-based page number"""
+    page: Int! = 1
+
+    """One of 10, 20, 50"""
+    pageSize: Int! = 10
+    search: String
+    sortBy: SkillSortField! = name
+    sortOrder: SortOrder! = ASC
+  ): SkillPage!
+
+  """Skills available as project technologies ("Environment")"""
+  technologies: [Skill!]!
+
+  """
+  Languages of the user, readable by any authenticated user; sorted by language name. Fails with NOT_FOUND if the user does not exist
+  """
+  userLanguages(userId: ID!): [UserLanguage!]!
+
+  """
+  Skills of the user, readable by any authenticated user; sorted by category name, then skill name. Fails with NOT_FOUND if the user does not exist
+  """
+  userSkills(userId: ID!): [UserSkill!]!
+}
+
+input RequestPasswordResetInput {
+  email: String!
+}
+
+input ResetPasswordInput {
+  confirmPassword: String!
+  newPassword: String!
+  token: String!
+}
+
+input SignInInput {
+  email: String!
+  password: String!
+}
+
+input SignUpInput {
+  confirmPassword: String!
+  email: String!
+  password: String!
+}
+
+type Skill {
+  category: SkillCategory!
+  id: ID!
+  name: String!
+}
+
+type SkillCategory {
+  id: ID!
+  name: String!
+  type: String!
+}
+
+type SkillPage {
+  items: [Skill!]!
+
+  """Current page, 1-based"""
+  page: Int!
+  pageSize: Int!
+
+  """Items matching the search, not the page size"""
+  total: Int!
+}
+
+enum SkillSortField {
+  name
+}
+
+enum SortOrder {
+  ASC
+  DESC
+}
+
+input UpdateDepartmentInput {
+  id: ID!
+  name: String!
+}
+
+input UpdateLanguageInput {
+  id: ID!
+  iso: String!
+  name: String!
+  nativeName: String!
+}
+
+input UpdatePositionInput {
+  id: ID!
+  name: String!
+}
+
+input UpdateProjectInput {
+  description: String!
+  domain: String!
+  endDate: Date!
+  id: ID!
+  name: String!
+  startDate: Date!
+  technologyIds: [ID!]! = []
+}
+
+input UpdateSkillInput {
+  categoryId: ID!
+  id: ID!
+  name: String!
+}
+
+input UpdateUserLanguageInput {
+  id: ID!
+  proficiency: Proficiency!
+  userId: ID!
+}
+
+input UpdateUserSkillInput {
+  id: ID!
+  mastery: Mastery!
+  userId: ID!
+}
+
+type User {
+  avatarUrl: String
+  createdAt: DateTime!
+  department: Department
+  email: String!
+  emailVerifiedAt: DateTime
+  firstName: String
+  id: ID!
+  lastName: String
+  position: Position
+  role: UserRole!
+}
+
+type UserLanguage {
+  id: ID!
+  language: Language!
+  proficiency: Proficiency!
+}
+
+enum UserRole {
+  ADMIN
+  EMPLOYEE
+}
+
+type UserSkill {
+  id: ID!
+  mastery: Mastery!
+  skill: Skill!
+}
+
+input VerifyEmailInput {
+  code: String!
+}

@@ -1,5 +1,6 @@
 import { Button } from '../../buttons';
 import styles from './TableMessage.module.css';
+import { useTranslations } from 'next-intl';
 
 export type TableMessageVariant = 'empty' | 'error';
 
@@ -16,6 +17,7 @@ export function TableMessage({
   variant = 'empty',
   onRetry,
 }: TableMessageProps) {
+  const t = useTranslations('common.table');
   const isError = variant === 'error';
 
   return (
@@ -26,7 +28,7 @@ export function TableMessage({
             <p className={styles.text}>{message}</p>
             {onRetry && (
               <Button variant="secondary" size="sm" onClick={onRetry}>
-                RETRY
+                {t('retry')}
               </Button>
             )}
           </div>

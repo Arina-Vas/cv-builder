@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import { Roboto } from 'next/font/google';
+import { getLocale } from 'next-intl/server';
+import { NextIntlClientProvider } from 'next-intl';
 import type { ReactNode } from 'react';
 import { ApolloWrapper } from '@/shared/lib/apollo/apollo-provider';
 import { ThemeProvider } from '@/shared/theme/theme-provider';
@@ -7,6 +9,8 @@ import { themeScript } from '@/shared/theme/theme-script';
 import '@/shared/theme/tokens.css';
 import './globals.css';
 import { ToastProvider } from '@/shared/components/toast/ToastProvider';
+import { DeviceGuard } from '@/features/system-pages/components/device-guard/DeviceGuard';
+import { NetworkStatusGate } from '@/features/system-pages/components/network-status-gate/NetworkStatusGate';
 
 const roboto = Roboto({
   subsets: ['latin', 'cyrillic'],
@@ -19,18 +23,26 @@ export const metadata: Metadata = {
   title: 'CV Builder',
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  const locale = await getLocale();
+
   return (
-    <html lang="en" className={roboto.variable} suppressHydrationWarning>
+    <html lang={locale} className={roboto.variable} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body>
-        <ThemeProvider>
-          <ToastProvider>
-            <ApolloWrapper>{children}</ApolloWrapper>
-          </ToastProvider>
-        </ThemeProvider>
+        <NextIntlClientProvider>
+          <ThemeProvider>
+            <ToastProvider>
+              <ApolloWrapper>
+                <DeviceGuard>
+                  <NetworkStatusGate>{children}</NetworkStatusGate>
+                </DeviceGuard>
+              </ApolloWrapper>
+            </ToastProvider>
+          </ThemeProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

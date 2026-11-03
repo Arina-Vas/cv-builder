@@ -1,3 +1,5 @@
-export default function NotFoundPage() {
-  return <h1>Not Found</h1>;
+import { NotFoundPage } from '@/features/system-pages/components/not-found-page/NotFoundPage';
+
+export default function NotFound() {
+  return <NotFoundPage />;
 }

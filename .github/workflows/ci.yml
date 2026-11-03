@@ -37,3 +37,91 @@ jobs:
 
       - name: ESLint
         run: pnpm lint
+
+  # Test jobs live here, not in frontend.yml/backend.yml: those have path filters, and a required
+  # check from a workflow that never started blocks the merge.
+  frontend-test:
+    name: Frontend tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    defaults:
+      run:
+        working-directory: frontend
+    env:
+      NEXT_PUBLIC_GRAPHQL_URL: ${{ vars.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:4000/graphql' }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --filter frontend
+
+      # Fails on failing tests and on coverage below the thresholds in vitest.config.ts
+      - name: Test with coverage
+        run: pnpm test:coverage
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-coverage-${{ github.run_id }}
+          path: frontend/coverage
+          retention-days: 14
+
+      - name: Coverage summary comment
+        if: always() && github.event_name == 'pull_request'
+        uses: davelosert/vitest-coverage-report-action@v2
+        with:
+          name: Frontend
+          working-directory: frontend
+
+  backend-test:
+    name: Backend tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      DATABASE_URL: postgresql://cv_builder:cv_builder@localhost:5432/cv_builder?schema=public
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --filter backend
+
+      # Fails on failing tests and on coverage below coverageThreshold in package.json
+      - name: Test with coverage
+        run: pnpm test:cov
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage-${{ github.run_id }}
+          path: backend/coverage
+          retention-days: 14
+
+      - name: Coverage summary comment
+        if: always() && github.event_name == 'pull_request'
+        uses: davelosert/vitest-coverage-report-action@v2
+        with:
+          name: Backend
+          working-directory: backend

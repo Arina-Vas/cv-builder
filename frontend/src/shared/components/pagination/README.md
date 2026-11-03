@@ -5,6 +5,9 @@ It only shows the state it gets: the page keeps `page` / `pageSize`, sends them 
 and passes `total` from the response. Live examples: Storybook → **Shared/Pagination** and
 **Shared/DataTable → Pagination**.
 
+Its labels come from `common.pagination` in `messages/en.json`, so it needs `NextIntlClientProvider`
+above it: the root layout mounts it in the app, `.storybook/preview.tsx` in Storybook.
+
 ```tsx
 import { Pagination } from '@/shared/components/pagination';
 
@@ -32,15 +35,15 @@ import { Pagination } from '@/shared/components/pagination';
 
 ## Props
 
-| Prop               | Type                 | What it does                                      |
-| ------------------ | -------------------- | ------------------------------------------------- |
-| `page`             | `number`             | current page, starts at 1                         |
-| `pageSize`         | `number`             | rows per page                                     |
-| `total`            | `number`             | `total` from the backend response                 |
-| `onPageChange`     | `(page) => void`     | arrow or page click                               |
-| `onPageSizeChange` | `(pageSize) => void` | select change; **the page resets `page` to 1**    |
-| `pageSizeOptions`  | `number[]`           | select options, default `[10, 20, 50]`            |
-| `label`            | `string`             | `aria-label` of the `<nav>`, default `Pagination` |
+| Prop               | Type                 | What it does                                                   |
+| ------------------ | -------------------- | -------------------------------------------------------------- |
+| `page`             | `number`             | current page, starts at 1                                      |
+| `pageSize`         | `number`             | rows per page                                                  |
+| `total`            | `number`             | `total` from the backend response                              |
+| `onPageChange`     | `(page) => void`     | arrow or page click                                            |
+| `onPageSizeChange` | `(pageSize) => void` | select change; **the page resets `page` to 1**                 |
+| `pageSizeOptions`  | `number[]`           | select options, default `[10, 20, 50]`                         |
+| `label`            | `string`             | `aria-label` of the `<nav>`, default `common.pagination.label` |
 
 ## Behaviour
 
@@ -70,11 +73,15 @@ Figma draws `1 2 … 20`; we keep a fixed 7 slots so the arrows do not move whil
 
 ## Accessibility
 
-- `<nav aria-label="Pagination">` with a list; pages are buttons named `Page 2`,
-  the current one has `aria-current="page"`.
-- Arrows: `Previous page` / `Next page`, `disabled` on the edges. Ellipses are `aria-hidden`.
+Names below are the English texts; the keys are in `common.pagination`.
+
+- `<nav aria-label="Pagination">` (`label`) with a list; pages are buttons named `Page 2`
+  (`page`, with `{page}`), the current one has `aria-current="page"`.
+- Arrows: `Previous page` / `Next page` (`previous` / `next`), `disabled` on the edges. Ellipses are
+  `aria-hidden`.
 - The page-size select is the shared [`Select`](../select/README.md) with `hideLabel`: the label
-  `Rows per page` is only for screen readers; keyboard, Escape, focus back to the trigger.
+  `Rows per page` (`rowsPerPage`) is only for screen readers; keyboard, Escape, focus back to the
+  trigger.
 
 ## Files
 
