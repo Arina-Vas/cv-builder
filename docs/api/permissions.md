@@ -169,6 +169,21 @@ Operation-level tables are added by each module together with its resolvers: the
 | `updateSkill`     | Admin  |
 | `deleteSkill`     | Admin  |
 
+### User skills
+
+| Operation             | Access          |
+| --------------------- | --------------- |
+| `userSkills`          | All             |
+| `availableUserSkills` | All             |
+| `createUserSkill`     | Own or Admin \* |
+| `updateUserSkill`     | Own or Admin \* |
+| `deleteUserSkills`    | Own or Admin \* |
+
+\* The owner is the `userId` of the input, compared with the current user from the request
+(`canManageUser`, `backend/src/common/auth/can-manage-user.ts`); the client-sent id is never proof of ownership.
+Like every mutation, these need a verified email. An Employee changing another user's skills gets `FORBIDDEN`
+before the user is looked up, so the response does not reveal whether that user exists.
+
 ### Projects
 
 | Operation       | Access |
