@@ -1,8 +1,11 @@
-import { screen, waitFor } from '@testing-library/react';
-import { useState, type ComponentProps } from 'react';
+import { screen } from '@testing-library/react';
+import type { ComponentProps } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { renderWithProviders } from '@/test/render';
 import { Dialog } from './Dialog';
+
+// Props and states. What needs a real browser (focus trap and return, the overlay click, layout,
+// a Select inside) is checked by the play functions in Dialog.stories.tsx.
 
 type Props = Partial<ComponentProps<typeof Dialog>>;
 
@@ -12,23 +15,6 @@ function renderDialog(props: Props = {}) {
     <Dialog open title="Update department" onOpenChange={onOpenChange} {...props} />,
   );
   return { ...result, onOpenChange };
-}
-
-// Overlay and content are siblings in the portal; the overlay is the one without role="dialog"
-const getOverlay = () =>
-  document.body.querySelector<HTMLElement>('[data-state="open"]:not([role="dialog"])')!;
-
-// The page owns `open`, the trigger is outside the dialog (no Radix Dialog.Trigger)
-function DialogWithTrigger() {
-  const [open, setOpen] = useState(false);
-  return (
-    <>
-      <button type="button" onClick={() => setOpen(true)}>
-        Open dialog
-      </button>
-      <Dialog open={open} onOpenChange={setOpen} title="Update department" />
-    </>
-  );
 }
 
 describe('Dialog', () => {
@@ -83,21 +69,21 @@ describe('Dialog', () => {
     expect(screen.getByRole('alert')).toHaveTextContent('Request failed');
   });
 
-  it('is md by default and takes size and className', () => {
+  it('is sm by default and takes size and className', () => {
     const { rerender, onOpenChange } = renderDialog();
-    expect(screen.getByRole('dialog')).toHaveAttribute('data-size', 'md');
+    expect(screen.getByRole('dialog')).toHaveAttribute('data-size', 'sm');
 
     rerender(
       <Dialog
         open
         title="Update department"
         onOpenChange={onOpenChange}
-        size="sm"
+        size="md"
         className="custom"
       />,
     );
     const dialog = screen.getByRole('dialog');
-    expect(dialog).toHaveAttribute('data-size', 'sm');
+    expect(dialog).toHaveAttribute('data-size', 'md');
     expect(dialog).toHaveClass('custom');
   });
 
@@ -118,26 +104,6 @@ describe('Dialog', () => {
       expect(onOpenChange).toHaveBeenCalledTimes(1);
       expect(onOpenChange).toHaveBeenCalledWith(false);
     });
-
-    it('closes on a click on the overlay', async () => {
-      const { user, onOpenChange } = renderDialog();
-
-      await user.click(getOverlay());
-
-      expect(onOpenChange).toHaveBeenCalledWith(false);
-    });
-
-    it('returns focus to the element that opened it', async () => {
-      const { user } = renderWithProviders(<DialogWithTrigger />);
-      const trigger = screen.getByRole('button', { name: 'Open dialog' });
-
-      await user.click(trigger);
-      await screen.findByRole('dialog');
-      await user.keyboard('{Escape}');
-
-      await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
-      await waitFor(() => expect(trigger).toHaveFocus());
-    });
   });
 
   describe('preventClose', () => {
@@ -154,14 +120,6 @@ describe('Dialog', () => {
 
       expect(onOpenChange).not.toHaveBeenCalled();
       expect(screen.getByRole('dialog')).toBeInTheDocument();
-    });
-
-    it('ignores a click on the overlay', async () => {
-      const { user, onOpenChange } = renderDialog({ preventClose: true });
-
-      await user.click(getOverlay());
-
-      expect(onOpenChange).not.toHaveBeenCalled();
     });
   });
 });

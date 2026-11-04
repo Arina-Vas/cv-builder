@@ -38,6 +38,7 @@ const [open, setOpen] = useState(false);
   open={open}
   onOpenChange={setOpen}
   title={t('createDialog.title')}
+  size="md" // forms; the default is sm
   footer={
     <>
       <Button variant="ghost" onClick={() => setOpen(false)}>{tActions('cancel')}</Button>
@@ -53,7 +54,7 @@ A form puts its `<form>` with its own buttons into `children` and leaves `footer
 inside the form and Enter in a field submits it (story `WithForm`):
 
 ```tsx
-<Dialog open={open} onOpenChange={setOpen} title={t('createDialog.title')}>
+<Dialog open={open} onOpenChange={setOpen} title={t('createDialog.title')} size="md">
   <form onSubmit={handleSubmit}>
     {/* fields */}
     <Button type="submit">{tActions('save')}</Button>
@@ -70,7 +71,7 @@ inside the form and Enter in a field submits it (story `WithForm`):
 | `children`     | `ReactNode`: the body     | —        |
 | `footer`       | `ReactNode`: the buttons  | —        |
 | `error`        | `string`                  | —        |
-| `size`         | `'sm'` · `'md'`           | `'md'`   |
+| `size`         | `'sm'` · `'md'`           | `'sm'`   |
 | `preventClose` | `boolean`                 | `false`  |
 | `className`    | on the window             | —        |
 
@@ -195,32 +196,34 @@ Sources and open questions: [TOKENS.md](../../theme/TOKENS.md).
 
 ## Tests
 
-`play` functions in the stories run in Storybook (Interactions panel) and in Vitest (`storybook` project, needs
-`pnpm exec playwright install chromium` once). They cover what needs a real browser: focus, the portal, the
-overlay, layout and the page flow. Unit tests (`Dialog.test.tsx`, `ConfirmDialog.test.tsx`) cover props and
-states.
+Each behaviour is checked once, as `frontend/README.md` → Tests asks: unit tests (`Dialog.test.tsx`,
+`ConfirmDialog.test.tsx`, jsdom) cover props and states; `play` functions in the stories cover what needs a real
+browser: focus, the overlay click, layout, Radix portals, CSS and the page flow. Stories run in Storybook
+(Interactions panel) and in Vitest (`storybook` project, needs `pnpm exec playwright install chromium` once).
 
-| Story (Shared/Dialog)                   | Checks                                                             |
-| --------------------------------------- | ------------------------------------------------------------------ |
-| `Default`                               | title, × named "Close", focus inside the dialog                    |
-| `ClosesOnEscape`                        | Esc closes, focus returns to the trigger                           |
-| `ClosesOnOverlayClick`                  | a click inside does not close, a click on the overlay does         |
-| `ClosesOnCross`, `ClosesFromFooter`     | × and CANCEL close                                                 |
-| `FocusTrap`                             | Tab never leaves the dialog                                        |
-| `PreventClose`                          | × disabled, Esc and the overlay do not close                       |
-| `WithDescription`, `WithoutDescription` | accessible description; no `aria-describedby` and no Radix warning |
-| `WithoutFooter`, `WithForm`             | no footer; a form in `children` submits on Enter and on SAVE       |
-| `LongContent`                           | the body scrolls, the buttons stay visible                         |
-| `WithSelect`                            | a Select list opens above the dialog                               |
-| `Light`, `Dark`                         | opened on load, for a visual check                                 |
+| Unit test                | Checks                                                                                                                                                                                                                        |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Dialog.test.tsx`        | closed → nothing; named by the title, × "Close"; description / no `aria-describedby`; footer and error only when passed; `size`, `className`; Esc and × call `onOpenChange(false)`; `preventClose` disables × and ignores Esc |
+| `ConfirmDialog.test.tsx` | `sm`, title and message; default and own labels; CONFIRM calls `onConfirm` and does not close; CANCEL closes; `loading` disables the buttons and Esc; error shown, retry possible                                             |
 
-| Story (Shared/ConfirmDialog)                                         | Checks                                                                             |
-| -------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `Default`, `CustomLabels`, `LongName`                                | message with a bold name, own labels, `sm` width                                   |
-| `Cancel`, `Confirm`                                                  | CANCEL closes; CONFIRM calls `onConfirm` once and does not close                   |
-| `Loading`, `WithError`                                               | `loading` blocks buttons and closing; `error` is shown, retry works                |
-| `FlowSuccess`, `FlowDoubleClick`, `FlowError`, `FlowRetryAfterError` | a page with a simulated mutation: loading, close on success, error, reset on close |
-| `Light`, `Dark`, `DarkWithError`, `DarkLoading`                      | opened on load, for a visual check                                                 |
+| Story (Shared/Dialog)                               | Checks                                                     |
+| --------------------------------------------------- | ---------------------------------------------------------- |
+| `Default`                                           | focus moves into the dialog                                |
+| `ReturnsFocus`                                      | after Esc focus is back on the trigger                     |
+| `FocusTrap`                                         | Tab and Shift+Tab never leave the dialog                   |
+| `ClosesOnOverlayClick`                              | a click inside does not close, a click on the overlay does |
+| `PreventClose`                                      | a click on the overlay does not close                      |
+| `WithForm`                                          | a form in `children` submits on Enter and on SAVE          |
+| `LongContent`                                       | the body scrolls, the buttons stay visible                 |
+| `WithSelect`                                        | a Select list opens above the dialog                       |
+| `Light`, `Dark`, `WithDescriptionAndError`, `Small` | opened on load, for a visual check                         |
+
+| Story (Shared/ConfirmDialog)                                                            | Checks                                                                             |
+| --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `LongName`                                                                              | a long name wraps, the dialog keeps the `sm` width                                 |
+| `Loading`                                                                               | the loading CONFIRM keeps its accessible name; the overlay does not close          |
+| `FlowSuccess`, `FlowDoubleClick`, `FlowError`, `FlowRetryAfterError`                    | a page with a simulated mutation: loading, close on success, error, reset on close |
+| `Default`, `CustomLabels`, `WithError`, `Light`, `Dark`, `DarkWithError`, `DarkLoading` | visual only; `loading` and `error` can be changed in Controls                      |
 
 ## Status
 

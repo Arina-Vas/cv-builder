@@ -1,22 +1,25 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { useState, type ComponentProps, type ReactNode } from 'react';
-import { expect, fn, spyOn, userEvent, waitFor, within } from 'storybook/test';
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { Button } from '@/shared/components/buttons';
 import { Input } from '@/shared/components/inputs';
 import { Select } from '@/shared/components/select/Select';
 import { Dialog } from './Dialog';
 import s from './Dialog.module.css';
 
+// Stories check what needs a real browser: focus, the overlay, layout, Radix portals.
+// Props and states (title, description, footer, error, size, preventClose with Esc / ×) are in Dialog.test.tsx.
+
 type DialogProps = ComponentProps<typeof Dialog>;
 
 type DemoProps = Omit<DialogProps, 'open' | 'footer'> & {
-  // open on mount: for Dark and manual checks without clicking the trigger
+  // open on mount: for visual checks without clicking the trigger
   initialOpen?: boolean;
   // footer gets `close`, so CANCEL / SAVE in the stories really close the dialog
   renderFooter?: (close: () => void) => ReactNode;
 };
 
-// The page owns the open state (like useDialogState will), the trigger is outside the dialog
+// The page owns the open state, the trigger is outside the dialog
 const DialogDemo = ({ initialOpen = false, renderFooter, onOpenChange, ...rest }: DemoProps) => {
   const [open, setOpen] = useState(initialOpen);
 
@@ -73,6 +76,7 @@ const meta = {
   argTypes: {
     children: { control: false },
     description: { control: 'text' },
+    error: { control: 'text' },
     renderFooter: { control: false },
     onOpenChange: { control: false },
   },
@@ -85,17 +89,13 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 /* ------------------------------------------------------------------ */
-/* Opening and closing                                                 */
+/* Focus                                                               */
 /* ------------------------------------------------------------------ */
 
 export const Default: Story = {
   play: async ({ canvasElement }) => {
     const dialog = await openDialog(canvasElement);
 
-    await expect(dialog).toBeVisible();
-    await expect(within(dialog).getByRole('heading', { name: TITLE })).toBeVisible();
-    await expect(within(dialog).getByRole('button', { name: /close/i })).toBeEnabled();
-    await expect(within(dialog).getByRole('button', { name: 'Save' })).toBeVisible();
     // Radix moves focus into the dialog on the next tick
     await waitFor(() =>
       expect(dialog).toContainElement(canvasElement.ownerDocument.activeElement as HTMLElement),
@@ -103,19 +103,44 @@ export const Default: Story = {
   },
 };
 
-export const ClosesOnEscape: Story = {
-  play: async ({ args, canvasElement }) => {
+export const ReturnsFocus: Story = {
+  play: async ({ canvasElement }) => {
     const trigger = within(canvasElement).getByRole('button', { name: 'Open dialog' });
     await openDialog(canvasElement);
 
     await userEvent.keyboard('{Escape}');
 
     await waitFor(() => expect(getBody(canvasElement).queryByRole('dialog')).toBeNull());
-    await expect(args.onOpenChange).toHaveBeenCalledWith(false);
-    // focus goes back to the element that opened the dialog, after Radix unmounts it
+    // the component returns focus itself: Radix only does it for its own Dialog.Trigger
     await waitFor(() => expect(trigger).toHaveFocus());
   },
 };
+
+export const FocusTrap: Story = {
+  args: {
+    children: <Input label="Department" />,
+  },
+  play: async ({ canvasElement }) => {
+    const dialog = await openDialog(canvasElement);
+    const doc = canvasElement.ownerDocument;
+    const cross = within(dialog).getByRole('button', { name: 'Close' });
+    const save = within(dialog).getByRole('button', { name: 'Save' });
+
+    // × → Department → Cancel → Save → back to ×: Tab never leaves the dialog
+    for (let i = 0; i < 6; i++) {
+      await userEvent.tab();
+      await expect(dialog).toContainElement(doc.activeElement as HTMLElement);
+    }
+
+    cross.focus();
+    await userEvent.tab({ shift: true });
+    await expect(save).toHaveFocus();
+  },
+};
+
+/* ------------------------------------------------------------------ */
+/* Overlay                                                             */
+/* ------------------------------------------------------------------ */
 
 export const ClosesOnOverlayClick: Story = {
   play: async ({ args, canvasElement, step }) => {
@@ -135,59 +160,7 @@ export const ClosesOnOverlayClick: Story = {
   },
 };
 
-export const ClosesOnCross: Story = {
-  play: async ({ args, canvasElement }) => {
-    const dialog = await openDialog(canvasElement);
-
-    await userEvent.click(within(dialog).getByRole('button', { name: /close/i }));
-
-    await waitFor(() => expect(getBody(canvasElement).queryByRole('dialog')).toBeNull());
-    await expect(args.onOpenChange).toHaveBeenCalledTimes(1);
-    await expect(args.onOpenChange).toHaveBeenCalledWith(false);
-  },
-};
-
-export const ClosesFromFooter: Story = {
-  play: async ({ args, canvasElement }) => {
-    const dialog = await openDialog(canvasElement);
-
-    await userEvent.click(within(dialog).getByRole('button', { name: 'Cancel' }));
-
-    await waitFor(() => expect(getBody(canvasElement).queryByRole('dialog')).toBeNull());
-    await expect(args.onOpenChange).toHaveBeenCalledWith(false);
-  },
-};
-
-/* ------------------------------------------------------------------ */
-/* Focus                                                               */
-/* ------------------------------------------------------------------ */
-
-export const FocusTrap: Story = {
-  args: {
-    children: <Input label="Department" />,
-  },
-  play: async ({ canvasElement }) => {
-    const dialog = await openDialog(canvasElement);
-    const doc = canvasElement.ownerDocument;
-    const cross = within(dialog).getByRole('button', { name: /close/i });
-    const save = within(dialog).getByRole('button', { name: 'Save' });
-
-    // × → Department → Cancel → Save → back to ×: Tab never leaves the dialog
-    for (let i = 0; i < 6; i++) {
-      await userEvent.tab();
-      await expect(dialog).toContainElement(doc.activeElement as HTMLElement);
-    }
-
-    cross.focus();
-    await userEvent.tab({ shift: true });
-    await expect(save).toHaveFocus();
-  },
-};
-
-/* ------------------------------------------------------------------ */
-/* preventClose: a request is in progress                              */
-/* ------------------------------------------------------------------ */
-
+// preventClose with Esc and × is in Dialog.test.tsx; here only the overlay, which needs a browser
 export const PreventClose: Story = {
   args: {
     preventClose: true,
@@ -200,70 +173,21 @@ export const PreventClose: Story = {
       </>
     ),
   },
-  play: async ({ args, canvasElement, step }) => {
+  play: async ({ args, canvasElement }) => {
     const dialog = await openDialog(canvasElement);
 
-    await step('× is disabled', async () => {
-      await expect(within(dialog).getByRole('button', { name: /close/i })).toBeDisabled();
-    });
+    await userEvent.click(getOverlay(canvasElement));
 
-    await step('Esc does not close', async () => {
-      await userEvent.keyboard('{Escape}');
-      await expect(dialog).toBeVisible();
-    });
-
-    await step('a click on the overlay does not close', async () => {
-      await userEvent.click(getOverlay(canvasElement));
-      await expect(dialog).toBeVisible();
-    });
-
+    await expect(dialog).toBeVisible();
     await expect(args.onOpenChange).not.toHaveBeenCalled();
   },
 };
 
 /* ------------------------------------------------------------------ */
-/* Content                                                             */
+/* Layout                                                              */
 /* ------------------------------------------------------------------ */
 
-export const WithDescription: Story = {
-  args: {
-    title: TITLE,
-    description: 'Are you sure you want to delete department Engineering?',
-    children: null,
-  },
-  play: async ({ canvasElement }) => {
-    const dialog = await openDialog(canvasElement);
-
-    await expect(dialog).toHaveAccessibleDescription(
-      'Are you sure you want to delete department Engineering?',
-    );
-  },
-};
-
-export const WithoutDescription: Story = {
-  play: async ({ canvasElement }) => {
-    // Radix warns in the console when Description is missing and aria-describedby is not cleared
-    const warn = spyOn(console, 'warn');
-    const dialog = await openDialog(canvasElement);
-
-    await expect(dialog).not.toHaveAttribute('aria-describedby');
-    await expect(warn).not.toHaveBeenCalledWith(expect.stringContaining('Description'));
-    warn.mockRestore();
-  },
-};
-
-export const WithoutFooter: Story = {
-  args: {
-    renderFooter: undefined,
-  },
-  play: async ({ canvasElement }) => {
-    const dialog = await openDialog(canvasElement);
-
-    await expect(dialog.querySelector(`.${s.footer}`)).toBeNull();
-  },
-};
-
-// The FormModal pattern: <form> with its own footer goes into children, so submit is inside the form
+// The FormModal pattern: <form> with its own buttons goes into children, so submit is inside the form
 const onSubmit = fn();
 
 export const WithForm: Story = {
@@ -351,10 +275,10 @@ export const WithSelect: Story = {
 };
 
 /* ------------------------------------------------------------------ */
-/* Themes                                                              */
+/* Visual: opened on load                                              */
 /* ------------------------------------------------------------------ */
 
-// Opened on load. Side-by-side Light / Dark is not possible: the dialog is portaled to <body>
+// Side-by-side Light / Dark is not possible: the dialog is portaled to <body>
 // and takes the theme from <html>, so Dark is a separate story.
 export const Light: Story = {
   args: { initialOpen: true },
@@ -364,4 +288,21 @@ export const Light: Story = {
 export const Dark: Story = {
   args: { initialOpen: true },
   globals: { theme: 'dark' },
+};
+
+export const WithDescriptionAndError: Story = {
+  args: {
+    initialOpen: true,
+    description: 'Department name must be unique.',
+    error: 'Something went wrong. Please try again later',
+  },
+};
+
+export const Small: Story = {
+  args: {
+    initialOpen: true,
+    size: 'sm',
+    children: undefined,
+    description: 'Are you sure you want to delete department Engineering?',
+  },
 };

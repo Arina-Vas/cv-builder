@@ -26,7 +26,7 @@ export const Dialog = ({
   open,
   preventClose = false,
   className,
-  size = 'md',
+  size = 'sm',
   error,
 }: Props) => {
   const t = useTranslations('common.actions');

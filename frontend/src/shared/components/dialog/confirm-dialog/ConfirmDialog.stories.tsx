@@ -81,7 +81,6 @@ const PageDemo = ({
 };
 
 const TITLE = 'Delete department';
-const MESSAGE_TEXT = 'Are you sure you want to delete department Engineering?';
 // errors.ENTITY_IN_USE in messages/en.json; a page gets it from useErrorMessage(parseError(error))
 const IN_USE_TEXT = "This item is in use and can't be deleted";
 const REQUEST_MS = 800;
@@ -133,17 +132,8 @@ type Story = StoryObj<typeof meta>;
 /* Content                                                             */
 /* ------------------------------------------------------------------ */
 
-export const Default: Story = {
-  play: async ({ canvasElement }) => {
-    const dialog = await openDialog(canvasElement);
-
-    await expect(dialog).toHaveAccessibleDescription(MESSAGE_TEXT);
-    await expect(within(dialog).getByText('Engineering').tagName).toBe('STRONG');
-    await expect(within(dialog).getByRole('button', { name: 'Cancel' })).toBeEnabled();
-    await expect(within(dialog).getByRole('button', { name: 'Confirm' })).toBeEnabled();
-    await expect(within(dialog).queryByRole('alert')).toBeNull();
-  },
-};
+// Props and states (labels, Cancel / Confirm, loading, error) are in ConfirmDialog.test.tsx
+export const Default: Story = {};
 
 export const CustomLabels: Story = {
   args: {
@@ -155,12 +145,6 @@ export const CustomLabels: Story = {
     ),
     confirmLabel: 'Remove',
     cancelLabel: 'Keep',
-  },
-  play: async ({ canvasElement }) => {
-    const dialog = await openDialog(canvasElement, 'Remove skills');
-
-    await expect(within(dialog).getByRole('button', { name: 'Remove' })).toBeVisible();
-    await expect(within(dialog).getByRole('button', { name: 'Keep' })).toBeVisible();
   },
 };
 
@@ -182,71 +166,30 @@ export const LongName: Story = {
 };
 
 /* ------------------------------------------------------------------ */
-/* Buttons                                                             */
-/* ------------------------------------------------------------------ */
-
-export const Cancel: Story = {
-  play: async ({ args, canvasElement }) => {
-    const dialog = await openDialog(canvasElement);
-
-    await userEvent.click(within(dialog).getByRole('button', { name: 'Cancel' }));
-
-    await waitForClose(canvasElement);
-    await expect(args.onOpenChange).toHaveBeenCalledWith(false);
-    await expect(args.onConfirm).not.toHaveBeenCalled();
-  },
-};
-
-// Closing after success is the page's job (onCompleted), so the dialog stays open here
-export const Confirm: Story = {
-  play: async ({ args, canvasElement }) => {
-    const dialog = await openDialog(canvasElement);
-
-    await userEvent.click(within(dialog).getByRole('button', { name: 'Confirm' }));
-
-    await expect(args.onConfirm).toHaveBeenCalledTimes(1);
-    await expect(args.onOpenChange).not.toHaveBeenCalled();
-  },
-};
-
-/* ------------------------------------------------------------------ */
 /* States from props                                                   */
 /* ------------------------------------------------------------------ */
 
+// Only what jsdom can't see: the loading button keeps its accessible name (CSS), the overlay is blocked
 export const Loading: Story = {
   args: {
     loading: true,
   },
-  play: async ({ args, canvasElement, step }) => {
+  play: async ({ args, canvasElement }) => {
     const dialog = await openDialog(canvasElement);
-    const confirm = within(dialog).getByRole('button', { name: 'Confirm' });
 
-    await step('CONFIRM shows loading, CANCEL and × are disabled', async () => {
-      await expect(confirm).toHaveAttribute('aria-busy', 'true');
-      await expect(confirm).toBeDisabled();
-      await expect(within(dialog).getByRole('button', { name: 'Cancel' })).toBeDisabled();
-      await expect(within(dialog).getByRole('button', { name: 'Close' })).toBeDisabled();
-    });
-
-    await step('Esc and a click on the overlay do not close', async () => {
-      await userEvent.keyboard('{Escape}');
-      await userEvent.click(getOverlay(canvasElement));
-      await expect(dialog).toBeVisible();
-      await expect(args.onOpenChange).not.toHaveBeenCalled();
-    });
+    await expect(within(dialog).getByRole('button', { name: 'Confirm' })).toHaveAttribute(
+      'aria-busy',
+      'true',
+    );
+    await userEvent.click(getOverlay(canvasElement));
+    await expect(dialog).toBeVisible();
+    await expect(args.onOpenChange).not.toHaveBeenCalled();
   },
 };
 
 export const WithError: Story = {
   args: {
     error: IN_USE_TEXT,
-  },
-  play: async ({ canvasElement }) => {
-    const dialog = await openDialog(canvasElement);
-
-    await expect(within(dialog).getByRole('alert')).toHaveTextContent(IN_USE_TEXT);
-    // the user can retry
-    await expect(within(dialog).getByRole('button', { name: 'Confirm' })).toBeEnabled();
   },
 };
 
