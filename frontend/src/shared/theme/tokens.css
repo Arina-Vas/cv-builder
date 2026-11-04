@@ -265,6 +265,13 @@
   --pagination-select-padding: 8px; /* [A] Figma text left 12, but 12 + "10" + gap + chevron + 12 > 70 */
   --pagination-padding: 8px; /* [A] block padding under the table */
 
+  --search-height: 40px; /* [F] Users › Table › Header › Container */
+  --search-width: 320px; /* [F] */
+  --search-radius: var(--radius-pill); /* [F] 40px */
+  --search-icon-size: 24px; /* [F] */
+  --search-icon-offset: 12px; /* [F] icon left */
+  --search-text-offset: 43px; /* [F] placeholder left = 12 + 24 + 7 */
+
   --modal-radius: var(--radius-sm); /* [M] */
   --modal-title-padding: 16px 24px; /* [M] DialogTitle */
   --modal-content-padding: 16px 24px 20px; /* [A] paddingTop 16 override, [M] 24/20 */
