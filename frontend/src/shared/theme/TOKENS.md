@@ -51,6 +51,9 @@ How the values were obtained:
 | `--menu-bg`                                    | `--bg`                                                                                                     | `--bg`                  | [A] user menu paper override                                                                             |
 | `--menu-shadow`                                | elevation 8                                                                                                | same + overlay `.11`    | [A] Autocomplete paper; [M]                                                                              |
 | `--modal-bg`                                   | `--bg`                                                                                                     | `--bg`                  | [A] `MuiDialog.paper` override                                                                           |
+| Modal size                                     | width sm 620 / md 860, height min 200 / max 680, square corners                                            | —                       | [F] `Delete CV` (sm), `Create user` / `Add project` (md)                                                 |
+| Modal spacing                                  | content padding 16 / 24, gap between footer buttons 24                                                     | —                       | [F]; title / actions padding still [M]                                                                   |
+| `--z-dialog`                                   | `40`                                                                                                       | —                       | above the sidebar (30), below popovers (50) and toasts                                                   |
 | `--tab-text`                                   | `#2E2E2E`                                                                                                  | `#F5F5F7`               | [A] `MuiTab` override; active weight 600                                                                 |
 | `--tab-indicator` / active                     | `#C63031`                                                                                                  | same                    | [M]                                                                                                      |
 | `--sidebar-item-*`                             | text `text.secondary`; hover & active bg `action.hover`; active text `text.primary`                        | same rule               | [A]                                                                                                      |
@@ -67,7 +70,7 @@ How the values were obtained:
 | Type: floating label                           | 12 / 23 / .15 / 400                                                                                        | —                       | [F]                                                                                                      |
 | Type: helper / error                           | 12 / 16 / .15 / 400                                                                                        | —                       | [F]                                                                                                      |
 | Type: h1–h6, subtitle, body, caption, overline | MUI scale                                                                                                  | —                       | [M] (h4 34/41.99/.25 also [A] login title)                                                               |
-| Layout                                         | sidebar 200/56, header 44, content max 1536, settings 720, modal sm 600 / md 900                           | —                       | [A]                                                                                                      |
+| Layout                                         | sidebar 200/56, header 44, content max 1536, settings 720 (modal: see Modal size)                          | —                       | [A]                                                                                                      |
 | Motion                                         | 200ms hover/border, 300ms sidebar width, MUI enter 225 / leave 195, ease-in-out `cubic-bezier(.4,0,.2,1)`  | —                       | [A] / [M]                                                                                                |
 
 ## Missing / ambiguous: questions for the designer
@@ -90,6 +93,6 @@ How the values were obtained:
     - Project Environment chips (tokens use [M])
     - Tooltip (tokens use [M])
     - Pagination
-    - Modal header / actions layout (tokens use [M])
+    - Modal header and actions padding (tokens use [M]; size, content padding and button gap are [F])
 11. **No named color, text or effect styles or variables in the file.** Ask the designer to publish styles, so the next sync can use names instead of layer paths.
 12. **Typography outside the measured set.** h1–h3, h5, h6, subtitle1/2, overline and table head/cell were not found as distinct Figma text styles. The values are the MUI scale the captured screens render with.
