@@ -13,7 +13,6 @@
   translate: -50% -50%;
   z-index: var(--z-dialog);
   width: min(var(--modal-width-md), 100vw - 2 * var(--space-4));
-  min-height: var(--modal-min-height);
   max-height: min(var(--modal-max-height), 100dvh - 2 * var(--space-4));
   display: flex;
   padding: var(--modal-content-padding);
@@ -45,12 +44,20 @@
   font-weight: var(--font-weight-regular);
   font-size: var(--type-body1-size);
   color: var(--text);
+  margin: 0;
 }
 
 .body {
   flex: 1;
   overflow-y: auto;
   min-height: 0;
+}
+
+.error {
+  font-weight: var(--font-weight-regular);
+  font-size: var(--type-body2-size);
+  color: var(--error);
+  margin: 0;
 }
 
 .footer {

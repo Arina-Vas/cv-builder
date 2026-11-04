@@ -8,13 +8,14 @@ import { useTranslations } from 'next-intl';
 type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  children: ReactNode;
+  children?: ReactNode;
   footer?: ReactNode;
   description?: ReactNode;
   title: string;
   preventClose?: boolean;
   className?: string;
   size?: 'sm' | 'md';
+  error?: string;
 };
 export const Dialog = ({
   children,
@@ -26,6 +27,7 @@ export const Dialog = ({
   preventClose = false,
   className,
   size = 'md',
+  error,
 }: Props) => {
   const t = useTranslations('common.actions');
 
@@ -73,6 +75,11 @@ export const Dialog = ({
             </RadixDialog.Description>
           )}
           {children && <div className={s.body}>{children}</div>}
+          {error && (
+            <p role="alert" className={s.error}>
+              {error}
+            </p>
+          )}
           {footer && <div className={s.footer}>{footer}</div>}
         </RadixDialog.Content>
       </RadixDialog.Portal>

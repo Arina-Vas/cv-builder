@@ -197,7 +197,6 @@
   --otp-cell-size: 48px; /* [F] Email verification code cell */
   --modal-width-sm: 620px; /* [F] confirmations (Delete CV) */
   --modal-width-md: 860px; /* [F] forms (Create user, Add project) */
-  --modal-min-height: 200px; /* [F] */
   --modal-max-height: 680px; /* [F] */
   --icon-size: 24px; /* [M] SvgIcon medium */
   --icon-size-sm: 20px; /* [M] SvgIcon small */
