@@ -150,6 +150,8 @@ needs more), never the backend `message` ([conventions](../docs/api/conventions.
   `RATE_LIMITED` gets the seconds from `retryAfter`. A new `ErrorCode` without a key fails the type-check.
 - A form checks the cases it knows better first and takes the text from `<feature>.errors`
   (`auth.errors.emailTaken` for `CONFLICT` on sign-up), then falls back to `errorMessage(appError)`.
+- Inside a modal, pass the text to the dialog's `error` prop instead of a toast: the dialog stays open and the
+  user can retry (`shared/components/dialog/README.md` → Errors).
 
 ```tsx
 const errorMessage = useErrorMessage(); // a hook: call it in the component body

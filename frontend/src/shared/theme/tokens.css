@@ -155,7 +155,7 @@
   /* Radii                                                               */
   /* ------------------------------------------------------------------ */
   --radius-none: 0; /* [A] inputs */
-  --radius-sm: 4px; /* [M] shape.borderRadius: menus, modals, skeleton(rounded), tooltip */
+  --radius-sm: 4px; /* [M] shape.borderRadius: menus, skeleton(rounded), tooltip */
   --radius-toast: 12px; /* [F] Toast */
   --radius-chip: 12px; /* [M] Chip medium */
   --radius-pill: 40px; /* [F][A] buttons */
@@ -195,8 +195,9 @@
   --auth-form-width: 560px; /* [F] auth pages "Form" frame */
   --auth-actions-offset: 44px; /* [F] last field → primary button */
   --otp-cell-size: 48px; /* [F] Email verification code cell */
-  --modal-width-sm: 600px; /* [A] maxWidth "sm" */
-  --modal-width-md: 900px; /* [A] maxWidth "md" (project / user forms) */
+  --modal-width-sm: 620px; /* [F] confirmations (Delete CV) */
+  --modal-width-md: 860px; /* [F] forms (Create user, Add project) */
+  --modal-max-height: 680px; /* [F] */
   --icon-size: 24px; /* [M] SvgIcon medium */
   --icon-size-sm: 20px; /* [M] SvgIcon small */
   --avatar-size-sm: 24px; /* [A] skill/language bullet */
@@ -265,12 +266,12 @@
   --pagination-select-padding: 8px; /* [A] Figma text left 12, but 12 + "10" + gap + chevron + 12 > 70 */
   --pagination-padding: 8px; /* [A] block padding under the table */
 
-  --modal-radius: var(--radius-sm); /* [M] */
+  --modal-radius: var(--radius-none); /* [F] square corners */
   --modal-title-padding: 16px 24px; /* [M] DialogTitle */
-  --modal-content-padding: 16px 24px 20px; /* [A] paddingTop 16 override, [M] 24/20 */
+  --modal-content-padding: 16px 24px; /* [F] */
   --modal-actions-padding: 8px; /* [M] DialogActions */
-  --modal-actions-gap: 8px; /* [M] */
-
+  --modal-actions-gap: 24px; /* [F] CANCEL ↔ primary button */
+  --modal-section-gap: 26px; /* [F] title ↔ body ↔ buttons */
   --menu-min-width: 200px; /* [A] user menu */
   --menu-radius: var(--radius-sm); /* [M] */
   --menu-item-padding: 6px 16px; /* [M] MenuItem */
@@ -283,6 +284,7 @@
   --toast-padding: 8px 16px; /* [F] title top 8, left 16 */
   --z-sidebar-backdrop: 20; /* tablet: dims the page under the open sidebar */
   --z-sidebar: 30; /* below popovers (50) */
+  --z-dialog: 40; /* above the sidebar, below popovers (50) opened inside the dialog */
   --z-toast: 9999;
   /* Provide default values for Radix Toast dynamic variables */
   --radix-toast-swipe-move-x: 0px;
