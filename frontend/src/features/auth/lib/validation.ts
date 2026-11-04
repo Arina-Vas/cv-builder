@@ -1,4 +1,5 @@
-import type { useTranslations } from 'next-intl';
+import { type ValidationT } from '@/shared/lib/form';
+export { type ValidationT } from '@/shared/lib/form';
 
 // Same limits as the backend inputs (backend/src/auth/dto/credentials.input.ts)
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -8,8 +9,6 @@ const PASSWORD_MAX_LENGTH = 128;
 const CODE_PATTERN = /^\d{6}$/;
 
 export type FieldErrors<TField extends string> = Partial<Record<TField, string>>;
-
-export type ValidationT = ReturnType<typeof useTranslations<'validation'>>;
 
 export function validateEmail(value: string, t: ValidationT) {
   const email = value.trim();
