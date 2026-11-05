@@ -39,6 +39,7 @@ const meta = {
     value: null,
     onChange: fn(),
     onOpenChange: fn(),
+    onBlur: fn(),
     placeholder: 'Select date',
     disabled: false,
   },
@@ -46,6 +47,7 @@ const meta = {
     value: { control: false },
     onChange: { control: false },
     onOpenChange: { control: false },
+    onBlur: { control: false },
     minDate: { control: false },
     maxDate: { control: false },
     excludeDates: { control: false },
@@ -174,6 +176,37 @@ export const SelectsDate: Story = {
     await waitFor(() => expect(body.queryByRole('dialog')).not.toBeInTheDocument());
     // a form marks the field as touched on close, so picking a day must report it too
     await expect(args.onOpenChange).toHaveBeenLastCalledWith(false);
+  },
+};
+
+// react-hook-form marks a field as touched on blur; the picker reports it when the calendar closes,
+// not when focus moves into the popover on open
+export const BlursOnClose: Story = {
+  play: async ({ args, canvasElement, step }) => {
+    const body = getBody(canvasElement);
+    const trigger = getTrigger(canvasElement);
+
+    await step('opening does not blur', async () => {
+      await userEvent.click(trigger);
+      await body.findByRole('dialog');
+
+      await expect(args.onBlur).not.toHaveBeenCalled();
+    });
+
+    await step('Escape without a date blurs once', async () => {
+      await userEvent.keyboard('{Escape}');
+      await waitFor(() => expect(body.queryByRole('dialog')).not.toBeInTheDocument());
+
+      await expect(args.onBlur).toHaveBeenCalledTimes(1);
+    });
+
+    await step('picking a day blurs as well', async () => {
+      await userEvent.click(trigger);
+      await userEvent.click(await body.findByText('12'));
+      await waitFor(() => expect(body.queryByRole('dialog')).not.toBeInTheDocument());
+
+      await expect(args.onBlur).toHaveBeenCalledTimes(2);
+    });
   },
 };
 

@@ -56,6 +56,7 @@ const [endDate, setEndDate] = useState<Date | null>(null);
 | `excludeDates` | `Date[]`: single days disabled                          | —                                               |
 | `disabled`     | `boolean`                                               | `false`                                         |
 | `onOpenChange` | `(open: boolean) => void`: the calendar opened / closed | —                                               |
+| `onBlur`       | `() => void`: called when the calendar closes           | —                                               |
 | `id`           | `string`: id of the trigger                             | `useId()`                                       |
 | `ref`          | `Ref<HTMLButtonElement>`: the trigger                   | —                                               |
 
@@ -64,7 +65,8 @@ const [endDate, setEndDate] = useState<Date | null>(null);
   There is no "clear" button yet, so `onChange` is never called with `null` by the component itself.
 - The trigger shows the value as `dd.MM.yyyy`. The format is fixed in the component.
 - Disabled days (`minDate` / `maxDate` / `excludeDates`) are greyed out and struck through, they can't be clicked.
-- `onOpenChange` is called on every open and close, including the close after a day is picked.
+- `onOpenChange` is called on every open and close, including the close after a day is picked; `onBlur` on
+  every close.
 - Hover, focus, open, error and disabled are drawn by `Field` (outline colour, label position, background); only
   `error` and `disabled` are props.
 
@@ -118,7 +120,7 @@ parseISO('2025-09-04'); // receive → local midnight
       label={t('startDate')}
       value={field.value ?? null}
       onChange={field.onChange}
-      onOpenChange={(open) => !open && field.onBlur()}
+      onBlur={field.onBlur}
       error={fieldState.error?.message}
     />
   )}
@@ -126,9 +128,10 @@ parseISO('2025-09-04'); // receive → local midnight
 ```
 
 - `ref` points at the trigger: react-hook-form focuses it on a validation error.
-- Don't wire `field.onBlur` to the trigger: opening the calendar moves focus into the popover, so the field would
-  be marked touched on the first open. Mark it on close instead (`onOpenChange`), so with `mode: 'onTouched'`
-  "required" shows after the calendar was opened and closed without picking a day.
+- `onBlur` fires when the calendar **closes** (a day picked, Escape, click outside), not when the trigger loses
+  focus: opening moves focus into the popover, which would mark the field touched on the first open. Pass
+  `field.onBlur` as is; with `mode: 'onTouched'` "required" shows after the calendar was opened and closed
+  without picking a day.
 - In the form the value is `Date | null`; the zod schema turns it into `Date` (`requiredDate` in
   `shared/lib/form`), the mutation gets `format(date, 'yyyy-MM-dd')`.
 
@@ -178,6 +181,7 @@ To change a size or colour, change the token, not the component CSS.
 | ------------------------- | -------------------------------------------------------------------------------------------------------------- |
 | `SelectsDate`             | clicking a day calls `onChange`, shows the date in the trigger, closes the calendar with `onOpenChange(false)` |
 | `OpenClose`               | open, Escape (focus back on the trigger), click outside, `onOpenChange`; reopening resets to the day view      |
+| `BlursOnClose`            | opening does not call `onBlur`; Escape and picking a day do, once each                                         |
 | `PlaceholderOnlyWhenOpen` | empty and closed: no placeholder under the label; open: the placeholder is shown                               |
 | `LabelNamesTrigger`       | `<label for>` points at the trigger `id`                                                                       |
 | `WithError`               | the error text is `role="alert"` and is the trigger's accessible description                                   |

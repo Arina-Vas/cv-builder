@@ -13,6 +13,7 @@ import { Field, getErrorId } from '@/shared/components/field/Field';
 type Props = {
   value: Date | null;
   onChange: (date: Date | null) => void;
+  onBlur?: () => void;
   placeholder?: string;
   minDate?: Date;
   maxDate?: Date;
@@ -35,6 +36,7 @@ export const DatePicker = ({
   maxDate,
   excludeDates,
   disabled,
+  onBlur,
   id,
   label,
   error,
@@ -55,6 +57,8 @@ export const DatePicker = ({
     if (next) {
       setView('day');
       setViewDate(value ?? new Date());
+    } else {
+      onBlur?.();
     }
   };
 
@@ -63,7 +67,7 @@ export const DatePicker = ({
     if (view === 'day') {
       onChange(date);
       setOpen(false);
-      onOpenChange?.(false);
+      handleOpenChange(false);
       return;
     }
 
