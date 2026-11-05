@@ -28,7 +28,7 @@ export const ConfirmDialog = ({
   const t = useTranslations('common.actions');
   const footer = (
     <>
-      <Button variant={'ghost'} disabled={loading} onClick={() => onOpenChange(false)}>
+      <Button variant={'secondary'} disabled={loading} onClick={() => onOpenChange(false)}>
         {cancelLabel ?? t('cancel')}
       </Button>
       <Button variant={'primary'} loading={loading} onClick={onConfirm}>

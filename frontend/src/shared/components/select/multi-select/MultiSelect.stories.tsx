@@ -57,6 +57,7 @@ const meta = {
     disabled: false,
     onValueChange: fn(),
     onOpenChange: fn(),
+    onBlur: fn(),
   },
   argTypes: {
     options: { control: false },
@@ -64,6 +65,7 @@ const meta = {
     defaultValue: { control: false },
     onValueChange: { control: false },
     onOpenChange: { control: false },
+    onBlur: { control: false },
     filter: { control: false },
   },
   decorators: [
@@ -383,6 +385,31 @@ export const Closes: Story = {
 
       await waitFor(() => expect(body.queryByRole('listbox')).not.toBeInTheDocument());
       await expect(input).toHaveValue('');
+    });
+  },
+};
+
+// react-hook-form marks a field as touched on blur; focus stays in the input while options are
+// picked, so blur means the user really left the field
+export const BlursOnLeave: Story = {
+  play: async ({ args, canvasElement, step }) => {
+    const input = getInput(canvasElement);
+    const body = getBody(canvasElement);
+
+    await step('focusing and picking options do not blur', async () => {
+      await userEvent.click(input);
+      await userEvent.click(await body.findByRole('option', { name: 'Software Engineer 1' }));
+
+      await expect(input).toHaveFocus();
+      await expect(args.onBlur).not.toHaveBeenCalled();
+    });
+
+    await step('leaving the field blurs once', async () => {
+      // the input is the only tabbable element in the story, so Tab would wrap back to it: click outside
+      await userEvent.click(canvasElement.ownerDocument.body);
+
+      await expect(input).not.toHaveFocus();
+      await expect(args.onBlur).toHaveBeenCalledTimes(1);
     });
   },
 };

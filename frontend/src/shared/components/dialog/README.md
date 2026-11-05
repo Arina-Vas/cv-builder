@@ -41,7 +41,7 @@ const [open, setOpen] = useState(false);
   size="md" // forms; the default is sm
   footer={
     <>
-      <Button variant="ghost" onClick={() => setOpen(false)}>{tActions('cancel')}</Button>
+      <Button variant="secondary" onClick={() => setOpen(false)}>{tActions('cancel')}</Button>
       <Button onClick={save}>{tActions('save')}</Button>
     </>
   }
@@ -50,8 +50,10 @@ const [open, setOpen] = useState(false);
 </Dialog>
 ```
 
-A form puts its `<form>` with its own buttons into `children` and leaves `footer` empty, so the submit button is
-inside the form and Enter in a field submits it (story `WithForm`):
+For a react-hook-form form use [`FormModal`](../form/README.md): it puts the `<form>` into the body and CANCEL /
+submit into `footer` (the submit button is linked with `form="<id>"`, so the buttons stay in place when a long form
+scrolls), and handles loading, closing and the request error. A plain form can also put its `<form>` with its own
+buttons into `children` and leave `footer` empty (story `WithForm`), but then the buttons scroll with the body:
 
 ```tsx
 <Dialog open={open} onOpenChange={setOpen} title={t('createDialog.title')} size="md">
@@ -128,6 +130,7 @@ const [deleteDepartment, { loading, error, reset }] = useMutation(DELETE_DEPARTM
   the dialog can't be closed (`preventClose`).
 - `message` becomes the dialog's accessible description; the entity name is bold, as in Figma (`t.rich`).
 - Size is always `sm`.
+- CANCEL is a `secondary` button (outlined, as in Figma), CONFIRM `primary`.
 
 ## Behaviour
 

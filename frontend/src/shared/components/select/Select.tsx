@@ -23,6 +23,7 @@ type Props = {
   open?: boolean;
   defaultOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
+  onBlur?: () => void;
   ref?: Ref<HTMLButtonElement>;
 };
 
@@ -43,6 +44,7 @@ export const Select = ({
   required,
   disabled = false,
   name,
+  onBlur,
   ref,
 }: Props) => {
   const autoId = useId();
@@ -50,6 +52,11 @@ export const Select = ({
 
   const [selected, setSelected] = useControllableState(value, defaultValue ?? '', onValueChange);
   const [isOpen, setIsOpen] = useControllableState(open, defaultOpen ?? false, onOpenChange);
+
+  const handleOpenChange = (next: boolean) => {
+    setIsOpen(next);
+    if (!next) onBlur?.();
+  };
 
   return (
     <Field
@@ -66,7 +73,7 @@ export const Select = ({
         value={selected}
         onValueChange={setSelected}
         open={isOpen}
-        onOpenChange={setIsOpen}
+        onOpenChange={handleOpenChange}
         disabled={disabled}
         required={required}
         name={name}

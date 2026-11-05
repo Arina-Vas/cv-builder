@@ -56,6 +56,7 @@ const POSITIONS = [
 | `open`          | `boolean`                                              | —                                        |
 | `defaultOpen`   | `boolean`                                              | `false`                                  |
 | `onOpenChange`  | `(open: boolean) => void`                              | —                                        |
+| `onBlur`        | `() => void`: called when the input loses focus        | —                                        |
 | `filter`        | `(option, query) => boolean`                           | label contains query, case-insensitive   |
 | `emptyText`     | `string`: shown when nothing matches                   | `common.select.noOptions` (`No options`) |
 | `ref`           | `Ref<HTMLInputElement>`: the search input              | —                                        |
@@ -144,11 +145,15 @@ max width. Set the width with the form layout (e.g. one column on tablet) or `cl
       options={skillOptions}
       value={field.value ?? []}
       onValueChange={field.onChange}
+      onBlur={field.onBlur}
       error={fieldState.error?.message}
     />
   )}
 />
 ```
+
+- `onBlur` fires when the input loses focus. Picking options keeps focus in the input (the list never takes it),
+  so it means the user really left the field: pass `field.onBlur` as is.
 
 ## Tokens
 
@@ -161,25 +166,26 @@ To change a size or colour, change the token, not the component CSS.
 `play` functions in `MultiSelect.stories.tsx` run in Storybook (Interactions panel) and in Vitest
 (`@storybook/addon-vitest`, needs `npx playwright install chromium` once).
 
-| Story                 | Checks                                                        |
-| --------------------- | ------------------------------------------------------------- |
-| `Default`             | closed, no chips, accessible name, label inside               |
-| `WithValue`           | chips in the order of selection, label raised                 |
-| `ManyChips`           | chips wrap, the field grows                                   |
-| `Open`                | every option, `aria-expanded`, `onOpenChange`, `Field` active |
-| `Disabled`            | input and chip ⊗ disabled, can't be opened                    |
-| `Invalid`             | `aria-invalid`, error as the accessible description           |
-| `DisabledOption`      | a disabled option can't be chosen                             |
-| `SelectsSeveral`      | two clicks → two chips, the list stays open                   |
-| `Deselects`           | a second click removes the value                              |
-| `RemoveChip`          | ⊗ removes the value and doesn't open the list                 |
-| `Filters`             | typing filters, `emptyText`, picking clears the search        |
-| `Keyboard`            | arrows, ends, Enter toggles, highlight kept after a search    |
-| `EnterDoesNotSubmit`  | Enter in an open list doesn't submit the form                 |
-| `Backspace`           | removes the last chip                                         |
-| `Closes`              | Escape twice, click outside                                   |
-| `Controlled`          | external state + reset to `[]`                                |
-| `ControlledRejecting` | the parent ignores `onValueChange` → no chip appears          |
+| Story                 | Checks                                                                             |
+| --------------------- | ---------------------------------------------------------------------------------- |
+| `Default`             | closed, no chips, accessible name, label inside                                    |
+| `WithValue`           | chips in the order of selection, label raised                                      |
+| `ManyChips`           | chips wrap, the field grows                                                        |
+| `Open`                | every option, `aria-expanded`, `onOpenChange`, `Field` active                      |
+| `Disabled`            | input and chip ⊗ disabled, can't be opened                                         |
+| `Invalid`             | `aria-invalid`, error as the accessible description                                |
+| `DisabledOption`      | a disabled option can't be chosen                                                  |
+| `SelectsSeveral`      | two clicks → two chips, the list stays open                                        |
+| `Deselects`           | a second click removes the value                                                   |
+| `RemoveChip`          | ⊗ removes the value and doesn't open the list                                      |
+| `Filters`             | typing filters, `emptyText`, picking clears the search                             |
+| `Keyboard`            | arrows, ends, Enter toggles, highlight kept after a search                         |
+| `EnterDoesNotSubmit`  | Enter in an open list doesn't submit the form                                      |
+| `Backspace`           | removes the last chip                                                              |
+| `Closes`              | Escape twice, click outside                                                        |
+| `BlursOnLeave`        | focusing and picking options do not call `onBlur`; Tab out of the field does, once |
+| `Controlled`          | external state + reset to `[]`                                                     |
+| `ControlledRejecting` | the parent ignores `onValueChange` → no chip appears                               |
 
 - The list is portaled to `<body>`: query it with `within(canvasElement.ownerDocument.body)`.
 - Popover is not modal, so `userEvent.click(body)` works for an outside click (unlike Radix Select).
