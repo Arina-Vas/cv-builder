@@ -38,6 +38,7 @@
       "types": { "success": "Success", "error": "Error", "warning": "Warning", "info": "Info" }
     },
     "input": { "showPassword": "Show password", "hidePassword": "Hide password" },
+    "searchField": { "label": "Search", "clear": "Clear search" },
     "datePicker": {
       "placeholder": "Select date",
       "previous": "Previous",
