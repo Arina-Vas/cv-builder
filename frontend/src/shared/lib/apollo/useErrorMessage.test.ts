@@ -10,6 +10,15 @@ function messageFor(error: Partial<AppError>) {
 }
 
 describe('useErrorMessage', () => {
+  it('returns the same function between renders, so effects that use it do not resubscribe', () => {
+    const { result, rerender } = renderHook(() => useErrorMessage(), { wrapper: IntlProvider });
+    const first = result.current;
+
+    rerender();
+
+    expect(result.current).toBe(first);
+  });
+
   it('shows the generic text when there is no code (network error)', () => {
     expect(messageFor({})).toBe('Something went wrong. Please try again later');
   });

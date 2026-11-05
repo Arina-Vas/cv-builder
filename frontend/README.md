@@ -173,6 +173,23 @@ catch (error) {
 }
 ```
 
+#### Global error toasts
+
+An API error nobody handles locally is shown as an error toast with the same `errors.<code>` text.
+
+- `apiErrors` (`src/shared/lib/apollo/api-errors.ts`) carries errors from Apollo links, which live outside
+  React, to React: `report(appError)` / `subscribe(listener)`. It passes the parsed `AppError`, not a text, so
+  the translation stays in React.
+- `ApiErrorToaster` (same folder), mounted once in `app/layout.tsx` inside `ToastProvider`, subscribes and calls
+  `toast.error(errorMessage(error))`. It sits next to `ApolloWrapper`, above `NetworkStatusGate`, so it stays
+  mounted while the No Internet page is shown.
+- Errors reported before `ApiErrorToaster` subscribes (a query failing during the first render) wait in a queue
+  of the last 3 (= toasts on screen) and are shown on subscribe. On the server `report` keeps nothing: the module
+  is shared between requests.
+- Duplicates are dropped by `ToastProvider`: a toast with the same type, title and text as an open one is not
+  added, so several queries failing with `FORBIDDEN` give one toast.
+- Nothing calls `report` yet: the error-toast link and the opt-out per operation come next.
+
 ### Validation
 
 Validators in `src/features/auth/lib/validation.ts` take the `validation` translator and return the text:
