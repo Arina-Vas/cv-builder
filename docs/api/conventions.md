@@ -329,6 +329,12 @@ The codes cover the error categories the wiki asks the frontend to handle:
 `UNAUTHENTICATED`, `FORBIDDEN`, `BAD_USER_INPUT` and `INTERNAL_SERVER_ERROR` follow Apollo Server conventions;
 the other codes are ours.
 
+The list of codes is `ErrorCode` in `backend/src/common/errors/error-code.enum.ts`. The frontend repeats it as
+`ERROR_CODES` (`frontend/src/shared/lib/apollo/graphql-errors.ts`) and the `errors.*` texts in
+`frontend/messages/en.json`; `frontend/src/shared/lib/apollo/error-codes.test.ts` fails when the three differ.
+So a new or renamed code changes the enum, `ERROR_CODES` and the text in one PR. A code outside the list (for
+example Apollo Server's `GRAPHQL_VALIDATION_FAILED`) is treated by the frontend as `INTERNAL_SERVER_ERROR`.
+
 ### Messages
 
 The frontend shows **its own text**, chosen by `extensions.code` and `field`, so the UI can be translated.

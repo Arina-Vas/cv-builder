@@ -1,20 +1,27 @@
 import { CombinedGraphQLErrors } from '@apollo/client/errors';
 
 // Error format: docs/api/conventions.md#errors (backend). The code is in `extensions.code`.
+// Codes the backend sends in extensions.code: backend/src/common/errors/error-code.enum.ts
 
-export type ErrorCode =
-  | 'UNAUTHENTICATED'
-  | 'FORBIDDEN'
-  | 'EMAIL_NOT_VERIFIED'
-  | 'NOT_FOUND'
-  | 'BAD_USER_INPUT'
-  | 'CONFLICT'
-  | 'ENTITY_IN_USE'
-  | 'RATE_LIMITED'
-  | 'INTERNAL_SERVER_ERROR';
+export const ERROR_CODES = [
+  'UNAUTHENTICATED',
+  'FORBIDDEN',
+  'EMAIL_NOT_VERIFIED',
+  'NOT_FOUND',
+  'BAD_USER_INPUT',
+  'CONFLICT',
+  'ENTITY_IN_USE',
+  'RATE_LIMITED',
+  'INTERNAL_SERVER_ERROR',
+] as const;
+
+export type ErrorCode = (typeof ERROR_CODES)[number];
+
+export const isErrorCode = (value: unknown): value is ErrorCode =>
+  typeof value === 'string' && (ERROR_CODES as readonly string[]).includes(value);
 
 interface AppErrorExtensions {
-  code?: ErrorCode;
+  code?: unknown;
   field?: string;
   fields?: { field: string; message: string }[];
   retryAfter?: number;
@@ -46,7 +53,7 @@ export function parseError(error: unknown): AppError {
   }
 
   return {
-    code: extensions.code,
+    code: isErrorCode(extensions.code) ? extensions.code : undefined,
     message: first.message,
     fieldErrors,
     retryAfter: extensions.retryAfter,

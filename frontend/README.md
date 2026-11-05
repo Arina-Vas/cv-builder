@@ -147,7 +147,13 @@ needs more), never the backend `message` ([conventions](../docs/api/conventions.
   logs only.
 - `useErrorMessage()` (`src/shared/lib/apollo/useErrorMessage.ts`) returns a function that turns that result
   into the `errors.<code>` text; no code (network error) falls back to `errors.INTERNAL_SERVER_ERROR`.
-  `RATE_LIMITED` gets the seconds from `retryAfter`. A new `ErrorCode` without a key fails the type-check.
+  `RATE_LIMITED` gets the seconds from `retryAfter`.
+- The codes come from the backend enum (`backend/src/common/errors/error-code.enum.ts`); the frontend list is
+  `ERROR_CODES` in `graphql-errors.ts`, and `ErrorCode` is derived from it. `error-codes.test.ts` next to it
+  fails when `ERROR_CODES`, the backend enum and the `errors.*` keys differ, so a code added on the backend
+  needs `ERROR_CODES` and a text here in the same PR.
+- `parseError` keeps only known codes (`isErrorCode`): an unknown `extensions.code` (Apollo Server's
+  `GRAPHQL_VALIDATION_FAILED`, …) becomes no code, and the UI shows the `INTERNAL_SERVER_ERROR` text.
 - A form checks the cases it knows better first and takes the text from `<feature>.errors`
   (`auth.errors.emailTaken` for `CONFLICT` on sign-up), then falls back to `errorMessage(appError)`.
 - Inside a modal, pass the text to the dialog's `error` prop instead of a toast: the dialog stays open and the

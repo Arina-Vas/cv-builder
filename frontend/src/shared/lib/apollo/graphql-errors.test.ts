@@ -1,6 +1,6 @@
 import { CombinedGraphQLErrors } from '@apollo/client/errors';
 import { describe, expect, it } from 'vitest';
-import { hasErrorCode, parseError } from './graphql-errors';
+import { hasErrorCode, isErrorCode, parseError } from './graphql-errors';
 
 function graphQLError(message: string, extensions: Record<string, unknown>) {
   return new CombinedGraphQLErrors({ errors: [{ message, extensions }] });
@@ -10,6 +10,18 @@ describe('parseError', () => {
   it('returns no code for non-GraphQL errors (network), so the UI shows the generic text', () => {
     expect(parseError(new Error('Failed to fetch'))).toEqual({ message: '', fieldErrors: {} });
   });
+
+  it.each([['GRAPHQL_VALIDATION_FAILED'], ['BAD_REQUEST'], [42], [null]])(
+    'drops an unknown code %j, so the UI shows the fallback text',
+    (code) => {
+      const error = graphQLError('Cannot query field "foo"', { code });
+
+      expect(parseError(error)).toMatchObject({
+        code: undefined,
+        message: 'Cannot query field "foo"',
+      });
+    },
+  );
 
   it('collects field messages from extensions.fields, first message per field wins', () => {
     const error = graphQLError('Validation failed', {
@@ -67,4 +79,17 @@ describe('hasErrorCode', () => {
   it('is false for other errors', () => {
     expect(hasErrorCode(new Error('boom'), 'UNAUTHENTICATED')).toBe(false);
   });
+});
+
+describe('isErrorCode', () => {
+  it('accepts a backend code', () => {
+    expect(isErrorCode('ENTITY_IN_USE')).toBe(true);
+  });
+
+  it.each([['GRAPHQL_PARSE_FAILED'], ['entity_in_use'], [''], [undefined], [42]])(
+    'rejects %j',
+    (value) => {
+      expect(isErrorCode(value)).toBe(false);
+    },
+  );
 });
