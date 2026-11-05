@@ -298,6 +298,9 @@
   --skill-bar-width: 80px; /* [F] Progressbar */
   --skill-bar-track-opacity: 0.9; /* [F] Progressbar opacity 90% */
 
+  --form-row-gap: 21px; /* [F] Create project: between rows of fields, on top of Field's own 16px */
+  --form-column-gap: 12px; /* [F] Create project: between the two columns */
+
   /* ------------------------------------------------------------------ */
   /* Semantic — LIGHT theme                                              */
   /* ------------------------------------------------------------------ */
