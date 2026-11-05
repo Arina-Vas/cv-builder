@@ -52,6 +52,11 @@
       "remove": "Remove avatar",
       "invalidType": "Only png, jpg or gif allowed",
       "tooLarge": "File is larger than {maxSize}"
+    },
+    "actions": {
+      "confirm": "Confirm",
+      "cancel": "Cancel",
+      "close": "Close"
     }
   },
   "errors": {
