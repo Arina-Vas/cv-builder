@@ -175,7 +175,22 @@ catch (error) {
 
 #### Global error toasts
 
-An API error nobody handles locally is shown as an error toast with the same `errors.<code>` text.
+A failed **mutation** nobody shows locally is shown as an error toast with the same `errors.<code>` text. A failed
+query is not a toast: the page shows its error state with Retry (wiki: "Error State… Retry action is available"),
+and a network failure opens the No Internet page.
+
+- `createErrorToastLink` (`src/shared/lib/apollo/error-toast-link.ts`) is first in the Apollo chain
+  (`apollo-provider.tsx`): errors come back right to left, so it sees the final error, after `refresh-link` has
+  refreshed the session and repeated the request. It reports a mutation error unless:
+  - the operation is not a mutation;
+  - the mutation opted out with `context: NO_ERROR_TOAST` (below);
+  - the code is `UNAUTHENTICATED` (`refresh-link` repeats the request or redirects to Sign In);
+  - the code is `BAD_USER_INPUT` or `CONFLICT`: those go under the form fields (wiki: "validation errors are
+    displayed inline").
+
+  Everything else is reported: `ENTITY_IN_USE`, `FORBIDDEN`, `NOT_FOUND`, `EMAIL_NOT_VERIFIED`, `RATE_LIMITED`,
+  `INTERNAL_SERVER_ERROR`, and a network failure, a non-GraphQL response or an unknown code with the generic text.
+  The link only reports: the error still reaches the component (`catch`, `useMutation().error`).
 
 - `apiErrors` (`src/shared/lib/apollo/api-errors.ts`) carries errors from Apollo links, which live outside
   React, to React: `report(appError)` / `subscribe(listener)`. It passes the parsed `AppError`, not a text, so
@@ -187,8 +202,21 @@ An API error nobody handles locally is shown as an error toast with the same `er
   of the last 3 (= toasts on screen) and are shown on subscribe. On the server `report` keeps nothing: the module
   is shared between requests.
 - Duplicates are dropped by `ToastProvider`: a toast with the same type, title and text as an open one is not
-  added, so several queries failing with `FORBIDDEN` give one toast.
-- Nothing calls `report` yet: the error-toast link and the opt-out per operation come next.
+  added, so the same error twice in a row gives one toast.
+
+**Opting out.** A component that shows the error itself (a form, `FormModal`, `ConfirmDialog`, a logout that
+ignores errors) passes `NO_ERROR_TOAST`, otherwise the user gets its message and a toast:
+
+```tsx
+import { NO_ERROR_TOAST } from '@/shared/lib/apollo/error-toast-link';
+
+const [save] = useMutation(CREATE_DEPARTMENT, { context: NO_ERROR_TOAST });
+```
+
+- `skipErrorToast` is typed on Apollo's `DefaultContext`, but the context also takes any other key, so a typo is
+  not a type error: use the constant.
+- `errorPolicy` does not help: links see the errors before it is applied.
+- All auth mutations (`features/auth`) opt out: every form there shows its own errors.
 
 ### Validation
 

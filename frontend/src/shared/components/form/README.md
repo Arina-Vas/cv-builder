@@ -40,7 +40,9 @@ const t = useTranslations('departments');
 const tValidation = useTranslations('validation');
 const schema = useMemo(() => departmentSchema(tValidation), [tValidation]);
 const form = useAppForm({ schema, defaultValues: { name: '' } });
-const [save] = useMutation(department ? UPDATE_DEPARTMENT : CREATE_DEPARTMENT);
+const [save] = useMutation(department ? UPDATE_DEPARTMENT : CREATE_DEPARTMENT, {
+  context: NO_ERROR_TOAST, // FormModal shows the error in the dialog: no global toast
+});
 
 <FormModal
   form={form}
@@ -126,19 +128,19 @@ Send a date to the API as `format(date, 'yyyy-MM-dd')` (see the `DatePicker` REA
 
 The page owns the form (`useAppForm`) and passes it in; `FormModal` runs the modal around it.
 
-| Prop           | Values                                                         | Default                                               |
-| -------------- | -------------------------------------------------------------- | ----------------------------------------------------- |
-| `form`         | the result of `useAppForm`                                     | required                                              |
-| `open`         | `boolean`                                                      | required                                              |
-| `onOpenChange` | `(open: boolean) => void`                                      | required                                              |
-| `title`        | `string`                                                       | required                                              |
-| `values`       | the form values for this opening                               | required                                              |
-| `onSubmit`     | `(values) => Promise<unknown>`: the mutation, rejects on error | required                                              |
-| `mode`         | `'create'` · `'update'`                                        | `'create'`                                            |
-| `submitLabel`  | `string`                                                       | `create` → Create, `update` → Save (`common.actions`) |
-| `requireDirty` | `boolean`: submit disabled until something changes             | `false`                                               |
-| `size`         | `'sm'` · `'md'`                                                | `'sm'`                                                |
-| `className`    | layout of the fields, set on `<form>`                          | `layout.stack`                                        |
+| Prop           | Values                                                                                                      | Default                                               |
+| -------------- | ----------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| `form`         | the result of `useAppForm`                                                                                  | required                                              |
+| `open`         | `boolean`                                                                                                   | required                                              |
+| `onOpenChange` | `(open: boolean) => void`                                                                                   | required                                              |
+| `title`        | `string`                                                                                                    | required                                              |
+| `values`       | the form values for this opening                                                                            | required                                              |
+| `onSubmit`     | `(values) => Promise<unknown>`: the mutation, rejects on error; the mutation uses `context: NO_ERROR_TOAST` | required                                              |
+| `mode`         | `'create'` · `'update'`                                                                                     | `'create'`                                            |
+| `submitLabel`  | `string`                                                                                                    | `create` → Create, `update` → Save (`common.actions`) |
+| `requireDirty` | `boolean`: submit disabled until something changes                                                          | `false`                                               |
+| `size`         | `'sm'` · `'md'`                                                                                             | `'sm'`                                                |
+| `className`    | layout of the fields, set on `<form>`                                                                       | `layout.stack`                                        |
 
 - **Opening** resets the form to `values`: empty for Create, the entity for Edit. Without it the previous row's
   values, errors and touched state would stay, because the form object lives on the page.
@@ -150,7 +152,10 @@ The page owns the form (`useAppForm`) and passes it in; `FormModal` runs the mod
   impossible: React disables the button before the next click or keypress, and the browser does not submit on Enter
   while the form's default button is disabled.
 - **Success** closes the modal. **Failure** keeps it open with the values, and shows `errors.<CODE>` above the
-  buttons (`Dialog` `error`, `role="alert"`), never the backend message; closing clears it.
+  buttons (`Dialog` `error`, `role="alert"`), never the backend message; closing clears it. `FormModal` does not
+  call the mutation, so it cannot opt it out of the global error toast: the page passes
+  `context: NO_ERROR_TOAST` to its `useMutation`, otherwise the error shows in the dialog and as a toast
+  ([frontend README](../../../../README.md) → Global error toasts).
 - Other labels for the submit button: `submitLabel={t('add')}` / `t('update')` (`common.actions.add`, `update`).
 - Server errors under a field (`CONFLICT` → "already exists" under Name) are not mapped yet: they come with the first
   real form (Departments).

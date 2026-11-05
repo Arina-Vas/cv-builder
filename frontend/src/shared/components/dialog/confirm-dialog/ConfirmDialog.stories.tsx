@@ -32,7 +32,8 @@ const ConfirmDialogDemo = ({ initialOpen = false, onOpenChange, ...rest }: DemoP
 type Outcome = 'success' | 'error' | 'errorThenSuccess';
 
 // What a page does with useMutation: loading while the request runs, close on success,
-// keep the dialog open with the error on failure, clear the error when the dialog closes
+// keep the dialog open with the error on failure, clear the error when the dialog closes.
+// The real mutation also passes `context: NO_ERROR_TOAST`, so the error is not a global toast too.
 const PageDemo = ({
   outcome,
   onConfirm,

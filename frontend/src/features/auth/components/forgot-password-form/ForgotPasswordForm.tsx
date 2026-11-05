@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl';
 import { Button } from '@/shared/components/buttons';
 import { Input } from '@/shared/components/inputs';
 import { useToast } from '@/shared/components/toast/ToastProvider';
+import { NO_ERROR_TOAST } from '@/shared/lib/apollo/error-toast-link';
 import { parseError } from '@/shared/lib/apollo/graphql-errors';
 import { useErrorMessage } from '@/shared/lib/apollo/useErrorMessage';
 import { REQUEST_PASSWORD_RESET } from '../../api/auth.operations';
@@ -20,7 +21,9 @@ export function ForgotPasswordForm() {
   const t = useTranslations('auth');
   const errorMessage = useErrorMessage();
   const toast = useToast();
-  const [requestPasswordReset, { loading }] = useMutation(REQUEST_PASSWORD_RESET);
+  const [requestPasswordReset, { loading }] = useMutation(REQUEST_PASSWORD_RESET, {
+    context: NO_ERROR_TOAST,
+  });
 
   const { values, isValid, register } = useFormFields({ email: '' }, ({ email }, tValidation) => ({
     email: validateEmail(email, tValidation),

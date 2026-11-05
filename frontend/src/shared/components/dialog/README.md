@@ -91,6 +91,7 @@ The dialog only shows the state; the page owns it. With Apollo it comes straight
 ```tsx
 const errorMessage = useErrorMessage();
 const [deleteDepartment, { loading, error, reset }] = useMutation(DELETE_DEPARTMENT, {
+  context: NO_ERROR_TOAST, // the dialog shows the error (ENTITY_IN_USE…): no global toast
   onCompleted: () => setTarget(null), // success → close
 });
 

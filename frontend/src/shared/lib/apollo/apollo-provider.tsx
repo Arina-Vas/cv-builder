@@ -7,6 +7,7 @@ import {
   InMemoryCache,
 } from '@apollo/client-integration-nextjs';
 import type { ReactNode } from 'react';
+import { createErrorToastLink } from './error-toast-link';
 import { createNetworkErrorLink } from './network-error-link';
 import { createRefreshLink } from './refresh-link';
 
@@ -22,6 +23,8 @@ function makeClient(): ApolloClient {
   return new ApolloClient({
     cache: new InMemoryCache(),
     link: ApolloLink.from([
+      // first: errors come back right to left, so it sees the final one (after refresh and retry)
+      createErrorToastLink(),
       createNetworkErrorLink(),
       createRefreshLink(graphqlUrl),
       new HttpLink({ uri: graphqlUrl, credentials: 'include' }),
