@@ -191,8 +191,16 @@ Page forms (Profile, CV Details, Settings) use the same classes on their own `<f
 
 ## Tests
 
-Unit tests cover `useAppForm` and the schemas (`shared/lib/form/*.test.ts(x)`); the stories cover `FormModal` in a
-real browser:
+Unit tests (jsdom) cover the logic and states:
+
+| Test                                  | Checks                                                                                                                                                                                                                                                                            |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `shared/lib/form/schemas.test.ts`     | each block: required / trim / min / `Date`, the error path, a message from the `validation` translator                                                                                                                                                                            |
+| `shared/lib/form/useAppForm.test.tsx` | `onTouched` / `onChange` modes and override, `isValid`, `handleSubmit` gets the schema output                                                                                                                                                                                     |
+| `FormModal.test.tsx`                  | `sm` / `md`, button labels, Cancel, layout class and `form` link; values on opening and reset on reopening; disabled while invalid / unchanged; submit and close, Enter; loading state; error text by code and for a network error, kept input, cleared on retry and on reopening |
+
+The stories cover what needs a real browser (layout widths, errors after leaving a field, the full flows with every
+field):
 
 | Story              | Checks                                                                                                                                                             |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
