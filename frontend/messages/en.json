@@ -56,7 +56,11 @@
     "actions": {
       "confirm": "Confirm",
       "cancel": "Cancel",
-      "close": "Close"
+      "close": "Close",
+      "create": "Create",
+      "update": "Update",
+      "save": "Save",
+      "add": "Add"
     }
   },
   "errors": {
@@ -71,6 +75,10 @@
     "INTERNAL_SERVER_ERROR": "Something went wrong. Please try again later"
   },
   "validation": {
+    "department": {
+      "required": "Department name is required",
+      "maxLength": "Department name must not exceed {max} characters"
+    },
     "email": {
       "required": "Email is required",
       "invalid": "Please enter a valid email address"

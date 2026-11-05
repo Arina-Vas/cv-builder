@@ -51,6 +51,7 @@ const POSITIONS = [
 | `open`          | `boolean`                                        | —        |
 | `defaultOpen`   | `boolean`                                        | `false`  |
 | `onOpenChange`  | `(open: boolean) => void`                        | —        |
+| `onBlur`        | `() => void`: called when the list closes        | —        |
 | `ref`           | `Ref<HTMLButtonElement>`: the trigger            | —        |
 | `className`     | on the `Field` root (label + trigger + error)    | —        |
 
@@ -94,14 +95,17 @@ open (`active`) or a value is chosen (`filled`). Keyboard focus without opening 
       options={POSITIONS}
       value={field.value ?? ''}
       onValueChange={field.onChange}
+      onBlur={field.onBlur}
       error={fieldState.error?.message}
     />
   )}
 />
 ```
 
-- Don't wire `field.onBlur` to the trigger: opening the list moves focus into the portal, so the field
-  would be marked touched on the first open.
+- `onBlur` fires when the list **closes** (an option chosen, Escape, click outside), not when the trigger loses
+  focus: opening the list moves focus into the portal, which would mark the field touched on the first open.
+  Pass `field.onBlur` as is; with `mode: 'onTouched'` "required" shows after the list was opened and closed
+  without a choice.
 
 ## Sizing rules
 
@@ -126,18 +130,19 @@ To change a size or colour, change the token, not the component CSS.
 `play` functions in `Select.stories.tsx` run in Storybook (Interactions panel) and in Vitest
 (`@storybook/addon-vitest`, needs `npx playwright install chromium` once).
 
-| Story                 | Checks                                                                  |
-| --------------------- | ----------------------------------------------------------------------- |
-| `Default`             | empty, closed, accessible name, label inside                            |
-| `Open`                | list with every option, `aria-expanded`, `onOpenChange`, `Field` active |
-| `WithValue`           | value shown, label raised, chosen option is `data-state="checked"`      |
-| `Disabled`            | can't be opened                                                         |
-| `Invalid`             | `aria-invalid`, error as the accessible description                     |
-| `DisabledOption`      | a disabled option can't be chosen                                       |
-| `SelectsWithMouse`    | click → `onValueChange`, list closes, focus back on the trigger         |
-| `SelectsWithKeyboard` | Tab / Enter / arrows / Home / End                                       |
-| `Closes`              | Escape and click outside close without changing the value               |
-| `Controlled`          | external state + reset back to an empty field                           |
+| Story                 | Checks                                                                      |
+| --------------------- | --------------------------------------------------------------------------- |
+| `Default`             | empty, closed, accessible name, label inside                                |
+| `Open`                | list with every option, `aria-expanded`, `onOpenChange`, `Field` active     |
+| `WithValue`           | value shown, label raised, chosen option is `data-state="checked"`          |
+| `Disabled`            | can't be opened                                                             |
+| `Invalid`             | `aria-invalid`, error as the accessible description                         |
+| `DisabledOption`      | a disabled option can't be chosen                                           |
+| `SelectsWithMouse`    | click → `onValueChange`, list closes, focus back on the trigger             |
+| `SelectsWithKeyboard` | Tab / Enter / arrows / Home / End                                           |
+| `Closes`              | Escape and click outside close without changing the value                   |
+| `BlursOnClose`        | opening does not call `onBlur`; Escape and choosing an option do, once each |
+| `Controlled`          | external state + reset back to an empty field                               |
 
 Radix quirks the tests rely on:
 
