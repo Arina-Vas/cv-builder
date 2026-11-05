@@ -1,4 +1,4 @@
-import { CombinedGraphQLErrors } from '@apollo/client/errors';
+import { CombinedGraphQLErrors, ServerError, ServerParseError } from '@apollo/client/errors';
 import { describe, expect, it } from 'vitest';
 import { hasErrorCode, isErrorCode, parseError } from './graphql-errors';
 
@@ -6,9 +6,30 @@ function graphQLError(message: string, extensions: Record<string, unknown>) {
   return new CombinedGraphQLErrors({ errors: [{ message, extensions }] });
 }
 
+const proxyPage = '<html lang="en"><body>502 Bad Gateway</body></html>';
+
 describe('parseError', () => {
-  it('returns no code for non-GraphQL errors (network), so the UI shows the generic text', () => {
-    expect(parseError(new Error('Failed to fetch'))).toEqual({ message: '', fieldErrors: {} });
+  // No code → useErrorMessage shows errors.INTERNAL_SERVER_ERROR. A failed query also opens the
+  // No Internet page (network-error-link), so there is no separate network text.
+  it.each([
+    ['a network failure (fetch rejects with TypeError)', new TypeError('Failed to fetch')],
+    [
+      'a non-GraphQL HTTP error (ServerError)',
+      new ServerError('Response not successful: Received status code 502', {
+        response: new Response(proxyPage, { status: 502 }),
+        bodyText: proxyPage,
+      }),
+    ],
+    [
+      'a body that is not JSON (ServerParseError)',
+      new ServerParseError(new SyntaxError('Unexpected token <'), {
+        response: new Response(proxyPage, { status: 200 }),
+        bodyText: proxyPage,
+      }),
+    ],
+    ['any other error', new Error('boom')],
+  ])('returns no code for %s, so the UI shows the generic text', (_, error) => {
+    expect(parseError(error)).toEqual({ message: '', fieldErrors: {} });
   });
 
   it.each([['GRAPHQL_VALIDATION_FAILED'], ['BAD_REQUEST'], [42], [null]])(

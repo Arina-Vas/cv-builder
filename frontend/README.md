@@ -146,7 +146,11 @@ needs more), never the backend `message` ([conventions](../docs/api/conventions.
 - `parseError(error)` returns `{ code, fieldErrors, retryAfter, message }`; `message` is the backend text, for
   logs only.
 - `useErrorMessage()` (`src/shared/lib/apollo/useErrorMessage.ts`) returns a function that turns that result
-  into the `errors.<code>` text; no code (network error) falls back to `errors.INTERNAL_SERVER_ERROR`.
+  into the `errors.<code>` text; no code falls back to `errors.INTERNAL_SERVER_ERROR`. There is no code for a
+  network failure (fetch rejects with `TypeError`), a non-GraphQL HTTP response (`ServerError`, e.g. a proxy
+  502), a body that is not JSON (`ServerParseError`) or an unknown `extensions.code`. A network failure has no
+  text of its own: a failed query opens the No Internet page (`network-error-link`), a mutation shows the
+  generic text.
   `RATE_LIMITED` gets the seconds from `retryAfter`.
 - The codes come from the backend enum (`backend/src/common/errors/error-code.enum.ts`); the frontend list is
   `ERROR_CODES` in `graphql-errors.ts`, and `ErrorCode` is derived from it. `error-codes.test.ts` next to it
