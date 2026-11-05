@@ -1,7 +1,9 @@
 # DatePicker
 
 Shared date field from the Figma design system ("Design system (components)" → DatePicker).
-A trigger button opens a calendar in a Radix [`Popover`](https://www.radix-ui.com/primitives/docs/components/popover);
+Like `Input` and `Select`, it is built on [`Field`](../field/Field.tsx): floating label, outline and the error text
+under the field. A trigger button opens a calendar in a Radix
+[`Popover`](https://www.radix-ui.com/primitives/docs/components/popover);
 the calendar itself is [`react-datepicker`](https://reactdatepicker.com) in `inline` mode with a custom header,
 dates are formatted with `date-fns`.
 Live examples of every state, Light and Dark: Storybook → **Shared/DatePicker**.
@@ -30,34 +32,52 @@ import { DatePicker } from '@/shared/components/date-picker/DatePicker';
 const [startDate, setStartDate] = useState<Date | null>(null);
 const [endDate, setEndDate] = useState<Date | null>(null);
 
-<DatePicker value={startDate} onChange={setStartDate} placeholder="Start Date" />
+<DatePicker label={t('startDate')} value={startDate} onChange={setStartDate} />
 <DatePicker
+  label={t('endDate')}
   value={endDate}
   onChange={setEndDate}
-  placeholder="End Date"
   minDate={startDate ?? undefined}         // end can't be before start
 />
-<DatePicker value={date} onChange={setDate} excludeDates={holidays} />
-<DatePicker value={date} onChange={setDate} disabled />
+<DatePicker label={t('date')} value={date} onChange={setDate} excludeDates={holidays} />
+<DatePicker label={t('date')} value={date} onChange={setDate} error={t('dateRequired')} />
+<DatePicker label={t('date')} value={date} onChange={setDate} disabled />
 ```
 
-| Prop           | Values                         | Default                                         |
-| -------------- | ------------------------------ | ----------------------------------------------- |
-| `value`        | `Date` · `null` = empty        | required ⚠️                                     |
-| `onChange`     | `(date: Date \| null) => void` | required                                        |
-| `placeholder`  | `string`                       | `common.datePicker.placeholder` (`Select date`) |
-| `minDate`      | `Date`: earlier days disabled  | —                                               |
-| `maxDate`      | `Date`: later days disabled    | —                                               |
-| `excludeDates` | `Date[]`: single days disabled | —                                               |
-| `disabled`     | `boolean`                      | `false`                                         |
+| Prop           | Values                                                  | Default                                         |
+| -------------- | ------------------------------------------------------- | ----------------------------------------------- |
+| `label`        | `string`: the `Field` label, names the trigger          | required                                        |
+| `value`        | `Date` · `null` = empty                                 | required ⚠️                                     |
+| `onChange`     | `(date: Date \| null) => void`                          | required                                        |
+| `error`        | `string`: text under the field, red outline and icon    | —                                               |
+| `placeholder`  | `string`: shown only while the calendar is open         | `common.datePicker.placeholder` (`Select date`) |
+| `minDate`      | `Date`: earlier days disabled                           | —                                               |
+| `maxDate`      | `Date`: later days disabled                             | —                                               |
+| `excludeDates` | `Date[]`: single days disabled                          | —                                               |
+| `disabled`     | `boolean`                                               | `false`                                         |
+| `onOpenChange` | `(open: boolean) => void`: the calendar opened / closed | —                                               |
+| `id`           | `string`: id of the trigger                             | `useId()`                                       |
+| `ref`          | `Ref<HTMLButtonElement>`: the trigger                   | —                                               |
 
 - ⚠️ **Controlled only**: there is no `defaultValue`, the parent always owns the date. Empty is `null`, not `undefined`.
 - `onChange` is called only when a **day** is clicked; it gets a local `Date` at 00:00. The popover closes after it.
   There is no "clear" button yet, so `onChange` is never called with `null` by the component itself.
 - The trigger shows the value as `dd.MM.yyyy`. The format is fixed in the component.
 - Disabled days (`minDate` / `maxDate` / `excludeDates`) are greyed out and struck through, they can't be clicked.
-- Hover / Open / Focus / Disabled are CSS states (`:hover`, `[data-state='open']`, `:focus-visible`, `:disabled`),
-  the placeholder look is `[data-empty='true']`. None of them are props.
+- `onOpenChange` is called on every open and close, including the close after a day is picked.
+- Hover, focus, open, error and disabled are drawn by `Field` (outline colour, label position, background); only
+  `error` and `disabled` are props.
+
+## Label and placeholder
+
+As in `Select`, the label sits inside the empty field and moves up when the calendar is open (`active`) or a date
+is chosen (`filled`):
+
+| State           | Label  | In the trigger |
+| --------------- | ------ | -------------- |
+| closed, empty   | inside | —              |
+| open, empty     | raised | `placeholder`  |
+| a date selected | raised | `dd.MM.yyyy`   |
 
 ## Calendar views
 
@@ -92,19 +112,40 @@ parseISO('2025-09-04'); // receive → local midnight
 <Controller
   name="startDate"
   control={control}
-  render={({ field }) => (
-    <DatePicker value={field.value ?? null} onChange={field.onChange} placeholder="Start Date" />
+  render={({ field, fieldState }) => (
+    <DatePicker
+      ref={field.ref}
+      label={t('startDate')}
+      value={field.value ?? null}
+      onChange={field.onChange}
+      onOpenChange={(open) => !open && field.onBlur()}
+      error={fieldState.error?.message}
+    />
   )}
 />
 ```
 
-The component has no `ref`, `name`, `label` or `error` props, so the label, error text and focus-on-error
-are handled by the form around it for now.
+- `ref` points at the trigger: react-hook-form focuses it on a validation error.
+- Don't wire `field.onBlur` to the trigger: opening the calendar moves focus into the popover, so the field would
+  be marked touched on the first open. Mark it on close instead (`onOpenChange`), so with `mode: 'onTouched'`
+  "required" shows after the calendar was opened and closed without picking a day.
+- In the form the value is `Date | null`; the zod schema turns it into `Date` (`requiredDate` in
+  `shared/lib/form`), the mutation gets `format(date, 'yyyy-MM-dd')`.
+
+## Accessibility
+
+- The trigger is a `<button>` named by the label (`<label for>` → trigger `id`); Radix adds
+  `aria-haspopup="dialog"` and `aria-expanded`.
+- With `error` the trigger gets `aria-describedby` → the error text (`role="alert"`). `aria-invalid` is not used:
+  it is not allowed on role `button` (jsx-a11y `role-supports-aria-props`). The red icon is styled with
+  `data-invalid`.
+- Keyboard focus highlights the `Field` outline (`[aria-haspopup]:focus-visible` in `Field.module.css`).
 
 ## Sizing rules
 
-The trigger owns its **height and look** (`--input-height`, same as other inputs) and takes the parent's width,
-but never less than `400px`. The popover is a fixed `448px` card, aligned to the trigger's left edge.
+The trigger owns its **height** (`--input-height`, same as other inputs); its **width comes from the parent**
+(`Field` is `width: 100%`), so it fits a half column of a form grid. The popover is a fixed `448px` card, aligned to
+the trigger's left edge.
 
 - Form column → the parent sets the width, the trigger fills it.
 - No room on screen → Radix shifts / flips the popover and keeps `16px` from the viewport edge
@@ -124,7 +165,8 @@ but never less than `400px`. The popover is a fixed `448px` card, aligned to the
 ## Tokens
 
 Styles use component / semantic tokens from [`theme/tokens.css`](../../theme/tokens.css) only, so Light / Dark
-switch automatically: `--input-*` for the trigger, `--datepicker-*` for the card, `--type-datepicker-size`.
+switch automatically: `--input-*` for the field (via `Field`) and the error icon, `--datepicker-*` for the card,
+`--type-datepicker-size`.
 To change a size or colour, change the token, not the component CSS.
 
 ## Tests
@@ -132,12 +174,20 @@ To change a size or colour, change the token, not the component CSS.
 `play` functions in `DatePicker.stories.tsx` run in Storybook (Interactions panel) and in Vitest
 (`@storybook/addon-vitest`, needs `npx playwright install chromium` once).
 
-| Story         | Checks                                                                                    |
-| ------------- | ----------------------------------------------------------------------------------------- |
-| `SelectsDate` | clicking a day calls `onChange` with that date and shows it in the trigger                |
-| `OpenClose`   | open, Escape (focus back on the trigger), click outside, reopening resets to the day view |
+| Story                     | Checks                                                                                                         |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `SelectsDate`             | clicking a day calls `onChange`, shows the date in the trigger, closes the calendar with `onOpenChange(false)` |
+| `OpenClose`               | open, Escape (focus back on the trigger), click outside, `onOpenChange`; reopening resets to the day view      |
+| `PlaceholderOnlyWhenOpen` | empty and closed: no placeholder under the label; open: the placeholder is shown                               |
+| `LabelNamesTrigger`       | `<label for>` points at the trigger `id`                                                                       |
+| `WithError`               | the error text is `role="alert"` and is the trigger's accessible description                                   |
+| `Disabled`                | the trigger is disabled                                                                                        |
 
-The other stories (`Default`, `WithValue`, `EndDate`, `ExcludeDates`, `Disabled`, `Dark`) are visual.
+The other stories (`Default`, `WithValue`, `EndDate`, `ExcludeDates`, `Dark`, `DarkWithError`) are visual.
+
+- The trigger is found by its label, `getByRole('button', { name: 'Start Date' })`; the date is checked with
+  `toHaveTextContent`.
+- The `Field` label has `pointer-events: none` (clicks go through to the control), so tests don't click it.
 
 - The popover is portaled to `<body>`: query it with `within(canvasElement.ownerDocument.body)`.
 - Radix gives the popover `role="dialog"`, react-datepicker names the month grid
