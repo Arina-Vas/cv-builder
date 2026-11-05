@@ -58,6 +58,9 @@ toast.show({ type: 'info', description: 'Same as toast.info' });
 
 - **Position:** top-right corner, 16 px from the edges. The newest toast is on top.
 - **At most 3 toasts** (`MAX_TOASTS`). A fourth one pushes out the oldest.
+- **No duplicates:** a toast with the same type, title and text as one that is open is not added (several
+  requests failing with the same error, a double click). An empty `title` counts as no title. A closed or
+  closing toast does not count, so the same text can be shown again.
 - **Closing:** ✕, the timer, swipe right or Esc. The toast plays the leave animation, then the provider
   removes it from its list (`EXIT_ANIMATION_MS` = 200, not shorter than `--duration-leave`).
 - **Pause:** the timer stops while the pointer is over the toasts or focus is inside them.
