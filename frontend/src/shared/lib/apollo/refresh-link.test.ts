@@ -12,16 +12,25 @@ import { createRefreshLink } from './refresh-link';
 
 const GRAPHQL_URL = 'http://localhost:4000/graphql';
 
-const ME: TypedDocumentNode<{ me: string }> = gql`
+// Real operations from backend/schema.gql, so the IDE GraphQL plugin validates them; the response is mocked
+const ME: TypedDocumentNode<{ me: { id: string } }> = gql`
   query Me {
-    me
+    me {
+      id
+    }
   }
 `;
+// the operation name matters: refresh-link skips the refresh for SignIn
 const SIGN_IN = gql`
-  mutation SignIn {
-    signIn
+  mutation SignIn($input: SignInInput!) {
+    signIn(input: $input) {
+      id
+    }
   }
 `;
+const SIGN_IN_INPUT = { input: { email: 'ada@example.test', password: 'wrong-password' } };
+
+const me = (id: string) => ({ data: { me: { __typename: 'User', id } } });
 
 const unauthenticated = {
   errors: [{ message: 'Unauthorized', extensions: { code: 'UNAUTHENTICATED' } }],
@@ -64,14 +73,11 @@ describe('createRefreshLink', () => {
   });
 
   it('refreshes the session once and retries the request on UNAUTHENTICATED', async () => {
-    const { client, backend, onSessionExpired } = createClient([
-      unauthenticated,
-      { data: { me: 'user' } },
-    ]);
+    const { client, backend, onSessionExpired } = createClient([unauthenticated, me('user')]);
 
     const result = await client.query({ query: ME, fetchPolicy: 'no-cache' });
 
-    expect(result.data).toEqual({ me: 'user' });
+    expect(result.data).toEqual(me('user').data);
     expect(backend).toHaveBeenCalledTimes(2);
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock).toHaveBeenCalledWith(
@@ -86,12 +92,7 @@ describe('createRefreshLink', () => {
   });
 
   it('shares one refresh between parallel requests', async () => {
-    const { client, backend } = createClient([
-      unauthenticated,
-      unauthenticated,
-      { data: { me: 'a' } },
-      { data: { me: 'b' } },
-    ]);
+    const { client, backend } = createClient([unauthenticated, unauthenticated, me('a'), me('b')]);
 
     // Different variables keep Apollo from deduplicating the two queries into one request;
     // without them this test would pass even if every request ran its own refresh.
@@ -100,7 +101,7 @@ describe('createRefreshLink', () => {
       client.query({ query: ME, fetchPolicy: 'no-cache', variables: { n: 2 } }),
     ]);
 
-    expect(results.map((result) => result.data?.me).sort()).toEqual(['a', 'b']);
+    expect(results.map((result) => result.data?.me.id).sort()).toEqual(['a', 'b']);
     expect(backend).toHaveBeenCalledTimes(4);
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
@@ -135,7 +136,9 @@ describe('createRefreshLink', () => {
   it('does not refresh for SignIn: wrong credentials are not an expired session', async () => {
     const { client, onSessionExpired } = createClient([unauthenticated]);
 
-    await expect(client.mutate({ mutation: SIGN_IN })).rejects.toThrow('Unauthorized');
+    await expect(client.mutate({ mutation: SIGN_IN, variables: SIGN_IN_INPUT })).rejects.toThrow(
+      'Unauthorized',
+    );
     expect(fetchMock).not.toHaveBeenCalled();
     expect(onSessionExpired).not.toHaveBeenCalled();
   });
