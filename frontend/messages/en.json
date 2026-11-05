@@ -95,6 +95,7 @@
     "collapseSidebar": "Collapse sidebar",
     "expandSidebar": "Expand sidebar",
     "navigation": "Main navigation",
+    "breadcrumbs": "Breadcrumb",
     "notAuthorized": "You are not authorized to access this page",
     "profile": "Profile",
     "settings": "Settings",

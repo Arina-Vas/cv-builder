@@ -9,7 +9,7 @@ import { Breadcrumbs } from '@/shared/components/breadcrumbs';
 import { ProfileIcon } from '@/shared/components/icons/ProfileIcon';
 
 <Breadcrumbs
-  label={t('breadcrumbs.label')}
+  label={t('layout.breadcrumbs')}
   items={[
     { label: 'Employees', href: '/users' },
     { label: fullName, href: `/users/${id}/profile`, icon: ProfileIcon, variant: 'entity' },

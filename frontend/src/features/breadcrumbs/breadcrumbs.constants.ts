@@ -17,6 +17,5 @@ export const DETAIL_TABS = {
   cvs: ['details', 'skills', 'projects', 'preview'],
 } as const;
 
-
 export type Section = keyof typeof SECTION_LABEL_KEYS;
 export type DetailSection = keyof typeof DETAIL_TABS;
