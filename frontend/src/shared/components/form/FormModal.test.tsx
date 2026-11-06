@@ -61,8 +61,15 @@ function renderModal(props: ModalProps & { initialOpen?: boolean } = {}) {
 const getDialog = () => screen.queryByRole('dialog', { name: 'Create department' });
 const getInput = () => screen.getByRole('textbox', { name: 'Department' });
 
-const graphQLError = (code: string) =>
-  new CombinedGraphQLErrors({ errors: [{ message: 'backend text', extensions: { code } }] });
+const graphQLError = (code: string, extensions: Record<string, unknown> = {}) =>
+  new CombinedGraphQLErrors({
+    errors: [{ message: 'backend text', extensions: { code, ...extensions } }],
+  });
+
+// what the backend sends for a duplicate: conflict('<input field>', ...)
+const conflictError = (field: string) => graphQLError('CONFLICT', { field });
+
+const CONFLICT_TEXT = 'This value is already taken';
 
 // a promise the test settles by hand, to look at the modal while the request runs
 function deferred() {
@@ -258,6 +265,18 @@ describe('FormModal', () => {
       await waitFor(() => expect(screen.queryByRole('alert')).not.toBeInTheDocument());
     });
 
+    it('ignores a field the form does not have and shows the error above the buttons', async () => {
+      const { user } = renderModal({
+        onSubmit: () => Promise.reject(conflictError('email')),
+        values: { name: 'QA' },
+      });
+
+      await user.click(screen.getByRole('button', { name: 'Create' }));
+
+      expect(await screen.findByRole('alert')).toHaveTextContent(CONFLICT_TEXT);
+      expect(getInput()).not.toHaveAttribute('aria-invalid', 'true');
+    });
+
     it('does not show the old error after closing and opening again', async () => {
       const { user } = renderModal({
         onSubmit: () => Promise.reject(graphQLError('FORBIDDEN')),
@@ -271,6 +290,63 @@ describe('FormModal', () => {
       await user.click(screen.getByRole('button', { name: 'Open' }));
 
       expect(getDialog()).toBeInTheDocument();
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    });
+  });
+
+  // the request passed the schema, the backend rejected a field: CONFLICT (duplicate name)
+  describe('server error on a field', () => {
+    it('shows the text for the code under the field, not above the buttons', async () => {
+      const { user, onOpenChange } = renderModal({
+        onSubmit: () => Promise.reject(conflictError('name')),
+        values: { name: 'Engineering' },
+      });
+
+      await user.click(screen.getByRole('button', { name: 'Create' }));
+
+      // the only alert is the field's helper text
+      expect(await screen.findByRole('alert')).toHaveTextContent(CONFLICT_TEXT);
+      expect(screen.getAllByRole('alert')).toHaveLength(1);
+      expect(screen.queryByText('backend text')).not.toBeInTheDocument();
+      expect(getInput()).toHaveAttribute('aria-invalid', 'true');
+      expect(getInput()).toHaveFocus();
+      expect(getInput()).toHaveValue('Engineering');
+      expect(getDialog()).toBeInTheDocument();
+      expect(onOpenChange).not.toHaveBeenCalled();
+    });
+
+    it('disables submit until the field changes, then clears the error', async () => {
+      const { user } = renderModal({
+        onSubmit: () => Promise.reject(conflictError('name')),
+        values: { name: 'Engineering' },
+      });
+      const create = screen.getByRole('button', { name: 'Create' });
+
+      await user.click(create);
+      await screen.findByText(CONFLICT_TEXT);
+      await waitFor(() => expect(create).toBeDisabled());
+
+      await user.type(getInput(), ' Team');
+
+      await waitFor(() => expect(screen.queryByText(CONFLICT_TEXT)).not.toBeInTheDocument());
+      expect(getInput()).not.toHaveAttribute('aria-invalid', 'true');
+      await waitFor(() => expect(create).toBeEnabled());
+    });
+
+    it('does not show the field error after closing and opening again', async () => {
+      const { user } = renderModal({
+        onSubmit: () => Promise.reject(conflictError('name')),
+        values: { name: 'Engineering' },
+      });
+
+      await user.click(screen.getByRole('button', { name: 'Create' }));
+      await screen.findByText(CONFLICT_TEXT);
+
+      await user.click(screen.getByRole('button', { name: 'Cancel' }));
+      await user.click(screen.getByRole('button', { name: 'Open' }));
+
+      expect(getInput()).toHaveValue('Engineering');
+      expect(getInput()).not.toHaveAttribute('aria-invalid', 'true');
       expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     });
   });
