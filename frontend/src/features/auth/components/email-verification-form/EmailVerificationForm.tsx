@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 
 import { Button } from '@/shared/components/buttons';
 import { useToast } from '@/shared/components/toast/ToastProvider';
+import { NO_ERROR_TOAST } from '@/shared/lib/apollo/error-toast-link';
 import { parseError } from '@/shared/lib/apollo/graphql-errors';
 import { useErrorMessage } from '@/shared/lib/apollo/useErrorMessage';
 import { RESEND_VERIFICATION_CODE, VERIFY_EMAIL } from '../../api/auth.operations';
@@ -37,8 +38,10 @@ export function EmailVerificationForm({ codeJustSent = false }: EmailVerificatio
   const tValidation = useTranslations('validation');
   const errorMessage = useErrorMessage();
   const toast = useToast();
-  const [verifyEmail, { loading }] = useMutation(VERIFY_EMAIL);
-  const [resendCode, { loading: resending }] = useMutation(RESEND_VERIFICATION_CODE);
+  const [verifyEmail, { loading }] = useMutation(VERIFY_EMAIL, { context: NO_ERROR_TOAST });
+  const [resendCode, { loading: resending }] = useMutation(RESEND_VERIFICATION_CODE, {
+    context: NO_ERROR_TOAST,
+  });
 
   const [code, setCode] = useState('');
   const [serverError, setServerError] = useState<string>();

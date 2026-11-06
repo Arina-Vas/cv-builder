@@ -13,6 +13,10 @@ const MAX_TOASTS = 3;
 
 const ToastContext = createContext<ToastApi | null>(null);
 
+// What the user sees: the same type, title and text. An empty title shows the default one, like no title.
+const isSameToast = (a: ToastOptions, b: ToastOptions) =>
+  a.type === b.type && a.description === b.description && (a.title || '') === (b.title || '');
+
 export const ToastProvider = ({ children }: { children: ReactNode }) => {
   const t = useTranslations('common.toast');
   const [items, setItems] = useState<ToastItem[]>([]);
@@ -27,8 +31,14 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
 
   const api = useMemo<ToastApi>(() => {
     const show = (options: ToastOptions) => {
-      const id = nextId.current++;
-      setItems((prev) => [...prev, { ...options, id, open: true }].slice(-MAX_TOASTS));
+      setItems((prev) => {
+        // the same toast is already on screen (several failed queries, a double click): skip the copy.
+        // A closing toast (open: false) does not count, so the text can be shown again right away.
+        if (prev.some((item) => item.open && isSameToast(item, options))) return prev;
+
+        const id = nextId.current++;
+        return [...prev, { ...options, id, open: true }].slice(-MAX_TOASTS);
+      });
     };
 
     return {

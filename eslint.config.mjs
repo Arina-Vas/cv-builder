@@ -16,6 +16,7 @@ export default tseslint.config(
       '**/.next/**',
       '**/node_modules/**',
       '**/coverage/**',
+      '**/storybook-static/**',
       '**/next-env.d.ts',
       'frontend/src/gql/**',
     ],

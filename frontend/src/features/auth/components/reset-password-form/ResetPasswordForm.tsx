@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl';
 import { Button } from '@/shared/components/buttons';
 import { Input } from '@/shared/components/inputs';
 import { useToast } from '@/shared/components/toast/ToastProvider';
+import { NO_ERROR_TOAST } from '@/shared/lib/apollo/error-toast-link';
 import { parseError } from '@/shared/lib/apollo/graphql-errors';
 import { useErrorMessage } from '@/shared/lib/apollo/useErrorMessage';
 import { LOGOUT, RESET_PASSWORD } from '../../api/auth.operations';
@@ -24,8 +25,9 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
   const toast = useToast();
   const t = useTranslations('auth');
   const errorMessage = useErrorMessage();
-  const [resetPassword, { loading }] = useMutation(RESET_PASSWORD);
-  const [logout] = useMutation(LOGOUT);
+  const [resetPassword, { loading }] = useMutation(RESET_PASSWORD, { context: NO_ERROR_TOAST });
+  // a failed logout is ignored on purpose (the user leaves anyway), so no toast either
+  const [logout] = useMutation(LOGOUT, { context: NO_ERROR_TOAST });
 
   const { values, isValid, register } = useFormFields(
     { password: '', confirmPassword: '' },

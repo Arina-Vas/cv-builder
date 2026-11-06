@@ -4,6 +4,7 @@ import { getLocale } from 'next-intl/server';
 import { NextIntlClientProvider } from 'next-intl';
 import type { ReactNode } from 'react';
 import { ApolloWrapper } from '@/shared/lib/apollo/apollo-provider';
+import { ApiErrorToaster } from '@/shared/lib/apollo/ApiErrorToaster';
 import { ThemeProvider } from '@/shared/theme/theme-provider';
 import { themeScript } from '@/shared/theme/theme-script';
 import '@/shared/theme/tokens.css';
@@ -35,6 +36,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         <NextIntlClientProvider>
           <ThemeProvider>
             <ToastProvider>
+              <ApiErrorToaster />
               <ApolloWrapper>
                 <DeviceGuard>
                   <NetworkStatusGate>{children}</NetworkStatusGate>
