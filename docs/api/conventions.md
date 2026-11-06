@@ -197,7 +197,7 @@ Lists without pagination extend `ListArgs` instead of `PaginatedListArgs` and re
 
 | List                                                                       | Default `sortBy` | Sort fields                                       | Search by                    | Paginated |
 | -------------------------------------------------------------------------- | ---------------- | ------------------------------------------------- | ---------------------------- | --------- |
-| `users`                                                                    | `firstName`      | `firstName`, `lastName`, `department`, `position` | first name, last name, email | yes       |
+| `users`                                                                    | none, see below  | `firstName`, `lastName`, `department`, `position` | first name, last name, email | yes       |
 | `departments`                                                              | `name`           | `name`                                            | name                         | yes       |
 | `positions`                                                                | `name`           | `name`                                            | name                         | yes       |
 | `skills`                                                                   | `name`           | `name`                                            | name                         | yes       |
@@ -219,6 +219,15 @@ used: a flat list of `UserSkill` normalizes in the Apollo cache by `id`. User la
 language name (wiki: a single "Current Languages" section).
 
 Sort and search fields come from the Sorting and Search sections of each wiki page.
+
+**Users list.** `sortBy` is optional and has no default (`sortBy: UserSortField`). Without it the backend returns
+users in the order they were created (`createdAt ASC`, then `id ASC`) and ignores `sortOrder`; the table shows no
+sort indicator. With it:
+
+- `department` and `position` sort by the name of the referenced department / position;
+- users without a value in the sorted column (`firstName`, `lastName`, `department`, `position` are nullable,
+  Sign Up collects only email and password) go **last in both directions** (`nulls: 'last'`);
+- `id ASC` is still added as the secondary sort.
 
 ### Sorting
 
@@ -266,6 +275,10 @@ avoid a column-key → enum map in every table.
   `UserLanguage`; wiki: the field is disabled in the Update modal), the update input takes
   `PickType(Create<Entity>Input, [...])` without it and adds `id` (`UpdateUserSkillInput`: `id`, `userId`,
   `mastery`; `UpdateUserLanguageInput`: `id`, `userId`, `proficiency`).
+- Exception: `UpdateUserInput` (Admin, Update user modal) is `PickType(CreateUserInput, ['departmentId',
+'positionId', 'role'])` plus `id`: the wiki disables email and password in that modal. First and last name are
+  changed on the Profile tab by a separate mutation with its own access rule (own profile or Admin), so one input
+  never mixes fields with different permissions.
 - Inputs are always validated on the backend, even if the frontend validates them too
   (wiki: "Client-side validation is intended for user experience and must not replace server-side validation").
 - **One error per field.** The `ValidationPipe` uses `stopAtFirstError` (`common/validation/validator-options.ts`), so
@@ -299,17 +312,18 @@ helpers in `backend/src/common/errors/app-errors.ts`; a global exception filter 
 
 ### Codes
 
-| Code                    | When                                                 | Extra fields                   | Frontend                                                                  |
-| ----------------------- | ---------------------------------------------------- | ------------------------------ | ------------------------------------------------------------------------- |
-| `UNAUTHENTICATED`       | no token, invalid or expired token                   | —                              | try `refresh`, otherwise go to Sign In                                    |
-| `FORBIDDEN`             | role or ownership check failed                       | —                              | query: "not authorized" state; mutation: toast                            |
-| `EMAIL_NOT_VERIFIED`    | mutation by a user whose email is not verified       | —                              | "verify your email" message + link to Email Verification; mutation: toast |
-| `NOT_FOUND`             | the entity does not exist (or was deleted meanwhile) | —                              | query: not-found state; mutation: toast, refresh stale data               |
-| `BAD_USER_INPUT`        | validation failed                                    | `fields: [{ field, message }]` | inline errors under the fields                                            |
-| `CONFLICT`              | a unique value is already taken                      | `field` (when known)           | inline error under `field`                                                |
-| `ENTITY_IN_USE`         | delete blocked because the item is referenced        | —                              | toast, or the delete dialog shows it                                      |
-| `RATE_LIMITED`          | too many requests (per IP or e.g. resend code)       | `retryAfter` (seconds)         | "please wait" message; mutation: toast                                    |
-| `INTERNAL_SERVER_ERROR` | unexpected error                                     | —                              | query: error state with Retry; mutation: generic error toast              |
+| Code                    | When                                                                                                                     | Extra fields                   | Frontend                                                                  |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------------------ | ------------------------------------------------------------------------- |
+| `UNAUTHENTICATED`       | no token, invalid or expired token                                                                                       | —                              | try `refresh`, otherwise go to Sign In                                    |
+| `FORBIDDEN`             | role or ownership check failed                                                                                           | —                              | query: "not authorized" state; mutation: toast                            |
+| `EMAIL_NOT_VERIFIED`    | mutation by a user whose email is not verified                                                                           | —                              | "verify your email" message + link to Email Verification; mutation: toast |
+| `NOT_FOUND`             | the entity does not exist (or was deleted meanwhile)                                                                     | —                              | query: not-found state; mutation: toast, refresh stale data               |
+| `BAD_USER_INPUT`        | validation failed                                                                                                        | `fields: [{ field, message }]` | inline errors under the fields                                            |
+| `CONFLICT`              | a unique value is already taken                                                                                          | `field` (when known)           | inline error under `field`                                                |
+| `ENTITY_IN_USE`         | delete blocked because the item is referenced                                                                            | —                              | toast, or the delete dialog shows it                                      |
+| `OPERATION_NOT_ALLOWED` | the caller has access, but a business rule forbids the action (e.g. delete own account, delete or demote the last admin) | —                              | toast, or the dialog / modal shows it                                     |
+| `RATE_LIMITED`          | too many requests (per IP or e.g. resend code)                                                                           | `retryAfter` (seconds)         | "please wait" message; mutation: toast                                    |
+| `INTERNAL_SERVER_ERROR` | unexpected error                                                                                                         | —                              | query: error state with Retry; mutation: generic error toast              |
 
 The codes cover the error categories the wiki asks the frontend to handle:
 
@@ -321,7 +335,8 @@ The codes cover the error categories the wiki asks the frontend to handle:
 | Feature requires a verified email    | `EMAIL_NOT_VERIFIED` ([read-only rule](../auth.md#unverified-users-are-read-only)) |
 | Not-found errors                     | `NOT_FOUND`                                                                        |
 | Conflict errors                      | `CONFLICT`                                                                         |
-| Dependency / business-rule errors    | `ENTITY_IN_USE`                                                                    |
+| Dependency errors                    | `ENTITY_IN_USE`                                                                    |
+| Business-rule errors                 | `OPERATION_NOT_ALLOWED`                                                            |
 | Unexpected server errors             | `INTERNAL_SERVER_ERROR`                                                            |
 | Rate limiting (auth pages)           | `RATE_LIMITED`                                                                     |
 | Network errors                       | no code: the request did not reach the server (`networkError` in Apollo Client)    |
@@ -345,6 +360,12 @@ The frontend shows **its own text**, chosen by `extensions.code` and `field`, so
 The backend `message` is English, meant for developers and logs, and is a fallback when the frontend has no text
 for a case.
 
+- Validation messages come from the page of the form, even for the same rule: `CreateUserInput` uses the Create
+  user modal texts (`Invalid email address`, `Password must contain at least 6 characters`), `SignInInput` /
+  `SignUpInput` use the Sign In texts (`Please enter a valid email address`,
+  `Password must be at least 6 characters long`). The limits are shared constants (`PASSWORD_MIN_LENGTH`,
+  `PASSWORD_MAX_LENGTH`, `EMAIL_MAX_LENGTH` in `auth/dto/credentials.input.ts`), and messages with a number build
+  it from the constant.
 - `message` never contains SQL, stack traces, internal ids or other users' data.
 - `field` / `fields[].field` use the input field names (`name`, `iso`, `categoryId`), so the frontend can map them
   to form fields without a lookup.
