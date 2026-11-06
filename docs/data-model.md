@@ -68,7 +68,7 @@ All tables have `id` (uuid), `created_at` and `updated_at`. Only the meaningful 
 | `auth_tokens` | `user_id`, `type` (`EMAIL_VERIFICATION`/`PASSWORD_RESET`), `code_hash`, `expires_at`, `used_at?`                                                                 |
 
 - Profile fields are nullable: Sign Up collects only email and password. "Create user" by an Admin requires
-  first/last name, department and position; this is enforced by the input DTO, not by the DB.
+  first/last name, department, position and role; this is enforced by the input DTO, not by the DB.
 - `email_verified_at` is the email verification status (`null` = not verified).
 - `avatar_url` stores a reference to the uploaded file, never the image itself.
 - `auth_tokens` covers both the 6-digit email verification code (10 min, single-use, a new code invalidates the

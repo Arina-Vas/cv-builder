@@ -157,6 +157,19 @@ Operation-level tables are added by each module together with its resolvers: the
 | `updateUser` | Admin  |
 | `deleteUser` | Admin  |
 
+Errors thrown by the service, besides the [protected users](#users) rules:
+
+| Operation                  | Case                          | Code             | Message                                     |
+| -------------------------- | ----------------------------- | ---------------- | ------------------------------------------- |
+| `user`                     | the user does not exist       | `NOT_FOUND`      | `User not found`                            |
+| `createUser`               | the email is taken            | `CONFLICT`       | `An account with this email already exists` |
+| `createUser`, `updateUser` | the department does not exist | `BAD_USER_INPUT` | `Department not found` (`departmentId`)     |
+| `createUser`, `updateUser` | the position does not exist   | `BAD_USER_INPUT` | `Position not found` (`positionId`)         |
+| `updateUser`, `deleteUser` | the user does not exist       | `NOT_FOUND`      | `User not found`                            |
+
+The email message is the Sign Up one: the Create user modal has no text for a taken email. "Change own role" is
+checked only when `role` differs from the caller's current role, because the Update user modal always sends `role`.
+
 The Profile tab mutation (first / last name, department, position; own profile or Admin) is added with the Profile
 module.
 

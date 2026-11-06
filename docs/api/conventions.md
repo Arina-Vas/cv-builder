@@ -360,6 +360,12 @@ The frontend shows **its own text**, chosen by `extensions.code` and `field`, so
 The backend `message` is English, meant for developers and logs, and is a fallback when the frontend has no text
 for a case.
 
+- Validation messages come from the page of the form, even for the same rule: `CreateUserInput` uses the Create
+  user modal texts (`Invalid email address`, `Password must contain at least 6 characters`), `SignInInput` /
+  `SignUpInput` use the Sign In texts (`Please enter a valid email address`,
+  `Password must be at least 6 characters long`). The limits are shared constants (`PASSWORD_MIN_LENGTH`,
+  `PASSWORD_MAX_LENGTH`, `EMAIL_MAX_LENGTH` in `auth/dto/credentials.input.ts`), and messages with a number build
+  it from the constant.
 - `message` never contains SQL, stack traces, internal ids or other users' data.
 - `field` / `fields[].field` use the input field names (`name`, `iso`, `categoryId`), so the frontend can map them
   to form fields without a lookup.
