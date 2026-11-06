@@ -1,4 +1,5 @@
 import { graphql } from '@/gql';
+import { NO_ERROR_TOAST } from '@/shared/lib/apollo/error-toast-link';
 
 graphql(`
   fragment DepartmentFields on Department {
@@ -53,3 +54,10 @@ export const DELETE_DEPARTMENT = graphql(`
     deleteDepartment(id: $id)
   }
 `);
+
+/** create / update / delete: the dialog shows the error, the list is refetched before it closes */
+export const DEPARTMENT_MUTATION_OPTIONS = {
+  context: NO_ERROR_TOAST,
+  refetchQueries: [DEPARTMENTS],
+  awaitRefetchQueries: true,
+};
