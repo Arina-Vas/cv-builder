@@ -186,5 +186,13 @@
       "projects": "Projects",
       "preview": "Preview"
     }
+  },
+  "departments": {
+    "title": "Departments",
+    "table": {
+      "name": "Name",
+      "empty": "No departments found",
+      "actions": { "edit": "Edit", "delete": "Delete" }
+    }
   }
 }
