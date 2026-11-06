@@ -30,6 +30,9 @@ export const conflict = (field: string, message: string): GraphQLError =>
 export const entityInUse = (message: string): GraphQLError =>
   new GraphQLError(message, { extensions: { code: ErrorCode.ENTITY_IN_USE } });
 
+export const operationNotAllowed = (message: string): GraphQLError =>
+  new GraphQLError(message, { extensions: { code: ErrorCode.OPERATION_NOT_ALLOWED } });
+
 export const rateLimited = (retryAfter: number, message = 'Too many requests'): GraphQLError =>
   new GraphQLError(message, { extensions: { code: ErrorCode.RATE_LIMITED, retryAfter } });
 
