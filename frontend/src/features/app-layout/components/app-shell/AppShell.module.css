@@ -9,6 +9,18 @@
   min-width: 0;
 }
 
+/* [A] Header: sticky strip above the page, breadcrumbs inside at 16px top / 20px left */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  box-sizing: border-box;
+  height: var(--header-height);
+  margin: 0 var(--content-padding-x);
+  padding: var(--header-padding);
+  background: var(--header-bg);
+}
+
 /* Tablet: the sidebar is fixed over the page, the page keeps only the rail's width.
    Breakpoint = SIDEBAR_OVERLAY_QUERY */
 @media (max-width: 1023.98px) {

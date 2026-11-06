@@ -12,9 +12,12 @@ import { NetworkStatusGate } from './NetworkStatusGate';
 const NO_INTERNET_MESSAGE =
   "Something went wrong. We're already working on fixing it. Please try again.";
 
+// Real operations from backend/schema.gql, so the IDE GraphQL plugin validates them; the response is mocked
 const ME = gql`
   query Me {
-    me
+    me {
+      id
+    }
   }
 `;
 
@@ -82,7 +85,7 @@ describe('NetworkStatusGate', () => {
     const backend = vi
       .fn()
       .mockImplementationOnce(() => throwError(() => new TypeError('Failed to fetch')))
-      .mockImplementation(() => of({ data: { me: 'ada' } }));
+      .mockImplementation(() => of({ data: { me: { __typename: 'User', id: 'ada' } } }));
     const client = new ApolloClient({
       cache: new InMemoryCache(),
       link: ApolloLink.from([createNetworkErrorLink(), new ApolloLink(backend)]),

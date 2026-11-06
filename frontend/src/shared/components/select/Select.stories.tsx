@@ -48,11 +48,13 @@ const meta = {
     disabled: false,
     onValueChange: fn(),
     onOpenChange: fn(),
+    onBlur: fn(),
   },
   argTypes: {
     options: { control: false },
     onValueChange: { control: false },
     onOpenChange: { control: false },
+    onBlur: { control: false },
   },
   decorators: [
     (Story) => (
@@ -284,6 +286,37 @@ export const Closes: Story = {
       await waitFor(() => expect(body.queryByRole('listbox')).not.toBeInTheDocument());
       await expect(trigger).toHaveTextContent('Software Engineer 1');
       await expect(args.onValueChange).not.toHaveBeenCalled();
+    });
+  },
+};
+
+// react-hook-form marks a field as touched on blur; opening moves focus into the portal, so the
+// select reports blur when the list closes instead
+export const BlursOnClose: Story = {
+  play: async ({ args, canvasElement, step }) => {
+    const trigger = within(canvasElement).getByRole('combobox');
+    const body = getBody(canvasElement);
+
+    await step('opening does not blur', async () => {
+      await userEvent.click(trigger);
+      await body.findByRole('listbox');
+
+      await expect(args.onBlur).not.toHaveBeenCalled();
+    });
+
+    await step('Escape without a choice blurs once', async () => {
+      await userEvent.keyboard('{Escape}');
+      await waitFor(() => expect(body.queryByRole('listbox')).not.toBeInTheDocument());
+
+      await expect(args.onBlur).toHaveBeenCalledTimes(1);
+    });
+
+    await step('choosing an option blurs as well', async () => {
+      await userEvent.click(trigger);
+      await userEvent.click(await body.findByRole('option', { name: 'Software Engineer 2' }));
+      await waitFor(() => expect(body.queryByRole('listbox')).not.toBeInTheDocument());
+
+      await expect(args.onBlur).toHaveBeenCalledTimes(2);
     });
   },
 };

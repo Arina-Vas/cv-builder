@@ -44,6 +44,7 @@
 
 .control > :is(input, textarea):focus ~ .outline,
 .control > [role='combobox']:focus-visible ~ .outline,
+.control > [aria-haspopup]:focus-visible ~ .outline,
 .root[data-active] > .control > .outline {
   border-color: var(--input-border-focus);
 }

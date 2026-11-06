@@ -299,17 +299,17 @@ helpers in `backend/src/common/errors/app-errors.ts`; a global exception filter 
 
 ### Codes
 
-| Code                    | When                                                 | Extra fields                   | Frontend                                                 |
-| ----------------------- | ---------------------------------------------------- | ------------------------------ | -------------------------------------------------------- |
-| `UNAUTHENTICATED`       | no token, invalid or expired token                   | —                              | try `refresh`, otherwise go to Sign In                   |
-| `FORBIDDEN`             | role or ownership check failed                       | —                              | "not authorized" state                                   |
-| `EMAIL_NOT_VERIFIED`    | mutation by a user whose email is not verified       | —                              | "verify your email" message + link to Email Verification |
-| `NOT_FOUND`             | the entity does not exist (or was deleted meanwhile) | —                              | not-found state, refresh stale data                      |
-| `BAD_USER_INPUT`        | validation failed                                    | `fields: [{ field, message }]` | inline errors under the fields                           |
-| `CONFLICT`              | a unique value is already taken                      | `field` (when known)           | inline error under `field`                               |
-| `ENTITY_IN_USE`         | delete blocked because the item is referenced        | —                              | toast                                                    |
-| `RATE_LIMITED`          | too many requests (per IP or e.g. resend code)       | `retryAfter` (seconds)         | "please wait" message                                    |
-| `INTERNAL_SERVER_ERROR` | unexpected error                                     | —                              | generic error toast with a retry option                  |
+| Code                    | When                                                 | Extra fields                   | Frontend                                                                  |
+| ----------------------- | ---------------------------------------------------- | ------------------------------ | ------------------------------------------------------------------------- |
+| `UNAUTHENTICATED`       | no token, invalid or expired token                   | —                              | try `refresh`, otherwise go to Sign In                                    |
+| `FORBIDDEN`             | role or ownership check failed                       | —                              | query: "not authorized" state; mutation: toast                            |
+| `EMAIL_NOT_VERIFIED`    | mutation by a user whose email is not verified       | —                              | "verify your email" message + link to Email Verification; mutation: toast |
+| `NOT_FOUND`             | the entity does not exist (or was deleted meanwhile) | —                              | query: not-found state; mutation: toast, refresh stale data               |
+| `BAD_USER_INPUT`        | validation failed                                    | `fields: [{ field, message }]` | inline errors under the fields                                            |
+| `CONFLICT`              | a unique value is already taken                      | `field` (when known)           | inline error under `field`                                                |
+| `ENTITY_IN_USE`         | delete blocked because the item is referenced        | —                              | toast, or the delete dialog shows it                                      |
+| `RATE_LIMITED`          | too many requests (per IP or e.g. resend code)       | `retryAfter` (seconds)         | "please wait" message; mutation: toast                                    |
+| `INTERNAL_SERVER_ERROR` | unexpected error                                     | —                              | query: error state with Retry; mutation: generic error toast              |
 
 The codes cover the error categories the wiki asks the frontend to handle:
 
@@ -328,6 +328,16 @@ The codes cover the error categories the wiki asks the frontend to handle:
 
 `UNAUTHENTICATED`, `FORBIDDEN`, `BAD_USER_INPUT` and `INTERNAL_SERVER_ERROR` follow Apollo Server conventions;
 the other codes are ours.
+
+A failed mutation that no component shows itself becomes a global error toast on the frontend (except
+`UNAUTHENTICATED`, `BAD_USER_INPUT` and `CONFLICT`); a failed query is the page's error / not-found /
+not-authorized state, never a toast. See `frontend/README.md` → Global error toasts.
+
+The list of codes is `ErrorCode` in `backend/src/common/errors/error-code.enum.ts`. The frontend repeats it as
+`ERROR_CODES` (`frontend/src/shared/lib/apollo/graphql-errors.ts`) and the `errors.*` texts in
+`frontend/messages/en.json`; `frontend/src/shared/lib/apollo/error-codes.test.ts` fails when the three differ.
+So a new or renamed code changes the enum, `ERROR_CODES` and the text in one PR. A code outside the list (for
+example Apollo Server's `GRAPHQL_VALIDATION_FAILED`) is treated by the frontend as `INTERNAL_SERVER_ERROR`.
 
 ### Messages
 

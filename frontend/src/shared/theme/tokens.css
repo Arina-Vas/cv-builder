@@ -155,7 +155,7 @@
   /* Radii                                                               */
   /* ------------------------------------------------------------------ */
   --radius-none: 0; /* [A] inputs */
-  --radius-sm: 4px; /* [M] shape.borderRadius: menus, modals, skeleton(rounded), tooltip */
+  --radius-sm: 4px; /* [M] shape.borderRadius: menus, skeleton(rounded), tooltip */
   --radius-toast: 12px; /* [F] Toast */
   --radius-chip: 12px; /* [M] Chip medium */
   --radius-pill: 40px; /* [F][A] buttons */
@@ -186,7 +186,7 @@
   --sidebar-padding-top: 44px; /* [A] */
   --sidebar-padding-bottom: 16px; /* [A] */
   --bottom-nav-height: 56px; /* [A] < 900px */
-  --header-height: 44px; /* [A] breadcrumbs header */
+  --header-height: 56px; /* [A] Header frame: 16 + 24 breadcrumbs + 16 */
   --header-padding: 16px 0 0 20px; /* [A] top / left */
   --content-max-width: 1536px; /* [A] Container maxWidth "xl" */
   --content-padding-x: 24px; /* [M] Container gutters ≥600px */
@@ -195,8 +195,9 @@
   --auth-form-width: 560px; /* [F] auth pages "Form" frame */
   --auth-actions-offset: 44px; /* [F] last field → primary button */
   --otp-cell-size: 48px; /* [F] Email verification code cell */
-  --modal-width-sm: 600px; /* [A] maxWidth "sm" */
-  --modal-width-md: 900px; /* [A] maxWidth "md" (project / user forms) */
+  --modal-width-sm: 620px; /* [F] confirmations (Delete CV) */
+  --modal-width-md: 860px; /* [F] forms (Create user, Add project) */
+  --modal-max-height: 680px; /* [F] */
   --icon-size: 24px; /* [M] SvgIcon medium */
   --icon-size-sm: 20px; /* [M] SvgIcon small */
   --avatar-size-sm: 24px; /* [A] skill/language bullet */
@@ -245,6 +246,11 @@
   --tab-min-width: 150px; /* [A] */
   --tab-indicator-height: 2px; /* [M] */
 
+  --breadcrumbs-separator-size: 20px; /* [A] Item → SVG */
+  --breadcrumbs-gap: 8px; /* [A] text ↔ separator ↔ text */
+  --breadcrumbs-icon-gap: 8px; /* [A] entity icon ↔ name */
+  --breadcrumbs-skeleton-width: 140px; /* entity name while it loads */
+
   --sidebar-item-height: 56px; /* [A] (40px < 900px) */
   --sidebar-item-padding: 9px 16px; /* [A] */
   --sidebar-item-gap: 16px; /* [A] icon ↔ label */
@@ -265,12 +271,19 @@
   --pagination-select-padding: 8px; /* [A] Figma text left 12, but 12 + "10" + gap + chevron + 12 > 70 */
   --pagination-padding: 8px; /* [A] block padding under the table */
 
+  --search-height: 40px; /* [F] Users › Table › Header › Container */
+  --search-width: 320px; /* [F] */
+  --search-radius: var(--radius-pill); /* [F] 40px */
+  --search-icon-size: 24px; /* [F] */
+  --search-icon-offset: 12px; /* [F] icon left */
+  --search-text-offset: 43px; /* [F] placeholder left = 12 + 24 + 7 */
+
   --modal-radius: var(--radius-sm); /* [M] */
   --modal-title-padding: 16px 24px; /* [M] DialogTitle */
-  --modal-content-padding: 16px 24px 20px; /* [A] paddingTop 16 override, [M] 24/20 */
+  --modal-content-padding: 16px 24px; /* [F] */
   --modal-actions-padding: 8px; /* [M] DialogActions */
-  --modal-actions-gap: 8px; /* [M] */
-
+  --modal-actions-gap: 24px; /* [F] CANCEL ↔ primary button */
+  --modal-section-gap: 26px; /* [F] title ↔ body ↔ buttons */
   --menu-min-width: 200px; /* [A] user menu */
   --menu-radius: var(--radius-sm); /* [M] */
   --menu-item-padding: 6px 16px; /* [M] MenuItem */
@@ -283,6 +296,7 @@
   --toast-padding: 8px 16px; /* [F] title top 8, left 16 */
   --z-sidebar-backdrop: 20; /* tablet: dims the page under the open sidebar */
   --z-sidebar: 30; /* below popovers (50) */
+  --z-dialog: 40; /* above the sidebar, below popovers (50) opened inside the dialog */
   --z-toast: 9999;
   /* Provide default values for Radix Toast dynamic variables */
   --radix-toast-swipe-move-x: 0px;
@@ -295,6 +309,9 @@
   --skill-bar-height: 4px; /* [F] Progressbar */
   --skill-bar-width: 80px; /* [F] Progressbar */
   --skill-bar-track-opacity: 0.9; /* [F] Progressbar opacity 90% */
+
+  --form-row-gap: 21px; /* [F] Create project: between rows of fields, on top of Field's own 16px */
+  --form-column-gap: 12px; /* [F] Create project: between the two columns */
 
   /* ------------------------------------------------------------------ */
   /* Semantic — LIGHT theme                                              */
@@ -407,6 +424,11 @@
   --tab-text: #2e2e2e; /* [A] */
   --tab-text-active: #c63031; /* [M] selected = primary */
   --tab-indicator: #c63031; /* [M] */
+
+  /* Breadcrumbs */
+  --breadcrumbs-text: #626262; /* [A] links + current page */
+  --breadcrumbs-separator: #aeaeae; /* [A] */
+  --breadcrumbs-entity: #c63031; /* [A] employee / CV name = primary */
 
   /* Sidebar */
   --sidebar-item-text: var(--text-secondary); /* [A] */
@@ -571,6 +593,9 @@
   --menu-item-selected: rgba(198, 48, 49, 0.16); /* [M] */
 
   --tab-text: #f5f5f7; /* [A] */
+
+  --breadcrumbs-text: #aeaeae; /* [A] */
+  --breadcrumbs-separator: #aeaeae; /* [A] */
 
   --tooltip-bg: rgba(97, 97, 97, 0.92); /* [M] same in dark */
 

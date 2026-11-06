@@ -3,14 +3,17 @@ import { throwError } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { createNetworkErrorLink, isNetworkFailure } from './network-error-link';
 
-const ME = gql`
-  query Me {
-    me
+// Real operations from backend/schema.gql, so the IDE GraphQL plugin validates them; the response is mocked
+const HEALTH = gql`
+  query Health {
+    health {
+      status
+    }
   }
 `;
-const SAVE = gql`
-  mutation Save {
-    save
+const DELETE_POSITION = gql`
+  mutation DeletePosition {
+    deletePosition(id: "position-1")
   }
 `;
 
@@ -41,7 +44,7 @@ describe('createNetworkErrorLink', () => {
   it('reports a query that could not reach the backend', async () => {
     const { client, onNetworkFailure } = createClient(new TypeError('Failed to fetch'));
 
-    await expect(client.query({ query: ME })).rejects.toThrow('Failed to fetch');
+    await expect(client.query({ query: HEALTH })).rejects.toThrow('Failed to fetch');
 
     expect(onNetworkFailure).toHaveBeenCalledOnce();
   });
@@ -49,7 +52,7 @@ describe('createNetworkErrorLink', () => {
   it('ignores server errors', async () => {
     const { client, onNetworkFailure } = createClient(new Error('Boom'));
 
-    await expect(client.query({ query: ME })).rejects.toThrow('Boom');
+    await expect(client.query({ query: HEALTH })).rejects.toThrow('Boom');
 
     expect(onNetworkFailure).not.toHaveBeenCalled();
   });
@@ -57,7 +60,7 @@ describe('createNetworkErrorLink', () => {
   it('leaves failed mutations to the form that sent them', async () => {
     const { client, onNetworkFailure } = createClient(new TypeError('Failed to fetch'));
 
-    await expect(client.mutate({ mutation: SAVE })).rejects.toThrow('Failed to fetch');
+    await expect(client.mutate({ mutation: DELETE_POSITION })).rejects.toThrow('Failed to fetch');
 
     expect(onNetworkFailure).not.toHaveBeenCalled();
   });

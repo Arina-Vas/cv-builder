@@ -38,6 +38,7 @@
       "types": { "success": "Success", "error": "Error", "warning": "Warning", "info": "Info" }
     },
     "input": { "showPassword": "Show password", "hidePassword": "Hide password" },
+    "searchField": { "label": "Search", "clear": "Clear search" },
     "datePicker": {
       "placeholder": "Select date",
       "previous": "Previous",
@@ -51,6 +52,15 @@
       "remove": "Remove avatar",
       "invalidType": "Only png, jpg or gif allowed",
       "tooLarge": "File is larger than {maxSize}"
+    },
+    "actions": {
+      "confirm": "Confirm",
+      "cancel": "Cancel",
+      "close": "Close",
+      "create": "Create",
+      "update": "Update",
+      "save": "Save",
+      "add": "Add"
     }
   },
   "errors": {
@@ -65,6 +75,10 @@
     "INTERNAL_SERVER_ERROR": "Something went wrong. Please try again later"
   },
   "validation": {
+    "department": {
+      "required": "Department name is required",
+      "maxLength": "Department name must not exceed {max} characters"
+    },
     "email": {
       "required": "Email is required",
       "invalid": "Please enter a valid email address"
@@ -89,6 +103,7 @@
     "collapseSidebar": "Collapse sidebar",
     "expandSidebar": "Expand sidebar",
     "navigation": "Main navigation",
+    "breadcrumbs": "Breadcrumb",
     "notAuthorized": "You are not authorized to access this page",
     "profile": "Profile",
     "settings": "Settings",

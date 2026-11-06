@@ -15,6 +15,7 @@ export interface MultiSelectProps {
   value?: string[];
   defaultValue?: string[];
   onValueChange?: (value: string[]) => void;
+  onBlur?: () => void;
   label: string;
   error?: string;
   disabled?: boolean;
@@ -50,6 +51,7 @@ export function MultiSelect({
   onOpenChange,
   filter = defaultFilter,
   emptyText,
+  onBlur,
   ref,
 }: MultiSelectProps) {
   const t = useTranslations('common.select');
@@ -214,6 +216,7 @@ export function MultiSelect({
               onBlur={() => {
                 setIsFocused(false);
                 closeList();
+                onBlur?.();
               }}
               onKeyDown={handleKeyDown}
             />
