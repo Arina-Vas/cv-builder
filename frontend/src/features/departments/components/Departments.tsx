@@ -13,6 +13,9 @@ import { useErrorMessage } from '@/shared/lib/apollo/useErrorMessage';
 import { useState } from 'react';
 import { DepartmentFormModal } from '@/features/departments/components/DepartmentFormModal';
 import { DeleteDepartmentDialog } from '@/features/departments/components/DeleteDepartmentDialog';
+import { PlusIcon } from '@/shared/components/icons/PlusIcon';
+import { Button } from '@/shared/components/buttons';
+import s from './Departments.module.css';
 
 type ModalState =
   | { type: 'create' }
@@ -57,7 +60,20 @@ export const Departments = () => {
 
   return (
     <div>
-      <SearchField value={search} onChange={setSearch} />
+      <div className={s.header}>
+        <SearchField value={search} onChange={setSearch} />
+        <Button
+          variant={'text'}
+          aria-label={t('createButton')}
+          onClick={() => setModal({ type: 'create' })}
+        >
+          <span className={s.withIcon}>
+            <PlusIcon />
+            {t('createButton')}
+          </span>
+        </Button>
+      </div>
+
       <DataTable<DepartmentFieldsFragment>
         rows={shown?.departments.items ?? []}
         getRowId={(department) => department.id}
