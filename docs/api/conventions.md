@@ -226,7 +226,12 @@ sort indicator. With it:
 
 - `department` and `position` sort by the name of the referenced department / position;
 - users without a value in the sorted column (`firstName`, `lastName`, `department`, `position` are nullable,
-  Sign Up collects only email and password) go **last in both directions** (`nulls: 'last'`);
+  Sign Up collects only email and password):
+  - for `firstName` and `lastName` they go **last in both directions** (`nulls: 'last'`);
+  - for `department` and `position` the PostgreSQL default applies: last for `ASC`, **first** for `DESC`. Prisma
+    does not support `nulls` when sorting by a relation field, and only self-registered users with an unfilled
+    profile have no department / position (admin-created users always have both), so we accept this instead of
+    raw SQL;
 - `id ASC` is still added as the secondary sort.
 
 ### Sorting
