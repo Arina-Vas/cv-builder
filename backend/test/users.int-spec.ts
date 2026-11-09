@@ -240,17 +240,21 @@ describe('Users (integration)', () => {
   });
 
   describe('updateUser', () => {
-    it('lets an Admin change the department, position and role of another user', async () => {
+    const names = { firstName: 'Jane', lastName: 'Doe' };
+
+    it('lets an Admin change the names, department, position and role of another user', async () => {
       const { browser } = await signedIn(UserRole.ADMIN);
       const target = await createUser(t.prisma);
       const qa = await t.prisma.department.create({ data: { name: 'QA' } });
 
       const { updateUser } = await browser.data<{ updateUser: GqlListUser }>(UPDATE_USER, {
-        input: { id: target.id, departmentId: qa.id, positionId, role: UserRole.ADMIN },
+        input: { id: target.id, ...names, departmentId: qa.id, positionId, role: UserRole.ADMIN },
       });
 
       expect(updateUser).toMatchObject({
         id: target.id,
+        firstName: 'Jane',
+        lastName: 'Doe',
         role: UserRole.ADMIN,
         department: { name: 'QA' },
         position: { name: 'Developer' },
@@ -261,7 +265,7 @@ describe('Users (integration)', () => {
       const { browser, user } = await signedIn();
 
       const error = await browser.error(UPDATE_USER, {
-        input: { id: user.id, departmentId, positionId, role: UserRole.ADMIN },
+        input: { id: user.id, ...names, departmentId, positionId, role: UserRole.ADMIN },
       });
 
       expect(error.extensions.code).toBe('FORBIDDEN');
@@ -274,7 +278,7 @@ describe('Users (integration)', () => {
       const { browser, user } = await signedIn(UserRole.ADMIN);
 
       const error = await browser.error(UPDATE_USER, {
-        input: { id: user.id, departmentId, positionId, role: UserRole.EMPLOYEE },
+        input: { id: user.id, ...names, departmentId, positionId, role: UserRole.EMPLOYEE },
       });
 
       expect(error.extensions.code).toBe('OPERATION_NOT_ALLOWED');
@@ -285,7 +289,7 @@ describe('Users (integration)', () => {
       const { browser, user } = await signedIn(UserRole.ADMIN);
 
       const { updateUser } = await browser.data<{ updateUser: GqlListUser }>(UPDATE_USER, {
-        input: { id: user.id, departmentId, positionId, role: UserRole.ADMIN },
+        input: { id: user.id, ...names, departmentId, positionId, role: UserRole.ADMIN },
       });
 
       expect(updateUser.department).toEqual({ name: 'Backend' });
@@ -295,10 +299,41 @@ describe('Users (integration)', () => {
       const { browser } = await signedIn(UserRole.ADMIN);
 
       const error = await browser.error(UPDATE_USER, {
-        input: { id: MISSING_ID, departmentId, positionId, role: UserRole.EMPLOYEE },
+        input: { id: MISSING_ID, ...names, departmentId, positionId, role: UserRole.EMPLOYEE },
       });
 
       expect(error.extensions.code).toBe('NOT_FOUND');
+    });
+    it('trims the names and rejects empty ones with BAD_USER_INPUT', async () => {
+      const { browser } = await signedIn(UserRole.ADMIN);
+      const target = await createUser(t.prisma);
+
+      const { updateUser } = await browser.data<{ updateUser: GqlListUser }>(UPDATE_USER, {
+        input: {
+          id: target.id,
+          firstName: '  Ann ',
+          lastName: ' Lee  ',
+          departmentId,
+          positionId,
+          role: UserRole.EMPLOYEE,
+        },
+      });
+      expect(updateUser).toMatchObject({ firstName: 'Ann', lastName: 'Lee' });
+
+      const error = await browser.error(UPDATE_USER, {
+        input: {
+          id: target.id,
+          firstName: ' ',
+          lastName: 'Lee',
+          departmentId,
+          positionId,
+          role: UserRole.EMPLOYEE,
+        },
+      });
+      expect(error.extensions.code).toBe('BAD_USER_INPUT');
+      await expect(
+        t.prisma.user.findUniqueOrThrow({ where: { id: target.id } }),
+      ).resolves.toMatchObject({ firstName: 'Ann' });
     });
   });
 

@@ -63,6 +63,8 @@ const createInput: CreateUserInput = {
 
 const updateInput = (role: UserRole = UserRole.EMPLOYEE): UpdateUserInput => ({
   id: 'user-1',
+  firstName: 'Jane',
+  lastName: 'Doe',
   departmentId: 'department-1',
   positionId: 'position-1',
   role,
@@ -258,14 +260,20 @@ describe('UsersService', () => {
       prisma.user.update.mockResolvedValue(row);
     });
 
-    it('updates department, position and role in a serializable transaction', async () => {
+    it('updates names, department, position and role in a serializable transaction', async () => {
       prisma.user.findUnique.mockResolvedValue({ role: UserRole.EMPLOYEE });
 
       const user = await service.update(updateInput(UserRole.ADMIN), 'admin-1');
 
       expect(prisma.user.update).toHaveBeenCalledWith({
         where: { id: 'user-1' },
-        data: { departmentId: 'department-1', positionId: 'position-1', role: UserRole.ADMIN },
+        data: {
+          firstName: 'Jane',
+          lastName: 'Doe',
+          departmentId: 'department-1',
+          positionId: 'position-1',
+          role: UserRole.ADMIN,
+        },
         include: userInclude,
       });
       expect(prisma.$transaction).toHaveBeenCalledWith(expect.any(Function), {
