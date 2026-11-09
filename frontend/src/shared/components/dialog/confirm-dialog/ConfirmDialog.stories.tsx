@@ -1,3 +1,4 @@
+import { CombinedGraphQLErrors } from '@apollo/client/errors';
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { useRef, useState, type ComponentProps } from 'react';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
@@ -5,14 +6,59 @@ import { Button } from '@/shared/components/buttons';
 import dialogStyles from '../Dialog.module.css';
 import { ConfirmDialog } from './ConfirmDialog';
 
-type DemoProps = Omit<ComponentProps<typeof ConfirmDialog>, 'open'> & {
+/* ------------------------------------------------------------------ */
+/* Simulated request                                                   */
+/* ------------------------------------------------------------------ */
+
+// what onConfirm's promise does; `pending` never settles, to look at the loading state
+type Outcome = 'success' | 'error' | 'errorThenSuccess' | 'pending';
+
+// errors.ENTITY_IN_USE in messages/en.json: the dialog gets it from useErrorMessage(parseError(error))
+const IN_USE_TEXT = "This item is in use and can't be deleted";
+const REQUEST_MS = 800;
+
+const inUseError = () =>
+  new CombinedGraphQLErrors({
+    errors: [{ message: 'Department is in use', extensions: { code: 'ENTITY_IN_USE' } }],
+  });
+
+// what a mutation does: resolves on success, rejects with an Apollo error on failure
+const request = (fails: boolean) =>
+  new Promise<void>((resolve, reject) => {
+    setTimeout(() => (fails ? reject(inUseError()) : resolve()), REQUEST_MS);
+  });
+
+/* ------------------------------------------------------------------ */
+/* Demo                                                                */
+/* ------------------------------------------------------------------ */
+
+type DemoProps = Omit<ComponentProps<typeof ConfirmDialog>, 'open' | 'onConfirm'> & {
+  outcome?: Outcome;
+  // spy: called on each Confirm, before the simulated request
+  onConfirm: () => void;
   // open on mount: for Dark and manual checks without clicking the trigger
   initialOpen?: boolean;
 };
 
-// Only owns `open`; loading / error come straight from args, so each state can be set in Controls
-const ConfirmDialogDemo = ({ initialOpen = false, onOpenChange, ...rest }: DemoProps) => {
+// Owns `open` like a page; onConfirm returns the simulated request, the dialog does the rest
+const ConfirmDialogDemo = ({
+  outcome = 'success',
+  onConfirm,
+  onOpenChange,
+  initialOpen = false,
+  ...rest
+}: DemoProps) => {
   const [open, setOpen] = useState(initialOpen);
+  const attempts = useRef(0);
+
+  const handleConfirm = () => {
+    onConfirm();
+    attempts.current += 1;
+    if (outcome === 'pending') return new Promise<never>(() => {});
+    return request(
+      outcome === 'error' || (outcome === 'errorThenSuccess' && attempts.current === 1),
+    );
+  };
 
   return (
     <>
@@ -24,57 +70,6 @@ const ConfirmDialogDemo = ({ initialOpen = false, onOpenChange, ...rest }: DemoP
           setOpen(next);
           onOpenChange(next);
         }}
-      />
-    </>
-  );
-};
-
-type Outcome = 'success' | 'error' | 'errorThenSuccess';
-
-// What a page does with useMutation: loading while the request runs, close on success,
-// keep the dialog open with the error on failure, clear the error when the dialog closes.
-// The real mutation also passes `context: NO_ERROR_TOAST`, so the error is not a global toast too.
-const PageDemo = ({
-  outcome,
-  onConfirm,
-  onOpenChange,
-  ...rest
-}: DemoProps & { outcome: Outcome }) => {
-  const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string>();
-  const attempts = useRef(0);
-
-  const handleOpenChange = (next: boolean) => {
-    if (!next) setError(undefined); // mutation reset()
-    setOpen(next);
-    onOpenChange(next);
-  };
-
-  const handleConfirm = () => {
-    onConfirm();
-    attempts.current += 1;
-    setLoading(true);
-    setError(undefined);
-
-    setTimeout(() => {
-      setLoading(false);
-      const fails =
-        outcome === 'error' || (outcome === 'errorThenSuccess' && attempts.current === 1);
-      if (fails) setError(IN_USE_TEXT);
-      else handleOpenChange(false); // onCompleted
-    }, REQUEST_MS);
-  };
-
-  return (
-    <>
-      <Button onClick={() => setOpen(true)}>Delete department</Button>
-      <ConfirmDialog
-        {...rest}
-        open={open}
-        loading={loading}
-        error={error}
-        onOpenChange={handleOpenChange}
         onConfirm={handleConfirm}
       />
     </>
@@ -82,9 +77,6 @@ const PageDemo = ({
 };
 
 const TITLE = 'Delete department';
-// errors.ENTITY_IN_USE in messages/en.json; a page gets it from useErrorMessage(parseError(error))
-const IN_USE_TEXT = "This item is in use and can't be deleted";
-const REQUEST_MS = 800;
 
 // The dialog is portaled to <body>, so queries go through the whole document
 const getBody = (canvasElement: HTMLElement) => within(canvasElement.ownerDocument.body);
@@ -100,6 +92,12 @@ const getOverlay = (canvasElement: HTMLElement) =>
 const waitForClose = (canvasElement: HTMLElement) =>
   waitFor(() => expect(getBody(canvasElement).queryByRole('dialog')).toBeNull());
 
+const clickConfirm = async (canvasElement: HTMLElement) => {
+  const dialog = await getBody(canvasElement).findByRole('dialog');
+  await userEvent.click(within(dialog).getByRole('button', { name: 'Confirm' }));
+  return dialog;
+};
+
 const meta = {
   title: 'Shared/ConfirmDialog',
   component: ConfirmDialogDemo,
@@ -110,14 +108,16 @@ const meta = {
         Are you sure you want to delete department <strong>Engineering</strong>?
       </>
     ),
-    loading: false,
-    error: '',
+    outcome: 'success',
     onConfirm: fn(),
     onOpenChange: fn(),
   },
   argTypes: {
     message: { control: false },
-    error: { control: 'text' },
+    outcome: {
+      control: 'inline-radio',
+      options: ['success', 'error', 'errorThenSuccess', 'pending'],
+    },
     onConfirm: { control: false },
     onOpenChange: { control: false },
   },
@@ -133,7 +133,7 @@ type Story = StoryObj<typeof meta>;
 /* Content                                                             */
 /* ------------------------------------------------------------------ */
 
-// Props and states (labels, Cancel / Confirm, loading, error) are in ConfirmDialog.test.tsx
+// Props and states (labels, Cancel / Confirm, loading, error, retry) are in ConfirmDialog.test.tsx
 export const Default: Story = {};
 
 export const CustomLabels: Story = {
@@ -167,16 +167,15 @@ export const LongName: Story = {
 };
 
 /* ------------------------------------------------------------------ */
-/* States from props                                                   */
+/* States                                                              */
 /* ------------------------------------------------------------------ */
 
 // Only what jsdom can't see: the loading button keeps its accessible name (CSS), the overlay is blocked
 export const Loading: Story = {
-  args: {
-    loading: true,
-  },
+  args: { outcome: 'pending' },
   play: async ({ args, canvasElement }) => {
-    const dialog = await openDialog(canvasElement);
+    await openDialog(canvasElement);
+    const dialog = await clickConfirm(canvasElement);
 
     await expect(within(dialog).getByRole('button', { name: 'Confirm' })).toHaveAttribute(
       'aria-busy',
@@ -189,31 +188,34 @@ export const Loading: Story = {
 };
 
 export const WithError: Story = {
-  args: {
-    error: IN_USE_TEXT,
+  args: { outcome: 'error' },
+  play: async ({ canvasElement }) => {
+    await openDialog(canvasElement);
+    const dialog = await clickConfirm(canvasElement);
+
+    await expect(await within(dialog).findByRole('alert')).toHaveTextContent(IN_USE_TEXT);
   },
 };
 
 /* ------------------------------------------------------------------ */
-/* Page flow: the way a page wires useMutation into the dialog         */
+/* Flows: onConfirm returns the mutation's promise                     */
 /* ------------------------------------------------------------------ */
 
 export const FlowSuccess: Story = {
-  render: (args) => <PageDemo {...args} outcome="success" />,
   play: async ({ args, canvasElement }) => {
-    const dialog = await openDialog(canvasElement);
-    const confirm = within(dialog).getByRole('button', { name: 'Confirm' });
+    await openDialog(canvasElement);
+    const dialog = await clickConfirm(canvasElement);
 
-    await userEvent.click(confirm);
-
-    await expect(confirm).toHaveAttribute('aria-busy', 'true');
+    await expect(within(dialog).getByRole('button', { name: 'Confirm' })).toHaveAttribute(
+      'aria-busy',
+      'true',
+    );
     await waitForClose(canvasElement);
     await expect(args.onConfirm).toHaveBeenCalledTimes(1);
   },
 };
 
 export const FlowDoubleClick: Story = {
-  render: (args) => <PageDemo {...args} outcome="success" />,
   play: async ({ args, canvasElement }) => {
     const dialog = await openDialog(canvasElement);
 
@@ -226,7 +228,7 @@ export const FlowDoubleClick: Story = {
 };
 
 export const FlowError: Story = {
-  render: (args) => <PageDemo {...args} outcome="error" />,
+  args: { outcome: 'error' },
   play: async ({ canvasElement, step }) => {
     let dialog = await openDialog(canvasElement);
 
@@ -246,7 +248,7 @@ export const FlowError: Story = {
 };
 
 export const FlowRetryAfterError: Story = {
-  render: (args) => <PageDemo {...args} outcome="errorThenSuccess" />,
+  args: { outcome: 'errorThenSuccess' },
   play: async ({ canvasElement, step }) => {
     const dialog = await openDialog(canvasElement);
     const confirm = within(dialog).getByRole('button', { name: 'Confirm' });
@@ -281,11 +283,18 @@ export const Dark: Story = {
 };
 
 export const DarkWithError: Story = {
-  args: { initialOpen: true, error: IN_USE_TEXT },
+  args: { initialOpen: true, outcome: 'error' },
   globals: { theme: 'dark' },
+  play: async ({ canvasElement }) => {
+    const dialog = await clickConfirm(canvasElement);
+    await within(dialog).findByRole('alert');
+  },
 };
 
 export const DarkLoading: Story = {
-  args: { initialOpen: true, loading: true },
+  args: { initialOpen: true, outcome: 'pending' },
   globals: { theme: 'dark' },
+  play: async ({ canvasElement }) => {
+    await clickConfirm(canvasElement);
+  },
 };
