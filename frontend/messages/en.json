@@ -83,6 +83,21 @@
       "required": "Position name is required",
       "maxLength": "Position name must not exceed {max} characters"
     },
+    "language": {
+      "name": {
+        "required": "Name is required",
+        "maxLength": "Name must not exceed {max} characters"
+      },
+      "nativeName": {
+        "required": "Native name is required",
+        "maxLength": "Native name must not exceed {max} characters"
+      },
+      "iso": {
+        "required": "ISO is required",
+        "maxLength": "ISO must not exceed {max} characters",
+        "format": "ISO must be a language code, e.g. EN or PT-BR"
+      }
+    },
     "email": {
       "required": "Email is required",
       "invalid": "Please enter a valid email address"
