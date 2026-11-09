@@ -202,5 +202,21 @@
       "title": "Delete department",
       "message": "Are you sure you want to delete department <b>{name}</b>?"
     }
+  },
+  "positions": {
+    "title": "Positions",
+    "createButton": "Create position",
+    "table": {
+      "name": "Name",
+      "empty": "No positions found",
+      "actions": { "edit": "Edit", "delete": "Delete" }
+    },
+    "fields": { "name": "Position" },
+    "create": { "title": "Create position" },
+    "edit": { "title": "Edit position" },
+    "delete": {
+      "title": "Delete position",
+      "message": "Are you sure you want to delete position <b>{name}</b>?"
+    }
   }
 }

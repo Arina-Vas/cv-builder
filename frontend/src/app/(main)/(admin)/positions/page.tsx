@@ -1,3 +1,10 @@
+import { Positions } from '@/features/positions/components/Positions';
+import { Suspense } from 'react';
+
 export default function PositionsPage() {
-  return <h1>Positions</h1>;
+  return (
+    <Suspense>
+      <Positions />
+    </Suspense>
+  );
 }
