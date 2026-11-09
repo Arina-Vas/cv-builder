@@ -130,24 +130,30 @@ describe('CreateUserInput', () => {
 describe('UpdateUserInput', () => {
   const VALID_UPDATE = {
     id: USER_ID,
+    firstName: 'Jane',
+    lastName: 'Doe',
     departmentId: DEPARTMENT_ID,
     positionId: POSITION_ID,
     role: UserRole.ADMIN,
   };
 
-  it('accepts the id, department, position and role', () => {
+  it('accepts the id, names, department, position and role', () => {
     expect(check(UpdateUserInput, VALID_UPDATE).messages).toEqual({});
   });
 
-  it('inherits the department, position and role rules', () => {
+  it('inherits the names, department, position and role rules', () => {
     const { messages } = check(UpdateUserInput, {
       id: USER_ID,
+      firstName: '  ',
+      lastName: 'a'.repeat(101),
       departmentId: '',
       positionId: '',
       role: '',
     });
 
     expect(messages).toEqual({
+      firstName: ['First name is required'],
+      lastName: ['Last name must not exceed 100 characters'],
       departmentId: ['Department is required'],
       positionId: ['Position is required'],
       role: ['Role is required'],
