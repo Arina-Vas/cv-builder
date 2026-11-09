@@ -7,6 +7,7 @@
 .main {
   grid-column: 2;
   min-width: 0;
+  padding: 0 var(--content-padding-x);
 }
 
 /* [A] Header: sticky strip above the page, breadcrumbs inside at 16px top / 20px left */
@@ -16,7 +17,6 @@
   z-index: 1;
   box-sizing: border-box;
   height: var(--header-height);
-  margin: 0 var(--content-padding-x);
   padding: var(--header-padding);
   background: var(--header-bg);
 }
