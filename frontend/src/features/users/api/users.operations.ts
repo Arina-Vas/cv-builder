@@ -45,6 +45,23 @@ export const USERS = graphql(`
   }
 `);
 
+export const USER_FORM_OPTIONS = graphql(`
+  query UserFormOptions {
+    departments(pageSize: 50) {
+      items {
+        id
+        name
+      }
+    }
+    positions(pageSize: 50) {
+      items {
+        id
+        name
+      }
+    }
+  }
+`);
+
 export const CREATE_USER = graphql(`
   mutation CreateUser($input: CreateUserInput!) {
     createUser(input: $input) {

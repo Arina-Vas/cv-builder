@@ -16,6 +16,7 @@ import { SearchField } from '@/shared/components/inputs';
 import { Avatar } from '@/shared/components/avatar/Avatar';
 import { Button } from '@/shared/components/buttons';
 import { PlusIcon } from '@/shared/components/icons/PlusIcon';
+import { UserFormModal } from './UserFormModal';
 import s from './Users.module.css';
 
 const SORT_FIELDS: readonly UserSortField[] = ['firstName', 'lastName', 'department', 'position'];
@@ -151,8 +152,15 @@ export const Users = () => {
         onPageSizeChange={setPageSize}
       />
 
-      {/* TODO(KAN-46 steps 3–5): create / update / delete modals driven by `modal` */}
-      {modal && null}
+      {isAdmin && (
+        <UserFormModal
+          open={modal?.type === 'create' || modal?.type === 'update'}
+          onOpenChange={(open) => !open && setModal(null)}
+          user={modal?.type === 'update' ? modal.user : undefined}
+          isSelf={modal?.type === 'update' && modal.user.id === currentUser?.id}
+        />
+      )}
+      {/* TODO(KAN-46 step 5): Delete user dialog for modal.type === 'delete' */}
     </div>
   );
 };
