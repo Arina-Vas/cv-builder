@@ -106,7 +106,7 @@ export class UsersService {
   }
 
   async update(
-    { id, departmentId, positionId, role }: UpdateUserInput,
+    { id, firstName, lastName, departmentId, positionId, role }: UpdateUserInput,
     currentUserId: string,
   ): Promise<User> {
     await this.assertDepartmentAndPositionExist(departmentId, positionId);
@@ -129,7 +129,7 @@ export class UsersService {
 
         const row = await tx.user.update({
           where: { id },
-          data: { departmentId, positionId, role },
+          data: { firstName, lastName, departmentId, positionId, role },
           include: userInclude,
         });
 

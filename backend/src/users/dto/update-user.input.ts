@@ -4,6 +4,8 @@ import { IsUUID } from 'class-validator';
 
 @InputType()
 export class UpdateUserInput extends PickType(CreateUserInput, [
+  'firstName',
+  'lastName',
   'departmentId',
   'positionId',
   'role',

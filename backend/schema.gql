@@ -433,7 +433,9 @@ input UpdateSkillInput {
 
 input UpdateUserInput {
   departmentId: ID!
+  firstName: String!
   id: ID!
+  lastName: String!
   positionId: ID!
   role: UserRole!
 }

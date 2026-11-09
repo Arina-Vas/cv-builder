@@ -280,10 +280,10 @@ avoid a column-key → enum map in every table.
   `UserLanguage`; wiki: the field is disabled in the Update modal), the update input takes
   `PickType(Create<Entity>Input, [...])` without it and adds `id` (`UpdateUserSkillInput`: `id`, `userId`,
   `mastery`; `UpdateUserLanguageInput`: `id`, `userId`, `proficiency`).
-- Exception: `UpdateUserInput` (Admin, Update user modal) is `PickType(CreateUserInput, ['departmentId',
-'positionId', 'role'])` plus `id`: the wiki disables email and password in that modal. First and last name are
-  changed on the Profile tab by a separate mutation with its own access rule (own profile or Admin), so one input
-  never mixes fields with different permissions.
+- Exception: `UpdateUserInput` (Admin, Update user modal) is `PickType(CreateUserInput, ['firstName', 'lastName',
+'departmentId', 'positionId', 'role'])` plus `id`: the wiki disables only email and password in that modal. The
+  whole mutation is Admin-only, so it mixes no permissions; the Profile tab has its own mutation (own profile or
+  Admin) for the same names.
 - Inputs are always validated on the backend, even if the frontend validates them too
   (wiki: "Client-side validation is intended for user experience and must not replace server-side validation").
 - **One error per field.** The `ValidationPipe` uses `stopAtFirstError` (`common/validation/validator-options.ts`), so
