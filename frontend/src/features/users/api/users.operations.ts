@@ -1,0 +1,74 @@
+import { graphql } from '@/gql';
+import { NO_ERROR_TOAST } from '@/shared/lib/apollo/error-toast-link';
+
+graphql(`
+  fragment UserListFields on User {
+    id
+    email
+    firstName
+    lastName
+    avatarUrl
+    role
+    department {
+      id
+      name
+    }
+    position {
+      id
+      name
+    }
+  }
+`);
+
+export const USERS = graphql(`
+  query Users(
+    $page: Int!
+    $pageSize: Int!
+    $search: String
+    $sortBy: UserSortField
+    $sortOrder: SortOrder!
+  ) {
+    users(
+      page: $page
+      pageSize: $pageSize
+      sortBy: $sortBy
+      sortOrder: $sortOrder
+      search: $search
+    ) {
+      items {
+        ...UserListFields
+      }
+      page
+      pageSize
+      total
+    }
+  }
+`);
+
+export const CREATE_USER = graphql(`
+  mutation CreateUser($input: CreateUserInput!) {
+    createUser(input: $input) {
+      ...UserListFields
+    }
+  }
+`);
+
+export const UPDATE_USER = graphql(`
+  mutation UpdateUser($input: UpdateUserInput!) {
+    updateUser(input: $input) {
+      ...UserListFields
+    }
+  }
+`);
+
+export const DELETE_USER = graphql(`
+  mutation DeleteUser($id: ID!) {
+    deleteUser(id: $id)
+  }
+`);
+
+export const USER_MUTATION_OPTIONS = {
+  context: NO_ERROR_TOAST,
+  refetchQueries: [USERS],
+  awaitRefetchQueries: true,
+};
