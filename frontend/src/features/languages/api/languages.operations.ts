@@ -1,5 +1,6 @@
 import { graphql } from '@/gql';
 import { NO_ERROR_TOAST } from '@/shared/lib/apollo/error-toast-link';
+import type { ApolloCache } from '@apollo/client';
 
 graphql(`
   fragment LanguageFields on Language {
@@ -60,6 +61,10 @@ export const DELETE_LANGUAGE = graphql(`
 /** create / update / delete: the dialog shows the error, the list is refetched before it closes */
 export const LANGUAGE_MUTATION_OPTIONS = {
   context: NO_ERROR_TOAST,
+  update: (cache: ApolloCache) => {
+    cache.evict({ id: 'ROOT_QUERY', fieldName: 'languages' });
+    cache.gc();
+  },
   refetchQueries: [LANGUAGES],
   awaitRefetchQueries: true,
 };
