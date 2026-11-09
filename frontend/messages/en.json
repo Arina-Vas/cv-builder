@@ -237,5 +237,25 @@
       "title": "Delete position",
       "message": "Are you sure you want to delete position <b>{name}</b>?"
     }
+  },
+  "languages": {
+    "title": "Languages",
+    "createButton": "Create language",
+    "table": {
+      "columns": {
+        "name": "Name",
+        "iso": "ISO",
+        "nativeName": "Native name"
+      },
+      "empty": "No languages found",
+      "actions": { "edit": "Edit", "delete": "Delete" }
+    },
+    "fields": { "name": "Name", "iso": "ISO", "nativeName": "Native name" },
+    "create": { "title": "Create language" },
+    "edit": { "title": "Edit language" },
+    "delete": {
+      "title": "Delete language",
+      "message": "Are you sure you want to delete language <b>{name}</b>?"
+    }
   }
 }
