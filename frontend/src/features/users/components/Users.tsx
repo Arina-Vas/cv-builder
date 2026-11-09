@@ -2,10 +2,10 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useQuery } from '@apollo/client/react';
+import { useMutation, useQuery } from '@apollo/client/react';
 import { useTranslations } from 'next-intl';
 import type { UserListFieldsFragment, UserSortField } from '@/gql/graphql';
-import { USERS } from '@/features/users/api/users.operations';
+import { DELETE_USER, USER_MUTATION_OPTIONS, USERS } from '@/features/users/api/users.operations';
 import { useCurrentUser } from '@/features/auth/hooks/useCurrentUser';
 import { useTableParams } from '@/shared/hooks/useTableParams';
 import { parseError } from '@/shared/lib/apollo/graphql-errors';
@@ -16,6 +16,7 @@ import { SearchField } from '@/shared/components/inputs';
 import { Avatar } from '@/shared/components/avatar/Avatar';
 import { Button } from '@/shared/components/buttons';
 import { PlusIcon } from '@/shared/components/icons/PlusIcon';
+import { ConfirmDialog } from '@/shared/components/dialog';
 import { UserFormModal } from './UserFormModal';
 import s from './Users.module.css';
 
@@ -59,10 +60,20 @@ export const Users = () => {
 
   const openUser = (user: UserListFieldsFragment) => router.push(`/users/${user.id}`);
 
+  const userToDelete = modal?.type === 'delete' ? modal.user : null;
+  const [deleteUser] = useMutation(DELETE_USER, USER_MUTATION_OPTIONS);
+
+  const handleDelete = async () => {
+    if (!userToDelete) return;
+    await deleteUser({ variables: { id: userToDelete.id } });
+    if (page > 1 && shown?.users.items.length === 1) setPage(page - 1);
+  };
+
   const usersColumns: Column<UserListFieldsFragment>[] = [
     {
       key: 'avatar',
       header: t('table.avatar'),
+      hideHeader: true,
       render: (user) => (
         <Avatar src={user.avatarUrl ?? undefined} fallback={getFullName(user)} size="md" />
       ),
@@ -101,6 +112,7 @@ export const Users = () => {
 
   return (
     <div>
+      {/* TODO: replace with the shared TableToolbar (search + create button) once PR #45 is merged */}
       <div className={s.header}>
         <SearchField value={search} onChange={setSearch} />
         {isAdmin && (
@@ -135,10 +147,14 @@ export const Users = () => {
                   label: t('table.actions.update'),
                   onSelect: () => setModal({ type: 'update', user }),
                 },
-                {
-                  label: t('table.actions.delete'),
-                  onSelect: () => setModal({ type: 'delete', user }),
-                },
+                ...(user.id === currentUser?.id
+                  ? []
+                  : [
+                      {
+                        label: t('table.actions.delete'),
+                        onSelect: () => setModal({ type: 'delete', user }),
+                      },
+                    ]),
               ]
             : undefined
         }
@@ -160,7 +176,18 @@ export const Users = () => {
           isSelf={modal?.type === 'update' && modal.user.id === currentUser?.id}
         />
       )}
-      {/* TODO(KAN-46 step 5): Delete user dialog for modal.type === 'delete' */}
+      {isAdmin && (
+        <ConfirmDialog
+          open={!!userToDelete}
+          onOpenChange={(open) => !open && setModal(null)}
+          title={t('delete.title')}
+          message={t.rich('delete.message', {
+            name: userToDelete ? getFullName(userToDelete) : '',
+            b: (chunks) => <strong>{chunks}</strong>,
+          })}
+          onConfirm={handleDelete}
+        />
+      )}
     </div>
   );
 };

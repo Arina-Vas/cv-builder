@@ -214,6 +214,10 @@
     "roles": { "ADMIN": "Admin", "EMPLOYEE": "Employee" },
     "create": { "title": "Create user" },
     "update": { "title": "Update user" },
+    "delete": {
+      "title": "Delete user",
+      "message": "Are you sure you want to delete user <b>{name}</b>?"
+    },
     "tabs": {
       "label": "Employee sections",
       "profile": "Profile",

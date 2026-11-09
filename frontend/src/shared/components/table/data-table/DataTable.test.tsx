@@ -33,6 +33,15 @@ describe('DataTable', () => {
     expect(screen.getByRole('cell', { name: 'React' })).toBeInTheDocument();
   });
 
+  it('keeps a hidden header for screen readers only', () => {
+    renderTable({
+      columns: [{ key: 'icon', header: 'Icon', hideHeader: true, render: () => null }, ...columns],
+    });
+
+    const header = screen.getByRole('columnheader', { name: 'Icon' });
+    expect(within(header).getByText('Icon')).toHaveClass(/visuallyHidden/);
+  });
+
   it('marks the table busy and hides rows while loading', () => {
     renderTable({ isLoading: true });
 

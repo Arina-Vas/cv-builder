@@ -62,7 +62,8 @@ import { DataTable, type Column } from '@/shared/components/table';
 const columns: Column<UserRow>[] = [
   {
     key: 'avatar',
-    header: '',
+    header: 'Avatar',
+    hideHeader: true,
     width: '72px',
     render: (user) => <Avatar fallback={user.firstName} src={user.avatarUrl} size="md" />,
   },
@@ -74,6 +75,9 @@ const columns: Column<UserRow>[] = [
   `*SortField` enum value so the page passes it on as is.
 - `render` returns any node: text, `Avatar`, `Chip`s, a formatted date.
 - `sortable` shows the arrow and makes the header a button. It only works together with `onSortChange`.
+- `hideHeader` keeps `header` for screen readers only (`visuallyHidden`), the cell looks empty: a column
+  without a visible title in Figma (Avatar). Don't pass `header: ''`: the column then has no name at all.
+  Not for a `sortable` column, whose header is the sort button.
 - `width` goes to the `<th>` style. Leave it out and the browser shares the width.
 
 ## Row actions
