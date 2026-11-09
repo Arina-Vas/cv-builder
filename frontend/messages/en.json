@@ -79,6 +79,10 @@
       "required": "Department name is required",
       "maxLength": "Department name must not exceed {max} characters"
     },
+    "position": {
+      "required": "Position name is required",
+      "maxLength": "Position name must not exceed {max} characters"
+    },
     "email": {
       "required": "Email is required",
       "invalid": "Please enter a valid email address"

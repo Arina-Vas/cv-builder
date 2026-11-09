@@ -10,10 +10,19 @@ import { parseError } from '@/shared/lib/apollo/graphql-errors';
 import { useErrorMessage } from '@/shared/lib/apollo/useErrorMessage';
 import { POSITIONS } from '@/features/positions/api/positions.operations';
 import type { PositionFieldsFragment } from '@/gql/graphql';
+import { PositionFormModal } from '@/features/positions/components/PositionFormModal';
+import { useState } from 'react';
+
+type ModalState =
+  | { type: 'create' }
+  | { type: 'update'; position: PositionFieldsFragment }
+  | { type: 'delete'; position: PositionFieldsFragment };
 
 export const Positions = () => {
   const t = useTranslations('positions');
   const errorMessage = useErrorMessage();
+
+  const [modal, setModal] = useState<ModalState | null>(null);
 
   const { search, sort, page, pageSize, setSearch, setSort, setPage, setPageSize } = useTableParams(
     {
@@ -66,6 +75,11 @@ export const Positions = () => {
         total={shown?.positions.total ?? 0}
         onPageSizeChange={setPageSize}
         onPageChange={setPage}
+      />
+      <PositionFormModal
+        position={modal?.type === 'update' ? modal.position : undefined}
+        onOpenChange={(open) => !open && setModal(null)}
+        open={modal?.type === 'create' || modal?.type === 'update'}
       />
     </div>
   );
