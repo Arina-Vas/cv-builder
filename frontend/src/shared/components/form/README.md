@@ -40,9 +40,14 @@ const t = useTranslations('departments');
 const tValidation = useTranslations('validation');
 const schema = useMemo(() => departmentSchema(tValidation), [tValidation]);
 const form = useAppForm({ schema, defaultValues: { name: '' } });
-const [save] = useMutation(department ? UPDATE_DEPARTMENT : CREATE_DEPARTMENT, {
+// One hook per mutation: a document picked by a ternary loses the variables' types
+const options = {
   context: NO_ERROR_TOAST, // FormModal shows the error in the dialog: no global toast
-});
+  refetchQueries: [DEPARTMENTS], // the list is up to date before the modal closes
+  awaitRefetchQueries: true,
+};
+const [createDepartment] = useMutation(CREATE_DEPARTMENT, options);
+const [updateDepartment] = useMutation(UPDATE_DEPARTMENT, options);
 
 <FormModal
   form={form}
@@ -51,8 +56,11 @@ const [save] = useMutation(department ? UPDATE_DEPARTMENT : CREATE_DEPARTMENT, {
   title={department ? t('edit.title') : t('create.title')}
   mode={department ? 'update' : 'create'}
   values={{ name: department?.name ?? '' }}
+  requireDirty={!!department} // Save stays disabled until the name changes
   onSubmit={(values) =>
-    save({ variables: { input: department ? { id: department.id, ...values } : values } })
+    department
+      ? updateDepartment({ variables: { input: { id: department.id, ...values } } })
+      : createDepartment({ variables: { input: values } })
   }
 >
   <Input
@@ -157,8 +165,13 @@ The page owns the form (`useAppForm`) and passes it in; `FormModal` runs the mod
   `context: NO_ERROR_TOAST` to its `useMutation`, otherwise the error shows in the dialog and as a toast
   ([frontend README](../../../../README.md) → Global error toasts).
 - Other labels for the submit button: `submitLabel={t('add')}` / `t('update')` (`common.actions.add`, `update`).
-- Server errors under a field (`CONFLICT` → "already exists" under Name) are not mapped yet: they come with the first
-  real form (Departments).
+- **Server error on a field.** The values passed the schema, but the backend rejected a field: `CONFLICT` for a
+  duplicate name (`extensions.field: 'name'`), `BAD_USER_INPUT` with `extensions.fields`. If that field is in the
+  form, `FormModal` puts `errors.<CODE>` under it with `form.setError` (the field gets focus), and nothing is shown
+  above the buttons. The field names match the GraphQL input, so no mapping is needed: the page already passes
+  `formState.errors.<field>?.message` to the field. The submit button stays disabled until the field changes; the
+  change re-checks the field and clears the server error. A field the form does not have falls back to the text
+  above the buttons.
 
 ## Layout
 
@@ -198,11 +211,11 @@ Page forms (Profile, CV Details, Settings) use the same classes on their own `<f
 
 Unit tests (jsdom) cover the logic and states:
 
-| Test                                  | Checks                                                                                                                                                                                                                                                                            |
-| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `shared/lib/form/schemas.test.ts`     | each block: required / trim / min / `Date`, the error path, a message from the `validation` translator                                                                                                                                                                            |
-| `shared/lib/form/useAppForm.test.tsx` | `onTouched` / `onChange` modes and override, `isValid`, `handleSubmit` gets the schema output                                                                                                                                                                                     |
-| `FormModal.test.tsx`                  | `sm` / `md`, button labels, Cancel, layout class and `form` link; values on opening and reset on reopening; disabled while invalid / unchanged; submit and close, Enter; loading state; error text by code and for a network error, kept input, cleared on retry and on reopening |
+| Test                                  | Checks                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `shared/lib/form/schemas.test.ts`     | each block: required / trim / min / `Date`, the error path, a message from the `validation` translator                                                                                                                                                                                                                                                                                                                                                                        |
+| `shared/lib/form/useAppForm.test.tsx` | `onTouched` / `onChange` modes and override, `isValid`, `handleSubmit` gets the schema output                                                                                                                                                                                                                                                                                                                                                                                 |
+| `FormModal.test.tsx`                  | `sm` / `md`, button labels, Cancel, layout class and `form` link; values on opening and reset on reopening; disabled while invalid / unchanged; submit and close, Enter; loading state; error text by code and for a network error, kept input, cleared on retry and on reopening; `CONFLICT` with a field: text under the field and focus, submit disabled until the field changes, cleared on change and on reopening, a field not in the form falls back above the buttons |
 
 The stories cover what needs a real browser (layout widths, errors after leaving a field, the full flows with every
 field):
@@ -213,6 +226,7 @@ field):
 | `EditDepartment`   | `update` mode: filled from `values`, Save disabled until changed (`requireDirty`), Enter submits                                                                   |
 | `Submitting`       | spinner, CANCEL and × disabled, Esc ignored, submit button disabled; closes after one submit                                                                       |
 | `SubmitError`      | `errors.FORBIDDEN` text in the dialog, the input is kept, retry possible; reopening resets values and error                                                        |
+| `ConflictOnField`  | `CONFLICT` (`field: 'name'`): `errors.CONFLICT` under the field, focus, no text above the buttons; submit disabled until the name changes, then the error is gone  |
 | `AllFields`        | `md` + `grid`: short fields half, `full` fields the whole row; all five fields; submit gets trimmed text, ids, a `Date`                                            |
 | `Dark`             | visual                                                                                                                                                             |
 
@@ -223,6 +237,6 @@ The request is simulated with a promise; the error is a real `CombinedGraphQLErr
 - [x] `useAppForm`, schema blocks, `onBlur` of the selects and the date picker
 - [x] `FormModal`: reset on open, disabled / loading submit, close on success, request error, `sm` / `md`, layout
 - [x] Example forms in Storybook (Create / Edit department, all fields), Light / Dark
-- [ ] Server field errors (`CONFLICT` / `BAD_USER_INPUT` with `field`) under the fields — with the Departments form
+- [x] Server field errors (`CONFLICT` / `BAD_USER_INPUT` with `field`) under the fields
 - [ ] Confirm closing with unsaved changes (optional in the task)
 - [ ] Auth forms still use their own `useFormFields`; moving them to this kit is a separate task

@@ -199,5 +199,21 @@
       "projects": "Projects",
       "preview": "Preview"
     }
+  },
+  "departments": {
+    "title": "Departments",
+    "createButton": "Create department",
+    "table": {
+      "name": "Name",
+      "empty": "No departments found",
+      "actions": { "edit": "Edit", "delete": "Delete" }
+    },
+    "fields": { "name": "Department" },
+    "create": { "title": "Create department" },
+    "edit": { "title": "Edit department" },
+    "delete": {
+      "title": "Delete department",
+      "message": "Are you sure you want to delete department <b>{name}</b>?"
+    }
   }
 }
