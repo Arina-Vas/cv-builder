@@ -217,8 +217,8 @@ async function seedDemoUsers(): Promise<void> {
         emailVerifiedAt: new Date(),
         firstName: hasName ? firstName : null,
         lastName: hasName ? lastName : null,
-        departmentId: hasJob ? departments[index % departments.length].id : null,
-        positionId: hasJob ? positions[index % positions.length].id : null,
+        departmentId: hasJob ? departments[index % departments.length]!.id : null,
+        positionId: hasJob ? positions[index % positions.length]!.id : null,
       };
     }),
   );
