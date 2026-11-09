@@ -62,11 +62,7 @@ export const Departments = () => {
     <div>
       <div className={s.header}>
         <SearchField value={search} onChange={setSearch} />
-        <Button
-          variant={'text'}
-          aria-label={t('createButton')}
-          onClick={() => setModal({ type: 'create' })}
-        >
+        <Button variant={'text'} onClick={() => setModal({ type: 'create' })} size={'sm'}>
           <span className={s.withIcon}>
             <PlusIcon />
             {t('createButton')}

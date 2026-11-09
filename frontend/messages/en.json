@@ -200,8 +200,7 @@
     "edit": { "title": "Edit department" },
     "delete": {
       "title": "Delete department",
-      "message": "Are you sure you want to delete department <b>{name}</b>?",
-      "confirm": "Delete"
+      "message": "Are you sure you want to delete department <b>{name}</b>?"
     }
   }
 }

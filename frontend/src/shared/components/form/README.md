@@ -40,9 +40,14 @@ const t = useTranslations('departments');
 const tValidation = useTranslations('validation');
 const schema = useMemo(() => departmentSchema(tValidation), [tValidation]);
 const form = useAppForm({ schema, defaultValues: { name: '' } });
-const [save] = useMutation(department ? UPDATE_DEPARTMENT : CREATE_DEPARTMENT, {
+// One hook per mutation: a document picked by a ternary loses the variables' types
+const options = {
   context: NO_ERROR_TOAST, // FormModal shows the error in the dialog: no global toast
-});
+  refetchQueries: [DEPARTMENTS], // the list is up to date before the modal closes
+  awaitRefetchQueries: true,
+};
+const [createDepartment] = useMutation(CREATE_DEPARTMENT, options);
+const [updateDepartment] = useMutation(UPDATE_DEPARTMENT, options);
 
 <FormModal
   form={form}
@@ -51,8 +56,11 @@ const [save] = useMutation(department ? UPDATE_DEPARTMENT : CREATE_DEPARTMENT, {
   title={department ? t('edit.title') : t('create.title')}
   mode={department ? 'update' : 'create'}
   values={{ name: department?.name ?? '' }}
+  requireDirty={!!department} // Save stays disabled until the name changes
   onSubmit={(values) =>
-    save({ variables: { input: department ? { id: department.id, ...values } : values } })
+    department
+      ? updateDepartment({ variables: { input: { id: department.id, ...values } } })
+      : createDepartment({ variables: { input: values } })
   }
 >
   <Input
