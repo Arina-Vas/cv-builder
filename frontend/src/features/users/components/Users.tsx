@@ -10,15 +10,11 @@ import { useCurrentUser } from '@/features/auth/hooks/useCurrentUser';
 import { useTableParams } from '@/shared/hooks/useTableParams';
 import { parseError } from '@/shared/lib/apollo/graphql-errors';
 import { useErrorMessage } from '@/shared/lib/apollo/useErrorMessage';
-import { type Column, DataTable } from '@/shared/components/table';
+import { type Column, DataTable, TableToolbar } from '@/shared/components/table';
 import { Pagination } from '@/shared/components/pagination';
-import { SearchField } from '@/shared/components/inputs';
 import { Avatar } from '@/shared/components/avatar/Avatar';
-import { Button } from '@/shared/components/buttons';
-import { PlusIcon } from '@/shared/components/icons/PlusIcon';
 import { ConfirmDialog } from '@/shared/components/dialog';
 import { UserFormModal } from './UserFormModal';
-import s from './Users.module.css';
 
 const SORT_FIELDS: readonly UserSortField[] = ['firstName', 'lastName', 'department', 'position'];
 
@@ -112,18 +108,15 @@ export const Users = () => {
 
   return (
     <div>
-      {/* TODO: replace with the shared TableToolbar (search + create button) once PR #45 is merged */}
-      <div className={s.header}>
-        <SearchField value={search} onChange={setSearch} />
-        {isAdmin && (
-          <Button variant="text" onClick={() => setModal({ type: 'create' })}>
-            <span className={s.withIcon}>
-              <PlusIcon />
-              {t('createButton')}
-            </span>
-          </Button>
-        )}
-      </div>
+      <TableToolbar
+        search={search}
+        onSearch={setSearch}
+        action={
+          isAdmin
+            ? { label: t('createButton'), onClick: () => setModal({ type: 'create' }) }
+            : undefined
+        }
+      />
 
       <DataTable<UserListFieldsFragment>
         rows={shown?.users.items ?? []}
