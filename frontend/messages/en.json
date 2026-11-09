@@ -80,6 +80,10 @@
       "required": "Department name is required",
       "maxLength": "Department name must not exceed {max} characters"
     },
+    "position": {
+      "required": "Position name is required",
+      "maxLength": "Position name must not exceed {max} characters"
+    },
     "email": {
       "required": "Email is required",
       "invalid": "Please enter a valid email address"
@@ -202,6 +206,22 @@
     "delete": {
       "title": "Delete department",
       "message": "Are you sure you want to delete department <b>{name}</b>?"
+    }
+  },
+  "positions": {
+    "title": "Positions",
+    "createButton": "Create position",
+    "table": {
+      "name": "Name",
+      "empty": "No positions found",
+      "actions": { "edit": "Edit", "delete": "Delete" }
+    },
+    "fields": { "name": "Position" },
+    "create": { "title": "Create position" },
+    "edit": { "title": "Edit position" },
+    "delete": {
+      "title": "Delete position",
+      "message": "Are you sure you want to delete position <b>{name}</b>?"
     }
   }
 }

@@ -1,6 +1,5 @@
 'use client';
 
-import { SearchField } from '@/shared/components/inputs';
 import {
   DELETE_DEPARTMENT,
   DEPARTMENT_MUTATION_OPTIONS,
@@ -8,7 +7,7 @@ import {
 } from '@/features/departments/api/departments.operations';
 import { useMutation, useQuery } from '@apollo/client/react';
 import { useTableParams } from '@/shared/hooks/useTableParams';
-import { type Column, DataTable } from '@/shared/components/table';
+import { type Column, DataTable, TableToolbar } from '@/shared/components/table';
 import type { DepartmentFieldsFragment } from '@/gql/graphql';
 import { Pagination } from '@/shared/components/pagination';
 import { useTranslations } from 'next-intl';
@@ -16,9 +15,6 @@ import { parseError } from '@/shared/lib/apollo/graphql-errors';
 import { useErrorMessage } from '@/shared/lib/apollo/useErrorMessage';
 import { useState } from 'react';
 import { DepartmentFormModal } from '@/features/departments/components/DepartmentFormModal';
-import { PlusIcon } from '@/shared/components/icons/PlusIcon';
-import { Button } from '@/shared/components/buttons';
-import s from './Departments.module.css';
 import { ConfirmDialog } from '@/shared/components/dialog';
 
 type ModalState =
@@ -72,15 +68,11 @@ export const Departments = () => {
 
   return (
     <div>
-      <div className={s.header}>
-        <SearchField value={search} onChange={setSearch} />
-        <Button variant={'text'} onClick={() => setModal({ type: 'create' })} size={'sm'}>
-          <span className={s.withIcon}>
-            <PlusIcon />
-            {t('createButton')}
-          </span>
-        </Button>
-      </div>
+      <TableToolbar
+        search={search}
+        onSearch={setSearch}
+        action={{ label: t('createButton'), onClick: () => setModal({ type: 'create' }) }}
+      />
 
       <DataTable<DepartmentFieldsFragment>
         rows={shown?.departments.items ?? []}
