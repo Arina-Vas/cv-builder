@@ -4,6 +4,7 @@ import {
   type DefaultValues,
   type FieldValues,
   type UseFormReturn,
+  type Path,
   FormProvider,
 } from 'react-hook-form';
 import { Button } from '@/shared/components/buttons';
@@ -67,7 +68,17 @@ export const FormModal = <TInput extends FieldValues, TOutput extends FieldValue
       await onSubmit(submitted);
       handleOpenChange(false);
     } catch (error) {
-      setSubmitError(errorMessage(parseError(error)));
+      const appError = parseError(error);
+      const message = errorMessage(appError);
+      const field = Object.keys(appError.fieldErrors).find(
+        (name): name is Path<TInput> => name in form.getValues(),
+      );
+
+      if (field) {
+        form.setError(field, { type: 'server', message }, { shouldFocus: true });
+      } else {
+        setSubmitError(message);
+      }
     }
   });
 

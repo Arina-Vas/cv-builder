@@ -1,3 +1,4 @@
+import { CombinedGraphQLErrors } from '@apollo/client/errors';
 import { screen } from '@testing-library/react';
 import type { ComponentProps } from 'react';
 import { describe, expect, it, vi } from 'vitest';
@@ -6,9 +7,19 @@ import { ConfirmDialog } from './ConfirmDialog';
 
 type Props = Partial<ComponentProps<typeof ConfirmDialog>>;
 
+const IN_USE_TEXT = "This item is in use and can't be deleted";
+
+const inUseError = () =>
+  new CombinedGraphQLErrors({
+    errors: [{ message: 'backend text', extensions: { code: 'ENTITY_IN_USE' } }],
+  });
+
+// a request that is still running when the test checks the dialog
+const pending = () => new Promise<never>(() => {});
+
 function renderConfirm(props: Props = {}) {
   const onOpenChange = vi.fn();
-  const onConfirm = vi.fn();
+  const onConfirm = vi.fn(() => Promise.resolve());
   const result = renderWithProviders(
     <ConfirmDialog
       open
@@ -52,13 +63,13 @@ describe('ConfirmDialog', () => {
     expect(screen.getByRole('button', { name: 'Keep' })).toBeInTheDocument();
   });
 
-  it('calls onConfirm and leaves closing to the page', async () => {
+  it('closes after onConfirm resolves', async () => {
     const { user, onConfirm, onOpenChange } = renderConfirm();
 
     await user.click(screen.getByRole('button', { name: 'Confirm' }));
 
     expect(onConfirm).toHaveBeenCalledTimes(1);
-    expect(onOpenChange).not.toHaveBeenCalled();
+    await expect.poll(() => onOpenChange).toHaveBeenCalledWith(false);
   });
 
   it('closes on Cancel without confirming', async () => {
@@ -70,9 +81,11 @@ describe('ConfirmDialog', () => {
     expect(onConfirm).not.toHaveBeenCalled();
   });
 
-  describe('while loading', () => {
-    it('shows loading on Confirm and disables Cancel and ×', () => {
-      renderConfirm({ loading: true });
+  describe('while onConfirm is running', () => {
+    it('shows loading on Confirm and disables Cancel and ×', async () => {
+      const { user } = renderConfirm({ onConfirm: pending });
+
+      await user.click(screen.getByRole('button', { name: 'Confirm' }));
 
       // the name is checked in the stories: jsdom ignores the CSS that hides the label
       const confirm = screen.getByRole('button', { name: 'Confirm' });
@@ -83,25 +96,57 @@ describe('ConfirmDialog', () => {
     });
 
     it('does not confirm again and does not close on Esc', async () => {
-      const { user, onConfirm, onOpenChange } = renderConfirm({ loading: true });
+      const onConfirm = vi.fn(pending);
+      const { user, onOpenChange } = renderConfirm({ onConfirm });
 
+      await user.click(screen.getByRole('button', { name: 'Confirm' }));
       await user.click(screen.getByRole('button', { name: 'Confirm' }));
       await user.keyboard('{Escape}');
 
-      expect(onConfirm).not.toHaveBeenCalled();
+      expect(onConfirm).toHaveBeenCalledTimes(1);
       expect(onOpenChange).not.toHaveBeenCalled();
     });
   });
 
-  it('shows the error as an alert and lets the user retry', async () => {
-    const { user, onConfirm } = renderConfirm({
-      error: "This item is in use and can't be deleted",
+  describe('when onConfirm fails', () => {
+    it('shows the error as an alert and stays open', async () => {
+      const { user, onOpenChange } = renderConfirm({
+        onConfirm: () => Promise.reject(inUseError()),
+      });
+
+      await user.click(screen.getByRole('button', { name: 'Confirm' }));
+
+      expect(await screen.findByRole('alert')).toHaveTextContent(IN_USE_TEXT);
+      expect(screen.getByRole('button', { name: 'Confirm' })).toBeEnabled();
+      expect(onOpenChange).not.toHaveBeenCalled();
     });
 
-    expect(screen.getByRole('alert')).toHaveTextContent("This item is in use and can't be deleted");
+    it('lets the user retry: the error goes away and the dialog closes', async () => {
+      const onConfirm = vi
+        .fn<() => Promise<unknown>>()
+        .mockRejectedValueOnce(inUseError())
+        .mockResolvedValueOnce(undefined);
+      const { user, onOpenChange } = renderConfirm({ onConfirm });
 
-    await user.click(screen.getByRole('button', { name: 'Confirm' }));
-    expect(onConfirm).toHaveBeenCalledTimes(1);
+      await user.click(screen.getByRole('button', { name: 'Confirm' }));
+      await screen.findByRole('alert');
+      await user.click(screen.getByRole('button', { name: 'Confirm' }));
+
+      await expect.poll(() => onOpenChange).toHaveBeenCalledWith(false);
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+      expect(onConfirm).toHaveBeenCalledTimes(2);
+    });
+
+    it('clears the error when the dialog closes', async () => {
+      const { user } = renderConfirm({ onConfirm: () => Promise.reject(inUseError()) });
+
+      await user.click(screen.getByRole('button', { name: 'Confirm' }));
+      await screen.findByRole('alert');
+      await user.click(screen.getByRole('button', { name: 'Cancel' }));
+
+      // `open` stays true in this test, so the same dialog shows what the next opening would
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    });
   });
 
   it('has no alert without an error', () => {
