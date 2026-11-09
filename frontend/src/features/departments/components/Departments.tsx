@@ -1,8 +1,12 @@
 'use client';
 
 import { SearchField } from '@/shared/components/inputs';
-import { DEPARTMENTS } from '@/features/departments/api/departments.operations';
-import { useQuery } from '@apollo/client/react';
+import {
+  DELETE_DEPARTMENT,
+  DEPARTMENT_MUTATION_OPTIONS,
+  DEPARTMENTS,
+} from '@/features/departments/api/departments.operations';
+import { useMutation, useQuery } from '@apollo/client/react';
 import { useTableParams } from '@/shared/hooks/useTableParams';
 import { type Column, DataTable } from '@/shared/components/table';
 import type { DepartmentFieldsFragment } from '@/gql/graphql';
@@ -12,10 +16,10 @@ import { parseError } from '@/shared/lib/apollo/graphql-errors';
 import { useErrorMessage } from '@/shared/lib/apollo/useErrorMessage';
 import { useState } from 'react';
 import { DepartmentFormModal } from '@/features/departments/components/DepartmentFormModal';
-import { DeleteDepartmentDialog } from '@/features/departments/components/DeleteDepartmentDialog';
 import { PlusIcon } from '@/shared/components/icons/PlusIcon';
 import { Button } from '@/shared/components/buttons';
 import s from './Departments.module.css';
+import { ConfirmDialog } from '@/shared/components/dialog';
 
 type ModalState =
   | { type: 'create' }
@@ -57,6 +61,14 @@ export const Departments = () => {
       sortable: true,
     },
   ];
+
+  const [deleteDepartment] = useMutation(DELETE_DEPARTMENT, DEPARTMENT_MUTATION_OPTIONS);
+
+  const handleDelete = async () => {
+    if (!departmentToDelete) return;
+    await deleteDepartment({ variables: { id: departmentToDelete.id } });
+    if (page > 1 && shown?.departments.items.length === 1) setPage(page - 1);
+  };
 
   return (
     <div>
@@ -102,12 +114,15 @@ export const Departments = () => {
         onPageChange={setPage}
       />
 
-      <DeleteDepartmentDialog
-        department={departmentToDelete}
-        onClose={() => setModal(null)}
-        onDeleted={() => {
-          if (page > 1 && shown?.departments.items.length === 1) setPage(page - 1);
-        }}
+      <ConfirmDialog
+        open={!!departmentToDelete}
+        onOpenChange={(open) => !open && setModal(null)}
+        title={t('delete.title')}
+        message={t.rich('delete.message', {
+          name: departmentToDelete?.name ?? '',
+          b: (chunks) => <strong>{chunks}</strong>,
+        })}
+        onConfirm={handleDelete}
       />
 
       <DepartmentFormModal

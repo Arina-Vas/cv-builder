@@ -86,31 +86,29 @@ buttons into `children` and leave `footer` empty (story `WithForm`), but then th
 
 ### `ConfirmDialog`
 
-The dialog only shows the state; the page owns it. With Apollo it comes straight from `useMutation`:
+Works like `FormModal`: the page passes the action as a promise (usually the mutation), the dialog owns the
+loading state and the error and closes itself on success. The page only owns `open` (usually the selected row):
 
 ```tsx
-const errorMessage = useErrorMessage();
-const [deleteDepartment, { loading, error, reset }] = useMutation(DELETE_DEPARTMENT, {
+const [deleteDepartment] = useMutation(DELETE_DEPARTMENT, {
   context: NO_ERROR_TOAST, // the dialog shows the error (ENTITY_IN_USE…): no global toast
-  onCompleted: () => setTarget(null), // success → close
+  refetchQueries: [DEPARTMENTS], // the list is up to date before the dialog closes
+  awaitRefetchQueries: true,
 });
 
 <ConfirmDialog
   open={target !== null}
-  onOpenChange={(open) => {
-    if (!open) {
-      reset(); // the next opening starts without the old error
-      setTarget(null);
-    }
-  }}
-  title={t('deleteDialog.title')}
-  message={t.rich('deleteDialog.message', {
+  onOpenChange={(open) => !open && setTarget(null)}
+  title={t('delete.title')}
+  message={t.rich('delete.message', {
     name: target?.name ?? '',
     b: (c) => <strong>{c}</strong>,
   })}
-  loading={loading}
-  error={error ? errorMessage(parseError(error)) : undefined}
-  onConfirm={() => deleteDepartment({ variables: { id: target!.id } })}
+  onConfirm={async () => {
+    if (!target) return;
+    await deleteDepartment({ variables: { id: target.id } });
+    // anything else that belongs to the action (e.g. go back a page) runs under the same spinner
+  }}
 />;
 ```
 
@@ -120,15 +118,16 @@ const [deleteDepartment, { loading, error, reset }] = useMutation(DELETE_DEPARTM
 | `onOpenChange` | `(open: boolean) => void` | required                 |
 | `title`        | `string`                  | required                 |
 | `message`      | `ReactNode`               | required                 |
-| `onConfirm`    | `() => void`              | required                 |
-| `loading`      | `boolean`                 | `false`                  |
-| `error`        | `string`                  | —                        |
+| `onConfirm`    | `() => Promise<unknown>`  | required                 |
 | `confirmLabel` | `string`                  | `common.actions.confirm` |
 | `cancelLabel`  | `string`                  | `common.actions.cancel`  |
 
-- CONFIRM only calls `onConfirm`; closing after success is the page's job (`onCompleted`).
-- `loading` → spinner on CONFIRM (`aria-busy`, disabled, so a second click is ignored), CANCEL and × disabled,
-  the dialog can't be closed (`preventClose`).
+- CONFIRM awaits `onConfirm`. While the promise runs: spinner on CONFIRM (`aria-busy`, disabled, so a second
+  click is ignored), CANCEL and × disabled, the dialog can't be closed (`preventClose`).
+- Resolved → the dialog calls `onOpenChange(false)`. Rejected → it shows `useErrorMessage()(parseError(error))`
+  above the buttons and stays open; CONFIRM retries. The page needs no `try / catch`, `loading`, `error` or
+  `reset()`.
+- The error is cleared whenever the dialog closes (CANCEL, ×, Esc, overlay), so the next opening starts clean.
 - `message` becomes the dialog's accessible description; the entity name is bold, as in Figma (`t.rich`).
 - Size is always `sm`.
 - CANCEL is a `secondary` button (outlined, as in Figma), CONFIRM `primary`.
@@ -205,10 +204,10 @@ Each behaviour is checked once, as `frontend/README.md` → Tests asks: unit tes
 browser: focus, the overlay click, layout, Radix portals, CSS and the page flow. Stories run in Storybook
 (Interactions panel) and in Vitest (`storybook` project, needs `pnpm exec playwright install chromium` once).
 
-| Unit test                | Checks                                                                                                                                                                                                                        |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Dialog.test.tsx`        | closed → nothing; named by the title, × "Close"; description / no `aria-describedby`; footer and error only when passed; `size`, `className`; Esc and × call `onOpenChange(false)`; `preventClose` disables × and ignores Esc |
-| `ConfirmDialog.test.tsx` | `sm`, title and message; default and own labels; CONFIRM calls `onConfirm` and does not close; CANCEL closes; `loading` disables the buttons and Esc; error shown, retry possible                                             |
+| Unit test                | Checks                                                                                                                                                                                                                                       |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Dialog.test.tsx`        | closed → nothing; named by the title, × "Close"; description / no `aria-describedby`; footer and error only when passed; `size`, `className`; Esc and × call `onOpenChange(false)`; `preventClose` disables × and ignores Esc                |
+| `ConfirmDialog.test.tsx` | `sm`, title and message; default and own labels; closes after `onConfirm` resolves; CANCEL closes; while it runs the buttons and Esc are disabled, no second call; rejected → error shown, dialog open; retry closes; error cleared on close |
 
 | Story (Shared/Dialog)                               | Checks                                                     |
 | --------------------------------------------------- | ---------------------------------------------------------- |
@@ -222,17 +221,18 @@ browser: focus, the overlay click, layout, Radix portals, CSS and the page flow.
 | `WithSelect`                                        | a Select list opens above the dialog                       |
 | `Light`, `Dark`, `WithDescriptionAndError`, `Small` | opened on load, for a visual check                         |
 
-| Story (Shared/ConfirmDialog)                                                            | Checks                                                                             |
-| --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `LongName`                                                                              | a long name wraps, the dialog keeps the `sm` width                                 |
-| `Loading`                                                                               | the loading CONFIRM keeps its accessible name; the overlay does not close          |
-| `FlowSuccess`, `FlowDoubleClick`, `FlowError`, `FlowRetryAfterError`                    | a page with a simulated mutation: loading, close on success, error, reset on close |
-| `Default`, `CustomLabels`, `WithError`, `Light`, `Dark`, `DarkWithError`, `DarkLoading` | visual only; `loading` and `error` can be changed in Controls                      |
+| Story (Shared/ConfirmDialog)                                               | Checks                                                                                              |
+| -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `LongName`                                                                 | a long name wraps, the dialog keeps the `sm` width                                                  |
+| `Loading`                                                                  | the loading CONFIRM keeps its accessible name; the overlay does not close                           |
+| `WithError`                                                                | a rejected `onConfirm` shows the ENTITY_IN_USE text                                                 |
+| `FlowSuccess`, `FlowDoubleClick`, `FlowError`, `FlowRetryAfterError`       | `onConfirm` returns a simulated mutation: loading, close on success, error, retry, cleared on close |
+| `Default`, `CustomLabels`, `Light`, `Dark`, `DarkWithError`, `DarkLoading` | visual only; the request result can be changed in Controls (`outcome`)                              |
 
 ## Status
 
 - [x] `Dialog`: title, ×, description, body, error, footer, `sm` / `md`, `preventClose`, focus return
-- [x] `ConfirmDialog`: controlled `loading` / `error`
+- [x] `ConfirmDialog`: awaits `onConfirm`, owns loading and the error, closes on success (like `FormModal`)
 - [x] Stories and unit tests, Light / Dark
 - [ ] `Loading` story fails: `Button` hides its label with `visibility: hidden`, so a loading button has no
       accessible name (fix in `Button.module.css`)

@@ -1,7 +1,9 @@
-import { screen, within } from '@testing-library/react';
+import type { MockLink } from '@apollo/client/testing';
+import { screen, waitFor, within } from '@testing-library/react';
+import { GraphQLError } from 'graphql';
 import { describe, expect, it } from 'vitest';
 import { renderWithProviders } from '@/test/render';
-import { DEPARTMENTS } from '../api/departments.operations';
+import { DELETE_DEPARTMENT, DEPARTMENTS } from '../api/departments.operations';
 import { Departments } from './Departments';
 
 const departments = [
@@ -9,7 +11,7 @@ const departments = [
   { __typename: 'Department' as const, id: '2', name: 'Marketing' },
 ];
 
-const listMock = {
+const listMock = (items = departments): MockLink.MockedResponse => ({
   request: {
     query: DEPARTMENTS,
     variables: { page: 1, pageSize: 10, search: '', sortBy: 'name', sortOrder: 'ASC' },
@@ -18,16 +20,19 @@ const listMock = {
     data: {
       departments: {
         __typename: 'DepartmentPage',
-        items: departments,
+        items,
         page: 1,
         pageSize: 10,
-        total: 2,
+        total: items.length,
       },
     },
   },
-};
+});
 
-const renderPage = () => renderWithProviders(<Departments />, { mocks: [listMock] });
+const deleteRequest = { query: DELETE_DEPARTMENT, variables: { id: '1' } };
+
+const renderPage = (mocks: MockLink.MockedResponse[] = [listMock()]) =>
+  renderWithProviders(<Departments />, { mocks });
 
 async function openRowAction(user: ReturnType<typeof renderPage>['user'], name: string) {
   await user.click(await screen.findByRole('button', { name: 'Actions for Engineering' }));
@@ -60,12 +65,52 @@ describe('Departments', () => {
     expect(within(dialog).getByLabelText('Department')).toHaveValue('Engineering');
   });
 
-  it('opens the delete confirmation for the row', async () => {
-    const { user } = renderPage();
+  describe('delete', () => {
+    it('asks to confirm with the department name in bold', async () => {
+      const { user } = renderPage();
 
-    await openRowAction(user, 'Delete');
+      await openRowAction(user, 'Delete');
 
-    const dialog = screen.getByRole('dialog', { name: 'Delete department' });
-    expect(dialog).toHaveTextContent('Are you sure you want to delete department Engineering?');
+      const dialog = screen.getByRole('dialog', { name: 'Delete department' });
+      expect(dialog).toHaveTextContent('Are you sure you want to delete department Engineering?');
+      expect(within(dialog).getByText('Engineering').tagName).toBe('STRONG');
+    });
+
+    it('deletes the department, closes the dialog and refreshes the list', async () => {
+      const { user } = renderPage([
+        listMock(),
+        { request: deleteRequest, result: { data: { deleteDepartment: '1' } } },
+        // refetchQueries: the list without the deleted row
+        listMock(departments.slice(1)),
+      ]);
+
+      await openRowAction(user, 'Delete');
+      await user.click(screen.getByRole('button', { name: 'Confirm' }));
+
+      await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+      expect(screen.queryByText('Engineering')).not.toBeInTheDocument();
+      expect(screen.getByText('Marketing')).toBeInTheDocument();
+    });
+
+    it('shows ENTITY_IN_USE in the dialog and keeps it open', async () => {
+      const { user } = renderPage([
+        listMock(),
+        {
+          request: deleteRequest,
+          result: {
+            errors: [new GraphQLError('In use', { extensions: { code: 'ENTITY_IN_USE' } })],
+          },
+        },
+      ]);
+
+      await openRowAction(user, 'Delete');
+      await user.click(screen.getByRole('button', { name: 'Confirm' }));
+
+      const dialog = screen.getByRole('dialog', { name: 'Delete department' });
+      expect(await within(dialog).findByRole('alert')).toHaveTextContent(
+        "This item is in use and can't be deleted",
+      );
+      expect(screen.getByText('Marketing')).toBeInTheDocument();
+    });
   });
 });
