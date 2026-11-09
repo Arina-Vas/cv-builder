@@ -35,19 +35,26 @@ export const departmentSchema = (t: ValidationT) =>
     }),
   });
 
+// features/departments/api/departments.operations.ts: one set of options for create / update / delete
+export const DEPARTMENT_MUTATION_OPTIONS = {
+  context: NO_ERROR_TOAST, // the modal / dialog shows the error: no global toast
+  // every cached page / sort / search of the list is stale after a change, not only the one on screen
+  update: (cache: ApolloCache) => {
+    cache.evict({ id: 'ROOT_QUERY', fieldName: 'departments' });
+    cache.gc();
+  },
+  refetchQueries: [DEPARTMENTS], // the list on screen is up to date before the modal closes
+  awaitRefetchQueries: true,
+};
+
 // features/departments/…/DepartmentFormModal.tsx
 const t = useTranslations('departments');
 const tValidation = useTranslations('validation');
 const schema = useMemo(() => departmentSchema(tValidation), [tValidation]);
 const form = useAppForm({ schema, defaultValues: { name: '' } });
 // One hook per mutation: a document picked by a ternary loses the variables' types
-const options = {
-  context: NO_ERROR_TOAST, // FormModal shows the error in the dialog: no global toast
-  refetchQueries: [DEPARTMENTS], // the list is up to date before the modal closes
-  awaitRefetchQueries: true,
-};
-const [createDepartment] = useMutation(CREATE_DEPARTMENT, options);
-const [updateDepartment] = useMutation(UPDATE_DEPARTMENT, options);
+const [createDepartment] = useMutation(CREATE_DEPARTMENT, DEPARTMENT_MUTATION_OPTIONS);
+const [updateDepartment] = useMutation(UPDATE_DEPARTMENT, DEPARTMENT_MUTATION_OPTIONS);
 
 <FormModal
   form={form}
@@ -172,6 +179,11 @@ The page owns the form (`useAppForm`) and passes it in; `FormModal` runs the mod
   `formState.errors.<field>?.message` to the field. The submit button stays disabled until the field changes; the
   change re-checks the field and clears the server error. A field the form does not have falls back to the text
   above the buttons.
+- **List refresh after a mutation** (catalog pages: one options object per catalog, used by create, update and
+  delete). `refetchQueries` + `awaitRefetchQueries` reload only the list on screen, before the modal closes.
+  Pages, sorts and searches opened earlier stay in the Apollo cache and would show stale rows (a row on two
+  pages, a deleted row back), so `update` also evicts the whole list field (`cache.evict({ id: 'ROOT_QUERY',
+fieldName })` + `cache.gc()`): they load again when opened. Apollo merges the two list requests into one.
 
 ## Layout
 
