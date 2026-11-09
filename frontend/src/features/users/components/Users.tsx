@@ -1,0 +1,158 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useQuery } from '@apollo/client/react';
+import { useTranslations } from 'next-intl';
+import type { UserListFieldsFragment, UserSortField } from '@/gql/graphql';
+import { USERS } from '@/features/users/api/users.operations';
+import { useCurrentUser } from '@/features/auth/hooks/useCurrentUser';
+import { useTableParams } from '@/shared/hooks/useTableParams';
+import { parseError } from '@/shared/lib/apollo/graphql-errors';
+import { useErrorMessage } from '@/shared/lib/apollo/useErrorMessage';
+import { type Column, DataTable } from '@/shared/components/table';
+import { Pagination } from '@/shared/components/pagination';
+import { SearchField } from '@/shared/components/inputs';
+import { Avatar } from '@/shared/components/avatar/Avatar';
+import { Button } from '@/shared/components/buttons';
+import { PlusIcon } from '@/shared/components/icons/PlusIcon';
+import s from './Users.module.css';
+
+const SORT_FIELDS: readonly UserSortField[] = ['firstName', 'lastName', 'department', 'position'];
+
+type ModalState =
+  | { type: 'create' }
+  | { type: 'update'; user: UserListFieldsFragment }
+  | { type: 'delete'; user: UserListFieldsFragment };
+
+/** "First Last", or the email when the user has no name yet */
+const getFullName = (user: UserListFieldsFragment) =>
+  [user.firstName, user.lastName].filter(Boolean).join(' ') || user.email;
+
+export const Users = () => {
+  const t = useTranslations('users');
+  const errorMessage = useErrorMessage();
+  const router = useRouter();
+  const { user: currentUser } = useCurrentUser();
+  const isAdmin = currentUser?.role === 'ADMIN';
+
+  const [modal, setModal] = useState<ModalState | null>(null);
+
+  const { search, sort, page, pageSize, setSearch, setSort, setPage, setPageSize } =
+    useTableParams<UserSortField>({
+      sortFields: SORT_FIELDS,
+      defaultSort: { field: 'firstName', order: 'ASC' },
+    });
+
+  const { data, previousData, loading, error, refetch } = useQuery(USERS, {
+    variables: {
+      page,
+      pageSize,
+      search,
+      sortBy: sort.field,
+      sortOrder: sort.order,
+    },
+  });
+
+  const shown = data ?? previousData;
+
+  const openUser = (user: UserListFieldsFragment) => router.push(`/users/${user.id}`);
+
+  const usersColumns: Column<UserListFieldsFragment>[] = [
+    {
+      key: 'avatar',
+      header: t('table.avatar'),
+      render: (user) => (
+        <Avatar src={user.avatarUrl ?? undefined} fallback={getFullName(user)} size="md" />
+      ),
+      width: '72px',
+    },
+    {
+      key: 'firstName',
+      header: t('table.firstName'),
+      render: (user) => user.firstName,
+      sortable: true,
+    },
+    {
+      key: 'lastName',
+      header: t('table.lastName'),
+      render: (user) => user.lastName,
+      sortable: true,
+    },
+    {
+      key: 'email',
+      header: t('table.email'),
+      render: (user) => user.email,
+    },
+    {
+      key: 'department',
+      header: t('table.department'),
+      render: (user) => user.department?.name,
+      sortable: true,
+    },
+    {
+      key: 'position',
+      header: t('table.position'),
+      render: (user) => user.position?.name,
+      sortable: true,
+    },
+  ];
+
+  return (
+    <div>
+      <div className={s.header}>
+        <SearchField value={search} onChange={setSearch} />
+        {isAdmin && (
+          <Button variant="text" onClick={() => setModal({ type: 'create' })}>
+            <span className={s.withIcon}>
+              <PlusIcon />
+              {t('createButton')}
+            </span>
+          </Button>
+        )}
+      </div>
+
+      <DataTable<UserListFieldsFragment>
+        rows={shown?.users.items ?? []}
+        getRowId={(user) => user.id}
+        columns={usersColumns}
+        caption={t('title')}
+        emptyMessage={t('table.empty')}
+        getRowLabel={getFullName}
+        sort={sort}
+        onSortChange={setSort}
+        onRetry={() => refetch()}
+        error={error && errorMessage(parseError(error))}
+        isLoading={loading && !shown}
+        isRefreshing={loading && !!shown}
+        onRowClick={isAdmin ? undefined : openUser}
+        rowActions={
+          isAdmin
+            ? (user) => [
+                { label: t('table.actions.view'), onSelect: openUser },
+                {
+                  label: t('table.actions.update'),
+                  onSelect: () => setModal({ type: 'update', user }),
+                },
+                {
+                  label: t('table.actions.delete'),
+                  onSelect: () => setModal({ type: 'delete', user }),
+                },
+              ]
+            : undefined
+        }
+      />
+
+      <Pagination
+        page={page}
+        pageSize={pageSize}
+        total={shown?.users.total ?? 0}
+        onPageChange={setPage}
+        onPageSizeChange={setPageSize}
+      />
+
+      {/* TODO(KAN-46 steps 3–5): create / update / delete modals driven by `modal` */}
+      {modal && null}
+    </div>
+  );
+};
