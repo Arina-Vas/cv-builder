@@ -11,6 +11,7 @@ import { Input, Textarea } from '@/shared/components/inputs';
 import { Select } from '@/shared/components/select/Select';
 import { MultiSelect } from '@/shared/components/select/multi-select/MultiSelect';
 import {
+  NAME_MAX_LENGTH,
   optionalString,
   requiredDate,
   requiredIds,
@@ -56,14 +57,11 @@ const request = (outcome: Outcome, delay = 300) =>
 /* Example: Create / Edit department                                   */
 /* ------------------------------------------------------------------ */
 
-// same limit as the backend (MAX_NAME_LENGTH in backend/src/common/graphql/constants.ts)
-const DEPARTMENT_NAME_MAX = 100;
-
 // a schema is a factory of the `validation` translator, so the field errors are translated
 const departmentSchema = (t: ValidationT) =>
   z.object({
-    name: requiredString(t('department.required')).max(DEPARTMENT_NAME_MAX, {
-      error: t('department.maxLength', { max: DEPARTMENT_NAME_MAX }),
+    name: requiredString(t('department.required')).max(NAME_MAX_LENGTH, {
+      error: t('department.maxLength', { max: NAME_MAX_LENGTH }),
     }),
   });
 
@@ -293,7 +291,7 @@ export const CreateDepartment: Story = {
 
     await step('too long a name shows the translated max length error', async () => {
       await userEvent.click(input);
-      await userEvent.paste('a'.repeat(DEPARTMENT_NAME_MAX + 1));
+      await userEvent.paste('a'.repeat(NAME_MAX_LENGTH + 1));
 
       await expect(
         await within(dialog).findByText('Department name must not exceed 100 characters'),

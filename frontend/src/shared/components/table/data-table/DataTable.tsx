@@ -82,7 +82,11 @@ export function DataTable<T>({
             />
           ) : (
             <th key={column.key} style={{ width: column.width }} scope="col">
-              {column.header}
+              {column.hideHeader ? (
+                <span className={styles.visuallyHidden}>{column.header}</span>
+              ) : (
+                column.header
+              )}
             </th>
           );
         })}

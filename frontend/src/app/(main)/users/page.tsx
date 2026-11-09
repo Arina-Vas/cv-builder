@@ -1,3 +1,10 @@
+import { Suspense } from 'react';
+import { Users } from '@/features/users/components/Users';
+
 export default function UsersPage() {
-  return <h1>Users</h1>;
+  return (
+    <Suspense>
+      <Users />
+    </Suspense>
+  );
 }

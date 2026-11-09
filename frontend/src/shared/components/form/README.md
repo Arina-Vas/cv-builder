@@ -11,13 +11,14 @@ all on [`Field`](../field/Field.tsx)) for the UI, and `FormModal` for the Create
 | ---------------------------------------------- | ------------------------------------------------------------------------- |
 | `shared/lib/form/useAppForm.ts`                | `useForm` + `zodResolver` + the validation mode shared by all forms       |
 | `shared/lib/form/schemas.ts`                   | zod building blocks: `requiredString`, `optionalString`, `requiredIds`, … |
+| `shared/lib/form/limits.ts`                    | field length limits shared with the backend: `NAME_MAX_LENGTH`, …         |
 | `shared/lib/form/types.ts`                     | `ValidationT`: the `validation` translator a schema factory takes         |
 | `shared/components/form/FormModal.tsx`         | `Dialog` + `<form>` + CANCEL / submit, loading, close, request error      |
 | `shared/components/form/FormLayout.module.css` | field layout classes: `stack`, `grid`, `full`                             |
 | `*.test.ts(x)`, `FormModal.stories.tsx`        | unit tests, stories with `play` checks                                    |
 
 ```tsx
-import { useAppForm, requiredString, type ValidationT } from '@/shared/lib/form';
+import { useAppForm, requiredString, NAME_MAX_LENGTH, type ValidationT } from '@/shared/lib/form';
 import { FormModal } from '@/shared/components/form';
 import layout from '@/shared/components/form/FormLayout.module.css';
 ```
@@ -26,12 +27,10 @@ import layout from '@/shared/components/form/FormLayout.module.css';
 
 ```tsx
 // features/departments/…/department.schema.ts
-const NAME_MAX = 100; // same as the backend (MAX_NAME_LENGTH)
-
 export const departmentSchema = (t: ValidationT) =>
   z.object({
-    name: requiredString(t('department.required')).max(NAME_MAX, {
-      error: t('department.maxLength', { max: NAME_MAX }),
+    name: requiredString(t('department.required')).max(NAME_MAX_LENGTH, {
+      error: t('department.maxLength', { max: NAME_MAX_LENGTH }),
     }),
   });
 
@@ -77,7 +76,8 @@ const [updateDepartment] = useMutation(UPDATE_DEPARTMENT, options);
   are translated: keys `validation.<field>.<rule>` (`validation.department.required`). Build it in `useMemo`,
   otherwise the resolver is recreated on every render.
 - **Building blocks take the translated message**, not a key. Limits are chained as usual zod calls
-  (`.max(100, { error })`); take them from the backend DTO so both sides agree.
+  (`.max(NAME_MAX_LENGTH, { error })`). The numbers live once in `shared/lib/form/limits.ts`, copied from the
+  backend DTOs so both sides agree; add a new limit there, not as a local constant in a schema.
 - **Field names are the names of the GraphQL input** (`name`, `categoryId`, `startDate`, `technologyIds`), so the
   values go to the mutation as they are and a server error `field` points at the right field.
 
