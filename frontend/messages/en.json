@@ -171,6 +171,18 @@
     }
   },
   "users": {
+    "title": "Employees",
+    "createButton": "Create user",
+    "table": {
+      "avatar": "Avatar",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "department": "Department",
+      "position": "Position",
+      "empty": "No users found",
+      "actions": { "view": "View", "update": "Update", "delete": "Delete" }
+    },
     "tabs": {
       "label": "Employee sections",
       "profile": "Profile",
