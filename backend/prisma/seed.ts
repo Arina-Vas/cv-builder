@@ -178,10 +178,59 @@ async function seedUsers(): Promise<void> {
   }
 }
 
+const DEMO_FIRST_NAMES = [
+  'Olivia',
+  'Liam',
+  'Emma',
+  'Noah',
+  'Sophia',
+  'Lucas',
+  'Mia',
+  'Ethan',
+  'Anna',
+  'Mark',
+];
+
+const DEMO_LAST_NAMES = ['Smith', 'Kowalski', 'Müller', 'Rossi', 'Shevchenko', 'Garcia'];
+
+/**
+ * 60 employees (every first × last name) for the Employees list: enough for a second page at
+ * pageSize 50. Deterministic, so every run produces the same people. Every 15th has no name and
+ * every 12th has no department/position, to show the email fallback and empty cells.
+ * They sign in with SEED_EMPLOYEE_PASSWORD.
+ */
+async function seedDemoUsers(): Promise<void> {
+  const departments = await prisma.department.findMany({ orderBy: { name: 'asc' } });
+  const positions = await prisma.position.findMany({ orderBy: { name: 'asc' } });
+  // argon2 is slow on purpose: hash once, not 60 times
+  const passwordHash = await argon2.hash(requireEnv('SEED_EMPLOYEE_PASSWORD'));
+
+  const users = DEMO_FIRST_NAMES.flatMap((firstName, i) =>
+    DEMO_LAST_NAMES.map((lastName, j) => {
+      const index = i * DEMO_LAST_NAMES.length + j;
+      const hasName = index % 15 !== 14;
+      const hasJob = index % 12 !== 11;
+
+      return {
+        email: `${firstName}.${lastName}@example.com`.toLowerCase(),
+        passwordHash,
+        emailVerifiedAt: new Date(),
+        firstName: hasName ? firstName : null,
+        lastName: hasName ? lastName : null,
+        departmentId: hasJob ? departments[index % departments.length]!.id : null,
+        positionId: hasJob ? positions[index % positions.length]!.id : null,
+      };
+    }),
+  );
+
+  await prisma.user.createMany({ data: users, skipDuplicates: true });
+}
+
 async function main(): Promise<void> {
   await seedCatalogs();
   await seedProjects();
   await seedUsers();
+  await seedDemoUsers();
 }
 
 main()
