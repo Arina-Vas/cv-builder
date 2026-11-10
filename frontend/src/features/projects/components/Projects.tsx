@@ -1,17 +1,22 @@
 'use client';
 
-import { useQuery } from '@apollo/client/react';
+import { useMutation, useQuery } from '@apollo/client/react';
 import { useTableParams } from '@/shared/hooks/useTableParams';
 import { type Column, DataTable, TableToolbar } from '@/shared/components/table';
 import type { ProjectFieldsFragment } from '@/gql/graphql';
 import { useTranslations } from 'next-intl';
 import { parseError } from '@/shared/lib/apollo/graphql-errors';
 import { useErrorMessage } from '@/shared/lib/apollo/useErrorMessage';
-import { PROJECTS } from '@/features/projects/api/projects.operations';
+import {
+  DELETE_PROJECT,
+  PROJECT_MUTATION_OPTIONS,
+  PROJECTS,
+} from '@/features/projects/api/projects.operations';
 import { parseISO, format } from 'date-fns';
 import { ProjectDetails } from '@/features/projects/components/projectDetails/ProjectDetails';
 import { useState } from 'react';
 import { ProjectFormModal } from '@/features/projects/components/ProjectFormModal';
+import { ConfirmDialog } from '@/shared/components/dialog';
 
 type ModalState =
   | { type: 'create' }
@@ -65,6 +70,15 @@ export const Projects = () => {
     },
   ];
 
+  const projectToDelete = modal?.type === 'delete' ? modal.project : undefined;
+
+  const [deleteProject] = useMutation(DELETE_PROJECT, PROJECT_MUTATION_OPTIONS);
+
+  const handleDelete = async () => {
+    if (!projectToDelete) return;
+    await deleteProject({ variables: { id: projectToDelete.id } });
+  };
+
   return (
     <div>
       <TableToolbar
@@ -86,11 +100,33 @@ export const Projects = () => {
         isLoading={loading && !shown}
         isRefreshing={loading && !!shown}
         renderRowDetails={(project) => <ProjectDetails project={project} />}
+        rowActions={(project) => [
+          {
+            label: t('table.actions.edit'),
+            onSelect: () => setModal({ type: 'update', project }),
+          },
+          {
+            label: t('table.actions.delete'),
+            onSelect: () => setModal({ type: 'delete', project }),
+          },
+        ]}
       />
 
       <ProjectFormModal
-        open={modal?.type === 'create'}
+        open={modal?.type === 'create' || modal?.type === 'update'}
+        project={modal?.type === 'update' ? modal.project : undefined}
         onOpenChange={(open) => !open && setModal(null)}
+      />
+
+      <ConfirmDialog
+        open={!!projectToDelete}
+        onOpenChange={(open) => !open && setModal(null)}
+        title={t('delete.title')}
+        message={t.rich('delete.message', {
+          name: projectToDelete?.name ?? '',
+          b: (chunks) => <strong>{chunks}</strong>,
+        })}
+        onConfirm={handleDelete}
       />
     </div>
   );
