@@ -71,6 +71,7 @@
     "BAD_USER_INPUT": "Check the entered data",
     "CONFLICT": "This value is already taken",
     "ENTITY_IN_USE": "This item is in use and can't be deleted",
+    "OPERATION_NOT_ALLOWED": "This action is not allowed",
     "RATE_LIMITED": "{seconds, plural, =0 {Too many attempts. Try again later} one {Too many attempts. Try again in # second} other {Too many attempts. Try again in # seconds}}",
     "INTERNAL_SERVER_ERROR": "Something went wrong. Please try again later"
   },
@@ -115,6 +116,25 @@
     "code": {
       "required": "Verification code is required",
       "invalid": "Please enter a valid 6-digit code"
+    },
+    "user": {
+      "email": { "required": "Email is required", "invalid": "Invalid email address" },
+      "password": {
+        "required": "Password is required",
+        "minLength": "Password must contain at least {min} characters",
+        "maxLength": "Password must not exceed {max} characters"
+      },
+      "firstName": {
+        "required": "First name is required",
+        "maxLength": "First name must not exceed {max} characters"
+      },
+      "lastName": {
+        "required": "Last name is required",
+        "maxLength": "Last name must not exceed {max} characters"
+      },
+      "department": { "required": "Department is required" },
+      "position": { "required": "Position is required" },
+      "role": { "required": "Role is required" }
     }
   },
   "layout": {
@@ -189,6 +209,34 @@
     }
   },
   "users": {
+    "title": "Employees",
+    "createButton": "Create user",
+    "table": {
+      "avatar": "Avatar",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "department": "Department",
+      "position": "Position",
+      "empty": "No users found",
+      "actions": { "view": "View", "update": "Update", "delete": "Delete" }
+    },
+    "fields": {
+      "email": "Email",
+      "password": "Password",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "department": "Department",
+      "position": "Position",
+      "role": "Role"
+    },
+    "roles": { "ADMIN": "Admin", "EMPLOYEE": "Employee" },
+    "create": { "title": "Create user" },
+    "update": { "title": "Update user" },
+    "delete": {
+      "title": "Delete user",
+      "message": "Are you sure you want to delete user <b>{name}</b>?"
+    },
     "tabs": {
       "label": "Employee sections",
       "profile": "Profile",

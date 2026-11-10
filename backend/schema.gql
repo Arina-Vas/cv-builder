@@ -30,6 +30,16 @@ input CreateSkillInput {
   name: String!
 }
 
+input CreateUserInput {
+  departmentId: ID!
+  email: String!
+  firstName: String!
+  lastName: String!
+  password: String!
+  positionId: ID!
+  role: UserRole!
+}
+
 input CreateUserLanguageInput {
   languageId: ID!
   proficiency: Proficiency!
@@ -113,6 +123,11 @@ type Mutation {
   createSkill(input: CreateSkillInput!): Skill!
 
   """
+  Fails with CONFLICT (field: email) if the email is taken, BAD_USER_INPUT if the department or position does not exist
+  """
+  createUser(input: CreateUserInput!): User!
+
+  """
   Own profile or Admin. Fails with BAD_USER_INPUT (languageId) if the language does not exist and with CONFLICT (languageId) if it is already assigned
   """
   createUserLanguage(input: CreateUserLanguageInput!): UserLanguage!
@@ -138,6 +153,11 @@ type Mutation {
   Fails with ENTITY_IN_USE if the skill is assigned to users, projects or CVs
   """
   deleteSkill(id: ID!): ID!
+
+  """
+  Fails with NOT_FOUND if the user does not exist, OPERATION_NOT_ALLOWED when deleting own account or the last admin
+  """
+  deleteUser(id: ID!): ID!
 
   """
   Own profile or Admin. Removes the given UserLanguage ids of the user; returns the removed ids
@@ -166,6 +186,11 @@ type Mutation {
   updatePosition(input: UpdatePositionInput!): Position!
   updateProject(input: UpdateProjectInput!): Project!
   updateSkill(input: UpdateSkillInput!): Skill!
+
+  """
+  Fails with NOT_FOUND if the user does not exist, BAD_USER_INPUT if the department or position does not exist, OPERATION_NOT_ALLOWED when changing own role or demoting the last admin
+  """
+  updateUser(input: UpdateUserInput!): User!
 
   """
   Own profile or Admin. Changes only the proficiency level; fails with NOT_FOUND if the assignment does not exist or belongs to another user
@@ -292,6 +317,9 @@ type Query {
   """Skills available as project technologies ("Environment")"""
   technologies: [Skill!]!
 
+  """Fails with NOT_FOUND if the user does not exist"""
+  user(id: ID!): User!
+
   """
   Languages of the user, readable by any authenticated user; sorted by language name. Fails with NOT_FOUND if the user does not exist
   """
@@ -301,6 +329,20 @@ type Query {
   Skills of the user, readable by any authenticated user; sorted by category name, then skill name. Fails with NOT_FOUND if the user does not exist
   """
   userSkills(userId: ID!): [UserSkill!]!
+  users(
+    """1-based page number"""
+    page: Int! = 1
+
+    """One of 10, 20, 50"""
+    pageSize: Int! = 10
+    search: String
+
+    """
+    Without it users are returned in creation order and sortOrder is ignored
+    """
+    sortBy: UserSortField
+    sortOrder: SortOrder! = ASC
+  ): UserPage!
 }
 
 input RequestPasswordResetInput {
@@ -389,6 +431,15 @@ input UpdateSkillInput {
   name: String!
 }
 
+input UpdateUserInput {
+  departmentId: ID!
+  firstName: String!
+  id: ID!
+  lastName: String!
+  positionId: ID!
+  role: UserRole!
+}
+
 input UpdateUserLanguageInput {
   id: ID!
   proficiency: Proficiency!
@@ -420,6 +471,17 @@ type UserLanguage {
   proficiency: Proficiency!
 }
 
+type UserPage {
+  items: [User!]!
+
+  """Current page, 1-based"""
+  page: Int!
+  pageSize: Int!
+
+  """Items matching the search, not the page size"""
+  total: Int!
+}
+
 enum UserRole {
   ADMIN
   EMPLOYEE
@@ -429,6 +491,13 @@ type UserSkill {
   id: ID!
   mastery: Mastery!
   skill: Skill!
+}
+
+enum UserSortField {
+  department
+  firstName
+  lastName
+  position
 }
 
 input VerifyEmailInput {
