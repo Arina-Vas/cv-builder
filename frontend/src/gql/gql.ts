@@ -38,6 +38,12 @@ type Documents = {
     "\n  mutation CreatePosition($input: CreatePositionInput!) {\n    createPosition(input: $input) {\n      ...PositionFields\n    }\n  }\n": typeof types.CreatePositionDocument,
     "\n  mutation UpdatePosition($input: UpdatePositionInput!) {\n    updatePosition(input: $input) {\n      ...PositionFields\n    }\n  }\n": typeof types.UpdatePositionDocument,
     "\n  mutation DeletePosition($id: ID!) {\n    deletePosition(id: $id)\n  }\n": typeof types.DeletePositionDocument,
+    "\n  fragment ProjectFields on Project {\n    id\n    name\n    description\n    domain\n    startDate\n    endDate\n    technologies {\n      id\n      name\n    }\n  }\n": typeof types.ProjectFieldsFragmentDoc,
+    "\n  query Projects($search: String, $sortBy: ProjectSortField!, $sortOrder: SortOrder!) {\n    projects(search: $search, sortBy: $sortBy, sortOrder: $sortOrder) {\n      items {\n        ...ProjectFields\n      }\n      total\n    }\n  }\n": typeof types.ProjectsDocument,
+    "\n  query Technologies {\n    technologies {\n      id\n      name\n    }\n  }\n": typeof types.TechnologiesDocument,
+    "\n  mutation CreateProject($input: CreateProjectInput!) {\n    createProject(input: $input) {\n      ...ProjectFields\n    }\n  }\n": typeof types.CreateProjectDocument,
+    "\n  mutation UpdateProject($input: UpdateProjectInput!) {\n    updateProject(input: $input) {\n      ...ProjectFields\n    }\n  }\n": typeof types.UpdateProjectDocument,
+    "\n  mutation DeleteProject($id: ID!) {\n    deleteProject(id: $id)\n  }\n": typeof types.DeleteProjectDocument,
     "\n  fragment SkillFields on Skill {\n    id\n    name\n    category {\n      id\n      name\n      type\n    }\n  }\n": typeof types.SkillFieldsFragmentDoc,
     "\n  query Skills(\n    $page: Int!\n    $pageSize: Int!\n    $search: String\n    $sortBy: SkillSortField!\n    $sortOrder: SortOrder!\n  ) {\n    skills(\n      page: $page\n      pageSize: $pageSize\n      search: $search\n      sortBy: $sortBy\n      sortOrder: $sortOrder\n    ) {\n      items {\n        ...SkillFields\n      }\n      page\n      pageSize\n      total\n    }\n  }\n": typeof types.SkillsDocument,
     "\n  query SkillCategories {\n    skillCategories {\n      id\n      name\n      type\n    }\n  }\n": typeof types.SkillCategoriesDocument,
@@ -76,6 +82,12 @@ const documents: Documents = {
     "\n  mutation CreatePosition($input: CreatePositionInput!) {\n    createPosition(input: $input) {\n      ...PositionFields\n    }\n  }\n": types.CreatePositionDocument,
     "\n  mutation UpdatePosition($input: UpdatePositionInput!) {\n    updatePosition(input: $input) {\n      ...PositionFields\n    }\n  }\n": types.UpdatePositionDocument,
     "\n  mutation DeletePosition($id: ID!) {\n    deletePosition(id: $id)\n  }\n": types.DeletePositionDocument,
+    "\n  fragment ProjectFields on Project {\n    id\n    name\n    description\n    domain\n    startDate\n    endDate\n    technologies {\n      id\n      name\n    }\n  }\n": types.ProjectFieldsFragmentDoc,
+    "\n  query Projects($search: String, $sortBy: ProjectSortField!, $sortOrder: SortOrder!) {\n    projects(search: $search, sortBy: $sortBy, sortOrder: $sortOrder) {\n      items {\n        ...ProjectFields\n      }\n      total\n    }\n  }\n": types.ProjectsDocument,
+    "\n  query Technologies {\n    technologies {\n      id\n      name\n    }\n  }\n": types.TechnologiesDocument,
+    "\n  mutation CreateProject($input: CreateProjectInput!) {\n    createProject(input: $input) {\n      ...ProjectFields\n    }\n  }\n": types.CreateProjectDocument,
+    "\n  mutation UpdateProject($input: UpdateProjectInput!) {\n    updateProject(input: $input) {\n      ...ProjectFields\n    }\n  }\n": types.UpdateProjectDocument,
+    "\n  mutation DeleteProject($id: ID!) {\n    deleteProject(id: $id)\n  }\n": types.DeleteProjectDocument,
     "\n  fragment SkillFields on Skill {\n    id\n    name\n    category {\n      id\n      name\n      type\n    }\n  }\n": types.SkillFieldsFragmentDoc,
     "\n  query Skills(\n    $page: Int!\n    $pageSize: Int!\n    $search: String\n    $sortBy: SkillSortField!\n    $sortOrder: SortOrder!\n  ) {\n    skills(\n      page: $page\n      pageSize: $pageSize\n      search: $search\n      sortBy: $sortBy\n      sortOrder: $sortOrder\n    ) {\n      items {\n        ...SkillFields\n      }\n      page\n      pageSize\n      total\n    }\n  }\n": types.SkillsDocument,
     "\n  query SkillCategories {\n    skillCategories {\n      id\n      name\n      type\n    }\n  }\n": types.SkillCategoriesDocument,
@@ -200,6 +212,30 @@ export function graphql(source: "\n  mutation UpdatePosition($input: UpdatePosit
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation DeletePosition($id: ID!) {\n    deletePosition(id: $id)\n  }\n"): (typeof documents)["\n  mutation DeletePosition($id: ID!) {\n    deletePosition(id: $id)\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  fragment ProjectFields on Project {\n    id\n    name\n    description\n    domain\n    startDate\n    endDate\n    technologies {\n      id\n      name\n    }\n  }\n"): (typeof documents)["\n  fragment ProjectFields on Project {\n    id\n    name\n    description\n    domain\n    startDate\n    endDate\n    technologies {\n      id\n      name\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query Projects($search: String, $sortBy: ProjectSortField!, $sortOrder: SortOrder!) {\n    projects(search: $search, sortBy: $sortBy, sortOrder: $sortOrder) {\n      items {\n        ...ProjectFields\n      }\n      total\n    }\n  }\n"): (typeof documents)["\n  query Projects($search: String, $sortBy: ProjectSortField!, $sortOrder: SortOrder!) {\n    projects(search: $search, sortBy: $sortBy, sortOrder: $sortOrder) {\n      items {\n        ...ProjectFields\n      }\n      total\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query Technologies {\n    technologies {\n      id\n      name\n    }\n  }\n"): (typeof documents)["\n  query Technologies {\n    technologies {\n      id\n      name\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation CreateProject($input: CreateProjectInput!) {\n    createProject(input: $input) {\n      ...ProjectFields\n    }\n  }\n"): (typeof documents)["\n  mutation CreateProject($input: CreateProjectInput!) {\n    createProject(input: $input) {\n      ...ProjectFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation UpdateProject($input: UpdateProjectInput!) {\n    updateProject(input: $input) {\n      ...ProjectFields\n    }\n  }\n"): (typeof documents)["\n  mutation UpdateProject($input: UpdateProjectInput!) {\n    updateProject(input: $input) {\n      ...ProjectFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation DeleteProject($id: ID!) {\n    deleteProject(id: $id)\n  }\n"): (typeof documents)["\n  mutation DeleteProject($id: ID!) {\n    deleteProject(id: $id)\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
