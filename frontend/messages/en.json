@@ -99,6 +99,18 @@
         "format": "ISO must be a language code, e.g. EN or PT-BR"
       }
     },
+    "skill": {
+      "name": {
+        "required": "Skill is required",
+        "maxLength": "Skill name must not exceed {max} characters"
+      },
+      "categoryId": {
+        "required": "Category is required"
+      },
+      "type": {
+        "required": "ISO is required"
+      }
+    },
     "email": {
       "required": "Email is required",
       "invalid": "Please enter a valid email address"
@@ -304,6 +316,26 @@
     "delete": {
       "title": "Delete language",
       "message": "Are you sure you want to delete language <b>{name}</b>?"
+    }
+  },
+  "skills": {
+    "title": "Skills",
+    "createButton": "Create skill",
+    "table": {
+      "columns": {
+        "name": "Name",
+        "type": "Type",
+        "category": "Category"
+      },
+      "empty": "No skills found",
+      "actions": { "edit": "Edit", "delete": "Delete" }
+    },
+    "fields": { "name": "Name", "category": "Category" },
+    "create": { "title": "Create skill" },
+    "edit": { "title": "Edit skill" },
+    "delete": {
+      "title": "Delete skill",
+      "message": "Are you sure you want to delete skill <b>{name}</b>?"
     }
   }
 }
