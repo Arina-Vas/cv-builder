@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl';
 import type { UserListFieldsFragment, UserSortField } from '@/gql/graphql';
 import { DELETE_USER, USER_MUTATION_OPTIONS, USERS } from '@/features/users/api/users.operations';
 import { useCurrentUser } from '@/features/auth/hooks/useCurrentUser';
+import { getFullName } from '@/features/users/lib/getFullName';
 import { useTableParams } from '@/shared/hooks/useTableParams';
 import { parseError } from '@/shared/lib/apollo/graphql-errors';
 import { useErrorMessage } from '@/shared/lib/apollo/useErrorMessage';
@@ -28,10 +29,6 @@ type ModalState =
   | { type: 'create' }
   | { type: 'update'; user: UserListFieldsFragment }
   | { type: 'delete'; user: UserListFieldsFragment };
-
-/** "First Last", or the email when the user has no name yet */
-const getFullName = (user: UserListFieldsFragment) =>
-  [user.firstName, user.lastName].filter(Boolean).join(' ') || user.email;
 
 export const Users = () => {
   const t = useTranslations('users');

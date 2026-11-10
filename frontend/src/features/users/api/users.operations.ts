@@ -45,6 +45,16 @@ export const USERS = graphql(`
   }
 `);
 
+export const USER = graphql(`
+  query User($id: ID!) {
+    user(id: $id) {
+      ...UserListFields
+      createdAt
+      emailVerifiedAt
+    }
+  }
+`);
+
 export const USER_FORM_OPTIONS = graphql(`
   query UserFormOptions {
     departments(pageSize: 50) {
