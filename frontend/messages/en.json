@@ -106,9 +106,6 @@
       },
       "categoryId": {
         "required": "Category is required"
-      },
-      "type": {
-        "required": "ISO is required"
       }
     },
     "email": {
