@@ -1,5 +1,6 @@
 import { graphql } from '@/gql';
 import { NO_ERROR_TOAST } from '@/shared/lib/apollo/error-toast-link';
+import type { ApolloCache } from '@apollo/client';
 
 graphql(`
   fragment PositionFields on Position {
@@ -58,6 +59,10 @@ export const DELETE_POSITION = graphql(`
 /** create / update / delete: the dialog shows the error, the list is refetched before it closes */
 export const POSITION_MUTATION_OPTIONS = {
   context: NO_ERROR_TOAST,
+  update: (cache: ApolloCache) => {
+    cache.evict({ id: 'ROOT_QUERY', fieldName: 'positions' });
+    cache.gc();
+  },
   refetchQueries: [POSITIONS],
   awaitRefetchQueries: true,
 };
