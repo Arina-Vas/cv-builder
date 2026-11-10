@@ -138,6 +138,12 @@ Send a date to the API as `format(date, 'yyyy-MM-dd')` (see the `DatePicker` REA
 - `ref` lets react-hook-form focus the first invalid field.
 - `onBlur` of `Select` / `DatePicker` fires when the list / calendar closes, of `MultiSelect` when the input loses
   focus, so `mode: 'onTouched'` works for them too (see their READMEs).
+- **Options from the API** (skill categories, departments, positions): query them in the modal with
+  `skip: !open`, so nothing loads until the modal opens and later openings use the cache. Keep the select
+  `disabled` while they load, and show a failed load in its `error` (`useErrorMessage()(parseError(error))`), so
+  an empty list never looks like "no options". The form value is the option's `id`, as the GraphQL input expects
+  (`categoryId`); a value derived from it (the skill type) is shown, not sent. See `SkillFormModal`,
+  `UserFormModal`.
 
 ## `FormModal`
 
