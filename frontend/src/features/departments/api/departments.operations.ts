@@ -1,5 +1,6 @@
 import { graphql } from '@/gql';
 import { NO_ERROR_TOAST } from '@/shared/lib/apollo/error-toast-link';
+import type { ApolloCache } from '@apollo/client';
 
 graphql(`
   fragment DepartmentFields on Department {
@@ -58,6 +59,10 @@ export const DELETE_DEPARTMENT = graphql(`
 /** create / update / delete: the dialog shows the error, the list is refetched before it closes */
 export const DEPARTMENT_MUTATION_OPTIONS = {
   context: NO_ERROR_TOAST,
+  update: (cache: ApolloCache) => {
+    cache.evict({ id: 'ROOT_QUERY', fieldName: 'departments' });
+    cache.gc();
+  },
   refetchQueries: [DEPARTMENTS],
   awaitRefetchQueries: true,
 };

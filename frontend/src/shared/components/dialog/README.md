@@ -90,11 +90,9 @@ Works like `FormModal`: the page passes the action as a promise (usually the mut
 loading state and the error and closes itself on success. The page only owns `open` (usually the selected row):
 
 ```tsx
-const [deleteDepartment] = useMutation(DELETE_DEPARTMENT, {
-  context: NO_ERROR_TOAST, // the dialog shows the error (ENTITY_IN_USE…): no global toast
-  refetchQueries: [DEPARTMENTS], // the list is up to date before the dialog closes
-  awaitRefetchQueries: true,
-});
+// NO_ERROR_TOAST (the dialog shows ENTITY_IN_USE…), evict the cached list pages, refetch the list on
+// screen before the dialog closes: see DEPARTMENT_MUTATION_OPTIONS in the form README
+const [deleteDepartment] = useMutation(DELETE_DEPARTMENT, DEPARTMENT_MUTATION_OPTIONS);
 
 <ConfirmDialog
   open={target !== null}
