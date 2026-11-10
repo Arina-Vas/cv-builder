@@ -10,10 +10,13 @@ import { SortOrder } from '@/common/graphql/sort-order.enum';
 import { UserRole } from '@/common/graphql/enums';
 import type { CreateUserInput } from './dto/create-user.input';
 import type { UpdateUserInput } from './dto/update-user.input';
+import type { UpdateProfileInput } from './dto/update-profile.input';
+import { canManageUser } from '@/common/auth/can-manage-user';
 import { hashPassword } from '@/common/crypto/password';
 import {
   badUserInput,
   conflict,
+  forbidden,
   notFound,
   operationNotAllowed,
   type FieldError,
@@ -139,6 +142,27 @@ export class UsersService {
       },
       { isolationLevel: 'Serializable' },
     );
+  }
+
+  async updateProfile(
+    currentUser: Pick<User, 'id' | 'role'>,
+    { id, ...data }: UpdateProfileInput,
+  ): Promise<User> {
+    if (!canManageUser(currentUser, id)) {
+      throw forbidden();
+    }
+    await this.assertDepartmentAndPositionExist(data.departmentId, data.positionId);
+
+    try {
+      const row = await this.prisma.user.update({ where: { id }, data, include: userInclude });
+
+      return toUser(row);
+    } catch (error) {
+      if (isPrismaError(error, 'P2025')) {
+        throw notFound(UserMessage.notFound);
+      }
+      throw error;
+    }
   }
 
   async delete(id: string, currentUserId: string): Promise<string> {

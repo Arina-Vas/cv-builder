@@ -149,29 +149,34 @@ Operation-level tables are added by each module together with its resolvers: the
 
 ### Users
 
-| Operation    | Access |
-| ------------ | ------ |
-| `users`      | All    |
-| `user`       | All    |
-| `createUser` | Admin  |
-| `updateUser` | Admin  |
-| `deleteUser` | Admin  |
+| Operation       | Access       |
+| --------------- | ------------ |
+| `users`         | All          |
+| `user`          | All          |
+| `createUser`    | Admin        |
+| `updateUser`    | Admin        |
+| `updateProfile` | Own or Admin |
+| `deleteUser`    | Admin        |
 
 Errors thrown by the service, besides the [protected users](#users) rules:
 
-| Operation                  | Case                          | Code             | Message                                     |
-| -------------------------- | ----------------------------- | ---------------- | ------------------------------------------- |
-| `user`                     | the user does not exist       | `NOT_FOUND`      | `User not found`                            |
-| `createUser`               | the email is taken            | `CONFLICT`       | `An account with this email already exists` |
-| `createUser`, `updateUser` | the department does not exist | `BAD_USER_INPUT` | `Department not found` (`departmentId`)     |
-| `createUser`, `updateUser` | the position does not exist   | `BAD_USER_INPUT` | `Position not found` (`positionId`)         |
-| `updateUser`, `deleteUser` | the user does not exist       | `NOT_FOUND`      | `User not found`                            |
+| Operation                                   | Case                                | Code             | Message                                         |
+| ------------------------------------------- | ----------------------------------- | ---------------- | ----------------------------------------------- |
+| `user`                                      | the user does not exist             | `NOT_FOUND`      | `User not found`                                |
+| `createUser`                                | the email is taken                  | `CONFLICT`       | `An account with this email already exists`     |
+| `createUser`, `updateUser`, `updateProfile` | the department does not exist       | `BAD_USER_INPUT` | `Department not found` (`departmentId`)         |
+| `createUser`, `updateUser`, `updateProfile` | the position does not exist         | `BAD_USER_INPUT` | `Position not found` (`positionId`)             |
+| `updateUser`, `updateProfile`, `deleteUser` | the user does not exist             | `NOT_FOUND`      | `User not found`                                |
+| `updateProfile`                             | an Employee sends another user's id | `FORBIDDEN`      | `You are not authorized to perform this action` |
 
 The email message is the Sign Up one: the Create user modal has no text for a taken email. "Change own role" is
 checked only when `role` differs from the caller's current role, because the Update user modal always sends `role`.
 
-The Profile tab mutation (first / last name, department, position; own profile or Admin) is added with the Profile
-module.
+`updateProfile` is the Profile tab mutation: first / last name, department and position, own profile or Admin. It
+has no `role` field, so an Employee cannot change their role through it; roles change only through the Admin-only
+`updateUser` (Update user modal on the Users page). The ownership check runs before any query, so an Employee does
+not learn whether another user's id exists. Like every mutation, it needs a verified email (`EMAIL_NOT_VERIFIED`
+otherwise).
 
 ### Departments
 

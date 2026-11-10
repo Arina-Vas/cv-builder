@@ -8,6 +8,7 @@ import { SortOrder } from '@/common/graphql/sort-order.enum';
 import { Prisma } from '@/generated/prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import type { CreateUserInput } from './dto/create-user.input';
+import type { UpdateProfileInput } from './dto/update-profile.input';
 import type { UpdateUserInput } from './dto/update-user.input';
 import { UsersArgs } from './dto/users.args';
 import { UserSortField } from './models/user-sort-field.enum';
@@ -341,6 +342,84 @@ describe('UsersService', () => {
 
       expect(error.extensions['code']).toBe(ErrorCode.BAD_USER_INPUT);
       expect(prisma.$transaction).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('updateProfile', () => {
+    const employee = { id: 'user-1', role: UserRole.EMPLOYEE };
+    const admin = { id: 'admin-1', role: UserRole.ADMIN };
+    const profileInput: UpdateProfileInput = {
+      id: 'user-1',
+      firstName: 'Jane',
+      lastName: 'Doe',
+      departmentId: 'department-1',
+      positionId: 'position-1',
+    };
+    const expectedUpdate = {
+      where: { id: 'user-1' },
+      data: {
+        firstName: 'Jane',
+        lastName: 'Doe',
+        departmentId: 'department-1',
+        positionId: 'position-1',
+      },
+      include: userInclude,
+    };
+
+    beforeEach(() => {
+      prisma.user.update.mockResolvedValue({ ...row, firstName: 'Jane', lastName: 'Doe' });
+    });
+
+    it('lets an Employee update their own names, department and position, never the role', async () => {
+      const user = await service.updateProfile(employee, profileInput);
+
+      expect(prisma.user.update).toHaveBeenCalledWith(expectedUpdate);
+      expect(user).toMatchObject({ id: 'user-1', firstName: 'Jane', lastName: 'Doe' });
+      expect(user).not.toHaveProperty('passwordHash');
+    });
+
+    it("lets an Admin update another user's profile", async () => {
+      await service.updateProfile(admin, profileInput);
+
+      expect(prisma.user.update).toHaveBeenCalledWith(expectedUpdate);
+    });
+
+    it("fails with FORBIDDEN for an Employee updating another user's profile, without any query", async () => {
+      const error = await catchError(
+        service.updateProfile({ id: 'user-2', role: UserRole.EMPLOYEE }, profileInput),
+      );
+
+      expect(error.extensions['code']).toBe(ErrorCode.FORBIDDEN);
+      expect(prisma.department.findUnique).not.toHaveBeenCalled();
+      expect(prisma.user.update).not.toHaveBeenCalled();
+    });
+
+    it('fails with BAD_USER_INPUT when the department or position does not exist, without updating', async () => {
+      prisma.position.findUnique.mockResolvedValue(null);
+
+      const error = await catchError(service.updateProfile(employee, profileInput));
+
+      expect(error.extensions['code']).toBe(ErrorCode.BAD_USER_INPUT);
+      expect(error.extensions['fields']).toEqual([
+        { field: 'positionId', message: UserMessage.positionNotFound },
+      ]);
+      expect(prisma.user.update).not.toHaveBeenCalled();
+    });
+
+    it('fails with NOT_FOUND when the user no longer exists', async () => {
+      prisma.user.update.mockRejectedValue(prismaError('P2025'));
+
+      const error = await catchError(service.updateProfile(admin, profileInput));
+
+      expect(error.extensions['code']).toBe(ErrorCode.NOT_FOUND);
+      expect(error.message).toBe(UserMessage.notFound);
+    });
+
+    it('rethrows other database errors', async () => {
+      const dbError = prismaError('P2003');
+      prisma.user.update.mockRejectedValue(dbError);
+
+      await expect(service.updateProfile(employee, profileInput)).rejects.toBe(dbError);
     });
   });
 
