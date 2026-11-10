@@ -108,6 +108,27 @@
         "required": "Category is required"
       }
     },
+    "project": {
+      "name": {
+        "required": "Project name is required",
+        "maxLength": "Project name must not exceed {max} characters"
+      },
+      "domain": {
+        "required": "Domain is required",
+        "maxLength": "Domain must not exceed {max} characters"
+      },
+      "startDate": {
+        "required": "Start date is required"
+      },
+      "endDate": {
+        "required": "End date is required",
+        "beforeStart": "End date must be later than start date"
+      },
+      "description": {
+        "required": "Description is required",
+        "maxLength": "Description must not exceed {max} characters"
+      }
+    },
     "email": {
       "required": "Email is required",
       "invalid": "Please enter a valid email address"
@@ -339,6 +360,34 @@
     "delete": {
       "title": "Delete skill",
       "message": "Are you sure you want to delete skill <b>{name}</b>?"
+    }
+  },
+  "projects": {
+    "title": "Projects",
+    "createButton": "Create project",
+    "table": {
+      "columns": {
+        "name": "Name",
+        "domain": "Domain",
+        "startDate": "Start Date",
+        "endDate": "End Date"
+      },
+      "empty": "No projects found",
+      "actions": { "edit": "Edit", "delete": "Delete" }
+    },
+    "fields": {
+      "name": "Name",
+      "domain": "Domain",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "description": "Description",
+      "environment": "Environment"
+    },
+    "create": { "title": "Create project" },
+    "edit": { "title": "Edit project" },
+    "delete": {
+      "title": "Delete project",
+      "message": "Are you sure you want to delete project <b>{name}</b>?"
     }
   }
 }
