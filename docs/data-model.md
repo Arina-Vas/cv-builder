@@ -68,7 +68,7 @@ All tables have `id` (uuid), `created_at` and `updated_at`. Only the meaningful 
 | `auth_tokens` | `user_id`, `type` (`EMAIL_VERIFICATION`/`PASSWORD_RESET`), `code_hash`, `expires_at`, `used_at?`                                                                 |
 
 - Profile fields are nullable: Sign Up collects only email and password. "Create user" by an Admin requires
-  first/last name, department and position; this is enforced by the input DTO, not by the DB.
+  first/last name, department, position and role; this is enforced by the input DTO, not by the DB.
 - `email_verified_at` is the email verification status (`null` = not verified).
 - `avatar_url` stores a reference to the uploaded file, never the image itself.
 - `auth_tokens` covers both the 6-digit email verification code (10 min, single-use, a new code invalidates the
@@ -136,6 +136,10 @@ The spec asks each catalog to define its deletion policy explicitly. One rule is
 | `cv_projects.project_id` → projects            | Restrict                        | Project used in a CV cannot be deleted               |
 | `cv_project_roles.cv_project_id` → cv_projects | Cascade                         | Deleting a CV project removes its roles              |
 | `cv_project_roles.role_id` → project_roles     | Restrict                        | Role used in a CV cannot be deleted                  |
+
+Deleting a user removes their sessions, codes, skill and language assignments and CVs (with the CVs' skills and
+projects); departments, positions, skills and languages stay. Before deleting, the service rejects deleting
+oneself and the last Admin ([permissions](api/permissions.md#users)).
 
 ## Constraints
 
@@ -211,6 +215,12 @@ pnpm db:migrate
 - **Language ISO format** is checked by the input DTO: 2–3 letters with an optional 2-letter region (`EN`, `ENG`,
   `PT-BR`). The spec only says "a language ISO code, max 5 characters".
 - **User preferences (theme, language) are not stored.** The spec allows keeping them on the client.
+- **Users created by an Admin are not verified** (`email_verified_at = null`), like users who sign up. Sending
+  them a verification code on creation and redirecting unverified users to Email Verification after sign-in is an
+  open item, outside the Users API task.
+- **Two user update mutations.** `updateUser` (Admin: department, position, role) and the Profile mutation (own
+  profile or Admin: first / last name, department, position) have different access rules, so they are separate
+  operations instead of one input with per-field checks.
 - **`responsibilities` is a single text field** (a textarea in the spec), not an array.
 - **Skill mastery values follow the wiki**: `BEGINNER`, `ELEMENTARY`, `INTERMEDIATE`, `ADVANCED`, `EXPERT`
   (Add / Update Skill modals). The initial schema used other names; they were renamed in place

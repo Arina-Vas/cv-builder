@@ -10,6 +10,7 @@ export interface SortState {
 export interface Column<T> {
   key: string;
   header: string;
+  hideHeader?: boolean;
   render: (row: T) => ReactNode;
   sortable?: boolean;
   width?: string;
