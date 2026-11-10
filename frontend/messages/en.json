@@ -334,5 +334,33 @@
       "title": "Delete skill",
       "message": "Are you sure you want to delete skill <b>{name}</b>?"
     }
+  },
+  "projects": {
+    "title": "Projects",
+    "createButton": "Create project",
+    "table": {
+      "columns": {
+        "name": "Name",
+        "domain": "Domain",
+        "startDate": "Start Date",
+        "endDate": "End Date"
+      },
+      "empty": "No projects found",
+      "actions": { "edit": "Edit", "delete": "Delete" }
+    },
+    "fields": {
+      "name": "Name",
+      "domain": "Domain",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "description": "Description",
+      "environment": "Environment"
+    },
+    "create": { "title": "Create project" },
+    "edit": { "title": "Edit project" },
+    "delete": {
+      "title": "Delete project",
+      "message": "Are you sure you want to delete project <b>{name}</b>?"
+    }
   }
 }
