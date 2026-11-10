@@ -38,6 +38,8 @@ const EMPTY: DefaultValues<UserFormInput> = {
   positionId: '',
 };
 
+const PASSWORD_PLACEHOLDER = '********';
+
 const toOptions = (items: { id: string; name: string }[] = []): SelectOption[] =>
   items.map((item) => ({ value: item.id, label: item.name }));
 
@@ -71,7 +73,7 @@ export const UserFormModal = ({ open, onOpenChange, user, isSelf = false }: Prop
   const values: DefaultValues<UserFormInput> = user
     ? {
         email: user.email,
-        password: '',
+        password: PASSWORD_PLACEHOLDER,
         firstName: user.firstName ?? '',
         lastName: user.lastName ?? '',
         departmentId: user.department?.id ?? '',
