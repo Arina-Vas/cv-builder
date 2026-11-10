@@ -43,6 +43,8 @@ const toUserOrderBy = (
       return [{ department: { name: order } }, { id: 'asc' }];
     case UserSortField.position:
       return [{ position: { name: order } }, { id: 'asc' }];
+    case UserSortField.createdAt:
+      return [{ createdAt: order }, { id: 'asc' }];
   }
 };
 

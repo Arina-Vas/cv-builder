@@ -135,8 +135,10 @@ describe('UserFormModal', () => {
     expect(screen.getByRole('dialog', { name: 'Update user' })).toBeInTheDocument();
     expect(screen.getByLabelText('Email')).toHaveValue('jane@example.com');
     expect(screen.getByLabelText('Email')).toBeDisabled();
-    expect(screen.getByLabelText('Password')).toHaveValue('');
+    expect(screen.getByLabelText('Password')).toHaveValue('********');
+    expect(screen.getByLabelText('Password')).toHaveAttribute('type', 'password');
     expect(screen.getByLabelText('Password')).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Show password' })).toBeDisabled();
     expect(screen.getByLabelText('First Name')).toHaveValue('Jane');
     expect(screen.getByLabelText('First Name')).toBeEnabled();
     expect(screen.getByLabelText('Last Name')).toBeEnabled();
