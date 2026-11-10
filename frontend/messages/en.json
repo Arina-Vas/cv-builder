@@ -230,6 +230,12 @@
       "empty": "No users found",
       "actions": { "view": "View", "update": "Update", "delete": "Delete" }
     },
+    "profile": {
+      "memberSince": "A member since {date}",
+      "loading": "Loading profile",
+      "loadError": "Failed to load profile information",
+      "retry": "Retry"
+    },
     "fields": {
       "email": "Email",
       "password": "Password",
