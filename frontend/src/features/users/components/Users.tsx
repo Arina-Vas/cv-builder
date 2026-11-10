@@ -16,7 +16,13 @@ import { Avatar } from '@/shared/components/avatar/Avatar';
 import { ConfirmDialog } from '@/shared/components/dialog';
 import { UserFormModal } from './UserFormModal';
 
-const SORT_FIELDS: readonly UserSortField[] = ['firstName', 'lastName', 'department', 'position'];
+const SORT_FIELDS: readonly UserSortField[] = [
+  'firstName',
+  'lastName',
+  'department',
+  'position',
+  'createdAt',
+];
 
 type ModalState =
   | { type: 'create' }
@@ -39,7 +45,7 @@ export const Users = () => {
   const { search, sort, page, pageSize, setSearch, setSort, setPage, setPageSize } =
     useTableParams<UserSortField>({
       sortFields: SORT_FIELDS,
-      defaultSort: { field: 'firstName', order: 'ASC' },
+      defaultSort: { field: 'createdAt', order: 'DESC' },
     });
 
   const { data, previousData, loading, error, refetch } = useQuery(USERS, {

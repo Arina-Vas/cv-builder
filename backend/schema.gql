@@ -494,6 +494,7 @@ type UserSkill {
 }
 
 enum UserSortField {
+  createdAt
   department
   firstName
   lastName

@@ -155,6 +155,7 @@ describe('UsersService', () => {
       [UserSortField.lastName, { lastName: { sort: 'desc', nulls: 'last' } }],
       [UserSortField.department, { department: { name: 'desc' } }],
       [UserSortField.position, { position: { name: 'desc' } }],
+      [UserSortField.createdAt, { createdAt: 'desc' }],
     ])('sorts by %s, then id', async (sortBy, first) => {
       await service.findAll(args({ sortBy, sortOrder: SortOrder.DESC }));
 

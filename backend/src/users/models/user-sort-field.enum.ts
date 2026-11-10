@@ -5,6 +5,7 @@ export enum UserSortField {
   lastName = 'lastName',
   department = 'department',
   position = 'position',
+  createdAt = 'createdAt',
 }
 
 registerEnumType(UserSortField, { name: 'UserSortField' });

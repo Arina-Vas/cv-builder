@@ -47,7 +47,7 @@ const meMock = (me: typeof jane | typeof admin): MockLink.MockedResponse => ({
 
 const listRequest = {
   query: USERS,
-  variables: { page: 1, pageSize: 10, search: '', sortBy: 'firstName', sortOrder: 'ASC' },
+  variables: { page: 1, pageSize: 10, search: '', sortBy: 'createdAt', sortOrder: 'DESC' },
 };
 
 const listMock = (items = [admin, jane, john]): MockLink.MockedResponse => ({

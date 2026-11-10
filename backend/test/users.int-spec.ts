@@ -130,6 +130,30 @@ describe('Users (integration)', () => {
       expect(first.users.total).toBe(3);
     });
 
+    it('sorts by creation date, newest first for DESC', async () => {
+      const { browser, user: me } = await signedIn();
+      const [older, newer] = [await createUser(t.prisma), await createUser(t.prisma)];
+      await t.prisma.user.update({
+        where: { id: me.id },
+        data: { createdAt: new Date('2026-01-01T00:00:00Z') },
+      });
+      await t.prisma.user.update({
+        where: { id: older.id },
+        data: { createdAt: new Date('2026-02-01T00:00:00Z') },
+      });
+      await t.prisma.user.update({
+        where: { id: newer.id },
+        data: { createdAt: new Date('2026-03-01T00:00:00Z') },
+      });
+
+      const { users } = await browser.data<{ users: { items: GqlListUser[] } }>(
+        USERS,
+        listArgs({ sortBy: 'createdAt', sortOrder: 'DESC' }),
+      );
+
+      expect(users.items.map((user) => user.id)).toEqual([newer.id, older.id, me.id]);
+    });
+
     it('rejects a sort field outside the enum', async () => {
       const { browser } = await signedIn();
 

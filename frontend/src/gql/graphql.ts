@@ -94,6 +94,7 @@ export type UserRole =
   | 'EMPLOYEE';
 
 export type UserSortField =
+  | 'createdAt'
   | 'department'
   | 'firstName'
   | 'lastName'
