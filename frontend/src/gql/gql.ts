@@ -34,6 +34,12 @@ type Documents = {
     "\n  mutation CreateLanguage($input: CreateLanguageInput!) {\n    createLanguage(input: $input) {\n      ...LanguageFields\n    }\n  }\n": typeof types.CreateLanguageDocument,
     "\n  mutation UpdateLanguage($input: UpdateLanguageInput!) {\n    updateLanguage(input: $input) {\n      ...LanguageFields\n    }\n  }\n": typeof types.UpdateLanguageDocument,
     "\n  mutation DeleteLanguage($id: ID!) {\n    deleteLanguage(id: $id)\n  }\n": typeof types.DeleteLanguageDocument,
+    "\n  fragment UserLanguageFields on UserLanguage {\n    id\n    language {\n      id\n      name\n    }\n    proficiency\n  }\n": typeof types.UserLanguageFieldsFragmentDoc,
+    "\n  query UserLanguages($userId: ID!) {\n    userLanguages(userId: $userId) {\n      ...UserLanguageFields\n    }\n  }\n": typeof types.UserLanguagesDocument,
+    "\n  query AvailableUserLanguages($userId: ID!) {\n    availableUserLanguages(userId: $userId) {\n      id\n      name\n    }\n  }\n": typeof types.AvailableUserLanguagesDocument,
+    "\n  mutation CreateUserLanguage($input: CreateUserLanguageInput!) {\n    createUserLanguage(input: $input) {\n      ...UserLanguageFields\n    }\n  }\n": typeof types.CreateUserLanguageDocument,
+    "\n  mutation UpdateUserLanguage($input: UpdateUserLanguageInput!) {\n    updateUserLanguage(input: $input) {\n      ...UserLanguageFields\n    }\n  }\n": typeof types.UpdateUserLanguageDocument,
+    "\n  mutation DeleteUserLanguages($ids: [ID!]!, $userId: ID!) {\n    deleteUserLanguages(ids: $ids, userId: $userId)\n  }\n": typeof types.DeleteUserLanguagesDocument,
     "\n  fragment PositionFields on Position {\n    id\n    name\n  }\n": typeof types.PositionFieldsFragmentDoc,
     "\n  query Positions(\n    $page: Int!\n    $pageSize: Int!\n    $search: String\n    $sortBy: PositionSortField!\n    $sortOrder: SortOrder!\n  ) {\n    positions(\n      page: $page\n      pageSize: $pageSize\n      sortBy: $sortBy\n      sortOrder: $sortOrder\n      search: $search\n    ) {\n      items {\n        ...PositionFields\n      }\n      page\n      pageSize\n      total\n    }\n  }\n": typeof types.PositionsDocument,
     "\n  mutation CreatePosition($input: CreatePositionInput!) {\n    createPosition(input: $input) {\n      ...PositionFields\n    }\n  }\n": typeof types.CreatePositionDocument,
@@ -80,6 +86,12 @@ const documents: Documents = {
     "\n  mutation CreateLanguage($input: CreateLanguageInput!) {\n    createLanguage(input: $input) {\n      ...LanguageFields\n    }\n  }\n": types.CreateLanguageDocument,
     "\n  mutation UpdateLanguage($input: UpdateLanguageInput!) {\n    updateLanguage(input: $input) {\n      ...LanguageFields\n    }\n  }\n": types.UpdateLanguageDocument,
     "\n  mutation DeleteLanguage($id: ID!) {\n    deleteLanguage(id: $id)\n  }\n": types.DeleteLanguageDocument,
+    "\n  fragment UserLanguageFields on UserLanguage {\n    id\n    language {\n      id\n      name\n    }\n    proficiency\n  }\n": types.UserLanguageFieldsFragmentDoc,
+    "\n  query UserLanguages($userId: ID!) {\n    userLanguages(userId: $userId) {\n      ...UserLanguageFields\n    }\n  }\n": types.UserLanguagesDocument,
+    "\n  query AvailableUserLanguages($userId: ID!) {\n    availableUserLanguages(userId: $userId) {\n      id\n      name\n    }\n  }\n": types.AvailableUserLanguagesDocument,
+    "\n  mutation CreateUserLanguage($input: CreateUserLanguageInput!) {\n    createUserLanguage(input: $input) {\n      ...UserLanguageFields\n    }\n  }\n": types.CreateUserLanguageDocument,
+    "\n  mutation UpdateUserLanguage($input: UpdateUserLanguageInput!) {\n    updateUserLanguage(input: $input) {\n      ...UserLanguageFields\n    }\n  }\n": types.UpdateUserLanguageDocument,
+    "\n  mutation DeleteUserLanguages($ids: [ID!]!, $userId: ID!) {\n    deleteUserLanguages(ids: $ids, userId: $userId)\n  }\n": types.DeleteUserLanguagesDocument,
     "\n  fragment PositionFields on Position {\n    id\n    name\n  }\n": types.PositionFieldsFragmentDoc,
     "\n  query Positions(\n    $page: Int!\n    $pageSize: Int!\n    $search: String\n    $sortBy: PositionSortField!\n    $sortOrder: SortOrder!\n  ) {\n    positions(\n      page: $page\n      pageSize: $pageSize\n      sortBy: $sortBy\n      sortOrder: $sortOrder\n      search: $search\n    ) {\n      items {\n        ...PositionFields\n      }\n      page\n      pageSize\n      total\n    }\n  }\n": types.PositionsDocument,
     "\n  mutation CreatePosition($input: CreatePositionInput!) {\n    createPosition(input: $input) {\n      ...PositionFields\n    }\n  }\n": types.CreatePositionDocument,
@@ -200,6 +212,30 @@ export function graphql(source: "\n  mutation UpdateLanguage($input: UpdateLangu
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation DeleteLanguage($id: ID!) {\n    deleteLanguage(id: $id)\n  }\n"): (typeof documents)["\n  mutation DeleteLanguage($id: ID!) {\n    deleteLanguage(id: $id)\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  fragment UserLanguageFields on UserLanguage {\n    id\n    language {\n      id\n      name\n    }\n    proficiency\n  }\n"): (typeof documents)["\n  fragment UserLanguageFields on UserLanguage {\n    id\n    language {\n      id\n      name\n    }\n    proficiency\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query UserLanguages($userId: ID!) {\n    userLanguages(userId: $userId) {\n      ...UserLanguageFields\n    }\n  }\n"): (typeof documents)["\n  query UserLanguages($userId: ID!) {\n    userLanguages(userId: $userId) {\n      ...UserLanguageFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query AvailableUserLanguages($userId: ID!) {\n    availableUserLanguages(userId: $userId) {\n      id\n      name\n    }\n  }\n"): (typeof documents)["\n  query AvailableUserLanguages($userId: ID!) {\n    availableUserLanguages(userId: $userId) {\n      id\n      name\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation CreateUserLanguage($input: CreateUserLanguageInput!) {\n    createUserLanguage(input: $input) {\n      ...UserLanguageFields\n    }\n  }\n"): (typeof documents)["\n  mutation CreateUserLanguage($input: CreateUserLanguageInput!) {\n    createUserLanguage(input: $input) {\n      ...UserLanguageFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation UpdateUserLanguage($input: UpdateUserLanguageInput!) {\n    updateUserLanguage(input: $input) {\n      ...UserLanguageFields\n    }\n  }\n"): (typeof documents)["\n  mutation UpdateUserLanguage($input: UpdateUserLanguageInput!) {\n    updateUserLanguage(input: $input) {\n      ...UserLanguageFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation DeleteUserLanguages($ids: [ID!]!, $userId: ID!) {\n    deleteUserLanguages(ids: $ids, userId: $userId)\n  }\n"): (typeof documents)["\n  mutation DeleteUserLanguages($ids: [ID!]!, $userId: ID!) {\n    deleteUserLanguages(ids: $ids, userId: $userId)\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
