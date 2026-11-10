@@ -9,11 +9,20 @@ import { parseError } from '@/shared/lib/apollo/graphql-errors';
 import { useErrorMessage } from '@/shared/lib/apollo/useErrorMessage';
 import { PROJECTS } from '@/features/projects/api/projects.operations';
 import { parseISO, format } from 'date-fns';
-import { ProjectDetails } from '@/features/projects/components/ProjectDetails';
+import { ProjectDetails } from '@/features/projects/components/projectDetails/ProjectDetails';
+import { useState } from 'react';
+import { ProjectFormModal } from '@/features/projects/components/ProjectFormModal';
+
+type ModalState =
+  | { type: 'create' }
+  | { type: 'update'; project: ProjectFieldsFragment }
+  | { type: 'delete'; project: ProjectFieldsFragment };
 
 export const Projects = () => {
   const t = useTranslations('projects');
   const errorMessage = useErrorMessage();
+
+  const [modal, setModal] = useState<ModalState | null>(null);
 
   const { search, sort, setSearch, setSort } = useTableParams({
     sortFields: ['name', 'startDate', 'endDate'],
@@ -61,7 +70,7 @@ export const Projects = () => {
       <TableToolbar
         search={search}
         onSearch={setSearch}
-        action={{ label: t('createButton'), onClick: () => {} }}
+        action={{ label: t('createButton'), onClick: () => setModal({ type: 'create' }) }}
       />
       <DataTable<ProjectFieldsFragment>
         rows={shown?.projects.items ?? []}
@@ -77,6 +86,11 @@ export const Projects = () => {
         isLoading={loading && !shown}
         isRefreshing={loading && !!shown}
         renderRowDetails={(project) => <ProjectDetails project={project} />}
+      />
+
+      <ProjectFormModal
+        open={modal?.type === 'create'}
+        onOpenChange={(open) => !open && setModal(null)}
       />
     </div>
   );

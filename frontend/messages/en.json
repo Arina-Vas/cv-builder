@@ -108,6 +108,27 @@
         "required": "Category is required"
       }
     },
+    "project": {
+      "name": {
+        "required": "Project name is required",
+        "maxLength": "Project name must not exceed {max} characters"
+      },
+      "domain": {
+        "required": "Domain is required",
+        "maxLength": "Domain must not exceed {max} characters"
+      },
+      "startDate": {
+        "required": "Start date is required"
+      },
+      "endDate": {
+        "required": "End date is required",
+        "beforeStart": "End date must be later than start date"
+      },
+      "description": {
+        "required": "Description is required",
+        "maxLength": "Description must not exceed {max} characters"
+      }
+    },
     "email": {
       "required": "Email is required",
       "invalid": "Please enter a valid email address"
