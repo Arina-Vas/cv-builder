@@ -15,6 +15,7 @@ const USERS = `query ($search: String, $sortBy: UserSortField, $sortOrder: SortO
 const USER = `query ($id: ID!) { user(id: $id) { ${FIELDS} } }`;
 const CREATE_USER = `mutation ($input: CreateUserInput!) { createUser(input: $input) { ${FIELDS} } }`;
 const UPDATE_USER = `mutation ($input: UpdateUserInput!) { updateUser(input: $input) { ${FIELDS} } }`;
+const UPDATE_PROFILE = `mutation ($input: UpdateProfileInput!) { updateProfile(input: $input) { ${FIELDS} } }`;
 const DELETE_USER = 'mutation ($id: ID!) { deleteUser(id: $id) }';
 
 const MISSING_ID = '00000000-0000-4000-8000-000000000000';
@@ -358,6 +359,107 @@ describe('Users (integration)', () => {
       await expect(
         t.prisma.user.findUniqueOrThrow({ where: { id: target.id } }),
       ).resolves.toMatchObject({ firstName: 'Ann' });
+    });
+  });
+
+  describe('updateProfile', () => {
+    const profile = (id: string, overrides: Record<string, unknown> = {}) => ({
+      input: { id, firstName: 'Jane', lastName: 'Doe', departmentId, positionId, ...overrides },
+    });
+
+    it('requires authentication', async () => {
+      const target = await createUser(t.prisma);
+
+      const error = await client().error(UPDATE_PROFILE, profile(target.id));
+
+      expect(error.extensions.code).toBe('UNAUTHENTICATED');
+    });
+
+    it('lets an Employee update their own profile; the role stays', async () => {
+      const { browser, user } = await signedIn();
+
+      const { updateProfile } = await browser.data<{ updateProfile: GqlListUser }>(
+        UPDATE_PROFILE,
+        profile(user.id, { firstName: '  Ann ' }),
+      );
+
+      expect(updateProfile).toMatchObject({
+        id: user.id,
+        firstName: 'Ann',
+        lastName: 'Doe',
+        role: UserRole.EMPLOYEE,
+        department: { name: 'Backend' },
+        position: { name: 'Developer' },
+      });
+    });
+
+    it('rejects a role in the input: it is not part of UpdateProfileInput', async () => {
+      const { browser, user } = await signedIn();
+
+      const error = await browser.error(UPDATE_PROFILE, profile(user.id, { role: UserRole.ADMIN }));
+
+      expect(error.extensions.code).toBe('BAD_USER_INPUT');
+      await expect(
+        t.prisma.user.findUniqueOrThrow({ where: { id: user.id } }),
+      ).resolves.toMatchObject({ role: UserRole.EMPLOYEE, firstName: null });
+    });
+
+    it("rejects an Employee updating another user's profile with FORBIDDEN, without changes", async () => {
+      const { browser } = await signedIn();
+      const other = await createUser(t.prisma);
+
+      const error = await browser.error(UPDATE_PROFILE, profile(other.id));
+
+      expect(error.extensions.code).toBe('FORBIDDEN');
+      await expect(
+        t.prisma.user.findUniqueOrThrow({ where: { id: other.id } }),
+      ).resolves.toMatchObject({ firstName: null, departmentId: null });
+    });
+
+    it("lets an Admin update another user's profile", async () => {
+      const { browser } = await signedIn(UserRole.ADMIN);
+      const target = await createUser(t.prisma);
+
+      const { updateProfile } = await browser.data<{ updateProfile: GqlListUser }>(
+        UPDATE_PROFILE,
+        profile(target.id),
+      );
+
+      expect(updateProfile).toMatchObject({ id: target.id, firstName: 'Jane', lastName: 'Doe' });
+    });
+
+    it('rejects an unverified user with EMAIL_NOT_VERIFIED (mutations need a verified email)', async () => {
+      const user = await createUser(t.prisma, { verified: false });
+      const browser = client();
+      await signIn(browser, user.email);
+
+      const error = await browser.error(UPDATE_PROFILE, profile(user.id));
+
+      expect(error.extensions.code).toBe('EMAIL_NOT_VERIFIED');
+    });
+
+    it('fails with NOT_FOUND when an Admin updates a user that does not exist', async () => {
+      const { browser } = await signedIn(UserRole.ADMIN);
+
+      const error = await browser.error(UPDATE_PROFILE, profile(MISSING_ID));
+
+      expect(error.extensions.code).toBe('NOT_FOUND');
+    });
+
+    it('fails with BAD_USER_INPUT for empty names and an unknown department', async () => {
+      const { browser, user } = await signedIn();
+
+      const empty = await browser.error(UPDATE_PROFILE, profile(user.id, { firstName: '  ' }));
+      const missingDepartment = await browser.error(
+        UPDATE_PROFILE,
+        profile(user.id, { departmentId: MISSING_ID }),
+      );
+
+      expect(empty.extensions.code).toBe('BAD_USER_INPUT');
+      expect(missingDepartment.extensions).toMatchObject({
+        code: 'BAD_USER_INPUT',
+        fields: [{ field: 'departmentId', message: UserMessage.departmentNotFound }],
+      });
     });
   });
 

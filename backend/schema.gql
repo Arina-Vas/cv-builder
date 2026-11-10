@@ -184,6 +184,11 @@ type Mutation {
   updateDepartment(input: UpdateDepartmentInput!): Department!
   updateLanguage(input: UpdateLanguageInput!): Language!
   updatePosition(input: UpdatePositionInput!): Position!
+
+  """
+  Own profile or Admin; the role is not changed here. Fails with FORBIDDEN for another user's profile, NOT_FOUND if the user does not exist, BAD_USER_INPUT if the department or position does not exist
+  """
+  updateProfile(input: UpdateProfileInput!): User!
   updateProject(input: UpdateProjectInput!): Project!
   updateSkill(input: UpdateSkillInput!): Skill!
 
@@ -413,6 +418,14 @@ input UpdateLanguageInput {
 input UpdatePositionInput {
   id: ID!
   name: String!
+}
+
+input UpdateProfileInput {
+  departmentId: ID!
+  firstName: String!
+  id: ID!
+  lastName: String!
+  positionId: ID!
 }
 
 input UpdateProjectInput {

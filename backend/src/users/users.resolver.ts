@@ -4,6 +4,7 @@ import { CurrentUser } from '@/common/auth/current-user.decorator';
 import { Roles } from '@/common/auth/roles.decorator';
 import { UserRole } from '@/common/graphql/enums';
 import { CreateUserInput } from '@/users/dto/create-user.input';
+import { UpdateProfileInput } from '@/users/dto/update-profile.input';
 import { UpdateUserInput } from '@/users/dto/update-user.input';
 import { UsersArgs } from '@/users/dto/users.args';
 import { UserPage } from '@/users/models/user-page.model';
@@ -40,6 +41,18 @@ export class UsersResolver {
   })
   updateUser(@Args('input') input: UpdateUserInput, @CurrentUser() user: User): Promise<User> {
     return this.usersService.update(input, user.id);
+  }
+
+  @Mutation(() => User, {
+    description:
+      "Own profile or Admin; the role is not changed here. Fails with FORBIDDEN for another user's profile, " +
+      'NOT_FOUND if the user does not exist, BAD_USER_INPUT if the department or position does not exist',
+  })
+  updateProfile(
+    @CurrentUser() currentUser: User,
+    @Args('input') input: UpdateProfileInput,
+  ): Promise<User> {
+    return this.usersService.updateProfile(currentUser, input);
   }
 
   @Roles(UserRole.ADMIN)

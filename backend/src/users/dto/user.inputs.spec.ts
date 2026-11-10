@@ -6,6 +6,7 @@ import { UserRole } from '@/common/graphql/enums';
 import { VALIDATOR_OPTIONS } from '@/common/validation/validator-options';
 import { UserSortField } from '@/users/models/user-sort-field.enum';
 import { CreateUserInput } from './create-user.input';
+import { UpdateProfileInput } from './update-profile.input';
 import { UpdateUserInput } from './update-user.input';
 import { UsersArgs } from './users.args';
 
@@ -164,6 +165,49 @@ describe('UpdateUserInput', () => {
     expect(Object.keys(check(UpdateUserInput, { ...VALID_UPDATE, id: '42' }).messages)).toEqual([
       'id',
     ]);
+  });
+});
+
+describe('UpdateProfileInput', () => {
+  const VALID_PROFILE = {
+    id: USER_ID,
+    firstName: 'Jane',
+    lastName: 'Doe',
+    departmentId: DEPARTMENT_ID,
+    positionId: POSITION_ID,
+  };
+
+  it('accepts the id, names, department and position without a role', () => {
+    const { dto, messages } = check(UpdateProfileInput, {
+      ...VALID_PROFILE,
+      firstName: '  Mary   Jane ',
+    });
+
+    expect(messages).toEqual({});
+    expect(dto.firstName).toBe('Mary Jane');
+  });
+
+  it('gives the Profile tab messages for empty and too long fields', () => {
+    const { messages } = check(UpdateProfileInput, {
+      id: USER_ID,
+      firstName: '',
+      lastName: 'a'.repeat(MAX_NAME_LENGTH + 1),
+      departmentId: '',
+      positionId: '',
+    });
+
+    expect(messages).toEqual({
+      firstName: ['First name is required'],
+      lastName: ['Last name must not exceed 100 characters'],
+      departmentId: ['Department is required'],
+      positionId: ['Position is required'],
+    });
+  });
+
+  it('rejects an id that is not a UUID', () => {
+    expect(Object.keys(check(UpdateProfileInput, { ...VALID_PROFILE, id: '42' }).messages)).toEqual(
+      ['id'],
+    );
   });
 });
 
