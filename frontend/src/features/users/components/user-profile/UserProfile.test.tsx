@@ -4,7 +4,8 @@ import { GraphQLError } from 'graphql';
 import { notFound } from 'next/navigation';
 import { Component, type ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
-import { ME } from '@/features/auth/api/auth.operations';
+import { ME, RESEND_VERIFICATION_CODE } from '@/features/auth/api/auth.operations';
+import { mockRouter } from '@/test/next-navigation';
 import { renderWithProviders } from '@/test/render';
 import { UPDATE_PROFILE, USER, USER_FORM_OPTIONS } from '../../api/users.operations';
 import { UserProfile } from './UserProfile';
@@ -21,7 +22,7 @@ const rostislav = {
   role: 'EMPLOYEE' as const,
   // Midday UTC, so the day is the same in every time zone the tests may run in
   createdAt: '2024-01-14T12:00:00.000Z',
-  emailVerifiedAt: null,
+  emailVerifiedAt: null as string | null,
   department: { __typename: 'Department' as const, id: 'd1', name: 'React' },
   position: { __typename: 'Position' as const, id: 'p1', name: 'Software Engineer' },
 };
@@ -55,7 +56,11 @@ const OWNER: Viewer = { id: USER_ID, role: 'EMPLOYEE' };
 const OTHER_EMPLOYEE: Viewer = { id: 'u2', role: 'EMPLOYEE' };
 const ADMIN: Viewer = { id: 'a1', role: 'ADMIN' };
 
-const meMock = ({ id, role }: Viewer): MockLink.MockedResponse => ({
+// ME and USER are the same User:<id> record in the cache, so for the owner they must agree
+const meMock = (
+  { id, role }: Viewer,
+  emailVerifiedAt: string | null = null,
+): MockLink.MockedResponse => ({
   request: { query: ME },
   result: {
     data: {
@@ -64,7 +69,7 @@ const meMock = ({ id, role }: Viewer): MockLink.MockedResponse => ({
         id,
         email: `${id}@example.com`,
         role,
-        emailVerifiedAt: null,
+        emailVerifiedAt,
         firstName: id === USER_ID ? rostislav.firstName : 'Someone',
         lastName: id === USER_ID ? rostislav.lastName : 'Else',
         avatarUrl: null,
@@ -116,12 +121,16 @@ const updateMock = (
   result: { data: { updateProfile: user } },
 });
 
-const renderProfile = (mocks: MockLink.MockedResponse[], viewer = OTHER_EMPLOYEE) =>
+const renderProfile = (
+  mocks: MockLink.MockedResponse[],
+  viewer = OTHER_EMPLOYEE,
+  viewerEmailVerifiedAt: string | null = null,
+) =>
   renderWithProviders(
     <CatchErrors>
       <UserProfile userId={USER_ID} />
     </CatchErrors>,
-    { mocks: [meMock(viewer), ...mocks] },
+    { mocks: [meMock(viewer, viewerEmailVerifiedAt), ...mocks] },
   );
 
 const choose = async (
@@ -351,5 +360,100 @@ describe('UserProfile — editing', () => {
     expect(screen.queryByRole('button', { name: 'Update' })).not.toBeInTheDocument();
     // there is no USER_FORM_OPTIONS mock: the select shows the value from the profile query
     expect(screen.getByRole('combobox', { name: 'Department' })).toHaveTextContent('React');
+  });
+});
+
+describe('UserProfile — verify email', () => {
+  const verified = { ...rostislav, emailVerifiedAt: '2024-02-01T12:00:00.000Z' };
+
+  const resendMock = (result: MockLink.MockedResponse['result']): MockLink.MockedResponse => ({
+    request: { query: RESEND_VERIFICATION_CODE },
+    result,
+  });
+
+  const resendError = (code: string, extensions: Record<string, unknown> = {}) =>
+    resendMock({
+      errors: [new GraphQLError('raw backend text', { extensions: { code, ...extensions } })],
+    });
+
+  it('is shown only to the owner whose email is not verified', async () => {
+    renderProfile([userMock(), optionsMock], OWNER);
+
+    expect(await screen.findByRole('button', { name: 'Verify email' })).toBeEnabled();
+  });
+
+  it('is hidden when the email is already verified', async () => {
+    renderProfile([userMock(verified), optionsMock], OWNER, verified.emailVerifiedAt);
+
+    await screen.findByRole('heading', { level: 1 });
+    expect(screen.queryByRole('button', { name: 'Verify email' })).not.toBeInTheDocument();
+  });
+
+  it("is hidden for an admin on someone else's unverified profile", async () => {
+    renderProfile([userMock(), optionsMock], ADMIN);
+
+    await screen.findByRole('heading', { level: 1 });
+    expect(screen.getByRole('button', { name: 'Update' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Verify email' })).not.toBeInTheDocument();
+  });
+
+  it('sends a new code, shows the toast and opens the Verification page', async () => {
+    const { user } = renderProfile(
+      [userMock(), optionsMock, resendMock({ data: { resendVerificationCode: true } })],
+      OWNER,
+    );
+
+    await user.click(await screen.findByRole('button', { name: 'Verify email' }));
+
+    expect(await screen.findByText('Verification email has been sent')).toBeInTheDocument();
+    expect(mockRouter.push).toHaveBeenCalledWith('/verify-email?sent=1');
+  });
+
+  it('shows the spec error and stays on the page when sending fails', async () => {
+    const { user } = renderProfile(
+      [userMock(), optionsMock, resendError('INTERNAL_SERVER_ERROR')],
+      OWNER,
+    );
+
+    await user.click(await screen.findByRole('button', { name: 'Verify email' }));
+
+    expect(await screen.findByText('Failed to send verification email')).toBeInTheDocument();
+    expect(screen.queryByText('raw backend text')).not.toBeInTheDocument();
+    expect(mockRouter.push).not.toHaveBeenCalled();
+  });
+
+  it('asks to wait when a code was requested too recently', async () => {
+    const { user } = renderProfile(
+      [userMock(), optionsMock, resendError('RATE_LIMITED', { retryAfter: 42 })],
+      OWNER,
+    );
+
+    await user.click(await screen.findByRole('button', { name: 'Verify email' }));
+
+    expect(
+      await screen.findByText('Too many attempts. Try again in 42 seconds'),
+    ).toBeInTheDocument();
+    expect(mockRouter.push).not.toHaveBeenCalled();
+  });
+
+  it('reloads the profile and hides the button when the email was verified meanwhile', async () => {
+    const { user } = renderProfile(
+      [
+        userMock(),
+        optionsMock,
+        resendError('CONFLICT', { field: 'email' }),
+        userMock(verified),
+        meMock(OWNER, verified.emailVerifiedAt),
+      ],
+      OWNER,
+    );
+
+    await user.click(await screen.findByRole('button', { name: 'Verify email' }));
+
+    expect(await screen.findByText('Email is already verified')).toBeInTheDocument();
+    await expect
+      .poll(() => screen.queryByRole('button', { name: 'Verify email' }))
+      .not.toBeInTheDocument();
+    expect(mockRouter.push).not.toHaveBeenCalled();
   });
 });

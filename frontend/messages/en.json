@@ -256,7 +256,10 @@
       "loading": "Loading profile",
       "loadError": "Failed to load profile information",
       "retry": "Retry",
-      "updated": "Profile has been updated"
+      "updated": "Profile has been updated",
+      "verifyEmail": "Verify email",
+      "verificationSent": "Verification email has been sent",
+      "verificationFailed": "Failed to send verification email"
     },
     "fields": {
       "email": "Email",

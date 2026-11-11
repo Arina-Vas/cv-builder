@@ -18,12 +18,15 @@ import { parseError } from '@/shared/lib/apollo/graphql-errors';
 import { useErrorMessage } from '@/shared/lib/apollo/useErrorMessage';
 import { useAppForm } from '@/shared/lib/form';
 import s from './UserProfile.module.css';
+import { VerifyEmailButton } from './VerifyEmailButton';
 
 type ProfileUser = UserQuery['user'];
 
 interface UserProfileFormProps {
   user: ProfileUser;
   canEdit: boolean;
+  canVerifyEmail: boolean;
+  onEmailAlreadyVerified: () => void;
 }
 
 type Named = { id: string; name: string } | null | undefined;
@@ -38,7 +41,12 @@ const toFormValues = (user: ProfileUser): ProfileFormValues => ({
   positionId: user.position?.id ?? '',
 });
 
-export const UserProfileForm = ({ user, canEdit }: UserProfileFormProps) => {
+export const UserProfileForm = ({
+  user,
+  canEdit,
+  canVerifyEmail,
+  onEmailAlreadyVerified,
+}: UserProfileFormProps) => {
   const t = useTranslations('users');
   const tActions = useTranslations('common.actions');
   const tValidation = useTranslations('validation');
@@ -53,7 +61,7 @@ export const UserProfileForm = ({ user, canEdit }: UserProfileFormProps) => {
   const { data: optionsData, loading: optionsLoading } = useQuery(USER_FORM_OPTIONS, {
     skip: !canEdit,
   });
-  
+
   const departments = useMemo(
     () => toOptions(optionsData?.departments.items ?? [user.department]),
     [optionsData, user.department],
@@ -143,6 +151,7 @@ export const UserProfileForm = ({ user, canEdit }: UserProfileFormProps) => {
               {submitError}
             </p>
           )}
+          {canVerifyEmail && <VerifyEmailButton onAlreadyVerified={onEmailAlreadyVerified} />}
           <Button
             type="submit"
             variant="primary"

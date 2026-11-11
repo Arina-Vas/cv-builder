@@ -22,7 +22,11 @@ export const UserProfile = ({ userId }: UserProfileProps) => {
   const tProfile = useTranslations('users.profile');
   const formatMemberSince = useFormatMemberSince();
 
-  const { user: currentUser, loading: currentUserLoading } = useCurrentUser();
+  const {
+    user: currentUser,
+    loading: currentUserLoading,
+    refetch: refetchCurrentUser,
+  } = useCurrentUser();
   const isOwner = currentUser?.id === userId;
   const canEdit = isOwner || currentUser?.role === 'ADMIN';
 
@@ -41,7 +45,12 @@ export const UserProfile = ({ userId }: UserProfileProps) => {
     );
   }
 
-  if (!data || currentUserLoading) return <UserProfileSkeleton />;
+  if (!data || (currentUserLoading && !currentUser)) return <UserProfileSkeleton />;
+
+  const reloadVerification = () => {
+    void refetch();
+    void refetchCurrentUser();
+  };
 
   const { user } = data;
   const fullName = getFullName(user);
@@ -57,7 +66,13 @@ export const UserProfile = ({ userId }: UserProfileProps) => {
         </div>
       </header>
 
-      <UserProfileForm key={user.id} user={user} canEdit={canEdit} />
+      <UserProfileForm
+        key={user.id}
+        user={user}
+        canEdit={canEdit}
+        canVerifyEmail={isOwner && !user.emailVerifiedAt}
+        onEmailAlreadyVerified={reloadVerification}
+      />
     </section>
   );
 };
