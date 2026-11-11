@@ -255,7 +255,8 @@
       "memberSince": "A member since {date}",
       "loading": "Loading profile",
       "loadError": "Failed to load profile information",
-      "retry": "Retry"
+      "retry": "Retry",
+      "updated": "Profile has been updated"
     },
     "fields": {
       "email": "Email",

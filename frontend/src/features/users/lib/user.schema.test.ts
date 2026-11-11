@@ -1,7 +1,7 @@
 import { createTranslator } from 'next-intl';
 import { describe, expect, it } from 'vitest';
 import messages from '../../../../messages/en.json';
-import { userSchema } from './user.schema';
+import { profileSchema, userSchema } from './user.schema';
 
 const t = createTranslator({ locale: 'en', messages, namespace: 'validation' });
 
@@ -102,6 +102,45 @@ describe('userSchema (update)', () => {
       departmentId: 'Department is required',
       positionId: 'Position is required',
       role: 'Role is required',
+    });
+  });
+});
+
+describe('profileSchema', () => {
+  const profile = { firstName: 'Jane', lastName: 'Doe', departmentId: 'd1', positionId: 'p1' };
+
+  const profileErrorsOf = (values: Record<string, unknown>) => {
+    const errors: Record<string, string> = {};
+    for (const issue of profileSchema(t).safeParse(values).error?.issues ?? []) {
+      errors[String(issue.path[0])] ??= issue.message;
+    }
+    return errors;
+  };
+
+  it('passes valid values, trims them and drops the fields the profile does not edit', () => {
+    expect(
+      profileSchema(t).parse({ ...profile, firstName: ' Jane ', email: 'x@y.z', role: 'ADMIN' }),
+    ).toEqual(profile);
+  });
+
+  it('shows the spec messages for empty fields', () => {
+    expect(
+      profileErrorsOf({ firstName: ' ', lastName: '', departmentId: '', positionId: '' }),
+    ).toEqual({
+      firstName: 'First name is required',
+      lastName: 'Last name is required',
+      departmentId: 'Department is required',
+      positionId: 'Position is required',
+    });
+  });
+
+  it('limits names to 100 characters', () => {
+    expect(profileErrorsOf({ ...profile, firstName: 'a'.repeat(100) })).toEqual({});
+    expect(
+      profileErrorsOf({ ...profile, firstName: 'a'.repeat(101), lastName: 'b'.repeat(101) }),
+    ).toEqual({
+      firstName: 'First name must not exceed 100 characters',
+      lastName: 'Last name must not exceed 100 characters',
     });
   });
 });
