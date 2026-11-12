@@ -26,6 +26,66 @@
   color: var(--text-secondary);
 }
 
+.error {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+
+.errorText {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+/* UserLanguagesSkeleton: bar + name placeholders in the .list grid while the languages load */
+.skeletonItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-1) var(--space-2);
+}
+
+.skeleton {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background: var(--skeleton);
+}
+
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, var(--action-hover), transparent);
+  transform: translateX(-100%);
+  animation: wave 1.6s linear 0.5s infinite;
+}
+
+.skeletonBar {
+  width: var(--skill-bar-width);
+  height: var(--skill-bar-height);
+}
+
+.skeletonName {
+  width: 80px;
+  height: var(--type-body1-lh);
+}
+
+@keyframes wave {
+  60%,
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton::after {
+    animation: none;
+  }
+}
+
 .actions {
   display: flex;
   justify-content: flex-end;

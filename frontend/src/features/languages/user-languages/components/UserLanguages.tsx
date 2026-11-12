@@ -16,98 +16,105 @@ import { ConfirmDialog } from '@/shared/components/dialog';
 import s from './UserLanguages.module.css';
 import { PlusIcon } from '@/shared/components/icons/PlusIcon';
 import { TrashIcon } from '@/shared/components/icons/TrashIcon';
+import { useSelection } from '@/features/languages/user-languages/lib/useSelection';
+import { UserLanguagesSkeleton } from '@/features/languages/user-languages/components/UserLanguagesSkeleton';
 
-type Props = { userId: string; canEdit: boolean };
+type Props = {
+  userId: string;
+  canEdit: boolean;
+  emptyMessage: string;
+};
 
 type ModalState = { type: 'create' } | { type: 'update'; language: UserLanguageFieldsFragment };
 
-export const UserLanguages = ({ userId, canEdit }: Props) => {
+export const UserLanguages = ({ userId, canEdit, emptyMessage }: Props) => {
   const t = useTranslations('userLanguage');
   const tActions = useTranslations('common.actions');
   const [modal, setModal] = useState<ModalState | null>(null);
 
-  const [selectingMode, setSelectingMode] = useState<boolean>(false);
+  const { selectingMode, selectedIds, toggle, start, exit } = useSelection();
+
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
-  const { data } = useQuery(USER_LANGUAGES, userId ? { variables: { userId } } : skipToken);
+  const { data, loading, error, refetch } = useQuery(
+    USER_LANGUAGES,
+    userId ? { variables: { userId } } : skipToken,
+  );
   const [deleteLanguages] = useMutation(DELETE_USER_LANGUAGES, USER_LANGUAGE_MUTATION_OPTIONS);
-
-  const toggleLanguageId = (id: string) => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
-
-  const exitSelection = () => {
-    setSelectingMode(false);
-    setSelectedIds(new Set());
-  };
 
   const handleDeleteLanguages = async () => {
     await deleteLanguages({ variables: { ids: [...selectedIds], userId } });
-    exitSelection();
+    exit();
   };
 
   return (
     <div className={s.root}>
-      <h3 className={s.title}>{t('title')}</h3>
-      <ul className={s.list}>
-        {data?.userLanguages.map((language) => (
-          <li key={language.id}>
-            <UserLanguageItem
-              canEdit={canEdit}
-              userLanguage={language}
-              onClick={() =>
-                selectingMode
-                  ? toggleLanguageId(language.id)
-                  : setModal({ type: 'update', language })
-              }
-              selected={selectingMode ? selectedIds.has(language.id) : undefined}
-            />
-          </li>
-        ))}
-      </ul>
+      <h2 className={s.title}>{t('title')}</h2>
 
-      <div className={s.actions}>
-        {canEdit && !selectingMode && (
-          <>
-            <Button size={'sm'} onClick={() => setModal({ type: 'create' })} variant={'ghost'}>
-              <PlusIcon />
-              {t('addButton')}
-            </Button>
-            <Button
-              variant={'text'}
-              size={'sm'}
-              disabled={!data?.userLanguages.length}
-              onClick={() => {
-                setSelectingMode(true);
-              }}
-            >
-              <TrashIcon />
-              {t('removeButton')}
-            </Button>
-          </>
-        )}
+      {error && !data ? (
+        <div className={s.error} role="alert">
+          <p className={s.errorText}>{t('loadError')}</p>
+          <Button variant="secondary" size="sm" loading={loading} onClick={() => refetch()}>
+            {t('retry')}
+          </Button>
+        </div>
+      ) : !data ? (
+        <UserLanguagesSkeleton />
+      ) : data.userLanguages.length === 0 ? (
+        <p className={s.empty}>{emptyMessage}</p>
+      ) : (
+        <ul className={s.list}>
+          {data.userLanguages.map((language) => (
+            <li key={language.id}>
+              <UserLanguageItem
+                canEdit={canEdit}
+                userLanguage={language}
+                onClick={() =>
+                  selectingMode ? toggle(language.id) : setModal({ type: 'update', language })
+                }
+                selected={selectingMode ? selectedIds.has(language.id) : undefined}
+              />
+            </li>
+          ))}
+        </ul>
+      )}
 
-        {canEdit && selectingMode && (
-          <>
-            <Button size={'sm'} onClick={exitSelection} variant={'secondary'}>
-              {tActions('cancel')}
-            </Button>
-            <Button
-              disabled={selectedIds.size === 0}
-              size={'sm'}
-              onClick={() => setOpenConfirmDialog(true)}
-            >
-              {t('removeCount', { count: selectedIds.size })}
-            </Button>
-          </>
-        )}
-      </div>
+      {data && (
+        <div className={s.actions}>
+          {canEdit && !selectingMode && (
+            <>
+              <Button size={'sm'} onClick={() => setModal({ type: 'create' })} variant={'ghost'}>
+                <PlusIcon />
+                {t('addButton')}
+              </Button>
+              <Button
+                variant={'text'}
+                size={'sm'}
+                disabled={!data.userLanguages.length}
+                onClick={start}
+              >
+                <TrashIcon />
+                {t('removeButton')}
+              </Button>
+            </>
+          )}
+
+          {canEdit && selectingMode && (
+            <>
+              <Button size={'sm'} onClick={exit} variant={'secondary'}>
+                {tActions('cancel')}
+              </Button>
+              <Button
+                disabled={selectedIds.size === 0}
+                size={'sm'}
+                onClick={() => setOpenConfirmDialog(true)}
+              >
+                {t('removeCount', { count: selectedIds.size })}
+              </Button>
+            </>
+          )}
+        </div>
+      )}
 
       <UserLanguageFormModal
         open={modal?.type === 'create' || modal?.type === 'update'}

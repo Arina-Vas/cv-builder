@@ -357,6 +357,9 @@
     },
     "empty": "No languages added",
     "emptyProfile": "No languages added yet",
+    "loading": "Loading languages",
+    "loadError": "Failed to load languages",
+    "retry": "Retry",
     "form": {
       "updateTitle": "Update language",
       "createTitle": "Add language",
