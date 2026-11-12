@@ -6,9 +6,9 @@ import { useParams } from 'next/navigation';
 
 export default function UserLanguagesPage() {
   const { user } = useCurrentUser();
-  const { userId } = useParams();
+  const { userId } = useParams<{ userId: string }>();
 
   if (!user) return null;
 
-  return <UserLanguages userId={user.id} canEdit={user.id === userId} />;
+  return <UserLanguages userId={userId} canEdit={user.role === 'ADMIN' || user.id === userId} />;
 }
