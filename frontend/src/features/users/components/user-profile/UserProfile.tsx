@@ -3,30 +3,32 @@
 import { useQuery } from '@apollo/client/react';
 import { notFound } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { useCurrentUser } from '@/features/auth/hooks/useCurrentUser';
 import { USER } from '@/features/users/api/users.operations';
 import { useFormatMemberSince } from '@/features/users/hooks/useFormatMemberSince';
 import { getFullName } from '@/features/users/lib/getFullName';
 import { Avatar } from '@/shared/components/avatar/Avatar';
 import { Button } from '@/shared/components/buttons';
-import layout from '@/shared/components/form/FormLayout.module.css';
-import { Input } from '@/shared/components/inputs';
-import { Select } from '@/shared/components/select/Select';
-import type { SelectOption } from '@/shared/components/select/Select.types';
 import { hasErrorCode } from '@/shared/lib/apollo/graphql-errors';
 import s from './UserProfile.module.css';
+import { UserProfileForm } from './UserProfileForm';
 import { UserProfileSkeleton } from './UserProfileSkeleton';
 
 interface UserProfileProps {
   userId: string;
 }
 
-const toOptions = (item?: { id: string; name: string } | null): SelectOption[] =>
-  item ? [{ value: item.id, label: item.name }] : [];
-
 export const UserProfile = ({ userId }: UserProfileProps) => {
-  const t = useTranslations('users.fields');
   const tProfile = useTranslations('users.profile');
   const formatMemberSince = useFormatMemberSince();
+
+  const {
+    user: currentUser,
+    loading: currentUserLoading,
+    refetch: refetchCurrentUser,
+  } = useCurrentUser();
+  const isOwner = currentUser?.id === userId;
+  const canEdit = isOwner || currentUser?.role === 'ADMIN';
 
   const { data, loading, error, refetch } = useQuery(USER, { variables: { id: userId } });
 
@@ -43,7 +45,12 @@ export const UserProfile = ({ userId }: UserProfileProps) => {
     );
   }
 
-  if (!data) return <UserProfileSkeleton />;
+  if (!data || (currentUserLoading && !currentUser)) return <UserProfileSkeleton />;
+
+  const reloadVerification = () => {
+    void refetch();
+    void refetchCurrentUser();
+  };
 
   const { user } = data;
   const fullName = getFullName(user);
@@ -59,22 +66,13 @@ export const UserProfile = ({ userId }: UserProfileProps) => {
         </div>
       </header>
 
-      <form className={`${layout.grid} ${s.form}`}>
-        <Input label={t('firstName')} value={user.firstName ?? ''} readOnly disabled />
-        <Input label={t('lastName')} value={user.lastName ?? ''} readOnly disabled />
-        <Select
-          label={t('department')}
-          options={toOptions(user.department)}
-          value={user.department?.id ?? ''}
-          disabled
-        />
-        <Select
-          label={t('position')}
-          options={toOptions(user.position)}
-          value={user.position?.id ?? ''}
-          disabled
-        />
-      </form>
+      <UserProfileForm
+        key={user.id}
+        user={user}
+        canEdit={canEdit}
+        canVerifyEmail={isOwner && !user.emailVerifiedAt}
+        onEmailAlreadyVerified={reloadVerification}
+      />
     </section>
   );
 };

@@ -88,6 +88,16 @@ export const UPDATE_USER = graphql(`
   }
 `);
 
+export const UPDATE_PROFILE = graphql(`
+  mutation UpdateProfile($input: UpdateProfileInput!) {
+    updateProfile(input: $input) {
+      ...UserListFields
+      createdAt
+      emailVerifiedAt
+    }
+  }
+`);
+
 export const DELETE_USER = graphql(`
   mutation DeleteUser($id: ID!) {
     deleteUser(id: $id)

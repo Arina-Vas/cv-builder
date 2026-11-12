@@ -19,6 +19,7 @@ export interface Column<T> {
 export interface RowAction<T> {
   label: string;
   onSelect: (row: T) => void;
+  ungated?: boolean;
 }
 
 export interface DataTableProps<T> {
