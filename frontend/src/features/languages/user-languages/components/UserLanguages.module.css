@@ -1,7 +1,15 @@
+.root {
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+  padding-block: var(--space-8);
+}
+
 .title {
   margin: 0 0 var(--space-4);
   font-size: var(--type-subtitle1-size);
   line-height: var(--type-subtitle1-lh);
+  font-weight: var(--font-weight-regular);
 }
 
 .list {

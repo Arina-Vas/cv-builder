@@ -30,6 +30,8 @@ export const UserLanguageFormModal = ({ open, onOpenChange, userId, userLanguage
   const t = useTranslations('userLanguage.form');
   const tProficiency = useTranslations('userLanguage.proficiencyLevel');
   const tValidation = useTranslations('validation');
+  const tActions = useTranslations('common.actions');
+
   const errorMessage = useErrorMessage();
 
   const schema = useMemo(() => userLanguageSchema(tValidation), [tValidation]);
@@ -82,6 +84,7 @@ export const UserLanguageFormModal = ({ open, onOpenChange, userId, userLanguage
         proficiency: userLanguage?.proficiency ?? '',
       }}
       requireDirty={!!userLanguage}
+      submitLabel={userLanguage ? undefined : tActions('add')}
     >
       <Controller
         control={form.control}

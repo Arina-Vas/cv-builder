@@ -9,8 +9,9 @@ type Props = {
   canEdit: boolean;
   onClick?: () => void;
   userLanguage: UserLanguageFieldsFragment;
+  selected?: boolean;
 };
-export const UserLanguageItem = ({ canEdit, userLanguage, onClick }: Props) => {
+export const UserLanguageItem = ({ canEdit, userLanguage, onClick, selected }: Props) => {
   const tProficiency = useTranslations('userLanguage.proficiencyLevel');
   const nameId = useId();
 
@@ -26,7 +27,7 @@ export const UserLanguageItem = ({ canEdit, userLanguage, onClick }: Props) => {
   );
 
   return canEdit ? (
-    <button type="button" className={s.item} onClick={onClick}>
+    <button type="button" className={s.item} onClick={onClick} aria-pressed={selected}>
       {content}
     </button>
   ) : (
