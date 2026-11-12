@@ -26,15 +26,18 @@ const { search, setSearch } = useTableParams({ … });
 
 ## Props
 
-| Prop       | Type                                     | What it does                                                    |
-| ---------- | ---------------------------------------- | --------------------------------------------------------------- |
-| `search`   | `string`                                 | current search, shown in the field                              |
-| `onSearch` | `(search: string) => void`               | called after typing stops (`SearchField` debounce, 300 ms)      |
-| `action`   | `{ label: string; onClick: () => void }` | the **+** button on the right; leave out for a list without one |
+| Prop       | Type                                                        | What it does                                                    |
+| ---------- | ----------------------------------------------------------- | --------------------------------------------------------------- |
+| `search`   | `string`                                                    | current search, shown in the field                              |
+| `onSearch` | `(search: string) => void`                                  | called after typing stops (`SearchField` debounce, 300 ms)      |
+| `action`   | `{ label: string; onClick: () => void; ungated?: boolean }` | the **+** button on the right; leave out for a list without one |
 
 - The button is always `Button` `variant="text"` `size="sm"` (40px, the same height as the search) with
   `PlusIcon`; the label is uppercased by `Button`, so pass it in normal case (`Create department`).
 - The button is `type="button"`: it never submits a surrounding form.
+- The button is `gated`: under a closed action gate (unverified email, see
+  `shared/lib/action-gate`) it is `aria-disabled` and the click shows a toast instead of `onClick`.
+  `ungated: true` only for a button that changes nothing.
 - Without `action` only the search is shown (e.g. a list the current role can't add to).
 - Search and button are 20px (`--space-5`) in from the content edge, in line with the breadcrumbs; the
   table under it starts at the content edge, as in Figma.

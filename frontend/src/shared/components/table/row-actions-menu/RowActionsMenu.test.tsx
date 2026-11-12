@@ -1,5 +1,6 @@
 import { screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
+import { closedGate } from '@/test/action-gate';
 import { renderWithProviders } from '@/test/render';
 import { RowActionsMenu } from './RowActionsMenu';
 
@@ -56,5 +57,37 @@ describe('RowActionsMenu', () => {
 
     expect(screen.queryByRole('menu')).not.toBeInTheDocument();
     expect(trigger).toHaveFocus();
+  });
+
+  it('with a closed action gate locks the actions except `ungated` ones', async () => {
+    const onView = vi.fn();
+    const onDelete = vi.fn();
+    const { blocked, Wrapper } = closedGate();
+    const { user } = renderWithProviders(
+      <Wrapper>
+        <RowActionsMenu
+          row={row}
+          label="Actions for React"
+          actions={[
+            { label: 'View', onSelect: onView, ungated: true },
+            { label: 'Delete', onSelect: onDelete },
+          ]}
+        />
+      </Wrapper>,
+    );
+    const openMenu = () => user.click(screen.getByRole('button', { name: 'Actions for React' }));
+
+    await openMenu();
+    const remove = screen.getByRole('menuitem', { name: 'Delete' });
+    expect(remove).toHaveAttribute('aria-disabled', 'true');
+    expect(screen.getByRole('menuitem', { name: 'View' })).not.toHaveAttribute('aria-disabled');
+
+    await user.click(remove);
+    expect(blocked).toHaveBeenCalledTimes(1);
+    expect(onDelete).not.toHaveBeenCalled();
+
+    await openMenu();
+    await user.click(screen.getByRole('menuitem', { name: 'View' }));
+    expect(onView).toHaveBeenCalledWith(row);
   });
 });

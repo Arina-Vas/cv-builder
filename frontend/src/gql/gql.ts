@@ -63,6 +63,7 @@ type Documents = {
     "\n  query UserFormOptions {\n    departments(pageSize: 50) {\n      items {\n        id\n        name\n      }\n    }\n    positions(pageSize: 50) {\n      items {\n        id\n        name\n      }\n    }\n  }\n": typeof types.UserFormOptionsDocument,
     "\n  mutation CreateUser($input: CreateUserInput!) {\n    createUser(input: $input) {\n      ...UserListFields\n    }\n  }\n": typeof types.CreateUserDocument,
     "\n  mutation UpdateUser($input: UpdateUserInput!) {\n    updateUser(input: $input) {\n      ...UserListFields\n    }\n  }\n": typeof types.UpdateUserDocument,
+    "\n  mutation UpdateProfile($input: UpdateProfileInput!) {\n    updateProfile(input: $input) {\n      ...UserListFields\n      createdAt\n      emailVerifiedAt\n    }\n  }\n": typeof types.UpdateProfileDocument,
     "\n  mutation DeleteUser($id: ID!) {\n    deleteUser(id: $id)\n  }\n": typeof types.DeleteUserDocument,
 };
 const documents: Documents = {
@@ -115,6 +116,7 @@ const documents: Documents = {
     "\n  query UserFormOptions {\n    departments(pageSize: 50) {\n      items {\n        id\n        name\n      }\n    }\n    positions(pageSize: 50) {\n      items {\n        id\n        name\n      }\n    }\n  }\n": types.UserFormOptionsDocument,
     "\n  mutation CreateUser($input: CreateUserInput!) {\n    createUser(input: $input) {\n      ...UserListFields\n    }\n  }\n": types.CreateUserDocument,
     "\n  mutation UpdateUser($input: UpdateUserInput!) {\n    updateUser(input: $input) {\n      ...UserListFields\n    }\n  }\n": types.UpdateUserDocument,
+    "\n  mutation UpdateProfile($input: UpdateProfileInput!) {\n    updateProfile(input: $input) {\n      ...UserListFields\n      createdAt\n      emailVerifiedAt\n    }\n  }\n": types.UpdateProfileDocument,
     "\n  mutation DeleteUser($id: ID!) {\n    deleteUser(id: $id)\n  }\n": types.DeleteUserDocument,
 };
 
@@ -328,6 +330,10 @@ export function graphql(source: "\n  mutation CreateUser($input: CreateUserInput
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation UpdateUser($input: UpdateUserInput!) {\n    updateUser(input: $input) {\n      ...UserListFields\n    }\n  }\n"): (typeof documents)["\n  mutation UpdateUser($input: UpdateUserInput!) {\n    updateUser(input: $input) {\n      ...UserListFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation UpdateProfile($input: UpdateProfileInput!) {\n    updateProfile(input: $input) {\n      ...UserListFields\n      createdAt\n      emailVerifiedAt\n    }\n  }\n"): (typeof documents)["\n  mutation UpdateProfile($input: UpdateProfileInput!) {\n    updateProfile(input: $input) {\n      ...UserListFields\n      createdAt\n      emailVerifiedAt\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

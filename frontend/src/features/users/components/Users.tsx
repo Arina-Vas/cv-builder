@@ -138,7 +138,7 @@ export const Users = () => {
         rowActions={
           isAdmin
             ? (user) => [
-                { label: t('table.actions.view'), onSelect: openUser },
+                { label: t('table.actions.view'), onSelect: openUser, ungated: true },
                 {
                   label: t('table.actions.update'),
                   onSelect: () => setModal({ type: 'update', user }),

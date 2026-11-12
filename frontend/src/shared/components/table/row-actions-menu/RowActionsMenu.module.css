@@ -32,6 +32,11 @@
   background: var(--menu-item-hover);
 }
 
+.item[aria-disabled='true'] {
+  color: var(--text-disabled);
+  cursor: not-allowed;
+}
+
 .item[data-disabled] {
   color: var(--text-disabled);
   pointer-events: none;

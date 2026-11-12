@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { VerifiedActionGate } from '@/features/auth/components/verified-action-gate/VerifiedActionGate';
 import { AppBreadcrumbs } from '@/features/breadcrumbs/components/app-breadcrumbs/AppBreadcrumbs';
 import { Sidebar } from '../sidebar/Sidebar';
 import s from './AppShell.module.css';
@@ -16,7 +17,7 @@ export function AppShell({ defaultCollapsed, children }: AppShellProps) {
         <header className={s.header}>
           <AppBreadcrumbs />
         </header>
-        {children}
+        <VerifiedActionGate>{children}</VerifiedActionGate>
       </main>
     </div>
   );

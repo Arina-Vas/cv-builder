@@ -54,6 +54,21 @@
   width: 100%;
 }
 
+/* UPDATE on the right under the fields, a failed save message to its left */
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-4);
+}
+
+.submitError {
+  margin: 0;
+  color: var(--error);
+  font-size: var(--type-body2-size);
+  font-weight: var(--font-weight-regular);
+}
+
 /* Error: centered text + Retry (same look as the table error message) */
 .error {
   display: flex;

@@ -88,6 +88,11 @@ The last column is one of:
   at a time; it closes on outside click, action select, Escape and scroll.
 - `onRowClick`: › button that opens the row.
 
+Menu items are locked by the action gate (unverified email, `shared/lib/action-gate`): `aria-disabled`,
+and selecting one shows a toast instead of `onSelect`. Not Radix `disabled`, which skips the item without
+saying why. Mark an action that changes nothing with `ungated: true`
+(`{ label: 'View', onSelect: openUser, ungated: true }`).
+
 If both are passed, the menu wins. The buttons are named from `getRowLabel`, so pass it:
 `Actions for Christopher Nolan` reads better than `Actions for row 2`.
 

@@ -259,7 +259,11 @@
       "memberSince": "A member since {date}",
       "loading": "Loading profile",
       "loadError": "Failed to load profile information",
-      "retry": "Retry"
+      "retry": "Retry",
+      "updated": "Profile has been updated",
+      "verifyEmail": "Verify email",
+      "verificationSent": "Verification email has been sent",
+      "verificationFailed": "Failed to send verification email"
     },
     "fields": {
       "email": "Email",

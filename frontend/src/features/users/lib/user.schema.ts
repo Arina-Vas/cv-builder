@@ -46,5 +46,14 @@ export const userSchema = (t: ValidationT, mode: UserFormMode = 'create') => {
   });
 };
 
+export const profileSchema = (t: ValidationT) =>
+  userSchema(t, 'update').pick({
+    firstName: true,
+    lastName: true,
+    departmentId: true,
+    positionId: true,
+  });
+
+export type ProfileFormValues = z.output<ReturnType<typeof profileSchema>>;
 export type UserFormInput = z.input<ReturnType<typeof userSchema>>;
 export type UserFormValues = z.output<ReturnType<typeof userSchema>>;

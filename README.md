@@ -196,5 +196,9 @@ The database credentials in `docker-compose.yml` are for local development only.
 ### Authentication
 
 - Access and refresh tokens in httpOnly cookies; access JWT for 30 minutes, refresh token for 1 day with rotation.
-- Sign up starts a session; email verification uses it. Unverified users are read-only.
+- Sign up starts a session; email verification uses it. Unverified users are read-only: every mutation
+  except sign-in/up, logout, refresh and the verification ones is rejected with `EMAIL_NOT_VERIFIED`,
+  including editing their own profile and changing the password.
+- The frontend mirrors this as UX only: an action gate locks data-changing actions (`aria-disabled` + a
+  toast) on every page at once, see [frontend/src/shared/lib/action-gate](frontend/src/shared/lib/action-gate/README.md).
 - Details and reasons: [docs/auth.md](docs/auth.md).
