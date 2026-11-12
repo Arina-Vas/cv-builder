@@ -116,6 +116,19 @@
   color: var(--on-primary);
 }
 
+/* Content: an optional icon before the text, centred with it ("+ CREATE …", "🗑 REMOVE …") */
+.label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.label svg {
+  flex-shrink: 0;
+  width: var(--icon-size);
+  height: var(--icon-size);
+}
+
 /* Loading */
 .loading .label {
   visibility: hidden;

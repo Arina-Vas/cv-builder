@@ -16,10 +16,8 @@ export const TableToolbar = ({ search, onSearch, action }: TableToolbarProps) =>
       <SearchField value={search} onChange={onSearch} />
       {action && (
         <Button variant="text" size="sm" onClick={action.onClick}>
-          <span className={s.withIcon}>
-            <PlusIcon />
-            {action.label}
-          </span>
+          <PlusIcon />
+          {action.label}
         </Button>
       )}
     </div>
