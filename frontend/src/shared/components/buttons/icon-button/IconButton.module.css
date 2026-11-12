@@ -23,11 +23,11 @@
   fill: currentColor;
 }
 
-.iconButton:hover:not(:disabled) {
+.iconButton:hover:not(:disabled, [aria-disabled='true']) {
   border-color: var(--button-ghost-hover-border);
 }
 
-.iconButton:active:not(:disabled) {
+.iconButton:active:not(:disabled, [aria-disabled='true']) {
   background: var(--button-ghost-pressed-bg);
   border-color: var(--button-ghost-pressed-border);
   color: var(--button-ghost-pressed-text);
@@ -38,7 +38,7 @@
   outline-offset: 2px;
 }
 
-.iconButton:disabled {
+.iconButton:is(:disabled, [aria-disabled='true']) {
   color: var(--action-disabled);
   cursor: not-allowed;
 }

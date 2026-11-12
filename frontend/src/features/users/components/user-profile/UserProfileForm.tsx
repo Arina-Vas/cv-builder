@@ -155,6 +155,7 @@ export const UserProfileForm = ({
           <Button
             type="submit"
             variant="primary"
+            gated
             loading={isSubmitting}
             disabled={!isDirty || !isValid}
           >
