@@ -1,6 +1,7 @@
 import type { MockLink } from '@apollo/client/testing';
 import { screen, waitFor, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
+import { closedGate } from '@/test/action-gate';
 import { renderWithProviders } from '@/test/render';
 import { DELETE_USER_LANGUAGES, USER_LANGUAGES } from '../api/userLanguages.operations';
 import { UserLanguages } from './UserLanguages';
@@ -170,6 +171,52 @@ describe('UserLanguages', () => {
       expect(screen.getByText('German')).toBeInTheDocument();
       // selection mode is over
       expect(screen.getByRole('button', { name: 'Remove languages' })).toBeInTheDocument();
+    });
+  });
+
+  describe('with a closed action gate (unverified email)', () => {
+    it('locks Add, Remove and opening Update; the clicks are stopped', async () => {
+      const { blocked, Wrapper } = closedGate();
+      const { user } = renderWithProviders(
+        <Wrapper>
+          <UserLanguages userId={USER_ID} canEdit emptyMessage={EMPTY} />
+        </Wrapper>,
+        { mocks: [listMock()] },
+      );
+
+      const add = await screen.findByRole('button', { name: 'Add language' });
+      const remove = screen.getByRole('button', { name: 'Remove languages' });
+      const english = screen.getByRole('button', { name: /English/ });
+
+      for (const button of [add, remove, english]) {
+        expect(button).toHaveAttribute('aria-disabled', 'true');
+        await user.click(button);
+      }
+
+      expect(blocked).toHaveBeenCalledTimes(3);
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+      // still not in selection mode
+      expect(screen.queryByRole('button', { name: /Remove \(/ })).not.toBeInTheDocument();
+    });
+
+    it('leaves Retry alone: reloading changes nothing', async () => {
+      const { Wrapper } = closedGate();
+      renderWithProviders(
+        <Wrapper>
+          <UserLanguages userId={USER_ID} canEdit emptyMessage={EMPTY} />
+        </Wrapper>,
+        {
+          mocks: [
+            {
+              request: { query: USER_LANGUAGES, variables: { userId: USER_ID } },
+              error: new Error('down'),
+            },
+          ],
+        },
+      );
+
+      await screen.findByRole('alert');
+      expect(screen.getByRole('button', { name: 'Retry' })).not.toHaveAttribute('aria-disabled');
     });
   });
 });

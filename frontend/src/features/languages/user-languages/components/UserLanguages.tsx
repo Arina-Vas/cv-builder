@@ -83,13 +83,19 @@ export const UserLanguages = ({ userId, canEdit, emptyMessage }: Props) => {
         <div className={s.actions}>
           {canEdit && !selectingMode && (
             <>
-              <Button size={'sm'} onClick={() => setModal({ type: 'create' })} variant={'ghost'}>
+              <Button
+                size={'sm'}
+                gated
+                onClick={() => setModal({ type: 'create' })}
+                variant={'ghost'}
+              >
                 <PlusIcon />
                 {t('addButton')}
               </Button>
               <Button
                 variant={'text'}
                 size={'sm'}
+                gated
                 disabled={!data.userLanguages.length}
                 onClick={start}
               >
@@ -107,6 +113,7 @@ export const UserLanguages = ({ userId, canEdit, emptyMessage }: Props) => {
               <Button
                 disabled={selectedIds.size === 0}
                 size={'sm'}
+                gated
                 onClick={() => setOpenConfirmDialog(true)}
               >
                 {t('removeCount', { count: selectedIds.size })}

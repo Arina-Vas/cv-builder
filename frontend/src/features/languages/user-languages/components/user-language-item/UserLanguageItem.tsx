@@ -4,6 +4,7 @@ import { PROFICIENCY_LEVEL } from '@/features/languages/user-languages/lib/profi
 import type { UserLanguageFieldsFragment } from '@/gql/graphql';
 import { useTranslations } from 'next-intl';
 import { useId } from 'react';
+import { useActionGate } from '@/shared/lib/action-gate/ActionGate';
 
 type Props = {
   canEdit: boolean;
@@ -14,6 +15,10 @@ type Props = {
 export const UserLanguageItem = ({ canEdit, userLanguage, onClick, selected }: Props) => {
   const tProficiency = useTranslations('userLanguage.proficiencyLevel');
   const nameId = useId();
+  // opening Update changes data: locked for an unverified user. Selection mode is reached only
+  // through the gated REMOVE LANGUAGES, so a click there is never locked here.
+  const { locked, guard } = useActionGate();
+  const gated = selected === undefined;
 
   const content = (
     <>
@@ -27,7 +32,13 @@ export const UserLanguageItem = ({ canEdit, userLanguage, onClick, selected }: P
   );
 
   return canEdit ? (
-    <button type="button" className={s.item} onClick={onClick} aria-pressed={selected}>
+    <button
+      type="button"
+      className={s.item}
+      aria-pressed={selected}
+      aria-disabled={(gated && locked) || undefined}
+      onClick={onClick && (gated ? guard(onClick) : onClick)}
+    >
       {content}
     </button>
   ) : (

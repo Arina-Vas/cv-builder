@@ -42,7 +42,7 @@ Plus every native `<button>` attribute (`onClick`, `disabled`, `form`, `aria-*`,
   (unverified email, `shared/lib/action-gate`) it gets `aria-disabled` — looks disabled, stays focusable —
   and the click shows a toast instead of `onClick`; a `type="submit"` button doesn't submit its form.
   Without a gate provider (Storybook, tests) it is a normal button. Never gate CANCEL, Retry, pagination.
-- Hover / Active / Disabled / Focus are CSS states (`:hover`, `:active`, `:disabled`, `:focus-visible`), not props.
+- Hover / Active / Disabled / Focus are CSS states (`:hover`, `:active`, `:disabled`, `:focus-visible`), not props; `aria-disabled="true"` looks the same as `:disabled`.
 - **With an icon:** put the icon first, then the text, with no wrapper:
   `<Button variant="text" size="sm"><PlusIcon />Create department</Button>`. The label is an inline flex row: the
   icon is centred with the text, `--space-3` (12px) apart, and sized to `--icon-size` (24px). The icon takes

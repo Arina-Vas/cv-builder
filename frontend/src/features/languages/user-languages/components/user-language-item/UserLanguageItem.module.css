@@ -16,8 +16,13 @@ button.item {
   cursor: pointer;
 }
 
-button.item:hover {
+button.item:hover:not([aria-disabled='true']) {
   background: var(--action-hover);
+}
+
+/* locked by the action gate (unverified email): focusable, the click explains why */
+button.item[aria-disabled='true'] {
+  cursor: not-allowed;
 }
 
 button.item:focus-visible {
