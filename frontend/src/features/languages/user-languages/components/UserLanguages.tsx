@@ -5,10 +5,9 @@ import { USER_LANGUAGES } from '@/features/languages/user-languages/api/userLang
 import type { UserLanguageFieldsFragment } from '@/gql/graphql';
 import { useState } from 'react';
 import { Button } from '@/shared/components/buttons';
-import { LevelBar } from '@/shared/components/level-bar/LevelBar';
-import { PROFICIENCY_LEVEL } from '@/features/languages/user-languages/lib/proficiency';
-import { UserLanguageFormModal } from '@/features/languages/user-languages/components/UserLanguageFormModal';
+import { UserLanguageFormModal } from './UserLanguageFormModal';
 import { useTranslations } from 'next-intl';
+import { UserLanguageItem } from '@/features/languages/user-languages/components/user-language-item/UserLanguageItem';
 
 type Props = { userId: string; canEdit: boolean };
 
@@ -19,8 +18,6 @@ type ModalState =
 
 export const UserLanguages = ({ userId, canEdit }: Props) => {
   const t = useTranslations('userLanguage');
-  const tProficiency = useTranslations('userLanguage.proficiencyLevel');
-
   const [modal, setModal] = useState<ModalState | null>(null);
 
   const { data } = useQuery(USER_LANGUAGES, userId ? { variables: { userId } } : skipToken);
@@ -31,13 +28,11 @@ export const UserLanguages = ({ userId, canEdit }: Props) => {
       <ul>
         {data?.userLanguages.map((language) => (
           <li key={language.id}>
-            <LevelBar
-              level={PROFICIENCY_LEVEL[language.proficiency]}
-              label={tProficiency(language.proficiency)}
-              key={language.id}
-              onClick={canEdit ? () => setModal({ type: 'update', language }) : undefined}
+            <UserLanguageItem
+              canEdit={canEdit}
+              userLanguage={language}
+              onClick={() => setModal({ type: 'update', language })}
             />
-            <span>{language.language.name}</span>
           </li>
         ))}
       </ul>

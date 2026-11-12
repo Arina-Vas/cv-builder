@@ -1,0 +1,30 @@
+.item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  width: 100%;
+  padding: var(--space-1) var(--space-2);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+}
+
+button.item {
+  cursor: pointer;
+}
+
+button.item:hover {
+  background: var(--action-hover);
+}
+
+button.item:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+button.item[aria-pressed='true'] {
+  background: var(--table-row-selected);
+}
