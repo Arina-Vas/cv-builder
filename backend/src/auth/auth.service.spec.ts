@@ -21,7 +21,7 @@ const user: User = {
   email: 'employee@cv-builder.local',
   firstName: null,
   lastName: null,
-  avatarUrl: null,
+  avatarKey: null,
   role: UserRole.EMPLOYEE,
   department: null,
   position: null,

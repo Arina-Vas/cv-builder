@@ -43,6 +43,38 @@ export class GqlClient {
     return response.body as GqlResponse<T>;
   }
 
+  /**
+   * Sends the operation as a GraphQL multipart request with one file in the `file` variable.
+   * `preflight: false` leaves out the header Apollo requires against CSRF.
+   */
+  async upload<T = Record<string, unknown>>(
+    query: string,
+    variables: Record<string, unknown>,
+    file: { body: Buffer; filename: string; contentType?: string },
+    { preflight = true }: { preflight?: boolean } = {},
+  ): Promise<{ status: number; body: GqlResponse<T> }> {
+    let req = request(this.server)
+      .post('/graphql')
+      .set('X-Forwarded-For', this.ip)
+      .set(
+        'Cookie',
+        [...this.cookies].map(([name, value]) => `${name}=${value}`),
+      );
+    if (preflight) {
+      req = req.set('apollo-require-preflight', 'true');
+    }
+    const response = await req
+      .field('operations', JSON.stringify({ query, variables: { ...variables, file: null } }))
+      .field('map', JSON.stringify({ 0: ['variables.file'] }))
+      .attach('0', file.body, {
+        filename: file.filename,
+        contentType: file.contentType ?? 'application/octet-stream',
+      });
+
+    this.store(response.headers['set-cookie']);
+    return { status: response.status, body: response.body as GqlResponse<T> };
+  }
+
   /** Sends the operation and returns its data, failing the test on any GraphQL error. */
   async data<T = Record<string, unknown>>(
     query: string,

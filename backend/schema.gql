@@ -171,6 +171,11 @@ type Mutation {
   logout: Boolean!
   refresh: Boolean!
 
+  """
+  Own profile or Admin. Fails with FORBIDDEN for another user's profile, NOT_FOUND if the user does not exist
+  """
+  removeAvatar(userId: ID!): User!
+
   """Always returns true, whether or not the email belongs to an account"""
   requestPasswordReset(input: RequestPasswordResetInput!): Boolean!
   resendVerificationCode: Boolean!
@@ -206,6 +211,11 @@ type Mutation {
   Own profile or Admin. Changes only the mastery level; fails with NOT_FOUND if the assignment does not exist or belongs to another user
   """
   updateUserSkill(input: UpdateUserSkillInput!): UserSkill!
+
+  """
+  Own profile or Admin. PNG, JPEG or GIF up to 5 MB, checked by the file content. Fails with FORBIDDEN for another user's profile, NOT_FOUND if the user does not exist, BAD_USER_INPUT (field: file) for a wrong type or size. Send as a multipart request with the `apollo-require-preflight` header
+  """
+  uploadAvatar(file: Upload!, userId: ID!): User!
   verifyEmail(input: VerifyEmailInput!): User!
 }
 
@@ -465,7 +475,11 @@ input UpdateUserSkillInput {
   userId: ID!
 }
 
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload
+
 type User {
+  """Public URL of the avatar image"""
   avatarUrl: String
   createdAt: DateTime!
   department: Department

@@ -7,7 +7,7 @@ import { Department } from '@/departments/models/department.model';
 @ObjectType()
 export class User implements Pick<
   UserEntity,
-  'id' | 'email' | 'avatarUrl' | 'emailVerifiedAt' | 'firstName' | 'lastName' | 'role' | 'createdAt'
+  'id' | 'email' | 'avatarKey' | 'emailVerifiedAt' | 'firstName' | 'lastName' | 'role' | 'createdAt'
 > {
   @Field(() => ID)
   id!: string;
@@ -21,8 +21,7 @@ export class User implements Pick<
   @Field(() => String, { nullable: true })
   lastName!: string | null;
 
-  @Field(() => String, { nullable: true })
-  avatarUrl!: string | null;
+  avatarKey!: string | null;
 
   @Field(() => UserRole)
   role!: UserRole;

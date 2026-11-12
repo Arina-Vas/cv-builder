@@ -7,6 +7,7 @@ import { AppModule } from '@/app.module';
 import { configureApp } from '@/app.setup';
 import { Roles } from '@/common/auth/roles.decorator';
 import { UserRole } from '@/common/graphql/enums';
+import { type StoredFile, StorageService } from '@/files/storage.service';
 import { MailService } from '@/mail/mail.service';
 import { PrismaService } from '@/prisma/prisma.service';
 
@@ -41,6 +42,28 @@ export class FakeMailService {
   }
 }
 
+/** Replaces S3: keeps uploaded files in memory, so the tests do not need MinIO. */
+@Injectable()
+export class FakeStorageService {
+  readonly files = new Map<string, StoredFile>();
+  private nextId = 1;
+
+  upload(file: StoredFile): Promise<string> {
+    const key = `test-${this.nextId++}.${file.extension}`;
+    this.files.set(key, file);
+    return Promise.resolve(key);
+  }
+
+  delete(key: string): Promise<void> {
+    this.files.delete(key);
+    return Promise.resolve();
+  }
+
+  getPublicUrl(key: string): string {
+    return `http://storage.test/${key}`;
+  }
+}
+
 /**
  * Operations that exist only in the tests: the auth branch has no admin-only or plain signed-in
  * mutation yet, but the guards must be checked against them.
@@ -67,20 +90,30 @@ export interface TestApp {
   server: App;
   prisma: PrismaService;
   mail: FakeMailService;
+  storage: FakeStorageService;
 }
 
 export const createTestApp = async (): Promise<TestApp> => {
   const mail = new FakeMailService();
+  const storage = new FakeStorageService();
   const moduleRef = await Test.createTestingModule({ imports: [AppModule, ProbeModule] })
     .overrideProvider(MailService)
     .useValue(mail)
+    .overrideProvider(StorageService)
+    .useValue(storage)
     .compile();
 
   const app = moduleRef.createNestApplication<NestExpressApplication>({ logger: false });
   configureApp(app);
   await app.init();
 
-  return { app, server: app.getHttpServer() as App, prisma: app.get(PrismaService), mail };
+  return {
+    app,
+    server: app.getHttpServer() as App,
+    prisma: app.get(PrismaService),
+    mail,
+    storage,
+  };
 };
 
 /** Empties every application table; migrations history stays. */

@@ -1,5 +1,6 @@
 import { ParseUUIDPipe } from '@nestjs/common';
-import { Args, ID, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, ID, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
+import { GraphQLUpload, type Upload } from 'graphql-upload-minimal';
 import { CurrentUser } from '@/common/auth/current-user.decorator';
 import { Roles } from '@/common/auth/roles.decorator';
 import { UserRole } from '@/common/graphql/enums';
@@ -53,6 +54,36 @@ export class UsersResolver {
     @Args('input') input: UpdateProfileInput,
   ): Promise<User> {
     return this.usersService.updateProfile(currentUser, input);
+  }
+
+  @Mutation(() => User, {
+    description:
+      'Own profile or Admin. PNG, JPEG or GIF up to 5 MB, checked by the file content. Fails with FORBIDDEN ' +
+      "for another user's profile, NOT_FOUND if the user does not exist, BAD_USER_INPUT (field: file) for a " +
+      'wrong type or size. Send as a multipart request with the `apollo-require-preflight` header',
+  })
+  uploadAvatar(
+    @CurrentUser() currentUser: User,
+    @Args('userId', { type: () => ID }, ParseUUIDPipe) userId: string,
+    @Args('file', { type: () => GraphQLUpload }) file: Upload['promise'],
+  ): Promise<User> {
+    return this.usersService.uploadAvatar(currentUser, userId, file);
+  }
+
+  @Mutation(() => User, {
+    description:
+      "Own profile or Admin. Fails with FORBIDDEN for another user's profile, NOT_FOUND if the user does not exist",
+  })
+  removeAvatar(
+    @CurrentUser() currentUser: User,
+    @Args('userId', { type: () => ID }, ParseUUIDPipe) userId: string,
+  ): Promise<User> {
+    return this.usersService.removeAvatar(currentUser, userId);
+  }
+
+  @ResolveField(() => String, { nullable: true, description: 'Public URL of the avatar image' })
+  avatarUrl(@Parent() user: User): string | null {
+    return this.usersService.getAvatarUrl(user);
   }
 
   @Roles(UserRole.ADMIN)
