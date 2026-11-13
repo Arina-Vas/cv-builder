@@ -21,7 +21,7 @@ const currentUser = (id: string, role: UserRole): User => ({
   email: `${id}@example.com`,
   firstName: null,
   lastName: null,
-  avatarUrl: null,
+  avatarKey: null,
   role,
   position: null,
   department: null,

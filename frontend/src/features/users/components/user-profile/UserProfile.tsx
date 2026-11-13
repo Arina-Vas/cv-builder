@@ -7,10 +7,10 @@ import { useCurrentUser } from '@/features/auth/hooks/useCurrentUser';
 import { USER } from '@/features/users/api/users.operations';
 import { useFormatMemberSince } from '@/features/users/hooks/useFormatMemberSince';
 import { getFullName } from '@/features/users/lib/getFullName';
-import { Avatar } from '@/shared/components/avatar/Avatar';
 import { Button } from '@/shared/components/buttons';
 import { hasErrorCode } from '@/shared/lib/apollo/graphql-errors';
 import s from './UserProfile.module.css';
+import { ProfileAvatar } from './ProfileAvatar';
 import { UserProfileForm } from './UserProfileForm';
 import { UserProfileSkeleton } from './UserProfileSkeleton';
 
@@ -58,7 +58,12 @@ export const UserProfile = ({ userId }: UserProfileProps) => {
   return (
     <section className={s.root}>
       <header className={s.header}>
-        <Avatar src={user.avatarUrl ?? undefined} fallback={fullName} />
+        <ProfileAvatar
+          userId={user.id}
+          avatarUrl={user.avatarUrl ?? null}
+          fullName={fullName}
+          canEdit={canEdit}
+        />
         <div className={s.info}>
           <h1 className={s.name}>{fullName}</h1>
           <p className={s.email}>{user.email}</p>

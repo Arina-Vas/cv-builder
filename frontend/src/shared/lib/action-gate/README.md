@@ -14,6 +14,7 @@ user before they fill a form. UX only — the backend stays the source of truth.
 | `features/app-layout/components/app-shell/AppShell.tsx` | mounts `VerifiedActionGate` once around the page content              |
 | `TableToolbar` action, `RowActionsMenu` items           | gated **by default**; `ungated: true` for actions that change nothing |
 | `Button`                                                | gated only with the `gated` prop                                      |
+| `AvatarUploader`                                        | always gated: the file dialog and the remove cross                    |
 
 A locked action is `aria-disabled` (looks disabled, stays focusable), and clicking it shows the toast
 `Verify your email to do this`. While ME is loading the action is locked and the click does nothing.

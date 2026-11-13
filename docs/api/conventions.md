@@ -297,6 +297,9 @@ avoid a column-key → enum map in every table.
   @IsNotEmpty({ message: 'Email is required' })                       // 1st
   email!: string;
   ```
+- File mutations take the owner id and the file directly: `uploadAvatar(userId: ID!, file: Upload!): User!`,
+  `removeAvatar(userId: ID!): User!`. The database keeps the storage key; the output type exposes the URL
+  (`User.avatarUrl`, a field resolver over `avatarKey`). A replaced or removed file is deleted from the storage.
 - The UI treats a mutation as successful only after the response arrives (no optimistic updates without a rollback).
 
 ## Errors
@@ -458,6 +461,7 @@ build time.
 | `ID`       | uuid            | all ids                                  |
 | `Date`     | `YYYY-MM-DD`    | project and CV project dates             |
 | `DateTime` | ISO 8601 in UTC | `createdAt` ("Member since"), timestamps |
+| `Upload`   | multipart file  | `uploadAvatar(file)`                     |
 
 `DateTime` is the NestJS built-in for every `Date` field without an explicit type. `Date` is our custom scalar
 (`DateScalar`) and must be set explicitly: `@Field(() => DateScalar) startDate!: Date`.
@@ -470,7 +474,13 @@ day cannot shift.
 Frontend side:
 
 - send: `format(date, 'yyyy-MM-dd')`; receive: `parseISO(value)` (`date-fns`);
-- codegen config: `scalars: { Date: 'string' }`.
+- codegen config: `scalars: { Date: 'string', Upload: 'File' }`.
+
+`Upload` comes from `graphql-upload-minimal` and works only in a
+[GraphQL multipart request](https://github.com/jaydenseric/graphql-multipart-request-spec) with the
+`apollo-require-preflight: true` header (Apollo Server CSRF protection; the frontend's `UploadHttpLink` sends it).
+A file is checked by its content, not by its name or MIME type: `uploadAvatar` takes PNG, JPEG or GIF up to 5 MB
+and fails with `BAD_USER_INPUT` (`field: file`) otherwise.
 
 ## Authentication and access
 

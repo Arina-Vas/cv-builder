@@ -17,6 +17,14 @@ export const TEST_ENV: Record<string, string> = {
   SMTP_HOST: 'localhost',
   SMTP_PORT: '1025',
   MAIL_FROM: 'CV Builder <no-reply@cv-builder.local>',
+  // Storage settings only have to pass validation; the tests never reach MinIO
+  S3_ENDPOINT: 'http://localhost:9000',
+  S3_REGION: 'us-east-1',
+  S3_ACCESS_KEY: 'test-access-key',
+  S3_SECRET_KEY: 'test-secret-key',
+  S3_BUCKET: 'avatars-test',
+  S3_PUBLIC_URL: 'http://localhost:9000/avatars-test',
+  S3_FORCE_PATH_STYLE: 'true',
   // Each test sends its own X-Forwarded-For, so rate limits do not leak between tests
   TRUST_PROXY_HOPS: '1',
 };

@@ -98,6 +98,24 @@ export const UPDATE_PROFILE = graphql(`
   }
 `);
 
+export const UPLOAD_AVATAR = graphql(`
+  mutation UploadAvatar($userId: ID!, $file: Upload!) {
+    uploadAvatar(userId: $userId, file: $file) {
+      id
+      avatarUrl
+    }
+  }
+`);
+
+export const REMOVE_AVATAR = graphql(`
+  mutation RemoveAvatar($userId: ID!) {
+    removeAvatar(userId: $userId) {
+      id
+      avatarUrl
+    }
+  }
+`);
+
 export const DELETE_USER = graphql(`
   mutation DeleteUser($id: ID!) {
     deleteUser(id: $id)

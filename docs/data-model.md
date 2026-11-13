@@ -63,14 +63,17 @@ All tables have `id` (uuid), `created_at` and `updated_at`. Only the meaningful 
 
 | Table         | Columns                                                                                                                                                          |
 | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `users`       | `email` citext, `password_hash`, `role` (`EMPLOYEE`/`ADMIN`), `email_verified_at?`, `first_name?`, `last_name?`, `avatar_url?`, `department_id?`, `position_id?` |
+| `users`       | `email` citext, `password_hash`, `role` (`EMPLOYEE`/`ADMIN`), `email_verified_at?`, `first_name?`, `last_name?`, `avatar_key?`, `department_id?`, `position_id?` |
 | `sessions`    | `user_id`, `token_hash` (refresh token), `user_agent?`, `expires_at`, `revoked_at?`                                                                              |
 | `auth_tokens` | `user_id`, `type` (`EMAIL_VERIFICATION`/`PASSWORD_RESET`), `code_hash`, `expires_at`, `used_at?`                                                                 |
 
 - Profile fields are nullable: Sign Up collects only email and password. "Create user" by an Admin requires
   first/last name, department, position and role; this is enforced by the input DTO, not by the DB.
 - `email_verified_at` is the email verification status (`null` = not verified).
-- `avatar_url` stores a reference to the uploaded file, never the image itself.
+- `avatar_key` stores the key of the uploaded file in the S3-compatible storage (MinIO locally, R2 or AWS in
+  production), never the image itself and never its full URL. The API builds `User.avatarUrl` from the key and
+  `S3_PUBLIC_URL`, so moving the files to another host needs only a config change. Replacing or removing the
+  avatar and deleting the user also delete the file.
 - `auth_tokens` covers both the 6-digit email verification code (10 min, single-use, a new code invalidates the
   previous one) and the password reset token. Only hashes are stored; `code_hash` is not unique because two users
   can get the same 6-digit code. Lookup is by `(user_id, type)`.
