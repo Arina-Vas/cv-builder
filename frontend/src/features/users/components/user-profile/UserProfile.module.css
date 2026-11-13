@@ -84,24 +84,7 @@
   text-align: center;
 }
 
-/* Skeleton: grey bars with a wave, same as TableSkeleton / Breadcrumbs */
-.skeleton {
-  position: relative;
-  display: block;
-  overflow: hidden;
-  border-radius: var(--radius-sm);
-  background: var(--skeleton);
-}
-
-.skeleton::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, transparent, var(--action-hover), transparent);
-  transform: translateX(-100%);
-  animation: wave 1.6s linear 0.5s infinite;
-}
-
+/* UserProfileSkeleton: sizes of the shared Skeleton blocks (grey + wave come from it) */
 .skeletonAvatar {
   width: var(--avatar-size-lg);
   height: var(--avatar-size-lg);
@@ -122,17 +105,4 @@
 .skeletonField {
   height: var(--input-height);
   margin-top: var(--space-4);
-}
-
-@keyframes wave {
-  60%,
-  100% {
-    transform: translateX(100%);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .skeleton::after {
-    animation: none;
-  }
 }

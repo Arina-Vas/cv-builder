@@ -1,33 +1,28 @@
-import s from './UserLanguageItem.module.css';
+import s from './LevelItem.module.css';
 import { LevelBar } from '@/shared/components/level-bar/LevelBar';
-import { PROFICIENCY_LEVEL } from '@/features/languages/user-languages/lib/proficiency';
 import type { UserLanguageFieldsFragment } from '@/gql/graphql';
-import { useTranslations } from 'next-intl';
 import { useId } from 'react';
 import { useActionGate } from '@/shared/lib/action-gate/ActionGate';
+import type { LevelType } from '@/shared/components/level-bar/LevelBar.types';
 
 type Props = {
+  name: string;
+  level: LevelType;
+  levelLabel: string;
   canEdit: boolean;
   onClick?: () => void;
   userLanguage: UserLanguageFieldsFragment;
   selected?: boolean;
 };
-export const UserLanguageItem = ({ canEdit, userLanguage, onClick, selected }: Props) => {
-  const tProficiency = useTranslations('userLanguage.proficiencyLevel');
+export const LevelItem = ({ name, levelLabel, level, canEdit, onClick, selected }: Props) => {
   const nameId = useId();
-  // opening Update changes data: locked for an unverified user. Selection mode is reached only
-  // through the gated REMOVE LANGUAGES, so a click there is never locked here.
   const { locked, guard } = useActionGate();
   const gated = selected === undefined;
 
   const content = (
     <>
-      <LevelBar
-        level={PROFICIENCY_LEVEL[userLanguage.proficiency]}
-        label={tProficiency(userLanguage.proficiency)}
-        aria-labelledby={nameId}
-      />
-      <span id={nameId}>{userLanguage.language.name}</span>
+      <LevelBar level={level} label={levelLabel} aria-labelledby={nameId} />
+      <span id={nameId}>{name}</span>
     </>
   );
 

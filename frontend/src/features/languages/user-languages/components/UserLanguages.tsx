@@ -11,13 +11,14 @@ import { useState } from 'react';
 import { Button } from '@/shared/components/buttons';
 import { UserLanguageFormModal } from './UserLanguageFormModal';
 import { useTranslations } from 'next-intl';
-import { UserLanguageItem } from '@/features/languages/user-languages/components/user-language-item/UserLanguageItem';
+import { LevelItem } from '@/shared/components/level-item/LevelItem';
 import { ConfirmDialog } from '@/shared/components/dialog';
 import s from './UserLanguages.module.css';
 import { PlusIcon } from '@/shared/components/icons/PlusIcon';
 import { TrashIcon } from '@/shared/components/icons/TrashIcon';
-import { useSelection } from '@/features/languages/user-languages/lib/useSelection';
-import { UserLanguagesSkeleton } from '@/features/languages/user-languages/components/UserLanguagesSkeleton';
+import { useSelection } from '@/shared/hooks/useSelection';
+import { UserLanguagesSkeleton } from './UserLanguagesSkeleton';
+import { PROFICIENCY_LEVEL } from '@/features/languages/user-languages/lib/proficiency';
 
 type Props = {
   userId: string;
@@ -29,6 +30,7 @@ type ModalState = { type: 'create' } | { type: 'update'; language: UserLanguageF
 
 export const UserLanguages = ({ userId, canEdit, emptyMessage }: Props) => {
   const t = useTranslations('userLanguage');
+  const tProficiency = useTranslations('userLanguage.proficiencyLevel');
   const tActions = useTranslations('common.actions');
   const [modal, setModal] = useState<ModalState | null>(null);
 
@@ -66,7 +68,10 @@ export const UserLanguages = ({ userId, canEdit, emptyMessage }: Props) => {
         <ul className={s.list}>
           {data.userLanguages.map((language) => (
             <li key={language.id}>
-              <UserLanguageItem
+              <LevelItem
+                name={language.language.name}
+                level={PROFICIENCY_LEVEL[language.proficiency]}
+                levelLabel={tProficiency(language.proficiency)}
                 canEdit={canEdit}
                 userLanguage={language}
                 onClick={() =>
