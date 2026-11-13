@@ -1,6 +1,5 @@
 import s from './LevelItem.module.css';
 import { LevelBar } from '@/shared/components/level-bar/LevelBar';
-import type { UserLanguageFieldsFragment } from '@/gql/graphql';
 import { useId } from 'react';
 import { useActionGate } from '@/shared/lib/action-gate/ActionGate';
 import type { LevelType } from '@/shared/components/level-bar/LevelBar.types';
@@ -11,7 +10,6 @@ type Props = {
   levelLabel: string;
   canEdit: boolean;
   onClick?: () => void;
-  userLanguage: UserLanguageFieldsFragment;
   selected?: boolean;
 };
 export const LevelItem = ({ name, levelLabel, level, canEdit, onClick, selected }: Props) => {
