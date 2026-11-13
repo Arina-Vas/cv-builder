@@ -1,5 +1,6 @@
 import { useTranslations } from 'next-intl';
 import layout from '@/shared/components/form/FormLayout.module.css';
+import { Skeleton } from '@/shared/components/skeleton/Skeleton';
 import s from './UserProfile.module.css';
 
 const FIELD_COUNT = 4;
@@ -10,17 +11,17 @@ export const UserProfileSkeleton = () => {
   return (
     <section className={s.root} aria-busy="true" aria-label={t('loading')}>
       <div className={s.header}>
-        <span className={`${s.skeleton} ${s.skeletonAvatar}`} />
+        <Skeleton className={s.skeletonAvatar} />
         <div className={s.info}>
-          <span className={`${s.skeleton} ${s.skeletonName}`} />
-          <span className={`${s.skeleton} ${s.skeletonText}`} />
-          <span className={`${s.skeleton} ${s.skeletonText}`} />
+          <Skeleton className={s.skeletonName} />
+          <Skeleton className={s.skeletonText} />
+          <Skeleton className={s.skeletonText} />
         </div>
       </div>
 
       <div className={`${layout.grid} ${s.form}`}>
         {Array.from({ length: FIELD_COUNT }, (_, index) => (
-          <span key={index} className={`${s.skeleton} ${s.skeletonField}`} />
+          <Skeleton key={index} className={s.skeletonField} />
         ))}
       </div>
     </section>

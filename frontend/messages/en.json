@@ -99,6 +99,10 @@
         "format": "ISO must be a language code, e.g. EN or PT-BR"
       }
     },
+    "userLanguage": {
+      "languageId": { "required": "Language is required" },
+      "proficiency": { "required": "Language proficiency is required" }
+    },
     "skill": {
       "name": {
         "required": "Skill is required",
@@ -344,6 +348,35 @@
     "delete": {
       "title": "Delete language",
       "message": "Are you sure you want to delete language <b>{name}</b>?"
+    }
+  },
+  "userLanguage": {
+    "title": "Current languages",
+    "addButton": "Add language",
+    "removeButton": "Remove languages",
+    "removeCount": "Remove ({count})",
+    "remove": {
+      "title": "Remove languages",
+      "message": "Are you sure you want to remove {count, plural, one {# language} other {# languages}}?"
+    },
+    "empty": "No languages added",
+    "emptyProfile": "No languages added yet",
+    "loading": "Loading languages",
+    "loadError": "Failed to load languages",
+    "retry": "Retry",
+    "form": {
+      "updateTitle": "Update language",
+      "createTitle": "Add language",
+      "fields": { "languageId": "Language", "proficiency": "Proficiency" }
+    },
+    "proficiencyLevel": {
+      "A1": "A1",
+      "A2": "A2",
+      "B1": "B1",
+      "B2": "B2",
+      "C1": "C1",
+      "C2": "C2",
+      "NATIVE": "Native"
     }
   },
   "skills": {

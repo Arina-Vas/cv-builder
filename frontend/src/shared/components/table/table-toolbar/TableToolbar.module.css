@@ -5,9 +5,3 @@
   gap: var(--space-4);
   padding: 0 var(--space-5);
 }
-
-.withIcon {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-}

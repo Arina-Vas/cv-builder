@@ -47,7 +47,7 @@ const { search, setSearch } = useTableParams({ … });
 | File                       | What                                                       |
 | -------------------------- | ---------------------------------------------------------- |
 | `TableToolbar.tsx`         | `SearchField` + optional action `Button` with `PlusIcon`   |
-| `TableToolbar.module.css`  | `toolbar` (row, gap, side padding), `withIcon` (icon gap)  |
+| `TableToolbar.module.css`  | `toolbar` (row, gap, side padding)                         |
 | `TableToolbar.test.tsx`    | value, debounced `onSearch`, button only with `action`     |
 | `TableToolbar.stories.tsx` | default, without action, with search, layout, Light / Dark |
 
