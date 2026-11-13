@@ -1,4 +1,5 @@
 import type { FileUpload } from 'graphql-upload-minimal';
+import sharp from 'sharp';
 import { badUserInput } from '@/common/errors/app-errors';
 import type { StoredFile } from './storage.service';
 
@@ -45,8 +46,26 @@ const isSizeLimitError = (error: unknown): boolean =>
   typeof error === 'object' && error !== null && 'status' in error && error.status === 413;
 
 /**
- * Reads an uploaded image into memory and checks its real type and size.
- * Fails with BAD_USER_INPUT (field: file) if the file is too large or is not a PNG, JPEG or GIF.
+ * Decodes the image and encodes it again in the same format. sharp does not copy metadata to the
+ * output, so EXIF (GPS position, camera, date) never reaches the public bucket. The EXIF orientation
+ * is applied to the pixels first, so phone photos keep their rotation. GIFs have no EXIF orientation;
+ * `animated` keeps all their frames.
+ */
+const stripMetadata = (body: Buffer, contentType: string): Promise<Buffer> => {
+  switch (contentType) {
+    case 'image/gif':
+      return sharp(body, { animated: true }).gif().toBuffer();
+    case 'image/png':
+      return sharp(body).autoOrient().png().toBuffer();
+    default:
+      return sharp(body).autoOrient().jpeg({ quality: 90 }).toBuffer();
+  }
+};
+
+/**
+ * Reads an uploaded image into memory, checks its real type and size and strips its metadata.
+ * Fails with BAD_USER_INPUT (field: file) if the file is too large, is not a PNG, JPEG or GIF,
+ * or only starts like one and cannot be decoded.
  */
 export async function readImageUpload(upload: FileUpload): Promise<StoredFile> {
   const chunks: Buffer[] = [];
@@ -77,5 +96,10 @@ export async function readImageUpload(upload: FileUpload): Promise<StoredFile> {
   if (!type) {
     throw fileError(ImageUploadMessage.invalidType);
   }
-  return { body, ...type };
+
+  try {
+    return { body: await stripMetadata(body, type.contentType), ...type };
+  } catch {
+    throw fileError(ImageUploadMessage.invalidType);
+  }
 }

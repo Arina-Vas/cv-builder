@@ -1,6 +1,7 @@
 import { Readable } from 'node:stream';
 import type { FileUpload } from 'graphql-upload-minimal';
 import type { GraphQLError } from 'graphql';
+import sharp from 'sharp';
 import { ErrorCode } from '@/common/errors/error-code.enum';
 import {
   detectImageType,
@@ -59,16 +60,94 @@ describe('detectImageType', () => {
 });
 
 describe('readImageUpload', () => {
+  // Real images: the upload is decoded, so signature-only buffers are not enough here
+  const picture = (width = 4, height = 2) =>
+    sharp({ create: { width, height, channels: 3, background: '#ff0000' } });
+
+  /** A phone-like photo: 4x2 pixels stored sideways (orientation 6) with a GPS position in EXIF */
+  const phonePhoto = () =>
+    picture()
+      .jpeg()
+      .withMetadata({ orientation: 6 })
+      .withExifMerge({ IFD0: { Make: 'Phone' }, IFD3: { GPSLatitudeRef: 'N' } })
+      .toBuffer();
+
   it('joins the chunks and returns the detected type', async () => {
-    await expect(readImageUpload(fromChunks(PNG.subarray(0, 3), PNG.subarray(3)))).resolves.toEqual(
-      { body: PNG, contentType: 'image/png', extension: 'png' },
-    );
+    const png = await picture().png().toBuffer();
+
+    const image = await readImageUpload(fromChunks(png.subarray(0, 3), png.subarray(3)));
+
+    expect(image).toMatchObject({ contentType: 'image/png', extension: 'png' });
+    await expect(sharp(image.body).metadata()).resolves.toMatchObject({
+      format: 'png',
+      width: 4,
+      height: 2,
+    });
   });
 
   it('accepts a file of exactly the limit', async () => {
-    const body = Buffer.concat([JPEG, Buffer.alloc(MAX_IMAGE_BYTES - JPEG.length)]);
+    const jpeg = await picture().jpeg().toBuffer();
+    const body = Buffer.concat([jpeg, Buffer.alloc(MAX_IMAGE_BYTES - jpeg.length)]);
 
     await expect(readImageUpload(fromChunks(body))).resolves.toMatchObject({ extension: 'jpg' });
+  });
+
+  it('strips EXIF with the GPS position from a photo', async () => {
+    const photo = await phonePhoto();
+    expect((await sharp(photo).metadata()).exif).toBeDefined();
+
+    const { body } = await readImageUpload(fromChunks(photo));
+
+    const metadata = await sharp(body).metadata();
+    expect(metadata.exif).toBeUndefined();
+    expect(body.includes(Buffer.from('Phone'))).toBe(false);
+  });
+
+  it('turns a sideways photo upright before dropping its orientation tag', async () => {
+    const { body } = await readImageUpload(fromChunks(await phonePhoto()));
+
+    const metadata = await sharp(body).metadata();
+    expect(metadata).toMatchObject({ format: 'jpeg', width: 2, height: 4 });
+    expect(metadata.orientation).toBeUndefined();
+  });
+
+  it('strips EXIF from a PNG', async () => {
+    const png = await picture()
+      .png()
+      .withExif({ IFD0: { Make: 'Phone' } })
+      .toBuffer();
+    expect((await sharp(png).metadata()).exif).toBeDefined();
+
+    const { body } = await readImageUpload(fromChunks(png));
+
+    expect((await sharp(body).metadata()).exif).toBeUndefined();
+  });
+
+  it('keeps every frame of an animated GIF', async () => {
+    const frame = (background: string) =>
+      sharp({ create: { width: 2, height: 2, channels: 3, background } })
+        .png()
+        .toBuffer();
+    const gif = await sharp([await frame('#ff0000'), await frame('#0000ff')], {
+      join: { animated: true },
+    })
+      .gif()
+      .toBuffer();
+
+    const image = await readImageUpload(fromChunks(gif));
+
+    expect(image).toMatchObject({ contentType: 'image/gif', extension: 'gif' });
+    await expect(sharp(image.body).metadata()).resolves.toMatchObject({ format: 'gif', pages: 2 });
+  });
+
+  it.each([
+    ['PNG', PNG],
+    ['JPEG', JPEG],
+    ['GIF', GIF89],
+  ])('rejects a file that only starts like a %s', async (_, body) => {
+    const error = await rejection(readImageUpload(fromChunks(body)));
+
+    expect(error.extensions).toMatchObject(fileErrorOf(ImageUploadMessage.invalidType));
   });
 
   it('stops reading as soon as the file is over the limit', async () => {

@@ -58,7 +58,8 @@ export class UsersResolver {
 
   @Mutation(() => User, {
     description:
-      'Own profile or Admin. PNG, JPEG or GIF up to 5 MB, checked by the file content. Fails with FORBIDDEN ' +
+      'Own profile or Admin. PNG, JPEG or GIF up to 5 MB, checked by the file content. The image is ' +
+      'encoded again without metadata (EXIF, GPS) before it is stored. Fails with FORBIDDEN ' +
       "for another user's profile, NOT_FOUND if the user does not exist, BAD_USER_INPUT (field: file) for a " +
       'wrong type or size. Send as a multipart request with the `apollo-require-preflight` header',
   })

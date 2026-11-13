@@ -511,7 +511,12 @@ describe('UsersService', () => {
   describe('avatar', () => {
     const employee = { id: 'user-1', role: UserRole.EMPLOYEE };
     const admin = { id: 'admin-1', role: UserRole.ADMIN };
-    const PNG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00]);
+    // A real 1x1 PNG: the upload is decoded to strip its metadata
+    const PNG = Buffer.from(
+      '89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c48900000009704859' +
+        '73000003e8000003e801b57b526b0000000d494441540899636060606000000005000187a14ed40000000049454e44ae426082',
+      'hex',
+    );
 
     /** What the GraphQL Upload scalar gives the resolver: a promise of the file with a read stream. */
     const upload = (body: Buffer) =>
@@ -536,7 +541,7 @@ describe('UsersService', () => {
         const user = await service.uploadAvatar(employee, 'user-1', upload(PNG));
 
         expect(storage.upload).toHaveBeenCalledWith({
-          body: PNG,
+          body: expect.any(Buffer),
           contentType: 'image/png',
           extension: 'png',
         });

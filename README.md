@@ -238,6 +238,10 @@ The database and storage credentials in `docker-compose.yml` are for local devel
   `apollo-require-preflight` header, which Apollo Server's CSRF protection requires for multipart requests.
 - The backend checks the real type by the first bytes of the file (PNG, JPEG, GIF) and the size (5 MB); the
   frontend checks the same before sending, only to save a request.
+- Before storing, the backend decodes the image with **sharp** and encodes it again in the same format. sharp does
+  not copy metadata, so EXIF from phone photos (GPS position, camera, date) does not reach the public bucket; the
+  EXIF orientation is applied to the pixels first. A file that only starts like an image fails to decode and is
+  rejected as a wrong type.
 - The bucket is public for reading (file names are random UUIDs); writing goes only through the backend.
   On start the backend creates a missing bucket with a public-read policy; an existing bucket is left as it is.
 - Production (not deployed yet): create the R2 bucket, turn on its public access and create an API token with

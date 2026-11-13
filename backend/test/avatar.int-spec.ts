@@ -1,3 +1,4 @@
+import sharp from 'sharp';
 import { UserRole } from '@/common/graphql/enums';
 import { ImageUploadMessage, MAX_IMAGE_BYTES } from '@/files/image-upload';
 import { createUser, signIn } from './utils/fixtures';
@@ -13,12 +14,24 @@ const DELETE_USER = 'mutation ($id: ID!) { deleteUser(id: $id) }';
 const MISSING_ID = '00000000-0000-4000-8000-000000000000';
 
 const PNG = Buffer.from(
-  '89504e470d0a1a0a0000000d4948445200000001000000010806000000' +
-    '1f15c4890000000d49444154789c6360000002000154a24f5d0000000049454e44ae426082',
+  '89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c48900000009704859' +
+    '73000003e8000003e801b57b526b0000000d494441540899636060606000000005000187a14ed40000000049454e44ae426082',
   'hex',
 );
-const JPEG = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46]);
-const GIF = Buffer.from('GIF89a\x01\x00\x01\x00', 'latin1');
+// Real 1x1 images: the backend decodes every upload to strip its metadata
+const JPEG = Buffer.from(
+  'ffd8ffdb00430006040506050406060506070706080a100a0a09090a140e0f0c1017141818171416161a1d251f1a1b23' +
+    '1c1616202c20232627292a29191f2d302d283025282928ffdb0043010707070a080a130a0a13281a161a28282828282828' +
+    '28282828282828282828282828282828282828282828282828282828282828282828282828282828282828ffc000110800' +
+    '01000103012200021101031101ffc4001500010100000000000000000000000000000007ffc4001410010000000000000000' +
+    '0000000000000000ffc4001501010100000000000000000000000000000608ffc4001411010000000000000000000000000000' +
+    '0000ffda000c03010002110311003f009d001ca45fffd9',
+  'hex',
+);
+const GIF = Buffer.from(
+  '474946383961010001008000004c6971ff000021f90405000000002c00000000010001000002024c01003b',
+  'hex',
+);
 
 interface AvatarResult {
   uploadAvatar: { id: string; avatarUrl: string | null };
@@ -87,6 +100,26 @@ describe('Avatar (integration)', () => {
       const key = await storedKey(user.id);
       expect(key).toMatch(/\.png$/);
       expect(t.storage.files.get(key ?? '')?.contentType).toBe('image/png');
+    });
+
+    it('stores a photo without its EXIF (GPS position, camera)', async () => {
+      const { browser, user } = await signedIn();
+      const photo = await sharp({
+        create: { width: 2, height: 2, channels: 3, background: '#ff0000' },
+      })
+        .jpeg()
+        .withExif({ IFD0: { Make: 'Phone' }, IFD3: { GPSLatitudeRef: 'N' } })
+        .toBuffer();
+
+      await browser.upload(
+        UPLOAD_AVATAR,
+        { userId: user.id },
+        { body: photo, filename: 'photo.jpg', contentType: 'image/jpeg' },
+      );
+
+      const stored = t.storage.files.get((await storedKey(user.id)) ?? '');
+      expect(stored?.contentType).toBe('image/jpeg');
+      expect((await sharp(stored?.body).metadata()).exif).toBeUndefined();
     });
 
     it('rejects a file that only pretends to be an image', async () => {
