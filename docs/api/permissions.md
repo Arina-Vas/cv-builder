@@ -89,12 +89,12 @@ frontend shows a toast and refetches the list.
 
 ### Profile
 
-| Action                      | Employee, own profile | Employee, another profile | Admin                 |
-| --------------------------- | --------------------- | ------------------------- | --------------------- |
-| View                        | ✅                    | ✅                        | ✅                    |
-| Update profile information  | ✅                    | ❌                        | ✅ any user           |
-| Upload or change avatar     | ✅                    | ❌                        | ✅ any user           |
-| Initiate email verification | ✅                    | ❌                        | ❌ only the owner can |
+| Action                          | Employee, own profile | Employee, another profile | Admin                 |
+| ------------------------------- | --------------------- | ------------------------- | --------------------- |
+| View                            | ✅                    | ✅                        | ✅                    |
+| Update profile information      | ✅                    | ❌                        | ✅ any user           |
+| Upload, change or remove avatar | ✅                    | ❌                        | ✅ any user           |
+| Initiate email verification     | ✅                    | ❌                        | ❌ only the owner can |
 
 ### User skills and languages
 
