@@ -13,7 +13,7 @@ const config: CodegenConfig = {
         fragmentMasking: false,
       },
       config: {
-        scalars: { DateTime: 'string' },
+        scalars: { DateTime: 'string', Date: 'string', Upload: 'File' },
         useTypeImports: true,
       },
     },

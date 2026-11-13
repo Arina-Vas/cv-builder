@@ -5,9 +5,10 @@ import { ErrorCode } from '@/common/errors/error-code.enum';
 import { UserRole } from '@/common/graphql/enums';
 import { Prisma } from '@/generated/prisma/client';
 import type { User } from '@/users/models/user.model';
+import { UserMessage } from '@/users/user.messages';
 import type { UsersService } from '@/users/users.service';
 import type { AccessTokenService } from './sessions/access-token.service';
-import { AuthService, EMAIL_TAKEN_MESSAGE, INVALID_CREDENTIALS_MESSAGE } from './auth.service';
+import { AuthService, INVALID_CREDENTIALS_MESSAGE } from './auth.service';
 import type { EmailVerificationService } from './email-verification/email-verification.service';
 import type { SessionsService } from './sessions/sessions.service';
 
@@ -20,7 +21,7 @@ const user: User = {
   email: 'employee@cv-builder.local',
   firstName: null,
   lastName: null,
-  avatarUrl: null,
+  avatarKey: null,
   role: UserRole.EMPLOYEE,
   department: null,
   position: null,
@@ -114,7 +115,7 @@ describe('AuthService', () => {
       const error = await errorOf(service.signUp(input));
 
       expect(error.extensions).toEqual({ code: ErrorCode.CONFLICT, field: 'email' });
-      expect(error.message).toBe(EMAIL_TAKEN_MESSAGE);
+      expect(error.message).toBe(UserMessage.emailTaken);
       expect(users.create).not.toHaveBeenCalled();
     });
 

@@ -3,6 +3,7 @@ import { hashPassword, verifyPassword } from '@/common/crypto/password';
 import { conflict, unauthenticated } from '@/common/errors/app-errors';
 import { Prisma } from '@/generated/prisma/client';
 import type { User } from '@/users/models/user.model';
+import { UserMessage } from '@/users/user.messages';
 import { UsersService } from '@/users/users.service';
 import { AccessTokenService } from './sessions/access-token.service';
 import type { AuthTokens } from './sessions/auth-cookies';
@@ -10,7 +11,6 @@ import type { SignInInput, SignUpInput } from './dto/credentials.input';
 import { EmailVerificationService } from './email-verification/email-verification.service';
 import { SessionsService } from './sessions/sessions.service';
 
-export const EMAIL_TAKEN_MESSAGE = 'An account with this email already exists';
 export const INVALID_CREDENTIALS_MESSAGE = 'Invalid email or password';
 
 export interface AuthResult {
@@ -35,12 +35,12 @@ export class AuthService {
 
   async signUp(input: SignUpInput, userAgent?: string): Promise<AuthResult> {
     if (await this.users.findByEmail(input.email)) {
-      throw conflict('email', EMAIL_TAKEN_MESSAGE);
+      throw conflict('email', UserMessage.emailTaken);
     }
 
     const passwordHash = await hashPassword(input.password);
     const user = await this.users.create({ email: input.email, passwordHash }).catch((error) => {
-      throw isUniqueViolation(error) ? conflict('email', EMAIL_TAKEN_MESSAGE) : error;
+      throw isUniqueViolation(error) ? conflict('email', UserMessage.emailTaken) : error;
     });
 
     // The account exists either way; the user can ask for a new code on the verification page

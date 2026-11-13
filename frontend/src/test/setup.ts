@@ -20,6 +20,10 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
+Element.prototype.hasPointerCapture ??= () => false;
+Element.prototype.releasePointerCapture ??= () => {};
+Element.prototype.scrollIntoView ??= () => {};
+
 afterEach(() => {
   cleanup();
   vi.resetAllMocks();

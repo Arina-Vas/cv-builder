@@ -1,3 +1,10 @@
+import { Departments } from '@/features/departments/components/Departments';
+import { Suspense } from 'react';
+
 export default function DepartmentsPage() {
-  return <h1>Departments</h1>;
+  return (
+    <Suspense>
+      <Departments />
+    </Suspense>
+  );
 }

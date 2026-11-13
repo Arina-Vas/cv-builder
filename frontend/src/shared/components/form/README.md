@@ -11,13 +11,14 @@ all on [`Field`](../field/Field.tsx)) for the UI, and `FormModal` for the Create
 | ---------------------------------------------- | ------------------------------------------------------------------------- |
 | `shared/lib/form/useAppForm.ts`                | `useForm` + `zodResolver` + the validation mode shared by all forms       |
 | `shared/lib/form/schemas.ts`                   | zod building blocks: `requiredString`, `optionalString`, `requiredIds`, … |
+| `shared/lib/form/limits.ts`                    | field length limits shared with the backend: `NAME_MAX_LENGTH`, …         |
 | `shared/lib/form/types.ts`                     | `ValidationT`: the `validation` translator a schema factory takes         |
 | `shared/components/form/FormModal.tsx`         | `Dialog` + `<form>` + CANCEL / submit, loading, close, request error      |
 | `shared/components/form/FormLayout.module.css` | field layout classes: `stack`, `grid`, `full`                             |
 | `*.test.ts(x)`, `FormModal.stories.tsx`        | unit tests, stories with `play` checks                                    |
 
 ```tsx
-import { useAppForm, requiredString, type ValidationT } from '@/shared/lib/form';
+import { useAppForm, requiredString, NAME_MAX_LENGTH, type ValidationT } from '@/shared/lib/form';
 import { FormModal } from '@/shared/components/form';
 import layout from '@/shared/components/form/FormLayout.module.css';
 ```
@@ -26,23 +27,33 @@ import layout from '@/shared/components/form/FormLayout.module.css';
 
 ```tsx
 // features/departments/…/department.schema.ts
-const NAME_MAX = 100; // same as the backend (MAX_NAME_LENGTH)
-
 export const departmentSchema = (t: ValidationT) =>
   z.object({
-    name: requiredString(t('department.required')).max(NAME_MAX, {
-      error: t('department.maxLength', { max: NAME_MAX }),
+    name: requiredString(t('department.required')).max(NAME_MAX_LENGTH, {
+      error: t('department.maxLength', { max: NAME_MAX_LENGTH }),
     }),
   });
+
+// features/departments/api/departments.operations.ts: one set of options for create / update / delete
+export const DEPARTMENT_MUTATION_OPTIONS = {
+  context: NO_ERROR_TOAST, // the modal / dialog shows the error: no global toast
+  // every cached page / sort / search of the list is stale after a change, not only the one on screen
+  update: (cache: ApolloCache) => {
+    cache.evict({ id: 'ROOT_QUERY', fieldName: 'departments' });
+    cache.gc();
+  },
+  refetchQueries: [DEPARTMENTS], // the list on screen is up to date before the modal closes
+  awaitRefetchQueries: true,
+};
 
 // features/departments/…/DepartmentFormModal.tsx
 const t = useTranslations('departments');
 const tValidation = useTranslations('validation');
 const schema = useMemo(() => departmentSchema(tValidation), [tValidation]);
 const form = useAppForm({ schema, defaultValues: { name: '' } });
-const [save] = useMutation(department ? UPDATE_DEPARTMENT : CREATE_DEPARTMENT, {
-  context: NO_ERROR_TOAST, // FormModal shows the error in the dialog: no global toast
-});
+// One hook per mutation: a document picked by a ternary loses the variables' types
+const [createDepartment] = useMutation(CREATE_DEPARTMENT, DEPARTMENT_MUTATION_OPTIONS);
+const [updateDepartment] = useMutation(UPDATE_DEPARTMENT, DEPARTMENT_MUTATION_OPTIONS);
 
 <FormModal
   form={form}
@@ -51,8 +62,11 @@ const [save] = useMutation(department ? UPDATE_DEPARTMENT : CREATE_DEPARTMENT, {
   title={department ? t('edit.title') : t('create.title')}
   mode={department ? 'update' : 'create'}
   values={{ name: department?.name ?? '' }}
+  requireDirty={!!department} // Save stays disabled until the name changes
   onSubmit={(values) =>
-    save({ variables: { input: department ? { id: department.id, ...values } : values } })
+    department
+      ? updateDepartment({ variables: { input: { id: department.id, ...values } } })
+      : createDepartment({ variables: { input: values } })
   }
 >
   <Input
@@ -69,7 +83,8 @@ const [save] = useMutation(department ? UPDATE_DEPARTMENT : CREATE_DEPARTMENT, {
   are translated: keys `validation.<field>.<rule>` (`validation.department.required`). Build it in `useMemo`,
   otherwise the resolver is recreated on every render.
 - **Building blocks take the translated message**, not a key. Limits are chained as usual zod calls
-  (`.max(100, { error })`); take them from the backend DTO so both sides agree.
+  (`.max(NAME_MAX_LENGTH, { error })`). The numbers live once in `shared/lib/form/limits.ts`, copied from the
+  backend DTOs so both sides agree; add a new limit there, not as a local constant in a schema.
 - **Field names are the names of the GraphQL input** (`name`, `categoryId`, `startDate`, `technologyIds`), so the
   values go to the mutation as they are and a server error `field` points at the right field.
 
@@ -123,6 +138,12 @@ Send a date to the API as `format(date, 'yyyy-MM-dd')` (see the `DatePicker` REA
 - `ref` lets react-hook-form focus the first invalid field.
 - `onBlur` of `Select` / `DatePicker` fires when the list / calendar closes, of `MultiSelect` when the input loses
   focus, so `mode: 'onTouched'` works for them too (see their READMEs).
+- **Options from the API** (skill categories, departments, positions): query them in the modal with
+  `skip: !open`, so nothing loads until the modal opens and later openings use the cache. Keep the select
+  `disabled` while they load, and show a failed load in its `error` (`useErrorMessage()(parseError(error))`), so
+  an empty list never looks like "no options". The form value is the option's `id`, as the GraphQL input expects
+  (`categoryId`); a value derived from it (the skill type) is shown, not sent. See `SkillFormModal`,
+  `UserFormModal`.
 
 ## `FormModal`
 
@@ -157,8 +178,18 @@ The page owns the form (`useAppForm`) and passes it in; `FormModal` runs the mod
   `context: NO_ERROR_TOAST` to its `useMutation`, otherwise the error shows in the dialog and as a toast
   ([frontend README](../../../../README.md) → Global error toasts).
 - Other labels for the submit button: `submitLabel={t('add')}` / `t('update')` (`common.actions.add`, `update`).
-- Server errors under a field (`CONFLICT` → "already exists" under Name) are not mapped yet: they come with the first
-  real form (Departments).
+- **Server error on a field.** The values passed the schema, but the backend rejected a field: `CONFLICT` for a
+  duplicate name (`extensions.field: 'name'`), `BAD_USER_INPUT` with `extensions.fields`. If that field is in the
+  form, `FormModal` puts `errors.<CODE>` under it with `form.setError` (the field gets focus), and nothing is shown
+  above the buttons. The field names match the GraphQL input, so no mapping is needed: the page already passes
+  `formState.errors.<field>?.message` to the field. The submit button stays disabled until the field changes; the
+  change re-checks the field and clears the server error. A field the form does not have falls back to the text
+  above the buttons.
+- **List refresh after a mutation** (catalog pages: one options object per catalog, used by create, update and
+  delete). `refetchQueries` + `awaitRefetchQueries` reload only the list on screen, before the modal closes.
+  Pages, sorts and searches opened earlier stay in the Apollo cache and would show stale rows (a row on two
+  pages, a deleted row back), so `update` also evicts the whole list field (`cache.evict({ id: 'ROOT_QUERY',
+fieldName })` + `cache.gc()`): they load again when opened. Apollo merges the two list requests into one.
 
 ## Layout
 
@@ -198,11 +229,11 @@ Page forms (Profile, CV Details, Settings) use the same classes on their own `<f
 
 Unit tests (jsdom) cover the logic and states:
 
-| Test                                  | Checks                                                                                                                                                                                                                                                                            |
-| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `shared/lib/form/schemas.test.ts`     | each block: required / trim / min / `Date`, the error path, a message from the `validation` translator                                                                                                                                                                            |
-| `shared/lib/form/useAppForm.test.tsx` | `onTouched` / `onChange` modes and override, `isValid`, `handleSubmit` gets the schema output                                                                                                                                                                                     |
-| `FormModal.test.tsx`                  | `sm` / `md`, button labels, Cancel, layout class and `form` link; values on opening and reset on reopening; disabled while invalid / unchanged; submit and close, Enter; loading state; error text by code and for a network error, kept input, cleared on retry and on reopening |
+| Test                                  | Checks                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `shared/lib/form/schemas.test.ts`     | each block: required / trim / min / `Date`, the error path, a message from the `validation` translator                                                                                                                                                                                                                                                                                                                                                                        |
+| `shared/lib/form/useAppForm.test.tsx` | `onTouched` / `onChange` modes and override, `isValid`, `handleSubmit` gets the schema output                                                                                                                                                                                                                                                                                                                                                                                 |
+| `FormModal.test.tsx`                  | `sm` / `md`, button labels, Cancel, layout class and `form` link; values on opening and reset on reopening; disabled while invalid / unchanged; submit and close, Enter; loading state; error text by code and for a network error, kept input, cleared on retry and on reopening; `CONFLICT` with a field: text under the field and focus, submit disabled until the field changes, cleared on change and on reopening, a field not in the form falls back above the buttons |
 
 The stories cover what needs a real browser (layout widths, errors after leaving a field, the full flows with every
 field):
@@ -213,6 +244,7 @@ field):
 | `EditDepartment`   | `update` mode: filled from `values`, Save disabled until changed (`requireDirty`), Enter submits                                                                   |
 | `Submitting`       | spinner, CANCEL and × disabled, Esc ignored, submit button disabled; closes after one submit                                                                       |
 | `SubmitError`      | `errors.FORBIDDEN` text in the dialog, the input is kept, retry possible; reopening resets values and error                                                        |
+| `ConflictOnField`  | `CONFLICT` (`field: 'name'`): `errors.CONFLICT` under the field, focus, no text above the buttons; submit disabled until the name changes, then the error is gone  |
 | `AllFields`        | `md` + `grid`: short fields half, `full` fields the whole row; all five fields; submit gets trimmed text, ids, a `Date`                                            |
 | `Dark`             | visual                                                                                                                                                             |
 
@@ -223,6 +255,6 @@ The request is simulated with a promise; the error is a real `CombinedGraphQLErr
 - [x] `useAppForm`, schema blocks, `onBlur` of the selects and the date picker
 - [x] `FormModal`: reset on open, disabled / loading submit, close on success, request error, `sm` / `md`, layout
 - [x] Example forms in Storybook (Create / Edit department, all fields), Light / Dark
-- [ ] Server field errors (`CONFLICT` / `BAD_USER_INPUT` with `field`) under the fields — with the Departments form
+- [x] Server field errors (`CONFLICT` / `BAD_USER_INPUT` with `field`) under the fields
 - [ ] Confirm closing with unsaved changes (optional in the task)
 - [ ] Auth forms still use their own `useFormFields`; moving them to this kit is a separate task

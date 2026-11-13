@@ -1,15 +1,257 @@
 import { PrismaService } from '@/prisma/prisma.service';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import type { FileUpload } from 'graphql-upload-minimal';
 import type { Prisma } from '@/generated/prisma/client';
 import type { User } from './models/user.model';
-import { toUser, userInclude } from './user.mapper';
+import { toUser, userInclude, type UserWithRelations } from './user.mapper';
+import type { UserPage } from './models/user-page.model';
+import type { UsersArgs } from './dto/users.args';
+import { UserSortField } from './models/user-sort-field.enum';
+import { SortOrder } from '@/common/graphql/sort-order.enum';
+import { UserRole } from '@/common/graphql/enums';
+import type { CreateUserInput } from './dto/create-user.input';
+import type { UpdateUserInput } from './dto/update-user.input';
+import type { UpdateProfileInput } from './dto/update-profile.input';
+import { canManageUser } from '@/common/auth/can-manage-user';
+import { hashPassword } from '@/common/crypto/password';
+import {
+  badUserInput,
+  conflict,
+  forbidden,
+  notFound,
+  operationNotAllowed,
+  type FieldError,
+} from '@/common/errors/app-errors';
+import { isPrismaError } from '@/prisma/prisma-errors';
+import { readImageUpload } from '@/files/image-upload';
+import { StorageService } from '@/files/storage.service';
+
+import { UserMessage } from './user.messages';
 
 const userCredentialsSelect = { id: true, passwordHash: true } satisfies Prisma.UserSelect;
 export type UserCredentials = Prisma.UserGetPayload<{ select: typeof userCredentialsSelect }>;
 
+const countAdmins = (tx: Prisma.TransactionClient): Promise<number> =>
+  tx.user.count({ where: { role: UserRole.ADMIN } });
+
+const toUserOrderBy = (
+  sortBy: UserSortField | undefined,
+  order: Prisma.SortOrder,
+): Prisma.UserOrderByWithRelationInput[] => {
+  switch (sortBy) {
+    case undefined:
+      return [{ createdAt: 'asc' }, { id: 'asc' }];
+    case UserSortField.firstName:
+      return [{ firstName: { sort: order, nulls: 'last' } }, { id: 'asc' }];
+    case UserSortField.lastName:
+      return [{ lastName: { sort: order, nulls: 'last' } }, { id: 'asc' }];
+    case UserSortField.department:
+      return [{ department: { name: order } }, { id: 'asc' }];
+    case UserSortField.position:
+      return [{ position: { name: order } }, { id: 'asc' }];
+    case UserSortField.createdAt:
+      return [{ createdAt: order }, { id: 'asc' }];
+  }
+};
+
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly logger = new Logger(UsersService.name);
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly storage: StorageService,
+  ) {}
+
+  async findAll({ search, sortBy, sortOrder, page, pageSize }: UsersArgs): Promise<UserPage> {
+    const where: Prisma.UserWhereInput = search
+      ? {
+          OR: [
+            { firstName: { contains: search, mode: 'insensitive' } },
+            { lastName: { contains: search, mode: 'insensitive' } },
+            { email: { contains: search, mode: 'insensitive' } },
+          ],
+        }
+      : {};
+
+    const order: Prisma.SortOrder = sortOrder === SortOrder.ASC ? 'asc' : 'desc';
+
+    const [rows, total] = await this.prisma.$transaction([
+      this.prisma.user.findMany({
+        where,
+        include: userInclude,
+        orderBy: toUserOrderBy(sortBy, order),
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+      this.prisma.user.count({ where }),
+    ]);
+
+    return { items: rows.map(toUser), page, pageSize, total };
+  }
+
+  async findOne(id: string): Promise<User> {
+    const user = await this.findById(id);
+    if (!user) {
+      throw notFound(UserMessage.notFound);
+    }
+
+    return user;
+  }
+
+  async createUser({ password, ...data }: CreateUserInput): Promise<User> {
+    await this.assertDepartmentAndPositionExist(data.departmentId, data.positionId);
+    const passwordHash = await hashPassword(password);
+
+    try {
+      const row = await this.prisma.user.create({
+        data: { ...data, passwordHash },
+        include: userInclude,
+      });
+
+      return toUser(row);
+    } catch (error) {
+      if (isPrismaError(error, 'P2002')) {
+        throw conflict('email', UserMessage.emailTaken);
+      }
+      throw error;
+    }
+  }
+
+  async update(
+    { id, firstName, lastName, departmentId, positionId, role }: UpdateUserInput,
+    currentUserId: string,
+  ): Promise<User> {
+    await this.assertDepartmentAndPositionExist(departmentId, positionId);
+
+    return this.prisma.$transaction(
+      async (tx) => {
+        const target = await tx.user.findUnique({ where: { id }, select: { role: true } });
+        if (!target) {
+          throw notFound(UserMessage.notFound);
+        }
+
+        if (target.role !== role) {
+          if (id === currentUserId) {
+            throw operationNotAllowed(UserMessage.ownRoleChange);
+          }
+          if (target.role === UserRole.ADMIN && (await countAdmins(tx)) <= 1) {
+            throw operationNotAllowed(UserMessage.lastAdminDemote);
+          }
+        }
+
+        const row = await tx.user.update({
+          where: { id },
+          data: { firstName, lastName, departmentId, positionId, role },
+          include: userInclude,
+        });
+
+        return toUser(row);
+      },
+      { isolationLevel: 'Serializable' },
+    );
+  }
+
+  async updateProfile(
+    currentUser: Pick<User, 'id' | 'role'>,
+    { id, ...data }: UpdateProfileInput,
+  ): Promise<User> {
+    if (!canManageUser(currentUser, id)) {
+      throw forbidden();
+    }
+    await this.assertDepartmentAndPositionExist(data.departmentId, data.positionId);
+
+    try {
+      const row = await this.prisma.user.update({ where: { id }, data, include: userInclude });
+
+      return toUser(row);
+    } catch (error) {
+      if (isPrismaError(error, 'P2025')) {
+        throw notFound(UserMessage.notFound);
+      }
+      throw error;
+    }
+  }
+
+  async delete(id: string, currentUserId: string): Promise<string> {
+    if (id === currentUserId) {
+      throw operationNotAllowed(UserMessage.ownAccountDelete);
+    }
+
+    const avatarKey = await this.prisma.$transaction(
+      async (tx) => {
+        const target = await tx.user.findUnique({
+          where: { id },
+          select: { role: true, avatarKey: true },
+        });
+        if (!target) {
+          throw notFound(UserMessage.notFound);
+        }
+        if (target.role === UserRole.ADMIN && (await countAdmins(tx)) <= 1) {
+          throw operationNotAllowed(UserMessage.lastAdminDelete);
+        }
+
+        await tx.user.delete({ where: { id } });
+
+        return target.avatarKey;
+      },
+      { isolationLevel: 'Serializable' },
+    );
+    await this.deleteFileQuietly(avatarKey);
+
+    return id;
+  }
+
+  async uploadAvatar(
+    currentUser: Pick<User, 'id' | 'role'>,
+    userId: string,
+    upload: Promise<FileUpload>,
+  ): Promise<User> {
+    if (!canManageUser(currentUser, userId)) {
+      throw forbidden();
+    }
+    const image = await readImageUpload(await upload);
+    const previous = await this.findAvatarKey(userId);
+
+    const key = await this.storage.upload(image);
+    let row: UserWithRelations;
+    try {
+      row = await this.prisma.user.update({
+        where: { id: userId },
+        data: { avatarKey: key },
+        include: userInclude,
+      });
+    } catch (error) {
+      await this.deleteFileQuietly(key);
+      if (isPrismaError(error, 'P2025')) {
+        throw notFound(UserMessage.notFound);
+      }
+      throw error;
+    }
+    await this.deleteFileQuietly(previous);
+
+    return toUser(row);
+  }
+
+  async removeAvatar(currentUser: Pick<User, 'id' | 'role'>, userId: string): Promise<User> {
+    if (!canManageUser(currentUser, userId)) {
+      throw forbidden();
+    }
+    const previous = await this.findAvatarKey(userId);
+
+    const row = await this.prisma.user.update({
+      where: { id: userId },
+      data: { avatarKey: null },
+      include: userInclude,
+    });
+    await this.deleteFileQuietly(previous);
+
+    return toUser(row);
+  }
+
+  getAvatarUrl(user: Pick<User, 'avatarKey'>): string | null {
+    return user.avatarKey ? this.storage.getPublicUrl(user.avatarKey) : null;
+  }
 
   async findById(id: string): Promise<User | null> {
     const row = await this.prisma.user.findUnique({ where: { id }, include: userInclude });
@@ -31,5 +273,49 @@ export class UsersService {
 
   findWithPasswordHashByEmail(email: string): Promise<UserCredentials | null> {
     return this.prisma.user.findUnique({ where: { email }, select: userCredentialsSelect });
+  }
+
+  private async findAvatarKey(userId: string): Promise<string | null> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { avatarKey: true },
+    });
+    if (!user) {
+      throw notFound(UserMessage.notFound);
+    }
+    return user.avatarKey;
+  }
+
+  /** The user record is already saved, so a file left behind is only garbage, not an error for the client. */
+  private async deleteFileQuietly(key: string | null): Promise<void> {
+    if (!key) {
+      return;
+    }
+    try {
+      await this.storage.delete(key);
+    } catch (error) {
+      this.logger.warn(`Could not delete file ${key}: ${String(error)}`);
+    }
+  }
+
+  private async assertDepartmentAndPositionExist(
+    departmentId: string,
+    positionId: string,
+  ): Promise<void> {
+    const [department, position] = await Promise.all([
+      this.prisma.department.findUnique({ where: { id: departmentId }, select: { id: true } }),
+      this.prisma.position.findUnique({ where: { id: positionId }, select: { id: true } }),
+    ]);
+
+    const fields: FieldError[] = [];
+    if (!department) {
+      fields.push({ field: 'departmentId', message: UserMessage.departmentNotFound });
+    }
+    if (!position) {
+      fields.push({ field: 'positionId', message: UserMessage.positionNotFound });
+    }
+    if (fields.length > 0) {
+      throw badUserInput(fields);
+    }
   }
 }

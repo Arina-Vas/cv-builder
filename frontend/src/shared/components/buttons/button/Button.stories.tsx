@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import type { CSSProperties, ReactNode } from 'react';
-import { fn } from 'storybook/test';
+import { expect, fn, within } from 'storybook/test';
 
+import { PlusIcon } from '../../icons/PlusIcon';
 import { Button, type ButtonVariant } from './Button';
 
 const VARIANTS: { variant: ButtonVariant; label: string; title: string }[] = [
@@ -71,6 +72,30 @@ export const Loading: Story = {
 
 export const LongLabel: Story = {
   args: { children: 'SEND VERIFICATION EMAIL AGAIN' },
+};
+
+// "+ CREATE …" in toolbars: the icon goes first, no wrapper; it is centred with the text
+export const WithIcon: Story = {
+  args: {
+    variant: 'text',
+    size: 'sm',
+    children: (
+      <>
+        <PlusIcon />
+        Create department
+      </>
+    ),
+  },
+  play: async ({ canvasElement }) => {
+    const button = within(canvasElement).getByRole('button', { name: 'Create department' });
+    const icon = button.querySelector('svg')!;
+    const middle = (rect: DOMRect) => rect.top + rect.height / 2;
+
+    // centred in the button, not sitting on the text baseline
+    await expect(
+      Math.abs(middle(icon.getBoundingClientRect()) - middle(button.getBoundingClientRect())),
+    ).toBeLessThanOrEqual(1);
+  },
 };
 
 /* ------------------------------------------------------------------ */

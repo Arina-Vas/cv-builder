@@ -50,8 +50,9 @@
       "upload": "Upload avatar image",
       "hint": "png, jpg or gif no more than {maxSize}",
       "remove": "Remove avatar",
+      "uploading": "Uploading avatar",
       "invalidType": "Only png, jpg or gif allowed",
-      "tooLarge": "File is larger than {maxSize}"
+      "tooLarge": "File size must not exceed {maxSize}"
     },
     "actions": {
       "confirm": "Confirm",
@@ -71,6 +72,7 @@
     "BAD_USER_INPUT": "Check the entered data",
     "CONFLICT": "This value is already taken",
     "ENTITY_IN_USE": "This item is in use and can't be deleted",
+    "OPERATION_NOT_ALLOWED": "This action is not allowed",
     "RATE_LIMITED": "{seconds, plural, =0 {Too many attempts. Try again later} one {Too many attempts. Try again in # second} other {Too many attempts. Try again in # seconds}}",
     "INTERNAL_SERVER_ERROR": "Something went wrong. Please try again later"
   },
@@ -78,6 +80,63 @@
     "department": {
       "required": "Department name is required",
       "maxLength": "Department name must not exceed {max} characters"
+    },
+    "position": {
+      "required": "Position name is required",
+      "maxLength": "Position name must not exceed {max} characters"
+    },
+    "language": {
+      "name": {
+        "required": "Name is required",
+        "maxLength": "Name must not exceed {max} characters"
+      },
+      "nativeName": {
+        "required": "Native name is required",
+        "maxLength": "Native name must not exceed {max} characters"
+      },
+      "iso": {
+        "required": "ISO is required",
+        "maxLength": "ISO must not exceed {max} characters",
+        "format": "ISO must be a language code, e.g. EN or PT-BR"
+      }
+    },
+    "userLanguage": {
+      "languageId": { "required": "Language is required" },
+      "proficiency": { "required": "Language proficiency is required" }
+    },
+    "skill": {
+      "name": {
+        "required": "Skill is required",
+        "maxLength": "Skill name must not exceed {max} characters"
+      },
+      "categoryId": {
+        "required": "Category is required"
+      }
+    },
+    "userSkill": {
+      "skillId": { "required": "Skill is required" },
+      "mastery": { "required": "Skill mastery is required" }
+    },
+    "project": {
+      "name": {
+        "required": "Project name is required",
+        "maxLength": "Project name must not exceed {max} characters"
+      },
+      "domain": {
+        "required": "Domain is required",
+        "maxLength": "Domain must not exceed {max} characters"
+      },
+      "startDate": {
+        "required": "Start date is required"
+      },
+      "endDate": {
+        "required": "End date is required",
+        "beforeStart": "End date must be later than start date"
+      },
+      "description": {
+        "required": "Description is required",
+        "maxLength": "Description must not exceed {max} characters"
+      }
     },
     "email": {
       "required": "Email is required",
@@ -96,6 +155,25 @@
     "code": {
       "required": "Verification code is required",
       "invalid": "Please enter a valid 6-digit code"
+    },
+    "user": {
+      "email": { "required": "Email is required", "invalid": "Invalid email address" },
+      "password": {
+        "required": "Password is required",
+        "minLength": "Password must contain at least {min} characters",
+        "maxLength": "Password must not exceed {max} characters"
+      },
+      "firstName": {
+        "required": "First name is required",
+        "maxLength": "First name must not exceed {max} characters"
+      },
+      "lastName": {
+        "required": "Last name is required",
+        "maxLength": "Last name must not exceed {max} characters"
+      },
+      "department": { "required": "Department is required" },
+      "position": { "required": "Position is required" },
+      "role": { "required": "Role is required" }
     }
   },
   "layout": {
@@ -170,6 +248,47 @@
     }
   },
   "users": {
+    "title": "Employees",
+    "createButton": "Create user",
+    "table": {
+      "avatar": "Avatar",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "department": "Department",
+      "position": "Position",
+      "empty": "No users found",
+      "actions": { "view": "View", "update": "Update", "delete": "Delete" }
+    },
+    "profile": {
+      "memberSince": "A member since {date}",
+      "loading": "Loading profile",
+      "loadError": "Failed to load profile information",
+      "retry": "Retry",
+      "updated": "Profile has been updated",
+      "verifyEmail": "Verify email",
+      "verificationSent": "Verification email has been sent",
+      "verificationFailed": "Failed to send verification email",
+      "avatarUpdated": "Avatar has been updated",
+      "avatarRemoved": "Avatar has been removed",
+      "avatarFailed": "Failed to update the avatar"
+    },
+    "fields": {
+      "email": "Email",
+      "password": "Password",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "department": "Department",
+      "position": "Position",
+      "role": "Role"
+    },
+    "roles": { "ADMIN": "Admin", "EMPLOYEE": "Employee" },
+    "create": { "title": "Create user" },
+    "update": { "title": "Update user" },
+    "delete": {
+      "title": "Delete user",
+      "message": "Are you sure you want to delete user <b>{name}</b>?"
+    },
     "tabs": {
       "label": "Employee sections",
       "profile": "Profile",
@@ -185,6 +304,161 @@
       "skills": "Skills",
       "projects": "Projects",
       "preview": "Preview"
+    }
+  },
+  "departments": {
+    "title": "Departments",
+    "createButton": "Create department",
+    "table": {
+      "name": "Name",
+      "empty": "No departments found",
+      "actions": { "edit": "Edit", "delete": "Delete" }
+    },
+    "fields": { "name": "Department" },
+    "create": { "title": "Create department" },
+    "edit": { "title": "Edit department" },
+    "delete": {
+      "title": "Delete department",
+      "message": "Are you sure you want to delete department <b>{name}</b>?"
+    }
+  },
+  "positions": {
+    "title": "Positions",
+    "createButton": "Create position",
+    "table": {
+      "name": "Name",
+      "empty": "No positions found",
+      "actions": { "edit": "Edit", "delete": "Delete" }
+    },
+    "fields": { "name": "Position" },
+    "create": { "title": "Create position" },
+    "edit": { "title": "Edit position" },
+    "delete": {
+      "title": "Delete position",
+      "message": "Are you sure you want to delete position <b>{name}</b>?"
+    }
+  },
+  "languages": {
+    "title": "Languages",
+    "createButton": "Create language",
+    "table": {
+      "columns": {
+        "name": "Name",
+        "iso": "ISO",
+        "nativeName": "Native name"
+      },
+      "empty": "No languages found",
+      "actions": { "edit": "Edit", "delete": "Delete" }
+    },
+    "fields": { "name": "Name", "iso": "ISO", "nativeName": "Native name" },
+    "create": { "title": "Create language" },
+    "edit": { "title": "Edit language" },
+    "delete": {
+      "title": "Delete language",
+      "message": "Are you sure you want to delete language <b>{name}</b>?"
+    }
+  },
+  "userLanguage": {
+    "title": "Current languages",
+    "addButton": "Add language",
+    "removeButton": "Remove languages",
+    "removeCount": "Remove ({count})",
+    "remove": {
+      "title": "Remove languages",
+      "message": "Are you sure you want to remove {count, plural, one {# language} other {# languages}}?"
+    },
+    "empty": "No languages added",
+    "emptyProfile": "No languages added yet",
+    "loading": "Loading languages",
+    "loadError": "Failed to load languages",
+    "retry": "Retry",
+    "form": {
+      "updateTitle": "Update language",
+      "createTitle": "Add language",
+      "fields": { "languageId": "Language", "proficiency": "Proficiency" }
+    },
+    "proficiencyLevel": {
+      "A1": "A1",
+      "A2": "A2",
+      "B1": "B1",
+      "B2": "B2",
+      "C1": "C1",
+      "C2": "C2",
+      "NATIVE": "Native"
+    }
+  },
+  "skills": {
+    "title": "Skills",
+    "createButton": "Create skill",
+    "table": {
+      "columns": {
+        "name": "Name",
+        "type": "Type",
+        "category": "Category"
+      },
+      "empty": "No skills found",
+      "actions": { "edit": "Edit", "delete": "Delete" }
+    },
+    "fields": { "name": "Name", "category": "Category" },
+    "create": { "title": "Create skill" },
+    "edit": { "title": "Edit skill" },
+    "delete": {
+      "title": "Delete skill",
+      "message": "Are you sure you want to delete skill <b>{name}</b>?"
+    }
+  },
+  "userSkill": {
+    "addButton": "Add skill",
+    "removeButton": "Remove skills",
+    "removeCount": "Remove ({count})",
+    "remove": {
+      "title": "Remove skills",
+      "message": "Are you sure you want to remove {count, plural, one {# skill} other {# skills}}?"
+    },
+    "empty": "No skills added",
+    "emptyProfile": "No skills added yet",
+    "loading": "Loading skills",
+    "loadError": "Failed to load skills",
+    "retry": "Retry",
+    "form": {
+      "createTitle": "Add skill",
+      "updateTitle": "Update skill",
+      "fields": { "skillId": "Skill", "mastery": "Skill mastery" }
+    },
+    "masteryLevel": {
+      "BEGINNER": "Beginner",
+      "ELEMENTARY": "Elementary",
+      "INTERMEDIATE": "Intermediate",
+      "ADVANCED": "Advanced",
+      "EXPERT": "Expert"
+    }
+  },
+  "projects": {
+    "title": "Projects",
+    "createButton": "Create project",
+    "table": {
+      "columns": {
+        "name": "Name",
+        "domain": "Domain",
+        "startDate": "Start Date",
+        "endDate": "End Date"
+      },
+      "empty": "No projects found",
+      "actions": { "edit": "Edit", "delete": "Delete" }
+    },
+    "fields": {
+      "name": "Name",
+      "domain": "Domain",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "description": "Description",
+      "environment": "Environment"
+    },
+    "create": { "title": "Create project" },
+    "edit": { "title": "Edit project" },
+    "delete": {
+      "title": "Delete project",
+      "message": "Are you sure you want to delete project <b>{name}</b>?"
     }
   }
 }

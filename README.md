@@ -15,6 +15,7 @@ admins also manage users and global catalogs (skills, languages, departments, po
 | Backend       | NestJS 11, TypeScript                         |
 | API           | GraphQL, code-first (NestJS + Apollo Server)  |
 | Database      | PostgreSQL 17 (Docker), Prisma ORM 7          |
+| File storage  | S3-compatible: MinIO (Docker) locally         |
 | Backend tests | Jest + @nestjs/testing, Supertest             |
 | Code quality  | ESLint 9 (flat config), Prettier              |
 
@@ -37,7 +38,7 @@ This repository is a monorepo containing the frontend and backend applications:
 cv-builder/
 ├── package.json          # root scripts that run both apps
 ├── pnpm-workspace.yaml
-├── docker-compose.yml    # local PostgreSQL + Mailpit
+├── docker-compose.yml    # local PostgreSQL + Mailpit + MinIO
 ├── tsconfig.base.json    # shared TypeScript options, extended by both apps
 ├── eslint.config.mjs     # shared ESLint flat config
 ├── .prettierrc           # shared Prettier config
@@ -58,14 +59,15 @@ cv-builder/
 
 - Node.js 24 (see `.nvmrc`)
 - pnpm 12.5.1 (pinned via `packageManager`; `npm i -g pnpm@12.5.1` or Corepack)
-- Docker Desktop (for the local database and mail catcher)
+- Docker Desktop (for the local database, mail catcher and file storage)
 
 ## Getting started
 
 ```bash
 pnpm install                              # also generates the Prisma Client
 cp backend/.env.example backend/.env
-pnpm db:up                                # start PostgreSQL and wait until it is healthy
+cp frontend/.env.example frontend/.env.local
+pnpm db:up                                # start PostgreSQL, Mailpit and MinIO, wait until they are up
 pnpm db:deploy                            # apply all migrations
 pnpm dev
 ```
@@ -73,6 +75,7 @@ pnpm dev
 - Frontend: http://localhost:3000
 - Backend: http://localhost:4000 (health check: `GET /health`)
 - Mailpit (emails sent in development): http://localhost:8025
+- MinIO console (uploaded files, e.g. avatars): http://localhost:9001, login `cv_builder` / `cv_builder_secret`
 
 ## Scripts (run from the repo root)
 
@@ -88,7 +91,7 @@ pnpm dev
 | `pnpm format`       | Format the repo with Prettier           |
 | `pnpm format:check` | Check formatting without writing        |
 | `pnpm test`         | Run tests in all packages               |
-| `pnpm db:up`        | Start PostgreSQL and Mailpit in Docker  |
+| `pnpm db:up`        | Start PostgreSQL, Mailpit and MinIO     |
 | `pnpm db:down`      | Stop Docker services (data is kept)     |
 | `pnpm db:migrate`   | Create and apply a migration (dev)      |
 | `pnpm db:deploy`    | Apply pending migrations                |
@@ -110,10 +113,13 @@ The database itself is never shared between developers. Everyone gets the same d
 
 ```bash
 pnpm install      # new dependencies + regenerated Prisma Client
-pnpm db:up
+pnpm db:up        # also starts services added to docker-compose.yml
 pnpm db:deploy    # apply migrations added by teammates
 pnpm db:seed      # fill the database with shared dev data
 ```
+
+If the backend does not start after a pull with `Invalid environment variables: ...`, a teammate added a variable:
+copy it from `backend/.env.example` (or `frontend/.env.example` into `frontend/.env.local`).
 
 ### Seed data
 
@@ -177,12 +183,26 @@ Backend variables live in `backend/.env` (git-ignored). The template is `backend
 | `SMTP_PORT`              | Mail server port                                    | `1025` (Mailpit)                                                             |
 | `MAIL_FROM`              | Sender of outgoing emails                           | `CV Builder <no-reply@cv-builder.local>`                                     |
 | `TRUST_PROXY_HOPS`       | Number of reverse proxies in front of the API       | `0`                                                                          |
+| `S3_ENDPOINT`            | S3 API of the file storage                          | `http://localhost:9000` (MinIO)                                              |
+| `S3_REGION`              | Storage region (MinIO ignores it, `auto` for R2)    | `us-east-1`                                                                  |
+| `S3_ACCESS_KEY`          | Storage access key                                  | `cv_builder`                                                                 |
+| `S3_SECRET_KEY`          | Storage secret key                                  | `cv_builder_secret`                                                          |
+| `S3_BUCKET`              | Bucket for uploaded files                           | `avatars`                                                                    |
+| `S3_PUBLIC_URL`          | Public URL of the bucket; file keys are appended    | `http://localhost:9000/avatars`                                              |
+| `S3_FORCE_PATH_STYLE`    | `true` for MinIO (`host/bucket/key` URLs)           | `true`                                                                       |
 | `SEED_*`                 | Accounts created by `pnpm db:seed`                  | see [Seed data](#seed-data)                                                  |
 
 The backend validates these variables on startup (`backend/src/config/env.validation.ts`) and does not start if
 one is missing or invalid. `SEED_*` are read only by the seed script.
 
-The database credentials in `docker-compose.yml` are for local development only.
+Frontend variables live in `frontend/.env.local` (git-ignored). The template is `frontend/.env.example`.
+
+| Variable                  | Description                                                         | Default (local)                 |
+| ------------------------- | ------------------------------------------------------------------- | ------------------------------- |
+| `NEXT_PUBLIC_GRAPHQL_URL` | Backend GraphQL endpoint                                            | `http://localhost:4000/graphql` |
+| `NEXT_PUBLIC_STORAGE_URL` | Public URL of the bucket (`S3_PUBLIC_URL`); allowed in `next/image` | `http://localhost:9000/avatars` |
+
+The database and storage credentials in `docker-compose.yml` are for local development only.
 
 ## Architectural decisions
 
@@ -196,5 +216,34 @@ The database credentials in `docker-compose.yml` are for local development only.
 ### Authentication
 
 - Access and refresh tokens in httpOnly cookies; access JWT for 30 minutes, refresh token for 1 day with rotation.
-- Sign up starts a session; email verification uses it. Unverified users are read-only.
+- Sign up starts a session; email verification uses it. Unverified users are read-only: every mutation
+  except sign-in/up, logout, refresh and the verification ones is rejected with `EMAIL_NOT_VERIFIED`,
+  including editing their own profile and changing the password.
+- The frontend mirrors this as UX only: an action gate locks data-changing actions (`aria-disabled` + a
+  toast) on every page at once, see [frontend/src/shared/lib/action-gate](frontend/src/shared/lib/action-gate/README.md).
 - Details and reasons: [docs/auth.md](docs/auth.md).
+
+### File storage (avatars)
+
+- Uploaded files go to **S3-compatible object storage** through `@aws-sdk/client-s3` (`backend/src/files`).
+  Locally it is **MinIO** in Docker; in production the same code works with Cloudflare R2 or AWS S3, only the
+  `S3_*` variables change.
+- The MinIO image is `cgr.dev/chainguard/minio:latest`: MinIO withdrew its official images (`minio/minio` on
+  Docker Hub and quay.io no longer pull), and Chainguard builds the same open-source server. Its free tier has only
+  the `latest` tag, so the version is not pinned; that is acceptable for local development.
+- The database stores the **object key** (`users.avatar_key`), not the URL. GraphQL returns `User.avatarUrl`, built
+  from the key and `S3_PUBLIC_URL`, so moving the files to another host needs no data migration.
+- Files are uploaded with the [GraphQL multipart request spec](https://github.com/jaydenseric/graphql-multipart-request-spec):
+  `graphql-upload-minimal` on the backend, `apollo-upload-client` on the frontend. Every request carries the
+  `apollo-require-preflight` header, which Apollo Server's CSRF protection requires for multipart requests.
+- The backend checks the real type by the first bytes of the file (PNG, JPEG, GIF) and the size (5 MB); the
+  frontend checks the same before sending, only to save a request.
+- Before storing, the backend decodes the image with **sharp** and encodes it again in the same format. sharp does
+  not copy metadata, so EXIF from phone photos (GPS position, camera, date) does not reach the public bucket; the
+  EXIF orientation is applied to the pixels first. A file that only starts like an image fails to decode and is
+  rejected as a wrong type.
+- The bucket is public for reading (file names are random UUIDs); writing goes only through the backend.
+  On start the backend creates a missing bucket with a public-read policy; an existing bucket is left as it is.
+- Production (not deployed yet): create the R2 bucket, turn on its public access and create an API token with
+  Object Read & Write in the Cloudflare dashboard, then set `S3_*` (`S3_REGION=auto`) on the hosting and
+  `NEXT_PUBLIC_STORAGE_URL` on Vercel. If the token cannot reach the bucket, the backend does not start.

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { DropdownMenu } from 'radix-ui';
 import { IconButton } from '../../buttons';
 import { MoreIcon } from '../../icons/MoreIcon';
+import { useActionGate } from '@/shared/lib/action-gate/ActionGate';
 import type { RowAction } from '../types';
 import styles from './RowActionsMenu.module.css';
 
@@ -12,6 +13,7 @@ export interface RowActionsMenuProps<T> {
 }
 
 export function RowActionsMenu<T>({ row, actions, label }: RowActionsMenuProps<T>) {
+  const { locked, guard } = useActionGate();
   const [open, setOpen] = useState(false);
   const closedByScrollRef = useRef(false);
 
@@ -50,15 +52,22 @@ export function RowActionsMenu<T>({ row, actions, label }: RowActionsMenuProps<T
           sideOffset={0}
           onCloseAutoFocus={handleCloseAutoFocus}
         >
-          {actions.map((action) => (
-            <DropdownMenu.Item
-              className={styles.item}
-              key={action.label}
-              onSelect={() => action.onSelect(row)}
-            >
-              {action.label}
-            </DropdownMenu.Item>
-          ))}
+          {actions.map((action) => {
+            const gated = !action.ungated;
+            const select = () => action.onSelect(row);
+
+            return (
+              <DropdownMenu.Item
+                className={styles.item}
+                key={action.label}
+                // not Radix `disabled`: it skips the item, and the user never learns why
+                aria-disabled={(gated && locked) || undefined}
+                onSelect={gated ? guard(select) : select}
+              >
+                {action.label}
+              </DropdownMenu.Item>
+            );
+          })}
         </DropdownMenu.Content>
       </DropdownMenu.Portal>
     </DropdownMenu.Root>

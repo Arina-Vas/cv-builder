@@ -5,7 +5,9 @@ Next.js 16 (App Router), React 19, TypeScript, Apollo Client 4.
 ## Setup
 
 Copy `.env.example` to `.env.local`. `NEXT_PUBLIC_GRAPHQL_URL` points to the backend GraphQL endpoint
-(`http://localhost:4000/graphql` in local development).
+(`http://localhost:4000/graphql` in local development). `NEXT_PUBLIC_STORAGE_URL` is the public URL of the file
+storage bucket (`http://localhost:9000/avatars`, MinIO); `next.config.ts` allows it in `images.remotePatterns`, so
+avatars render with `next/image`. Restart `next dev` after changing it.
 
 ## Scripts
 
@@ -85,6 +87,22 @@ Operations are written with `graphql()` from `@/gql`; their result and variable 
   `graphql()` returns `unknown` for that operation and the type-check fails.
 - `src/gql/` is generated and committed; do not edit it by hand. Prettier and ESLint skip it.
 - Fragments are spread by name (`...AuthUserFields`); codegen adds them to the documents that use them.
+- The `Upload` scalar is generated as `File`: pass the `File` from an `<input type="file">` as a variable.
+
+## File uploads
+
+The last Apollo link is `UploadHttpLink` (`apollo-upload-client`) instead of `HttpLink`. Without files it sends the
+same requests; when the variables contain a `File`, it sends a
+[GraphQL multipart request](https://github.com/jaydenseric/graphql-multipart-request-spec). Every request carries
+`apollo-require-preflight: true`, which Apollo Server requires for multipart requests (CSRF protection).
+
+```ts
+await uploadAvatar({ variables: { userId, file } }); // file: File
+```
+
+Return the entity's `id` and the changed fields from the mutation, so the cache updates every view of it
+(`uploadAvatar` → the profile, the Employees table and the sidebar). The avatar flow is in
+`src/features/users/components/user-profile/ProfileAvatar.tsx`.
 
 ## Authentication
 

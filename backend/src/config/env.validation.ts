@@ -1,5 +1,6 @@
-import { plainToInstance } from 'class-transformer';
+import { plainToInstance, Transform } from 'class-transformer';
 import {
+  IsBoolean,
   IsEnum,
   IsInt,
   IsNotEmpty,
@@ -57,6 +58,34 @@ export class EnvironmentVariables {
   @IsString()
   @IsNotEmpty()
   MAIL_FROM!: string;
+
+  @IsUrl({ require_tld: false, require_protocol: true })
+  S3_ENDPOINT!: string;
+
+  // MinIO ignores the region, but the S3 client requires one
+  @IsString()
+  @IsNotEmpty()
+  S3_REGION: string = 'us-east-1';
+
+  @IsString()
+  @IsNotEmpty()
+  S3_ACCESS_KEY!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  S3_SECRET_KEY!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  S3_BUCKET!: string;
+
+  @IsUrl({ require_tld: false, require_protocol: true })
+  S3_PUBLIC_URL!: string;
+
+  // Implicit conversion turns any non-empty string into true, so read the raw value
+  @Transform(({ obj }: { obj: Record<string, unknown> }) => obj['S3_FORCE_PATH_STYLE'] === 'true')
+  @IsBoolean()
+  S3_FORCE_PATH_STYLE: boolean = false;
 
   @IsInt()
   @Min(0)

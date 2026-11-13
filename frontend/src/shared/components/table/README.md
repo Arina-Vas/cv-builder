@@ -62,7 +62,8 @@ import { DataTable, type Column } from '@/shared/components/table';
 const columns: Column<UserRow>[] = [
   {
     key: 'avatar',
-    header: '',
+    header: 'Avatar',
+    hideHeader: true,
     width: '72px',
     render: (user) => <Avatar fallback={user.firstName} src={user.avatarUrl} size="md" />,
   },
@@ -74,6 +75,9 @@ const columns: Column<UserRow>[] = [
   `*SortField` enum value so the page passes it on as is.
 - `render` returns any node: text, `Avatar`, `Chip`s, a formatted date.
 - `sortable` shows the arrow and makes the header a button. It only works together with `onSortChange`.
+- `hideHeader` keeps `header` for screen readers only (`visuallyHidden`), the cell looks empty: a column
+  without a visible title in Figma (Avatar). Don't pass `header: ''`: the column then has no name at all.
+  Not for a `sortable` column, whose header is the sort button.
 - `width` goes to the `<th>` style. Leave it out and the browser shares the width.
 
 ## Row actions
@@ -83,6 +87,11 @@ The last column is one of:
 - `rowActions`: ⋮ button with a menu (`RowActionsMenu`, Radix DropdownMenu). Only one menu is open
   at a time; it closes on outside click, action select, Escape and scroll.
 - `onRowClick`: › button that opens the row.
+
+Menu items are locked by the action gate (unverified email, `shared/lib/action-gate`): `aria-disabled`,
+and selecting one shows a toast instead of `onSelect`. Not Radix `disabled`, which skips the item without
+saying why. Mark an action that changes nothing with `ungated: true`
+(`{ label: 'View', onSelect: openUser, ungated: true }`).
 
 If both are passed, the menu wins. The buttons are named from `getRowLabel`, so pass it:
 `Actions for Christopher Nolan` reads better than `Actions for row 2`.

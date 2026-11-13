@@ -8,7 +8,7 @@ export type UserWithRelations = Prisma.UserGetPayload<{ include: typeof userIncl
 
 export const toUser = (row: UserWithRelations): User => ({
   id: row.id,
-  avatarUrl: row.avatarUrl,
+  avatarKey: row.avatarKey,
   createdAt: row.createdAt,
   department: row.department ? toDepartment(row.department) : null,
   email: row.email,

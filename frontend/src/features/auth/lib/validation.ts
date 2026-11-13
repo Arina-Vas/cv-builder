@@ -1,11 +1,13 @@
-import { type ValidationT } from '@/shared/lib/form';
+import {
+  EMAIL_MAX_LENGTH,
+  PASSWORD_MAX_LENGTH,
+  PASSWORD_MIN_LENGTH,
+  type ValidationT,
+} from '@/shared/lib/form';
 export { type ValidationT } from '@/shared/lib/form';
 
 // Same limits as the backend inputs (backend/src/auth/dto/credentials.input.ts)
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const EMAIL_MAX_LENGTH = 254;
-const PASSWORD_MIN_LENGTH = 6;
-const PASSWORD_MAX_LENGTH = 128;
 const CODE_PATTERN = /^\d{6}$/;
 
 export type FieldErrors<TField extends string> = Partial<Record<TField, string>>;

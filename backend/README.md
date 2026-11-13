@@ -47,6 +47,9 @@ database. Requirements: `docker compose up -d`. Nothing else: the tests set thei
   end with `_test`, so `cv_builder` is never touched.
 - Emails go to `FakeMailService` (`test/utils/test-app.ts`), which keeps them in memory, so a test reads the
   verification code or the reset link from the "sent" email.
+- Uploaded files go to `FakeStorageService` (same file) instead of MinIO: it keeps them in a `Map`, so a test checks
+  what was stored or deleted, and the tests do not need MinIO (CI has none). `GqlClient.upload()` sends a GraphQL
+  multipart request with one file; `{ preflight: false }` leaves out the CSRF header.
 - `GqlClient` (`test/utils/graphql-client.ts`) acts as one browser: it keeps the httpOnly cookies between requests
   and sends its own client IP in `X-Forwarded-For`, so rate limits of one test do not affect another.
 - Test-only operations (`adminProbe` with `@Roles(ADMIN)`, `verifiedProbe` without `@AllowUnverified`) check the
@@ -89,6 +92,7 @@ src/                  # main.ts, app.module.ts, app.controller.ts
     validation/       # input transforms (@NormalizeText(), …), @IsNotBeforeDate()
     auth/             # @Roles() decorator
   prisma/             # PrismaService (global module), isPrismaError()
+  files/              # StorageService (S3 / MinIO), readImageUpload(): type by content, 5 MB limit
   departments/        # feature module, see Module layout
   positions/          # feature module, same layout
   languages/          # feature module, same layout
@@ -112,6 +116,15 @@ departments/
 ```
 
 Rules for each part are in [docs/api/conventions.md](../docs/api/conventions.md).
+
+### File uploads
+
+`FilesModule` exports `StorageService`; a module that stores files imports `FilesModule` itself (it is not global).
+`StorageService` talks to any S3-compatible storage configured by the `S3_*` variables and creates a missing bucket
+on start, so the backend needs MinIO running (`docker compose up -d`). An upload argument is
+`@Args('file', { type: () => GraphQLUpload }) file: Upload['promise']`: with a plain `Promise<FileUpload>` type the
+global `ValidationPipe` tries to construct a Promise and the operation fails. Read the file with `readImageUpload()`
+(`files/image-upload.ts`), store it with `storage.upload()` and keep only the returned key in the database.
 
 ## Tests
 

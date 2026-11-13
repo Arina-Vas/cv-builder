@@ -29,7 +29,7 @@
   outline-offset: 2px;
 }
 
-.button:disabled {
+.button:is(:disabled, [aria-disabled='true']) {
   cursor: not-allowed;
 }
 
@@ -52,22 +52,22 @@
   color: var(--primary);
 }
 
-.primary:hover:not(:disabled),
-.text:hover:not(:disabled) {
+.primary:hover:not(:disabled, [aria-disabled='true']),
+.text:hover:not(:disabled, [aria-disabled='true']) {
   background: var(--primary-hover-bg);
   border-color: var(--primary-hover-border);
   color: var(--primary-hover-text);
 }
 
-.primary:active:not(:disabled),
-.text:active:not(:disabled) {
+.primary:active:not(:disabled, [aria-disabled='true']),
+.text:active:not(:disabled, [aria-disabled='true']) {
   background: var(--primary-pressed-bg);
   border-color: var(--primary-pressed-border);
   color: var(--primary-hover-text);
 }
 
-.primary:disabled,
-.text:disabled {
+.primary:is(:disabled, [aria-disabled='true']),
+.text:is(:disabled, [aria-disabled='true']) {
   background: var(--primary-disabled-bg);
   border-color: var(--primary-disabled-bg);
   color: var(--on-primary);
@@ -79,19 +79,19 @@
   color: var(--button-secondary-text);
 }
 
-.secondary:hover:not(:disabled) {
+.secondary:hover:not(:disabled, [aria-disabled='true']) {
   background: var(--button-secondary-hover-bg);
   border-color: var(--button-secondary-hover-border);
   color: var(--button-secondary-hover-text);
 }
 
-.secondary:active:not(:disabled) {
+.secondary:active:not(:disabled, [aria-disabled='true']) {
   background: var(--button-secondary-pressed-bg);
   border-color: var(--button-secondary-pressed-border);
   color: var(--button-secondary-pressed-text);
 }
 
-.secondary:disabled {
+.secondary:is(:disabled, [aria-disabled='true']) {
   background: var(--button-secondary-disabled-bg);
   border-color: var(--button-secondary-disabled-bg);
   color: var(--on-primary);
@@ -101,19 +101,32 @@
   color: var(--text);
 }
 
-.ghost:hover:not(:disabled) {
+.ghost:hover:not(:disabled, [aria-disabled='true']) {
   border-color: var(--button-ghost-hover-border);
 }
 
-.ghost:active:not(:disabled) {
+.ghost:active:not(:disabled, [aria-disabled='true']) {
   background: var(--button-ghost-pressed-bg);
   border-color: var(--button-ghost-pressed-border);
   color: var(--button-ghost-pressed-text);
 }
 
-.ghost:disabled {
+.ghost:is(:disabled, [aria-disabled='true']) {
   background: var(--button-secondary-disabled-bg);
   color: var(--on-primary);
+}
+
+/* Content: an optional icon before the text, centred with it ("+ CREATE …", "🗑 REMOVE …") */
+.label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.label svg {
+  flex-shrink: 0;
+  width: var(--icon-size);
+  height: var(--icon-size);
 }
 
 /* Loading */

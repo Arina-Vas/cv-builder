@@ -72,14 +72,29 @@ What each role may do, from the Scope and Permissions sections of the wiki pages
 | View user details                 | ✅       | ✅    |
 | Create, update, delete users      | ❌       | ✅    |
 
+Protected users (wiki: "The exact business rules should be defined by the team"). An Admin may delete or change
+the role of another Admin, with these exceptions:
+
+| Action                            | Result                                                                                           |
+| --------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Delete own account                | `OPERATION_NOT_ALLOWED` "You cannot delete your own account"; the UI hides Delete in the own row |
+| Change own role                   | `OPERATION_NOT_ALLOWED` "You cannot change your own role"; the UI disables Role for the own row  |
+| Delete the last Admin             | `OPERATION_NOT_ALLOWED` "The last admin cannot be deleted"                                       |
+| Change the role of the last Admin | `OPERATION_NOT_ALLOWED` "The last admin cannot be demoted"                                       |
+
+The checks run in the service, after the role check. There are no system accounts. A deleted user's sessions are
+removed with the user, and the auth guard loads the user and the session on every request, so the deleted user's
+next request gets `UNAUTHENTICATED`. If two Admins delete the same user, the second gets `NOT_FOUND`; the
+frontend shows a toast and refetches the list.
+
 ### Profile
 
-| Action                      | Employee, own profile | Employee, another profile | Admin                 |
-| --------------------------- | --------------------- | ------------------------- | --------------------- |
-| View                        | ✅                    | ✅                        | ✅                    |
-| Update profile information  | ✅                    | ❌                        | ✅ any user           |
-| Upload or change avatar     | ✅                    | ❌                        | ✅ any user           |
-| Initiate email verification | ✅                    | ❌                        | ❌ only the owner can |
+| Action                          | Employee, own profile | Employee, another profile | Admin                 |
+| ------------------------------- | --------------------- | ------------------------- | --------------------- |
+| View                            | ✅                    | ✅                        | ✅                    |
+| Update profile information      | ✅                    | ❌                        | ✅ any user           |
+| Upload, change or remove avatar | ✅                    | ❌                        | ✅ any user           |
+| Initiate email verification     | ✅                    | ❌                        | ❌ only the owner can |
 
 ### User skills and languages
 
@@ -131,6 +146,37 @@ operations still need the session started at sign-up, because the backend takes 
 
 Operation-level tables are added by each module together with its resolvers: the operation name and its access
 (**All**, **Admin**, **Own or Admin**, **Public**), matching the rules above.
+
+### Users
+
+| Operation       | Access       |
+| --------------- | ------------ |
+| `users`         | All          |
+| `user`          | All          |
+| `createUser`    | Admin        |
+| `updateUser`    | Admin        |
+| `updateProfile` | Own or Admin |
+| `deleteUser`    | Admin        |
+
+Errors thrown by the service, besides the [protected users](#users) rules:
+
+| Operation                                   | Case                                | Code             | Message                                         |
+| ------------------------------------------- | ----------------------------------- | ---------------- | ----------------------------------------------- |
+| `user`                                      | the user does not exist             | `NOT_FOUND`      | `User not found`                                |
+| `createUser`                                | the email is taken                  | `CONFLICT`       | `An account with this email already exists`     |
+| `createUser`, `updateUser`, `updateProfile` | the department does not exist       | `BAD_USER_INPUT` | `Department not found` (`departmentId`)         |
+| `createUser`, `updateUser`, `updateProfile` | the position does not exist         | `BAD_USER_INPUT` | `Position not found` (`positionId`)             |
+| `updateUser`, `updateProfile`, `deleteUser` | the user does not exist             | `NOT_FOUND`      | `User not found`                                |
+| `updateProfile`                             | an Employee sends another user's id | `FORBIDDEN`      | `You are not authorized to perform this action` |
+
+The email message is the Sign Up one: the Create user modal has no text for a taken email. "Change own role" is
+checked only when `role` differs from the caller's current role, because the Update user modal always sends `role`.
+
+`updateProfile` is the Profile tab mutation: first / last name, department and position, own profile or Admin. It
+has no `role` field, so an Employee cannot change their role through it; roles change only through the Admin-only
+`updateUser` (Update user modal on the Users page). The ownership check runs before any query, so an Employee does
+not learn whether another user's id exists. Like every mutation, it needs a verified email (`EMAIL_NOT_VERIFIED`
+otherwise).
 
 ### Departments
 

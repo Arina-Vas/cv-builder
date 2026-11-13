@@ -26,6 +26,7 @@ const meta = {
     src: { control: 'text' },
     fallback: { control: 'text' },
     disabled: { control: 'boolean' },
+    loading: { control: 'boolean' },
   },
 } satisfies Meta<typeof AvatarUploader>;
 
@@ -46,16 +47,16 @@ export const Default: Story = {
       await expect(canvas.queryByRole('button', { name: 'Remove avatar' })).not.toBeInTheDocument();
     });
 
-    await step('a png up to 0.5MB goes to onChange', async () => {
+    await step('a png up to 5 MB goes to onChange', async () => {
       const file = fileOf('image/png', 1024);
       await userEvent.upload(input, file);
       await expect(args.onChange).toHaveBeenCalledWith(file);
       await expect(args.onError).not.toHaveBeenCalled();
     });
 
-    await step('a file over 0.5MB goes to onError', async () => {
-      await userEvent.upload(input, fileOf('image/jpeg', 0.5 * 1024 * 1024 + 1));
-      await expect(args.onError).toHaveBeenCalledWith('File is larger than 0.5MB');
+    await step('a file over 5 MB goes to onError', async () => {
+      await userEvent.upload(input, fileOf('image/jpeg', 5 * 1024 * 1024 + 1));
+      await expect(args.onError).toHaveBeenCalledWith('File size must not exceed 5 MB');
       await expect(args.onChange).toHaveBeenCalledTimes(1);
     });
 
@@ -106,6 +107,17 @@ export const WithImage: Story = {
   },
 };
 
+export const Loading: Story = {
+  args: { loading: true, src: SAMPLE_AVATAR },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    await expect(canvas.getByRole('status')).toHaveTextContent('Uploading avatar');
+    await expect(canvas.queryByRole('button', { name: 'Remove avatar' })).not.toBeInTheDocument();
+    await expect(getFileInput(canvasElement)).toBeDisabled();
+  },
+};
+
 export const Disabled: Story = {
   args: { disabled: true },
   play: async ({ canvasElement }) => {
@@ -131,6 +143,7 @@ export const DisabledWithImage: Story = {
 const STATES: { title: string; props: Partial<AvatarUploaderProps> }[] = [
   { title: 'Default', props: {} },
   { title: 'With image', props: { src: SAMPLE_AVATAR } },
+  { title: 'Loading', props: { loading: true, src: SAMPLE_AVATAR } },
   { title: 'Disabled', props: { disabled: true } },
   { title: 'Disabled with image', props: { disabled: true, src: SAMPLE_AVATAR } },
 ];

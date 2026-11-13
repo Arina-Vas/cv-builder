@@ -1,11 +1,12 @@
 'use client';
 
-import { ApolloLink, HttpLink } from '@apollo/client';
+import { ApolloLink } from '@apollo/client';
 import {
   ApolloClient,
   ApolloNextAppProvider,
   InMemoryCache,
 } from '@apollo/client-integration-nextjs';
+import UploadHttpLink from 'apollo-upload-client/UploadHttpLink.mjs';
 import type { ReactNode } from 'react';
 import { createErrorToastLink } from './error-toast-link';
 import { createNetworkErrorLink } from './network-error-link';
@@ -27,7 +28,13 @@ function makeClient(): ApolloClient {
       createErrorToastLink(),
       createNetworkErrorLink(),
       createRefreshLink(graphqlUrl),
-      new HttpLink({ uri: graphqlUrl, credentials: 'include' }),
+      // Works like HttpLink; an operation with a File in its variables goes as a multipart request.
+      // The header lets such a request through the CSRF protection of Apollo Server.
+      new UploadHttpLink({
+        uri: graphqlUrl,
+        credentials: 'include',
+        headers: { 'apollo-require-preflight': 'true' },
+      }),
     ]),
   });
 }

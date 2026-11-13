@@ -1,3 +1,10 @@
+import { Projects } from '@/features/projects/components/Projects';
+import { Suspense } from 'react';
+
 export default function ProjectsPage() {
-  return <h1>Projects</h1>;
+  return (
+    <Suspense>
+      <Projects />
+    </Suspense>
+  );
 }

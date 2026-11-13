@@ -30,6 +30,7 @@ import { Button, IconButton } from '@/shared/components/buttons';
 | `variant` | `primary` · `secondary` · `ghost` · `text` | `primary`   |
 | `size`    | `md` (48px) · `sm` (40px)                  | `md`        |
 | `loading` | `boolean`                                  | `false`     |
+| `gated`   | `boolean`                                  | `false`     |
 | `type`    | native                                     | `button` ⚠️ |
 
 Plus every native `<button>` attribute (`onClick`, `disabled`, `form`, `aria-*`, `className`, `style`).
@@ -37,7 +38,15 @@ Plus every native `<button>` attribute (`onClick`, `disabled`, `form`, `aria-*`,
 - ⚠️ `type` defaults to `button`, so a button inside a form does **not** submit it. Pass `type="submit"` explicitly.
 - `loading` disables the button and sets `aria-busy`. Use it for mutations: it prevents duplicate
   submissions (AGENTS.md §2). The label stays in the layout, so the width doesn't jump.
-- Hover / Active / Disabled / Focus are CSS states (`:hover`, `:active`, `:disabled`, `:focus-visible`), not props.
+- `gated` marks a button that changes data (ADD SKILL, UPDATE, CHANGE). Under a closed action gate
+  (unverified email, `shared/lib/action-gate`) it gets `aria-disabled` — looks disabled, stays focusable —
+  and the click shows a toast instead of `onClick`; a `type="submit"` button doesn't submit its form.
+  Without a gate provider (Storybook, tests) it is a normal button. Never gate CANCEL, Retry, pagination.
+- Hover / Active / Disabled / Focus are CSS states (`:hover`, `:active`, `:disabled`, `:focus-visible`), not props; `aria-disabled="true"` looks the same as `:disabled`.
+- **With an icon:** put the icon first, then the text, with no wrapper:
+  `<Button variant="text" size="sm"><PlusIcon />Create department</Button>`. The label is an inline flex row: the
+  icon is centred with the text, `--space-3` (12px) apart, and sized to `--icon-size` (24px). The icon takes
+  `currentColor`, so it follows the text colour on hover and when disabled (no `fill` colour in the SVG).
 
 ## IconButton
 

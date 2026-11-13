@@ -11,6 +11,7 @@ import { Input, Textarea } from '@/shared/components/inputs';
 import { Select } from '@/shared/components/select/Select';
 import { MultiSelect } from '@/shared/components/select/multi-select/MultiSelect';
 import {
+  NAME_MAX_LENGTH,
   optionalString,
   requiredDate,
   requiredIds,
@@ -25,19 +26,30 @@ import { FormModal } from './FormModal';
 /* Simulated request                                                   */
 /* ------------------------------------------------------------------ */
 
-type Outcome = 'success' | 'error';
+type Outcome = 'success' | 'error' | 'conflict';
+
+const ERRORS: Record<Exclude<Outcome, 'success'>, CombinedGraphQLErrors> = {
+  // an error without a field: shown above the buttons
+  error: new CombinedGraphQLErrors({
+    errors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
+  }),
+  // the backend's conflict('name', ...) for a duplicate: shown under the field
+  conflict: new CombinedGraphQLErrors({
+    errors: [
+      {
+        message: 'Department already exists',
+        extensions: { code: 'CONFLICT', field: 'name' },
+      },
+    ],
+  }),
+};
 
 // what a mutation does: resolves on success, rejects with an Apollo error on failure
 const request = (outcome: Outcome, delay = 300) =>
   new Promise<void>((resolve, reject) => {
     setTimeout(() => {
       if (outcome === 'success') resolve();
-      else
-        reject(
-          new CombinedGraphQLErrors({
-            errors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
-          }),
-        );
+      else reject(ERRORS[outcome]);
     }, delay);
   });
 
@@ -45,14 +57,11 @@ const request = (outcome: Outcome, delay = 300) =>
 /* Example: Create / Edit department                                   */
 /* ------------------------------------------------------------------ */
 
-// same limit as the backend (MAX_NAME_LENGTH in backend/src/common/graphql/constants.ts)
-const DEPARTMENT_NAME_MAX = 100;
-
 // a schema is a factory of the `validation` translator, so the field errors are translated
 const departmentSchema = (t: ValidationT) =>
   z.object({
-    name: requiredString(t('department.required')).max(DEPARTMENT_NAME_MAX, {
-      error: t('department.maxLength', { max: DEPARTMENT_NAME_MAX }),
+    name: requiredString(t('department.required')).max(NAME_MAX_LENGTH, {
+      error: t('department.maxLength', { max: NAME_MAX_LENGTH }),
     }),
   });
 
@@ -248,7 +257,7 @@ const meta = {
   },
   argTypes: {
     onSubmit: { control: false },
-    outcome: { control: 'inline-radio', options: ['success', 'error'] },
+    outcome: { control: 'inline-radio', options: ['success', 'error', 'conflict'] },
   },
   parameters: {
     layout: 'centered',
@@ -282,7 +291,7 @@ export const CreateDepartment: Story = {
 
     await step('too long a name shows the translated max length error', async () => {
       await userEvent.click(input);
-      await userEvent.paste('a'.repeat(DEPARTMENT_NAME_MAX + 1));
+      await userEvent.paste('a'.repeat(NAME_MAX_LENGTH + 1));
 
       await expect(
         await within(dialog).findByText('Department name must not exceed 100 characters'),
@@ -397,6 +406,42 @@ export const SubmitError: Story = {
         'Engineering',
       );
       await expect(within(dialog).queryByRole('alert')).not.toBeInTheDocument();
+    });
+  },
+};
+
+// The name passed the schema, the backend rejected it as a duplicate (CONFLICT, field: 'name')
+export const ConflictOnField: Story = {
+  args: { outcome: 'conflict' },
+  play: async ({ canvasElement, step }) => {
+    const dialog = await openDialog(canvasElement, 'Create department');
+    const input = within(dialog).getByRole('textbox', { name: 'Department' });
+    const create = within(dialog).getByRole('button', { name: 'Create' });
+
+    await step('the error is shown under the field, not above the buttons', async () => {
+      await userEvent.type(input, 'Engineering');
+      await waitFor(() => expect(create).toBeEnabled());
+      await userEvent.click(create);
+
+      await expect(await within(dialog).findByText('This value is already taken')).toBeVisible();
+      await expect(within(dialog).getAllByRole('alert')).toHaveLength(1);
+      await expect(input).toHaveAttribute('aria-invalid', 'true');
+      await expect(input).toHaveFocus();
+      await expect(input).toHaveValue('Engineering');
+    });
+
+    await step('submit is disabled until the name changes', async () => {
+      await waitFor(() => expect(create).toBeDisabled());
+    });
+
+    await step('changing the name clears the error and enables submit', async () => {
+      await userEvent.type(input, ' Team');
+
+      await waitFor(() =>
+        expect(within(dialog).queryByText('This value is already taken')).not.toBeInTheDocument(),
+      );
+      await expect(input).not.toHaveAttribute('aria-invalid', 'true');
+      await waitFor(() => expect(create).toBeEnabled());
     });
   },
 };

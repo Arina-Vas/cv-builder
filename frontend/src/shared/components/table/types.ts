@@ -10,6 +10,7 @@ export interface SortState {
 export interface Column<T> {
   key: string;
   header: string;
+  hideHeader?: boolean;
   render: (row: T) => ReactNode;
   sortable?: boolean;
   width?: string;
@@ -18,6 +19,7 @@ export interface Column<T> {
 export interface RowAction<T> {
   label: string;
   onSelect: (row: T) => void;
+  ungated?: boolean;
 }
 
 export interface DataTableProps<T> {

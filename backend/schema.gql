@@ -30,6 +30,16 @@ input CreateSkillInput {
   name: String!
 }
 
+input CreateUserInput {
+  departmentId: ID!
+  email: String!
+  firstName: String!
+  lastName: String!
+  password: String!
+  positionId: ID!
+  role: UserRole!
+}
+
 input CreateUserLanguageInput {
   languageId: ID!
   proficiency: Proficiency!
@@ -113,6 +123,11 @@ type Mutation {
   createSkill(input: CreateSkillInput!): Skill!
 
   """
+  Fails with CONFLICT (field: email) if the email is taken, BAD_USER_INPUT if the department or position does not exist
+  """
+  createUser(input: CreateUserInput!): User!
+
+  """
   Own profile or Admin. Fails with BAD_USER_INPUT (languageId) if the language does not exist and with CONFLICT (languageId) if it is already assigned
   """
   createUserLanguage(input: CreateUserLanguageInput!): UserLanguage!
@@ -140,6 +155,11 @@ type Mutation {
   deleteSkill(id: ID!): ID!
 
   """
+  Fails with NOT_FOUND if the user does not exist, OPERATION_NOT_ALLOWED when deleting own account or the last admin
+  """
+  deleteUser(id: ID!): ID!
+
+  """
   Own profile or Admin. Removes the given UserLanguage ids of the user; returns the removed ids
   """
   deleteUserLanguages(ids: [ID!]!, userId: ID!): [ID!]!
@@ -150,6 +170,11 @@ type Mutation {
   deleteUserSkills(ids: [ID!]!, userId: ID!): [ID!]!
   logout: Boolean!
   refresh: Boolean!
+
+  """
+  Own profile or Admin. Fails with FORBIDDEN for another user's profile, NOT_FOUND if the user does not exist
+  """
+  removeAvatar(userId: ID!): User!
 
   """Always returns true, whether or not the email belongs to an account"""
   requestPasswordReset(input: RequestPasswordResetInput!): Boolean!
@@ -164,8 +189,18 @@ type Mutation {
   updateDepartment(input: UpdateDepartmentInput!): Department!
   updateLanguage(input: UpdateLanguageInput!): Language!
   updatePosition(input: UpdatePositionInput!): Position!
+
+  """
+  Own profile or Admin; the role is not changed here. Fails with FORBIDDEN for another user's profile, NOT_FOUND if the user does not exist, BAD_USER_INPUT if the department or position does not exist
+  """
+  updateProfile(input: UpdateProfileInput!): User!
   updateProject(input: UpdateProjectInput!): Project!
   updateSkill(input: UpdateSkillInput!): Skill!
+
+  """
+  Fails with NOT_FOUND if the user does not exist, BAD_USER_INPUT if the department or position does not exist, OPERATION_NOT_ALLOWED when changing own role or demoting the last admin
+  """
+  updateUser(input: UpdateUserInput!): User!
 
   """
   Own profile or Admin. Changes only the proficiency level; fails with NOT_FOUND if the assignment does not exist or belongs to another user
@@ -176,6 +211,11 @@ type Mutation {
   Own profile or Admin. Changes only the mastery level; fails with NOT_FOUND if the assignment does not exist or belongs to another user
   """
   updateUserSkill(input: UpdateUserSkillInput!): UserSkill!
+
+  """
+  Own profile or Admin. PNG, JPEG or GIF up to 5 MB, checked by the file content. The image is encoded again without metadata (EXIF, GPS) before it is stored. Fails with FORBIDDEN for another user's profile, NOT_FOUND if the user does not exist, BAD_USER_INPUT (field: file) for a wrong type or size. Send as a multipart request with the `apollo-require-preflight` header
+  """
+  uploadAvatar(file: Upload!, userId: ID!): User!
   verifyEmail(input: VerifyEmailInput!): User!
 }
 
@@ -292,6 +332,9 @@ type Query {
   """Skills available as project technologies ("Environment")"""
   technologies: [Skill!]!
 
+  """Fails with NOT_FOUND if the user does not exist"""
+  user(id: ID!): User!
+
   """
   Languages of the user, readable by any authenticated user; sorted by language name. Fails with NOT_FOUND if the user does not exist
   """
@@ -301,6 +344,20 @@ type Query {
   Skills of the user, readable by any authenticated user; sorted by category name, then skill name. Fails with NOT_FOUND if the user does not exist
   """
   userSkills(userId: ID!): [UserSkill!]!
+  users(
+    """1-based page number"""
+    page: Int! = 1
+
+    """One of 10, 20, 50"""
+    pageSize: Int! = 10
+    search: String
+
+    """
+    Without it users are returned in creation order and sortOrder is ignored
+    """
+    sortBy: UserSortField
+    sortOrder: SortOrder! = ASC
+  ): UserPage!
 }
 
 input RequestPasswordResetInput {
@@ -373,6 +430,14 @@ input UpdatePositionInput {
   name: String!
 }
 
+input UpdateProfileInput {
+  departmentId: ID!
+  firstName: String!
+  id: ID!
+  lastName: String!
+  positionId: ID!
+}
+
 input UpdateProjectInput {
   description: String!
   domain: String!
@@ -389,6 +454,15 @@ input UpdateSkillInput {
   name: String!
 }
 
+input UpdateUserInput {
+  departmentId: ID!
+  firstName: String!
+  id: ID!
+  lastName: String!
+  positionId: ID!
+  role: UserRole!
+}
+
 input UpdateUserLanguageInput {
   id: ID!
   proficiency: Proficiency!
@@ -401,7 +475,11 @@ input UpdateUserSkillInput {
   userId: ID!
 }
 
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload
+
 type User {
+  """Public URL of the avatar image"""
   avatarUrl: String
   createdAt: DateTime!
   department: Department
@@ -420,6 +498,17 @@ type UserLanguage {
   proficiency: Proficiency!
 }
 
+type UserPage {
+  items: [User!]!
+
+  """Current page, 1-based"""
+  page: Int!
+  pageSize: Int!
+
+  """Items matching the search, not the page size"""
+  total: Int!
+}
+
 enum UserRole {
   ADMIN
   EMPLOYEE
@@ -429,6 +518,14 @@ type UserSkill {
   id: ID!
   mastery: Mastery!
   skill: Skill!
+}
+
+enum UserSortField {
+  createdAt
+  department
+  firstName
+  lastName
+  position
 }
 
 input VerifyEmailInput {
