@@ -9,15 +9,13 @@ import { LevelItem } from '@/shared/components/level-item/LevelItem';
 import { MASTERY_LEVEL } from '@/features/skills/user-skills/lib/mastery';
 import { useTranslations } from 'next-intl';
 import { useSelection } from '@/shared/hooks/useSelection';
-import { Fragment, useState } from 'react';
+import { useMemo, useState } from 'react';
 import type { UserSkillFieldsFragment } from '@/gql/graphql';
-import { Button } from '@/shared/components/buttons';
-import { PlusIcon } from '@/shared/components/icons/PlusIcon';
-import { TrashIcon } from '@/shared/components/icons/TrashIcon';
 import { UserSkillFormModal } from '@/features/skills/user-skills/components/UserSkillFormModal';
 import s from './UserSkills.module.css';
 import { ConfirmDialog } from '@/shared/components/dialog';
-import { UserSkillsSkeleton } from '@/features/skills/user-skills/components/UserSkillsSkeleton';
+import { AsyncList } from '@/shared/components/async-list/AsyncList';
+import { SelectionActions } from '@/shared/components/selection-actions/SelectionActions';
 
 type Props = {
   userId: string;
@@ -48,87 +46,64 @@ export const UserSkills = ({ userId, canEdit, emptyMessage }: Props) => {
     exit();
   };
 
-  const groupedSkills = groupByCategory(data?.userSkills ?? []);
+  const groupedSkills = useMemo(() => groupByCategory(data?.userSkills ?? []), [data?.userSkills]);
 
   return (
     <div className={s.root}>
-      {error && !data ? (
-        <div className={s.error} role="alert">
-          <p className={s.errorText}>{t('loadError')}</p>
-          <Button variant="secondary" size="sm" loading={loading} onClick={() => refetch()}>
-            {t('retry')}
-          </Button>
-        </div>
-      ) : !data ? (
-        <UserSkillsSkeleton />
-      ) : data.userSkills.length === 0 ? (
-        <p className={s.empty}>{emptyMessage}</p>
-      ) : (
-        groupedSkills.map((group) => (
-          <Fragment key={group.category.id}>
-            <h2 className={s.title}>{group.category.name}</h2>
-            <ul className={s.list}>
-              {group.skills.map((skill) => (
-                <li key={skill.id}>
-                  <LevelItem
-                    name={skill.skill.name}
-                    level={MASTERY_LEVEL[skill.mastery]}
-                    levelLabel={t(`masteryLevel.${skill.mastery}`)}
-                    canEdit={canEdit}
-                    onClick={() =>
-                      selectingMode ? toggle(skill.id) : setModal({ type: 'update', skill })
-                    }
-                    selected={selectingMode ? selectedIds.has(skill.id) : undefined}
-                  />
-                </li>
-              ))}
-            </ul>
-          </Fragment>
-        ))
-      )}
+      <AsyncList
+        items={data?.userSkills}
+        error={error}
+        loading={loading}
+        onRetry={() => refetch()}
+        loadErrorMessage={t('loadError')}
+        retryLabel={t('retry')}
+        loadingLabel={t('loading')}
+        emptyMessage={emptyMessage}
+      >
+        {groupedSkills.map((group) => {
+          const headingId = `skill-category-${group.category.id}`;
+
+          return (
+            <section key={group.category.id} aria-labelledby={headingId}>
+              <h2 id={headingId} className={s.title}>
+                {group.category.name}
+              </h2>
+              <ul className={s.list}>
+                {group.skills.map((skill) => (
+                  <li key={skill.id}>
+                    <LevelItem
+                      name={skill.skill.name}
+                      level={MASTERY_LEVEL[skill.mastery]}
+                      levelLabel={t(`masteryLevel.${skill.mastery}`)}
+                      canEdit={canEdit}
+                      onClick={() =>
+                        selectingMode ? toggle(skill.id) : setModal({ type: 'update', skill })
+                      }
+                      selected={selectingMode ? selectedIds.has(skill.id) : undefined}
+                    />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          );
+        })}
+      </AsyncList>
 
       {data && (
-        <div className={s.actions}>
-          {canEdit && !selectingMode && (
-            <>
-              <Button
-                size={'sm'}
-                gated
-                onClick={() => setModal({ type: 'create' })}
-                variant={'ghost'}
-              >
-                <PlusIcon />
-                {t('addButton')}
-              </Button>
-              <Button
-                variant={'text'}
-                size={'sm'}
-                gated
-                disabled={!data.userSkills.length}
-                onClick={start}
-              >
-                <TrashIcon />
-                {t('removeButton')}
-              </Button>
-            </>
-          )}
-
-          {canEdit && selectingMode && (
-            <>
-              <Button size={'sm'} onClick={exit} variant={'secondary'}>
-                {tActions('cancel')}
-              </Button>
-              <Button
-                disabled={selectedIds.size === 0}
-                size={'sm'}
-                gated
-                onClick={() => setOpenConfirmDialog(true)}
-              >
-                {t('removeCount', { count: selectedIds.size })}
-              </Button>
-            </>
-          )}
-        </div>
+        <SelectionActions
+          canEdit={canEdit}
+          selecting={selectingMode}
+          selectedCount={selectedIds.size}
+          canRemove={data.userSkills.length > 0}
+          addLabel={t('addButton')}
+          removeLabel={t('removeButton')}
+          removeCountLabel={t('removeCount', { count: selectedIds.size })}
+          cancelLabel={tActions('cancel')}
+          onAdd={() => setModal({ type: 'create' })}
+          onStartRemove={start}
+          onCancel={exit}
+          onRemove={() => setOpenConfirmDialog(true)}
+        />
       )}
 
       <UserSkillFormModal

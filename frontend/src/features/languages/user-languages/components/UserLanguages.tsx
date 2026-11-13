@@ -8,16 +8,14 @@ import {
 } from '@/features/languages/user-languages/api/userLanguages.operations';
 import type { UserLanguageFieldsFragment } from '@/gql/graphql';
 import { useState } from 'react';
-import { Button } from '@/shared/components/buttons';
 import { UserLanguageFormModal } from './UserLanguageFormModal';
 import { useTranslations } from 'next-intl';
 import { LevelItem } from '@/shared/components/level-item/LevelItem';
 import { ConfirmDialog } from '@/shared/components/dialog';
 import s from './UserLanguages.module.css';
-import { PlusIcon } from '@/shared/components/icons/PlusIcon';
-import { TrashIcon } from '@/shared/components/icons/TrashIcon';
 import { useSelection } from '@/shared/hooks/useSelection';
-import { UserLanguagesSkeleton } from './UserLanguagesSkeleton';
+import { AsyncList } from '@/shared/components/async-list/AsyncList';
+import { SelectionActions } from '@/shared/components/selection-actions/SelectionActions';
 import { PROFICIENCY_LEVEL } from '@/features/languages/user-languages/lib/proficiency';
 
 type Props = {
@@ -53,78 +51,51 @@ export const UserLanguages = ({ userId, canEdit, emptyMessage }: Props) => {
     <div className={s.root}>
       <h2 className={s.title}>{t('title')}</h2>
 
-      {error && !data ? (
-        <div className={s.error} role="alert">
-          <p className={s.errorText}>{t('loadError')}</p>
-          <Button variant="secondary" size="sm" loading={loading} onClick={() => refetch()}>
-            {t('retry')}
-          </Button>
-        </div>
-      ) : !data ? (
-        <UserLanguagesSkeleton />
-      ) : data.userLanguages.length === 0 ? (
-        <p className={s.empty}>{emptyMessage}</p>
-      ) : (
-        <ul className={s.list}>
-          {data.userLanguages.map((language) => (
-            <li key={language.id}>
-              <LevelItem
-                name={language.language.name}
-                level={PROFICIENCY_LEVEL[language.proficiency]}
-                levelLabel={tProficiency(language.proficiency)}
-                canEdit={canEdit}
-                onClick={() =>
-                  selectingMode ? toggle(language.id) : setModal({ type: 'update', language })
-                }
-                selected={selectingMode ? selectedIds.has(language.id) : undefined}
-              />
-            </li>
-          ))}
-        </ul>
-      )}
+      <AsyncList
+        items={data?.userLanguages}
+        error={error}
+        loading={loading}
+        onRetry={() => refetch()}
+        loadErrorMessage={t('loadError')}
+        retryLabel={t('retry')}
+        loadingLabel={t('loading')}
+        emptyMessage={emptyMessage}
+      >
+        {
+          <ul className={s.list}>
+            {data?.userLanguages.map((language) => (
+              <li key={language.id}>
+                <LevelItem
+                  name={language.language.name}
+                  level={PROFICIENCY_LEVEL[language.proficiency]}
+                  levelLabel={tProficiency(language.proficiency)}
+                  canEdit={canEdit}
+                  onClick={() =>
+                    selectingMode ? toggle(language.id) : setModal({ type: 'update', language })
+                  }
+                  selected={selectingMode ? selectedIds.has(language.id) : undefined}
+                />
+              </li>
+            ))}
+          </ul>
+        }
+      </AsyncList>
 
       {data && (
-        <div className={s.actions}>
-          {canEdit && !selectingMode && (
-            <>
-              <Button
-                size={'sm'}
-                gated
-                onClick={() => setModal({ type: 'create' })}
-                variant={'ghost'}
-              >
-                <PlusIcon />
-                {t('addButton')}
-              </Button>
-              <Button
-                variant={'text'}
-                size={'sm'}
-                gated
-                disabled={!data.userLanguages.length}
-                onClick={start}
-              >
-                <TrashIcon />
-                {t('removeButton')}
-              </Button>
-            </>
-          )}
-
-          {canEdit && selectingMode && (
-            <>
-              <Button size={'sm'} onClick={exit} variant={'secondary'}>
-                {tActions('cancel')}
-              </Button>
-              <Button
-                disabled={selectedIds.size === 0}
-                size={'sm'}
-                gated
-                onClick={() => setOpenConfirmDialog(true)}
-              >
-                {t('removeCount', { count: selectedIds.size })}
-              </Button>
-            </>
-          )}
-        </div>
+        <SelectionActions
+          canEdit={canEdit}
+          selecting={selectingMode}
+          selectedCount={selectedIds.size}
+          canRemove={data.userLanguages.length > 0}
+          addLabel={t('addButton')}
+          removeLabel={t('removeButton')}
+          removeCountLabel={t('removeCount', { count: selectedIds.size })}
+          cancelLabel={tActions('cancel')}
+          onAdd={() => setModal({ type: 'create' })}
+          onStartRemove={start}
+          onCancel={exit}
+          onRemove={() => setOpenConfirmDialog(true)}
+        />
       )}
 
       <UserLanguageFormModal
