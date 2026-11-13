@@ -73,7 +73,6 @@ export const UserLanguages = ({ userId, canEdit, emptyMessage }: Props) => {
                 level={PROFICIENCY_LEVEL[language.proficiency]}
                 levelLabel={tProficiency(language.proficiency)}
                 canEdit={canEdit}
-                userLanguage={language}
                 onClick={() =>
                   selectingMode ? toggle(language.id) : setModal({ type: 'update', language })
                 }
