@@ -58,6 +58,8 @@ type Documents = {
     "\n  mutation CreateUser($input: CreateUserInput!) {\n    createUser(input: $input) {\n      ...UserListFields\n    }\n  }\n": typeof types.CreateUserDocument,
     "\n  mutation UpdateUser($input: UpdateUserInput!) {\n    updateUser(input: $input) {\n      ...UserListFields\n    }\n  }\n": typeof types.UpdateUserDocument,
     "\n  mutation UpdateProfile($input: UpdateProfileInput!) {\n    updateProfile(input: $input) {\n      ...UserListFields\n      createdAt\n      emailVerifiedAt\n    }\n  }\n": typeof types.UpdateProfileDocument,
+    "\n  mutation UploadAvatar($userId: ID!, $file: Upload!) {\n    uploadAvatar(userId: $userId, file: $file) {\n      id\n      avatarUrl\n    }\n  }\n": typeof types.UploadAvatarDocument,
+    "\n  mutation RemoveAvatar($userId: ID!) {\n    removeAvatar(userId: $userId) {\n      id\n      avatarUrl\n    }\n  }\n": typeof types.RemoveAvatarDocument,
     "\n  mutation DeleteUser($id: ID!) {\n    deleteUser(id: $id)\n  }\n": typeof types.DeleteUserDocument,
 };
 const documents: Documents = {
@@ -105,6 +107,8 @@ const documents: Documents = {
     "\n  mutation CreateUser($input: CreateUserInput!) {\n    createUser(input: $input) {\n      ...UserListFields\n    }\n  }\n": types.CreateUserDocument,
     "\n  mutation UpdateUser($input: UpdateUserInput!) {\n    updateUser(input: $input) {\n      ...UserListFields\n    }\n  }\n": types.UpdateUserDocument,
     "\n  mutation UpdateProfile($input: UpdateProfileInput!) {\n    updateProfile(input: $input) {\n      ...UserListFields\n      createdAt\n      emailVerifiedAt\n    }\n  }\n": types.UpdateProfileDocument,
+    "\n  mutation UploadAvatar($userId: ID!, $file: Upload!) {\n    uploadAvatar(userId: $userId, file: $file) {\n      id\n      avatarUrl\n    }\n  }\n": types.UploadAvatarDocument,
+    "\n  mutation RemoveAvatar($userId: ID!) {\n    removeAvatar(userId: $userId) {\n      id\n      avatarUrl\n    }\n  }\n": types.RemoveAvatarDocument,
     "\n  mutation DeleteUser($id: ID!) {\n    deleteUser(id: $id)\n  }\n": types.DeleteUserDocument,
 };
 
@@ -298,6 +302,14 @@ export function graphql(source: "\n  mutation UpdateUser($input: UpdateUserInput
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation UpdateProfile($input: UpdateProfileInput!) {\n    updateProfile(input: $input) {\n      ...UserListFields\n      createdAt\n      emailVerifiedAt\n    }\n  }\n"): (typeof documents)["\n  mutation UpdateProfile($input: UpdateProfileInput!) {\n    updateProfile(input: $input) {\n      ...UserListFields\n      createdAt\n      emailVerifiedAt\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation UploadAvatar($userId: ID!, $file: Upload!) {\n    uploadAvatar(userId: $userId, file: $file) {\n      id\n      avatarUrl\n    }\n  }\n"): (typeof documents)["\n  mutation UploadAvatar($userId: ID!, $file: Upload!) {\n    uploadAvatar(userId: $userId, file: $file) {\n      id\n      avatarUrl\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation RemoveAvatar($userId: ID!) {\n    removeAvatar(userId: $userId) {\n      id\n      avatarUrl\n    }\n  }\n"): (typeof documents)["\n  mutation RemoveAvatar($userId: ID!) {\n    removeAvatar(userId: $userId) {\n      id\n      avatarUrl\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

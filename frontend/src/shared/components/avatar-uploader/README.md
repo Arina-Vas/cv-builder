@@ -33,6 +33,7 @@ the red × over it and the file input on the right.
 | `onError`  | `(message: string) => void` | —       |
 | `onRemove` | `() => void`                | —       |
 | `disabled` | `boolean`                   | `false` |
+| `loading`  | `boolean`                   | `false` |
 
 - `fallback` is the user's name: the first letter, upper-cased, is shown in the grey circle when there
   is no `src`. It is also the `alt` of the image.
@@ -44,17 +45,24 @@ the red × over it and the file input on the right.
 - `onError` gets the message, already translated, when the file fails a check. The component does not
   show it itself: the parent decides how (toast, text under the field).
 - `onRemove` is called by the red cross on the avatar. The cross is shown only while there is an image
-  and the uploader is not disabled.
+  and the uploader is not disabled or loading.
+- `loading` is for the parent's request (upload or removal): a spinner over the current avatar, a
+  `role="status"` text "Uploading avatar" (`uploading`) for screen readers, `aria-busy` on the wrapper,
+  and no new file or removal until it ends. Keep the old `src` while loading: the new avatar is shown
+  only after the backend saved it.
 
 ## File checks
 
-| Check | Rule                                     | `onError` message (key in `common.avatarUploader`) |
-| ----- | ---------------------------------------- | -------------------------------------------------- |
-| Type  | `image/png`, `image/jpeg`, `image/gif`   | `Only png, jpg or gif allowed` (`invalidType`)     |
-| Size  | no more than 0.5MB (`0.5 * 1024 * 1024`) | `File is larger than 0.5MB` (`tooLarge`)           |
+| Check | Rule                                   | `onError` message (key in `common.avatarUploader`) |
+| ----- | -------------------------------------- | -------------------------------------------------- |
+| Type  | `image/png`, `image/jpeg`, `image/gif` | `Only png, jpg or gif allowed` (`invalidType`)     |
+| Size  | no more than 5 MB (`MAX_AVATAR_SIZE`)  | `File size must not exceed 5 MB` (`tooLarge`)      |
 
-`tooLarge` and the hint under the link (`hint`: `png, jpg or gif no more than 0.5MB`) take the limit as
-`{maxSize}`: pass it as ready text (`0.5MB`), not as the byte count used for the check.
+The limit and the types are the same as on the backend (`backend/src/files/image-upload.ts`), which
+checks them again by the file content: these checks only save a request.
+
+`tooLarge` and the hint under the link (`hint`: `png, jpg or gif no more than 5 MB`) take the limit as
+`{maxSize}`: pass it as ready text (`5 MB`), not as the byte count used for the check.
 
 `accept` on the input only filters the file dialog (the user can switch it to "All files"), so the type
 is checked again in code. The input value is reset after every choice, so choosing the same file again
@@ -95,7 +103,9 @@ useEffect(() => {
 | Adding       | `:hover` / `:focus-within` on the text                                        | "Upload avatar image" (`upload`) is underlined                                             |
 | With image   | `src`                                                                         | round photo, `object-fit: cover`                                                           |
 | Remove image | `src` + `:hover` on the avatar / `:focus-visible` on the cross / touch screen | red cross with a white X in the top-right corner, fades in                                 |
+| Loading      | `loading` prop                                                                | dimmed circle with a spinner over the avatar, no cross, the dialog does not open           |
 | Disabled     | `disabled` prop                                                               | grey text and icon, `not-allowed` cursor, no underline, no cross, the dialog does not open |
+| Locked       | closed [action gate](../../lib/action-gate/README.md) (unverified email)      | looks disabled but stays focusable; a click shows the gate's toast instead of the dialog   |
 
 Adding and Remove image are CSS states, there are no props for them: hover the elements in Storybook
 or move focus to them with Tab.
@@ -121,6 +131,13 @@ its look under `.avatar`: 24px, no border, no fill on press, no focus ring.
 The icon is the shared [`CloseIcon`](../icons/CloseIcon.tsx): a circle in `currentColor` with the X cut
 out. The X is filled with `--close-icon-cross` (transparent by default, as in `Chip`); the uploader sets
 it to `--on-primary`, so the X is white and no background is needed behind the icon.
+
+## Action gate
+
+Uploading and removing change data, so the uploader is gated like a `gated` Button: under a closed
+gate the input and the cross get `aria-disabled`, the click on the input is cancelled (no file
+dialog) and the cross does not call `onRemove`; the gate shows its toast. Without a provider
+(Storybook, tests) nothing is locked.
 
 ## Accessibility
 

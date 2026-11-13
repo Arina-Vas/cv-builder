@@ -7,7 +7,13 @@ import { describe, expect, it, vi } from 'vitest';
 import { ME, RESEND_VERIFICATION_CODE } from '@/features/auth/api/auth.operations';
 import { mockRouter } from '@/test/next-navigation';
 import { renderWithProviders } from '@/test/render';
-import { UPDATE_PROFILE, USER, USER_FORM_OPTIONS } from '../../api/users.operations';
+import {
+  REMOVE_AVATAR,
+  UPDATE_PROFILE,
+  UPLOAD_AVATAR,
+  USER,
+  USER_FORM_OPTIONS,
+} from '../../api/users.operations';
 import { UserProfile } from './UserProfile';
 
 const USER_ID = 'u1';
@@ -18,7 +24,7 @@ const rostislav = {
   email: 'thorn_pear@icloud.com',
   firstName: 'Rostislav',
   lastName: 'Harlanov',
-  avatarUrl: null,
+  avatarUrl: null as string | null,
   role: 'EMPLOYEE' as const,
   // Midday UTC, so the day is the same in every time zone the tests may run in
   createdAt: '2024-01-14T12:00:00.000Z',
@@ -455,5 +461,150 @@ describe('UserProfile — verify email', () => {
       .poll(() => screen.queryByRole('button', { name: 'Verify email' }))
       .not.toBeInTheDocument();
     expect(mockRouter.push).not.toHaveBeenCalled();
+  });
+});
+
+describe('UserProfile — avatar', () => {
+  const AVATAR_URL = 'https://img.magnific.com/free-vector/rostislav.png';
+  const photo = new File([new Uint8Array(1024)], 'photo.png', { type: 'image/png' });
+
+  const fileInput = () => document.querySelector<HTMLInputElement>('input[type="file"]');
+
+  const avatarResult = (avatarUrl: string | null) => ({
+    __typename: 'User' as const,
+    id: USER_ID,
+    avatarUrl,
+  });
+
+  const uploadMock = (
+    result: MockLink.MockedResponse['result'],
+    delay?: number,
+  ): MockLink.MockedResponse => ({
+    request: { query: UPLOAD_AVATAR, variables: { userId: USER_ID, file: photo } },
+    result,
+    delay,
+  });
+
+  const backendError = (code: string) => ({
+    errors: [new GraphQLError('raw backend text', { extensions: { code } })],
+  });
+
+  it('is an upload control for the owner', async () => {
+    renderProfile([userMock(), optionsMock], OWNER);
+
+    expect(await screen.findByText('Upload avatar image')).toBeInTheDocument();
+    expect(fileInput()).toBeEnabled();
+  });
+
+  it("is an upload control for an admin on someone else's profile", async () => {
+    renderProfile([userMock(), optionsMock], ADMIN);
+
+    expect(await screen.findByText('Upload avatar image')).toBeInTheDocument();
+  });
+
+  it("is only a picture on another employee's profile", async () => {
+    renderProfile([userMock({ ...rostislav, avatarUrl: AVATAR_URL })], OTHER_EMPLOYEE);
+
+    expect(await screen.findByRole('img', { name: 'Rostislav Harlanov' })).toBeInTheDocument();
+    expect(fileInput()).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Remove avatar' })).not.toBeInTheDocument();
+  });
+
+  it('shows the new avatar and a toast only after the backend saved it', async () => {
+    const { user } = renderProfile(
+      [
+        userMock(),
+        optionsMock,
+        uploadMock({ data: { uploadAvatar: avatarResult(AVATAR_URL) } }, 50),
+      ],
+      OWNER,
+    );
+    await screen.findByText('Upload avatar image');
+
+    await user.upload(fileInput()!, photo);
+
+    // In progress: the spinner over the old initial, no new picture yet
+    expect(screen.getByText('Uploading avatar')).toBeInTheDocument();
+    expect(screen.getByText('R')).toBeInTheDocument();
+    expect(fileInput()).toBeDisabled();
+
+    expect(await screen.findByText('Avatar has been updated')).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'Rostislav Harlanov' })).toBeInTheDocument();
+    expect(fileInput()).toBeEnabled();
+  });
+
+  it('keeps the old avatar and explains when the backend rejects the file', async () => {
+    const { user } = renderProfile(
+      [userMock(), optionsMock, uploadMock(backendError('BAD_USER_INPUT'))],
+      OWNER,
+    );
+    await screen.findByText('Upload avatar image');
+
+    await user.upload(fileInput()!, photo);
+
+    expect(await screen.findByText('Only png, jpg or gif allowed')).toBeInTheDocument();
+    expect(screen.getByText('R')).toBeInTheDocument();
+    expect(screen.queryByRole('img', { name: 'Rostislav Harlanov' })).not.toBeInTheDocument();
+  });
+
+  it('shows the message for the error code, not the raw backend text', async () => {
+    const { user } = renderProfile(
+      [userMock(), optionsMock, uploadMock(backendError('FORBIDDEN'))],
+      OWNER,
+    );
+    await screen.findByText('Upload avatar image');
+
+    await user.upload(fileInput()!, photo);
+
+    expect(await screen.findByText("You don't have permission to do this")).toBeInTheDocument();
+    expect(screen.queryByText('raw backend text')).not.toBeInTheDocument();
+  });
+
+  it('shows a generic message when the request fails without a code', async () => {
+    const { user } = renderProfile(
+      [userMock(), optionsMock, { ...uploadMock({}), error: new Error('Failed to fetch') }],
+      OWNER,
+    );
+    await screen.findByText('Upload avatar image');
+
+    await user.upload(fileInput()!, photo);
+
+    expect(await screen.findByText('Failed to update the avatar')).toBeInTheDocument();
+  });
+
+  it('checks the size before sending anything', async () => {
+    const { user } = renderProfile([userMock(), optionsMock], OWNER);
+    await screen.findByText('Upload avatar image');
+
+    await user.upload(
+      fileInput()!,
+      new File([new Uint8Array(5 * 1024 * 1024 + 1)], 'big.png', { type: 'image/png' }),
+    );
+
+    // No UPLOAD_AVATAR mock: a request would fail the test with a missing-mock error toast
+    expect(await screen.findByText('File size must not exceed 5 MB')).toBeInTheDocument();
+    expect(screen.queryByText('Uploading avatar')).not.toBeInTheDocument();
+  });
+
+  // An admin on someone else's profile: for the owner ME (avatarUrl: null) would overwrite the same
+  // User record in the cache and race with USER
+  it('removes the avatar after the backend confirms', async () => {
+    const { user } = renderProfile(
+      [
+        userMock({ ...rostislav, avatarUrl: AVATAR_URL }),
+        optionsMock,
+        {
+          request: { query: REMOVE_AVATAR, variables: { userId: USER_ID } },
+          result: { data: { removeAvatar: avatarResult(null) } },
+        },
+      ],
+      ADMIN,
+    );
+
+    await user.click(await screen.findByRole('button', { name: 'Remove avatar' }));
+
+    expect(await screen.findByText('Avatar has been removed')).toBeInTheDocument();
+    expect(screen.getByText('R')).toBeInTheDocument();
+    expect(screen.queryByRole('img', { name: 'Rostislav Harlanov' })).not.toBeInTheDocument();
   });
 });

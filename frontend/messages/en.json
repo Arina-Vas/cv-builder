@@ -50,8 +50,9 @@
       "upload": "Upload avatar image",
       "hint": "png, jpg or gif no more than {maxSize}",
       "remove": "Remove avatar",
+      "uploading": "Uploading avatar",
       "invalidType": "Only png, jpg or gif allowed",
-      "tooLarge": "File is larger than {maxSize}"
+      "tooLarge": "File size must not exceed {maxSize}"
     },
     "actions": {
       "confirm": "Confirm",
@@ -259,7 +260,10 @@
       "updated": "Profile has been updated",
       "verifyEmail": "Verify email",
       "verificationSent": "Verification email has been sent",
-      "verificationFailed": "Failed to send verification email"
+      "verificationFailed": "Failed to send verification email",
+      "avatarUpdated": "Avatar has been updated",
+      "avatarRemoved": "Avatar has been removed",
+      "avatarFailed": "Failed to update the avatar"
     },
     "fields": {
       "email": "Email",

@@ -8,6 +8,43 @@
   position: relative;
 }
 
+/* Upload in progress: a dimmed circle with a spinner over the current avatar */
+.loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-round);
+  background: color-mix(in srgb, var(--bg) 60%, transparent);
+  color: var(--primary);
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid currentColor;
+  border-right-color: transparent;
+  border-radius: var(--radius-round);
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  white-space: nowrap;
+  clip-path: inset(50%);
+  margin: -1px;
+}
+
 .avatar .removeButton {
   position: absolute;
   top: 0;
@@ -43,6 +80,10 @@
 @media (prefers-reduced-motion: reduce) {
   .avatar .removeButton {
     transition: none;
+  }
+
+  .spinner {
+    animation-duration: 2.4s;
   }
 }
 @media (hover: none) {
