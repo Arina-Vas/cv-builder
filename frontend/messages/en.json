@@ -112,6 +112,10 @@
         "required": "Category is required"
       }
     },
+    "userSkill": {
+      "skillId": { "required": "Skill is required" },
+      "mastery": { "required": "Skill mastery is required" }
+    },
     "project": {
       "name": {
         "required": "Project name is required",
@@ -397,6 +401,32 @@
     "delete": {
       "title": "Delete skill",
       "message": "Are you sure you want to delete skill <b>{name}</b>?"
+    }
+  },
+  "userSkill": {
+    "addButton": "Add skill",
+    "removeButton": "Remove skills",
+    "removeCount": "Remove ({count})",
+    "remove": {
+      "title": "Remove skills",
+      "message": "Are you sure you want to remove {count, plural, one {# skill} other {# skills}}?"
+    },
+    "empty": "No skills added",
+    "emptyProfile": "No skills added yet",
+    "loading": "Loading skills",
+    "loadError": "Failed to load skills",
+    "retry": "Retry",
+    "form": {
+      "createTitle": "Add skill",
+      "updateTitle": "Update skill",
+      "fields": { "skillId": "Skill", "mastery": "Skill mastery" }
+    },
+    "masteryLevel": {
+      "BEGINNER": "Beginner",
+      "ELEMENTARY": "Elementary",
+      "INTERMEDIATE": "Intermediate",
+      "ADVANCED": "Advanced",
+      "EXPERT": "Expert"
     }
   },
   "projects": {
