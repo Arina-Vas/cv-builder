@@ -21,12 +21,7 @@ import s from './Settings.module.css';
 const FIELDS = ['currentPassword', 'newPassword', 'confirmPassword'] as const;
 const SERVER_ERROR = 'server';
 
-type ServerErrorKey =
-  | 'changePassword.currentIncorrect'
-  | 'changePassword.sameAsCurrent'
-  | 'changePassword.weakPassword';
-
-const BACKEND_SAME_PASSWORD_MESSAGE = 'New password must be different from the current password';
+type ServerErrorKey = 'changePassword.currentIncorrect' | 'changePassword.sameAsCurrent';
 
 export const ChangePasswordForm = () => {
   const t = useTranslations('settings.changePassword');
@@ -54,16 +49,12 @@ export const ChangePasswordForm = () => {
       await changePassword({ variables: { input } });
     } catch (error) {
       const appError = parseError(error);
-      const newPasswordError = appError.fieldErrors.newPassword;
       if (appError.fieldErrors.currentPassword) {
         setServerError('currentPassword', 'changePassword.currentIncorrect');
-      } else if (newPasswordError) {
-        setServerError(
-          'newPassword',
-          newPasswordError === BACKEND_SAME_PASSWORD_MESSAGE
-            ? 'changePassword.sameAsCurrent'
-            : 'changePassword.weakPassword',
-        );
+      } else if (appError.fieldErrors.newPassword) {
+        // The schema already checks the new password like the backend does, so the only error the
+        // backend can still return for it is "equal to the current one"
+        setServerError('newPassword', 'changePassword.sameAsCurrent');
       } else {
         toast.error(errorMessage(appError));
       }

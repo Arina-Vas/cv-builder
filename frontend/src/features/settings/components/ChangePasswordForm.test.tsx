@@ -218,16 +218,16 @@ describe('ChangePasswordForm', () => {
       expect(fields().next).toHaveFocus();
     });
 
-    it('shows any other new password error from the backend as the security requirements text', async () => {
+    it('does not depend on the backend wording of the new password error', async () => {
       const { user } = renderWithProviders(<ChangePasswordForm />, {
-        mocks: [fieldErrorMock('newPassword', 'Password must be at least 6 characters long')],
+        mocks: [fieldErrorMock('newPassword', 'Some other backend text')],
       });
 
       await fillValid(user);
       await user.click(fields().submit);
 
       expect(
-        await screen.findByText('Password does not meet the security requirements'),
+        await screen.findByText('New password must be different from the current password'),
       ).toBeInTheDocument();
     });
 
