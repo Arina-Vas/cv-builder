@@ -160,6 +160,12 @@
       "required": "La confirmation du mot de passe est requise",
       "mismatch": "Les mots de passe ne correspondent pas"
     },
+    "changePassword": {
+      "confirmRequired": "La confirmation du mot de passe est requise",
+      "currentIncorrect": "Le mot de passe actuel est incorrect",
+      "sameAsCurrent": "Le nouveau mot de passe doit être différent de l'actuel",
+      "weakPassword": "Le mot de passe ne respecte pas les exigences de sécurité"
+    },
     "code": {
       "required": "Le code de vérification est requis",
       "invalid": "Veuillez saisir un code valide à 6 chiffres"
@@ -471,6 +477,37 @@
     "delete": {
       "title": "Supprimer le projet",
       "message": "Voulez-vous vraiment supprimer le projet <b>{name}</b> ?"
+    }
+  },
+  "settings": {
+    "preferences": "Préférences",
+    "theme": {
+      "label": "Thème",
+      "LIGHT": "Clair",
+      "DARK": "Sombre",
+      "SYSTEM": "Paramètres de l'appareil"
+    },
+    "language": {
+      "label": "Langue"
+    },
+    "locales": {
+      "en": "Anglais",
+      "fr": "Français",
+      "de": "Allemand",
+      "it": "Italien",
+      "pl": "Polonais",
+      "pt": "Portugais",
+      "ru": "Russe",
+      "es": "Espagnol",
+      "uk": "Ukrainien"
+    },
+    "changePassword": {
+      "title": "Changer le mot de passe",
+      "currentPassword": "Mot de passe",
+      "newPassword": "Nouveau mot de passe",
+      "confirmPassword": "Confirmer le mot de passe",
+      "submit": "Changer",
+      "success": "Le mot de passe a été modifié"
     }
   }
 }

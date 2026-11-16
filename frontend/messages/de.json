@@ -152,6 +152,12 @@
       "required": "Passwortbestätigung ist erforderlich",
       "mismatch": "Die Passwörter stimmen nicht überein"
     },
+    "changePassword": {
+      "confirmRequired": "Passwortbestätigung ist erforderlich",
+      "currentIncorrect": "Das aktuelle Passwort ist falsch",
+      "sameAsCurrent": "Das neue Passwort muss sich vom aktuellen unterscheiden",
+      "weakPassword": "Das Passwort erfüllt die Sicherheitsanforderungen nicht"
+    },
     "code": {
       "required": "Bestätigungscode ist erforderlich",
       "invalid": "Bitte geben Sie einen gültigen 6-stelligen Code ein"
@@ -463,6 +469,37 @@
     "delete": {
       "title": "Projekt löschen",
       "message": "Möchten Sie das Projekt <b>{name}</b> wirklich löschen?"
+    }
+  },
+  "settings": {
+    "preferences": "Einstellungen",
+    "theme": {
+      "label": "Design",
+      "LIGHT": "Hell",
+      "DARK": "Dunkel",
+      "SYSTEM": "Geräteeinstellungen"
+    },
+    "language": {
+      "label": "Sprache"
+    },
+    "locales": {
+      "en": "Englisch",
+      "fr": "Französisch",
+      "de": "Deutsch",
+      "it": "Italienisch",
+      "pl": "Polnisch",
+      "pt": "Portugiesisch",
+      "ru": "Russisch",
+      "es": "Spanisch",
+      "uk": "Ukrainisch"
+    },
+    "changePassword": {
+      "title": "Passwort ändern",
+      "currentPassword": "Passwort",
+      "newPassword": "Neues Passwort",
+      "confirmPassword": "Passwort bestätigen",
+      "submit": "Ändern",
+      "success": "Das Passwort wurde geändert"
     }
   }
 }

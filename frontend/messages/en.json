@@ -152,6 +152,12 @@
       "required": "Confirm Password is required",
       "mismatch": "Passwords do not match"
     },
+    "changePassword": {
+      "confirmRequired": "Confirm password is required",
+      "currentIncorrect": "Current password is incorrect",
+      "sameAsCurrent": "New password must be different from the current password",
+      "weakPassword": "Password does not meet the security requirements"
+    },
     "code": {
       "required": "Verification code is required",
       "invalid": "Please enter a valid 6-digit code"
@@ -460,6 +466,37 @@
     "delete": {
       "title": "Delete project",
       "message": "Are you sure you want to delete project <b>{name}</b>?"
+    }
+  },
+  "settings": {
+    "preferences": "Preferences",
+    "theme": {
+      "label": "Theme",
+      "LIGHT": "Light",
+      "DARK": "Dark",
+      "SYSTEM": "Device settings"
+    },
+    "language": {
+      "label": "Language"
+    },
+    "locales": {
+      "en": "English",
+      "fr": "French",
+      "de": "German",
+      "it": "Italian",
+      "pl": "Polish",
+      "pt": "Portuguese",
+      "ru": "Russian",
+      "es": "Spanish",
+      "uk": "Ukrainian"
+    },
+    "changePassword": {
+      "title": "Change password",
+      "currentPassword": "Password",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm Password",
+      "submit": "Change",
+      "success": "Password has been changed"
     }
   }
 }

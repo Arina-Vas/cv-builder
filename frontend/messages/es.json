@@ -157,6 +157,12 @@
       "required": "La confirmación de la contraseña es obligatoria",
       "mismatch": "Las contraseñas no coinciden"
     },
+    "changePassword": {
+      "confirmRequired": "La confirmación de la contraseña es obligatoria",
+      "currentIncorrect": "La contraseña actual es incorrecta",
+      "sameAsCurrent": "La nueva contraseña debe ser diferente de la actual",
+      "weakPassword": "La contraseña no cumple los requisitos de seguridad"
+    },
     "code": {
       "required": "El código de verificación es obligatorio",
       "invalid": "Introduce un código válido de 6 dígitos"
@@ -471,6 +477,37 @@
     "delete": {
       "title": "Eliminar proyecto",
       "message": "¿Seguro que quieres eliminar el proyecto <b>{name}</b>?"
+    }
+  },
+  "settings": {
+    "preferences": "Preferencias",
+    "theme": {
+      "label": "Tema",
+      "LIGHT": "Claro",
+      "DARK": "Oscuro",
+      "SYSTEM": "Configuración del dispositivo"
+    },
+    "language": {
+      "label": "Idioma"
+    },
+    "locales": {
+      "en": "Inglés",
+      "fr": "Francés",
+      "de": "Alemán",
+      "it": "Italiano",
+      "pl": "Polaco",
+      "pt": "Portugués",
+      "ru": "Ruso",
+      "es": "Español",
+      "uk": "Ucraniano"
+    },
+    "changePassword": {
+      "title": "Cambiar contraseña",
+      "currentPassword": "Contraseña",
+      "newPassword": "Nueva contraseña",
+      "confirmPassword": "Confirmar contraseña",
+      "submit": "Cambiar",
+      "success": "La contraseña se ha cambiado"
     }
   }
 }

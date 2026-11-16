@@ -157,6 +157,12 @@
       "required": "Potwierdzenie hasła jest wymagane",
       "mismatch": "Hasła nie są zgodne"
     },
+    "changePassword": {
+      "confirmRequired": "Potwierdzenie hasła jest wymagane",
+      "currentIncorrect": "Obecne hasło jest nieprawidłowe",
+      "sameAsCurrent": "Nowe hasło musi różnić się od obecnego",
+      "weakPassword": "Hasło nie spełnia wymagań bezpieczeństwa"
+    },
     "code": {
       "required": "Kod weryfikacyjny jest wymagany",
       "invalid": "Wprowadź prawidłowy 6-cyfrowy kod"
@@ -464,6 +470,37 @@
     "delete": {
       "title": "Usuń projekt",
       "message": "Czy na pewno chcesz usunąć projekt <b>{name}</b>?"
+    }
+  },
+  "settings": {
+    "preferences": "Preferencje",
+    "theme": {
+      "label": "Motyw",
+      "LIGHT": "Jasny",
+      "DARK": "Ciemny",
+      "SYSTEM": "Ustawienia urządzenia"
+    },
+    "language": {
+      "label": "Język"
+    },
+    "locales": {
+      "en": "Angielski",
+      "fr": "Francuski",
+      "de": "Niemiecki",
+      "it": "Włoski",
+      "pl": "Polski",
+      "pt": "Portugalski",
+      "ru": "Rosyjski",
+      "es": "Hiszpański",
+      "uk": "Ukraiński"
+    },
+    "changePassword": {
+      "title": "Zmień hasło",
+      "currentPassword": "Hasło",
+      "newPassword": "Nowe hasło",
+      "confirmPassword": "Potwierdź hasło",
+      "submit": "Zmień",
+      "success": "Hasło zostało zmienione"
     }
   }
 }

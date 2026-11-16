@@ -157,6 +157,12 @@
       "required": "A confirmação da senha é obrigatória",
       "mismatch": "As senhas não coincidem"
     },
+    "changePassword": {
+      "confirmRequired": "A confirmação da senha é obrigatória",
+      "currentIncorrect": "A senha atual está incorreta",
+      "sameAsCurrent": "A nova senha deve ser diferente da atual",
+      "weakPassword": "A senha não atende aos requisitos de segurança"
+    },
     "code": {
       "required": "O código de verificação é obrigatório",
       "invalid": "Insira um código válido de 6 dígitos"
@@ -464,6 +470,37 @@
     "delete": {
       "title": "Excluir projeto",
       "message": "Tem certeza de que deseja excluir o projeto <b>{name}</b>?"
+    }
+  },
+  "settings": {
+    "preferences": "Preferências",
+    "theme": {
+      "label": "Tema",
+      "LIGHT": "Claro",
+      "DARK": "Escuro",
+      "SYSTEM": "Configurações do dispositivo"
+    },
+    "language": {
+      "label": "Idioma"
+    },
+    "locales": {
+      "en": "Inglês",
+      "fr": "Francês",
+      "de": "Alemão",
+      "it": "Italiano",
+      "pl": "Polonês",
+      "pt": "Português",
+      "ru": "Russo",
+      "es": "Espanhol",
+      "uk": "Ucraniano"
+    },
+    "changePassword": {
+      "title": "Alterar senha",
+      "currentPassword": "Senha",
+      "newPassword": "Nova senha",
+      "confirmPassword": "Confirmar senha",
+      "submit": "Alterar",
+      "success": "A senha foi alterada"
     }
   }
 }
