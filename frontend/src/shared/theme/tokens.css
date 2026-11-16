@@ -340,6 +340,7 @@
   --primary-pressed-bg: #e9b0b0; /* [F] */
   --primary-pressed-border: #c63031; /* [F] */
   --primary-disabled-bg: #aeaeae; /* [F] */
+  --primary-disabled-text: #E2E2E4; /* [M] primary.contrastText, as before */
   --primary-tint-hover: rgba(198, 48, 49, 0.04); /* [M] outlined/text button hover bg */
   --primary-tint-selected: rgba(198, 48, 49, 0.08); /* [M] */
 
@@ -379,7 +380,7 @@
   --button-secondary-disabled-bg: #aeaeae; /* [F] */
   /* Button — ghost (text) */
   --button-ghost-hover-border: #626262; /* TODO: visual only, not measured */
-  --button-ghost-text: #C4C4C6;
+  --button-ghost-text: #626262; /* [F] FORGOT PASSWORD */
   --button-ghost-pressed-bg: #aeaeae; /* [F] */
   --button-ghost-pressed-border: #626262; /* [F] */
   --button-ghost-pressed-text: #2e2e2e; /* TODO: visual only */
@@ -535,6 +536,7 @@
   --border-strong: #e2e2e4; /* [F] */
 
   --primary-disabled-bg: #626262; /* [F] */
+  --primary-disabled-text: #aeaeae; /* grey, so a disabled button does not look active */
   --primary-tint-hover: rgba(198, 48, 49, 0.08); /* [M] */
   --primary-tint-selected: rgba(198, 48, 49, 0.16); /* [M] */
 
@@ -567,6 +569,7 @@
   --button-secondary-pressed-text: #ffffff; /* TODO */
   --button-secondary-disabled-bg: #626262; /* [F] */
   --button-ghost-hover-border: #e2e2e4; /* TODO: visual only */
+  --button-ghost-text: #c4c4c6; /* [F] FORGOT PASSWORD */
   --button-ghost-pressed-bg: #e2e2e4; /* [F] */
   --button-ghost-pressed-border: #454545; /* [F] */
   --button-ghost-pressed-text: #2e2e2e; /* TODO: visual only (dark text on light fill) */

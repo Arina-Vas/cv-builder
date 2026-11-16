@@ -70,7 +70,7 @@
 .text:is(:disabled, [aria-disabled='true']) {
   background: var(--primary-disabled-bg);
   border-color: var(--primary-disabled-bg);
-  color: var(--color-disabled);
+  color: var(--primary-disabled-text);
 }
 
 .secondary {
