@@ -4,8 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/shared/components/buttons';
 import { useTranslations } from 'next-intl';
 import { useErrorMessage } from '@/shared/lib/apollo/useErrorMessage';
-import type { ErrorCode } from '@/shared/lib/apollo/graphql-errors';
-import { parseError } from '@/shared/lib/apollo/graphql-errors';
+import { parseError, type ErrorCode } from '@/shared/lib/apollo/graphql-errors';
 
 type Props = {
   title: string;
