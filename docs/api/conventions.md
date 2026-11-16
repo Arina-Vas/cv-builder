@@ -273,8 +273,11 @@ avoid a column-key → enum map in every table.
 - Bulk deletes take a list of ids and return the deleted ids:
   `deleteUserSkills(userId: ID!, ids: [ID!]!): [ID!]!` (same for `deleteUserLanguages`). The ids are the assignment
   ids (`UserSkill.id`, `UserLanguage.id`), not skill or language ids (wiki: the selection uses the ids of the
-  assignments). Ids that are already removed or belong to another user
-  are skipped, so the result can be shorter than the input; the frontend evicts the returned ids and refetches.
+  assignments).
+  - Ids that are already removed are skipped, so the result can be shorter than the input (deleting is
+    idempotent; wiki: "stale selections should be removed"). The frontend evicts the returned ids and refetches.
+  - An id of another user's assignment rejects the whole request with `FORBIDDEN` and nothing is removed: the UI
+    never sends one, so it means a tampered request (wiki: "Assignment belongs to the selected user").
 - Mutations take one argument named `input` of an `@InputType`, except deletes, which take ids directly.
 - `update*` inputs contain `id` and only the fields the user can change.
 - `update*` is a full update: `Update<Entity>Input extends Create<Entity>Input` and adds `id`, so the form sends

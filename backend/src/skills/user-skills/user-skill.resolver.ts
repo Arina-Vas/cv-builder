@@ -61,7 +61,9 @@ export class UserSkillResolver {
 
   @Mutation(() => [ID], {
     description:
-      'Own profile or Admin. Removes the given UserSkill ids of the user; returns the removed ids',
+      'Own profile or Admin. Removes the given UserSkill ids of the user; returns the removed ids. ' +
+      'Ids already removed are skipped. Fails with FORBIDDEN and removes nothing ' +
+      "if an id belongs to another user's assignment",
   })
   deleteUserSkills(
     @CurrentUser() currentUser: User,
