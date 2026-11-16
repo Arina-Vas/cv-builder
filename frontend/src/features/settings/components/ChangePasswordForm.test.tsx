@@ -110,6 +110,19 @@ describe('ChangePasswordForm', () => {
       expect(screen.queryByText('Passwords do not match')).not.toBeInTheDocument();
     });
 
+    it('leaves an untouched empty confirmation alone while the new password is typed', async () => {
+      const { user } = renderWithProviders(<ChangePasswordForm />);
+      const { next, confirm } = fields();
+
+      await user.type(next, 'new-secret');
+      await user.tab();
+      expect(screen.queryByText('Confirm password is required')).not.toBeInTheDocument();
+      expect(confirm).not.toHaveAttribute('aria-invalid');
+
+      await user.type(confirm, 'new-secret');
+      expect(screen.queryByText('Confirm password is required')).not.toBeInTheDocument();
+    });
+
     it('enables CHANGE as soon as the form is valid', async () => {
       const { user } = renderWithProviders(<ChangePasswordForm />);
 

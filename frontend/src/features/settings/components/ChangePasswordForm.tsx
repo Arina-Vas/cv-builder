@@ -84,7 +84,14 @@ export const ChangePasswordForm = () => {
 
   const field = (name: keyof ChangePasswordValues) => ({
     ...form.register(name, {
-      deps: name === 'newPassword' ? ['confirmPassword'] : undefined,
+      // A new password re-checks "Passwords do not match", but only once the confirmation has a value:
+      // `deps` would also flag an untouched empty confirmation as required
+      onChange:
+        name === 'newPassword'
+          ? () => {
+              if (form.getValues('confirmPassword')) void form.trigger('confirmPassword');
+            }
+          : undefined,
     }),
     error: errorText(name),
   });
