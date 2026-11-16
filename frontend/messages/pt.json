@@ -330,7 +330,8 @@
     "edit": { "title": "Editar departamento" },
     "delete": {
       "title": "Excluir departamento",
-      "message": "Tem certeza de que deseja excluir o departamento <b>{name}</b>?"
+      "message": "Tem certeza de que deseja excluir o departamento <b>{name}</b>?",
+      "inUse": "O departamento não pode ser excluído porque está em uso"
     }
   },
   "positions": {
@@ -346,7 +347,8 @@
     "edit": { "title": "Editar cargo" },
     "delete": {
       "title": "Excluir cargo",
-      "message": "Tem certeza de que deseja excluir o cargo <b>{name}</b>?"
+      "message": "Tem certeza de que deseja excluir o cargo <b>{name}</b>?",
+      "inUse": "O cargo não pode ser excluído porque está em uso"
     }
   },
   "languages": {
@@ -366,7 +368,8 @@
     "edit": { "title": "Editar idioma" },
     "delete": {
       "title": "Excluir idioma",
-      "message": "Tem certeza de que deseja excluir o idioma <b>{name}</b>?"
+      "message": "Tem certeza de que deseja excluir o idioma <b>{name}</b>?",
+      "inUse": "O idioma não pode ser excluído porque está em uso"
     }
   },
   "userLanguage": {
@@ -415,7 +418,8 @@
     "edit": { "title": "Editar habilidade" },
     "delete": {
       "title": "Excluir habilidade",
-      "message": "Tem certeza de que deseja excluir a habilidade <b>{name}</b>?"
+      "message": "Tem certeza de que deseja excluir a habilidade <b>{name}</b>?",
+      "inUse": "A habilidade não pode ser excluída porque está em uso"
     }
   },
   "userSkill": {
@@ -469,7 +473,8 @@
     "edit": { "title": "Editar projeto" },
     "delete": {
       "title": "Excluir projeto",
-      "message": "Tem certeza de que deseja excluir o projeto <b>{name}</b>?"
+      "message": "Tem certeza de que deseja excluir o projeto <b>{name}</b>?",
+      "inUse": "O projeto não pode ser excluído porque está em uso"
     }
   },
   "settings": {

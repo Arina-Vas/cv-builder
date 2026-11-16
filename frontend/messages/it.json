@@ -330,7 +330,8 @@
     "edit": { "title": "Modifica reparto" },
     "delete": {
       "title": "Elimina reparto",
-      "message": "Vuoi davvero eliminare il reparto <b>{name}</b>?"
+      "message": "Vuoi davvero eliminare il reparto <b>{name}</b>?",
+      "inUse": "Il reparto non può essere eliminato perché è attualmente in uso"
     }
   },
   "positions": {
@@ -346,7 +347,8 @@
     "edit": { "title": "Modifica posizione" },
     "delete": {
       "title": "Elimina posizione",
-      "message": "Vuoi davvero eliminare la posizione <b>{name}</b>?"
+      "message": "Vuoi davvero eliminare la posizione <b>{name}</b>?",
+      "inUse": "La posizione non può essere eliminata perché è attualmente in uso"
     }
   },
   "languages": {
@@ -366,7 +368,8 @@
     "edit": { "title": "Modifica lingua" },
     "delete": {
       "title": "Elimina lingua",
-      "message": "Vuoi davvero eliminare la lingua <b>{name}</b>?"
+      "message": "Vuoi davvero eliminare la lingua <b>{name}</b>?",
+      "inUse": "La lingua non può essere eliminata perché è attualmente in uso"
     }
   },
   "userLanguage": {
@@ -415,7 +418,8 @@
     "edit": { "title": "Modifica competenza" },
     "delete": {
       "title": "Elimina competenza",
-      "message": "Vuoi davvero eliminare la competenza <b>{name}</b>?"
+      "message": "Vuoi davvero eliminare la competenza <b>{name}</b>?",
+      "inUse": "La competenza non può essere eliminata perché è attualmente in uso"
     }
   },
   "userSkill": {
@@ -469,7 +473,8 @@
     "edit": { "title": "Modifica progetto" },
     "delete": {
       "title": "Elimina progetto",
-      "message": "Vuoi davvero eliminare il progetto <b>{name}</b>?"
+      "message": "Vuoi davvero eliminare il progetto <b>{name}</b>?",
+      "inUse": "Il progetto non può essere eliminato perché è attualmente in uso"
     }
   },
   "settings": {
