@@ -57,8 +57,8 @@ export const UserFormModal = ({ open, onOpenChange, user, isSelf = false }: Prop
   const { data: optionsData, loading: optionsLoading } = useQuery(USER_FORM_OPTIONS, {
     skip: !open,
   });
-  const departments = useMemo(() => toOptions(optionsData?.departments.items), [optionsData]);
-  const positions = useMemo(() => toOptions(optionsData?.positions.items), [optionsData]);
+  const departments = useMemo(() => toOptions(optionsData?.departmentOptions), [optionsData]);
+  const positions = useMemo(() => toOptions(optionsData?.positionOptions), [optionsData]);
   const roles: SelectOption[] = USER_ROLES.map((role) => ({
     value: role,
     label: t(`roles.${role}`),

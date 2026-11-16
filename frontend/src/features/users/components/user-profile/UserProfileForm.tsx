@@ -63,11 +63,11 @@ export const UserProfileForm = ({
   });
 
   const departments = useMemo(
-    () => toOptions(optionsData?.departments.items ?? [user.department]),
+    () => toOptions(optionsData?.departmentOptions ?? [user.department]),
     [optionsData, user.department],
   );
   const positions = useMemo(
-    () => toOptions(optionsData?.positions.items ?? [user.position]),
+    () => toOptions(optionsData?.positionOptions ?? [user.position]),
     [optionsData, user.position],
   );
   const selectDisabled = !canEdit || optionsLoading;

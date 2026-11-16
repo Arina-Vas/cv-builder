@@ -61,6 +61,7 @@ export const POSITION_MUTATION_OPTIONS = {
   context: NO_ERROR_TOAST,
   update: (cache: ApolloCache) => {
     cache.evict({ id: 'ROOT_QUERY', fieldName: 'positions' });
+    cache.evict({ id: 'ROOT_QUERY', fieldName: 'positionOptions' });
     cache.gc();
   },
   refetchQueries: [POSITIONS],
