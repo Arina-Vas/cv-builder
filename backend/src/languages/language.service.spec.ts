@@ -38,6 +38,9 @@ describe('LanguageService', () => {
       update: jest.fn(),
       delete: jest.fn(),
     },
+    userLanguage: {
+      count: jest.fn(),
+    },
     $transaction: jest.fn((operations: Promise<unknown>[]) => Promise.all(operations)),
   };
   const service = new LanguageService(prisma as unknown as PrismaService);
@@ -57,6 +60,8 @@ describe('LanguageService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // By default nothing references the language, so it can be deleted
+    prisma.userLanguage.count.mockResolvedValue(0);
     prisma.language.findMany.mockResolvedValue([
       row('English', 'EN'),
       row('German', 'DE', 'Deutsch'),
@@ -226,15 +231,27 @@ describe('LanguageService', () => {
   });
 
   describe('delete', () => {
-    it('deletes the language and returns its id', async () => {
+    it('deletes the language and returns its id when nothing references it', async () => {
       prisma.language.delete.mockResolvedValue(row('English', 'EN'));
 
       const result = await service.delete('id-EN');
 
+      expect(prisma.userLanguage.count).toHaveBeenCalledWith({ where: { languageId: 'id-EN' } });
       expect(prisma.language.delete).toHaveBeenCalledWith({ where: { id: 'id-EN' } });
       expect(result).toBe('id-EN');
     });
 
+    it('throws ENTITY_IN_USE and does not delete when users reference the language', async () => {
+      prisma.userLanguage.count.mockResolvedValue(2);
+
+      await expect(service.delete('id-EN')).rejects.toMatchObject({
+        message: 'Language cannot be deleted because it is currently in use',
+        extensions: { code: ErrorCode.ENTITY_IN_USE },
+      });
+      expect(prisma.language.delete).not.toHaveBeenCalled();
+    });
+
+    // P2003 here means a reference was added between the check and the delete
     it.each(['P2003', 'P2025'])('leaves %s to the global filter', async (code) => {
       const error = prismaError(code);
       prisma.language.delete.mockRejectedValue(error);

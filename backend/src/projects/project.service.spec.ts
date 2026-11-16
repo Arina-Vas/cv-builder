@@ -78,11 +78,16 @@ describe('ProjectService', () => {
       findMany: jest.fn(),
       count: jest.fn(),
     },
+    cvProject: {
+      count: jest.fn(),
+    },
   };
   const service = new ProjectService(prisma as unknown as PrismaService);
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // By default nothing references the project, so it can be deleted
+    prisma.cvProject.count.mockResolvedValue(0);
     prisma.project.findMany.mockResolvedValue([projectRow('Blog'), projectRow('CV Builder')]);
     // By default every submitted technology exists
     prisma.skill.count.mockImplementation(({ where }: { where: { id: { in: string[] } } }) =>
@@ -284,15 +289,27 @@ describe('ProjectService', () => {
   });
 
   describe('delete', () => {
-    it('deletes the project and returns its id', async () => {
+    it('deletes the project and returns its id when nothing references it', async () => {
       prisma.project.delete.mockResolvedValue(projectRow('Blog'));
 
       const result = await service.delete('id-Blog');
 
+      expect(prisma.cvProject.count).toHaveBeenCalledWith({ where: { projectId: 'id-Blog' } });
       expect(prisma.project.delete).toHaveBeenCalledWith({ where: { id: 'id-Blog' } });
       expect(result).toBe('id-Blog');
     });
 
+    it('throws ENTITY_IN_USE and does not delete when CVs reference the project', async () => {
+      prisma.cvProject.count.mockResolvedValue(2);
+
+      await expect(service.delete('id-Blog')).rejects.toMatchObject({
+        message: 'Project cannot be deleted because it is currently in use',
+        extensions: { code: ErrorCode.ENTITY_IN_USE },
+      });
+      expect(prisma.project.delete).not.toHaveBeenCalled();
+    });
+
+    // P2003 here means a reference was added between the check and the delete
     it.each(['P2003', 'P2025'])('leaves %s to the global filter', async (code) => {
       const error = prismaError(code);
       prisma.project.delete.mockRejectedValue(error);

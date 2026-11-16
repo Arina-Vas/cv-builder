@@ -9,7 +9,7 @@ import { SortOrder } from '@/common/graphql/sort-order.enum';
 import type { Prisma } from '@/generated/prisma/client';
 import { toPosition } from '@/positions/position.mapper';
 import { isPrismaError } from '@/prisma/prisma-errors';
-import { conflict } from '@/common/errors/app-errors';
+import { conflict, entityInUse } from '@/common/errors/app-errors';
 
 @Injectable()
 export class PositionService {
@@ -78,6 +78,10 @@ export class PositionService {
   }
 
   async delete(id: string): Promise<string> {
+    const assigned = await this.prisma.user.count({ where: { positionId: id } });
+    if (assigned > 0) {
+      throw entityInUse('Position cannot be deleted because it is currently in use');
+    }
     const row = await this.prisma.position.delete({ where: { id } });
 
     return row.id;

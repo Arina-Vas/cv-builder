@@ -115,8 +115,9 @@ All tables have `id` (uuid), `created_at` and `updated_at`. Only the meaningful 
 
 The spec asks each catalog to define its deletion policy explicitly. One rule is used everywhere:
 
-- **A catalog item cannot be deleted while something references it** (`Restrict`). The API returns a business
-  error, e.g. "Skill cannot be deleted because it is assigned to users".
+- **A catalog item cannot be deleted while something references it** (`Restrict`). The service checks the
+  references below before deleting and returns `ENTITY_IN_USE`, e.g. "Skill cannot be deleted because it is
+  currently in use"; `Restrict` is the safety net for a reference added meanwhile.
 - **Deleting an owner removes its own links** (`Cascade`). Global catalog items are never deleted as a side effect.
 
 | Relation (FK)                                  | On delete of the referenced row | Effect                                               |

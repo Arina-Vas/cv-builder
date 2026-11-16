@@ -32,12 +32,17 @@ describe('PositionService', () => {
       update: jest.fn(),
       delete: jest.fn(),
     },
+    user: {
+      count: jest.fn(),
+    },
     $transaction: jest.fn((operations: Promise<unknown>[]) => Promise.all(operations)),
   };
   const service = new PositionService(prisma as unknown as PrismaService);
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // By default nothing references the position, so it can be deleted
+    prisma.user.count.mockResolvedValue(0);
     prisma.position.findMany.mockResolvedValue([row('QA Engineer'), row('Project Manager')]);
     prisma.position.count.mockResolvedValue(2);
   });
@@ -161,20 +166,29 @@ describe('PositionService', () => {
   });
 
   describe('delete', () => {
-    it('deletes the position and returns its id', async () => {
+    it('deletes the position and returns its id when nothing references it', async () => {
       prisma.position.delete.mockResolvedValue(row('QA Engineer'));
 
       const result = await service.delete('id-QA Engineer');
 
-      expect(prisma.position.delete).toHaveBeenCalledWith({
-        where: { id: 'id-QA Engineer' },
-      });
+      expect(prisma.user.count).toHaveBeenCalledWith({ where: { positionId: 'id-QA Engineer' } });
+      expect(prisma.position.delete).toHaveBeenCalledWith({ where: { id: 'id-QA Engineer' } });
       expect(result).toBe('id-QA Engineer');
     });
 
+    it('throws ENTITY_IN_USE and does not delete when users reference the position', async () => {
+      prisma.user.count.mockResolvedValue(2);
+
+      await expect(service.delete('id-QA Engineer')).rejects.toMatchObject({
+        message: 'Position cannot be deleted because it is currently in use',
+        extensions: { code: ErrorCode.ENTITY_IN_USE },
+      });
+      expect(prisma.position.delete).not.toHaveBeenCalled();
+    });
+
+    // P2003 here means a reference was added between the check and the delete
     it.each(['P2003', 'P2025'])('leaves %s to the global filter', async (code) => {
       const error = prismaError(code);
-
       prisma.position.delete.mockRejectedValue(error);
 
       await expect(service.delete('id-QA Engineer')).rejects.toBe(error);

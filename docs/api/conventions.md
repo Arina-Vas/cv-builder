@@ -407,8 +407,12 @@ Rules for services:
 - **References.** Before `create` / `update`, a service checks that referenced records exist (`departmentId`,
   `categoryId`, `technologyIds`, …) and throws `badUserInput([{ field, message }])` otherwise (wiki: "Backend validates
   the selected department"). That is why a Prisma `P2003` reaching the filter means a blocked delete.
-- **Blocked delete.** Catalogs use `onDelete: Restrict` ([data model](../data-model.md#deletion-policy)), so the
-  database rejects deleting a referenced item and the filter returns `ENTITY_IN_USE`.
+- **Blocked delete.** Before `delete`, a catalog service counts the rows that reference the item (every relation
+  with `onDelete: Restrict`, see [data model](../data-model.md#deletion-policy)) and throws
+  `entityInUse('<Entity> cannot be deleted because it is currently in use')` when there are any (wiki: "Check
+  whether the department is referenced by other entities"). `Restrict` stays as the safety net: a reference added
+  between the check and the delete makes the database reject it, and the filter returns `ENTITY_IN_USE` with a
+  generic message. The frontend shows its own per-entity text either way, keyed by the page and the code.
 - **Rate limits.** A service that knows the cooldown throws `rateLimited(<seconds>, '<message>')`.
 
 Which Prisma errors a service catches (with `isPrismaError(error, code)`); everything else is rethrown for the
@@ -422,7 +426,19 @@ global filter:
 | `P2003` | `delete`: not caught                           | —                                            | `ENTITY_IN_USE` (filter)          |
 
 `P2003` on `create` / `update` happens when a referenced record is deleted between the existence check and the
-write. `P2025` is caught only when the frontend needs a specific message (e.g. `notFound('CV not found')`).
+write; on `delete`, when a reference is added between the reference check and the delete. `P2025` is caught only
+when the frontend needs a specific message (e.g. `notFound('CV not found')`).
+
+```ts
+async delete(id: string): Promise<string> {
+  const assigned = await this.prisma.user.count({ where: { departmentId: id } });
+  if (assigned > 0) {
+    throw entityInUse('Department cannot be deleted because it is currently in use');
+  }
+
+  return (await this.prisma.department.delete({ where: { id } })).id;
+}
+```
 
 ```ts
 async update({ id, name }: UpdateDepartmentInput): Promise<Department> {

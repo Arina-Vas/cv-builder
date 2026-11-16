@@ -32,12 +32,17 @@ describe('DepartmentService', () => {
       update: jest.fn(),
       delete: jest.fn(),
     },
+    user: {
+      count: jest.fn(),
+    },
     $transaction: jest.fn((operations: Promise<unknown>[]) => Promise.all(operations)),
   };
   const service = new DepartmentService(prisma as unknown as PrismaService);
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // By default nothing references the department, so it can be deleted
+    prisma.user.count.mockResolvedValue(0);
     prisma.department.findMany.mockResolvedValue([row('Backend'), row('Frontend')]);
     prisma.department.count.mockResolvedValue(2);
   });
@@ -157,20 +162,29 @@ describe('DepartmentService', () => {
   });
 
   describe('delete', () => {
-    it('deletes the department and returns its id', async () => {
+    it('deletes the department and returns its id when nothing references it', async () => {
       prisma.department.delete.mockResolvedValue(row('Sales'));
 
       const result = await service.delete('id-Sales');
 
-      expect(prisma.department.delete).toHaveBeenCalledWith({
-        where: { id: 'id-Sales' },
-      });
+      expect(prisma.user.count).toHaveBeenCalledWith({ where: { departmentId: 'id-Sales' } });
+      expect(prisma.department.delete).toHaveBeenCalledWith({ where: { id: 'id-Sales' } });
       expect(result).toBe('id-Sales');
     });
 
+    it('throws ENTITY_IN_USE and does not delete when users reference the department', async () => {
+      prisma.user.count.mockResolvedValue(2);
+
+      await expect(service.delete('id-Sales')).rejects.toMatchObject({
+        message: 'Department cannot be deleted because it is currently in use',
+        extensions: { code: ErrorCode.ENTITY_IN_USE },
+      });
+      expect(prisma.department.delete).not.toHaveBeenCalled();
+    });
+
+    // P2003 here means a reference was added between the check and the delete
     it.each(['P2003', 'P2025'])('leaves %s to the global filter', async (code) => {
       const error = prismaError(code);
-
       prisma.department.delete.mockRejectedValue(error);
 
       await expect(service.delete('id-Sales')).rejects.toBe(error);
