@@ -337,7 +337,8 @@
     "edit": { "title": "Editar departamento" },
     "delete": {
       "title": "Eliminar departamento",
-      "message": "¿Seguro que quieres eliminar el departamento <b>{name}</b>?"
+      "message": "¿Seguro que quieres eliminar el departamento <b>{name}</b>?",
+      "inUse": "El departamento no se puede eliminar porque está en uso"
     }
   },
   "positions": {
@@ -353,7 +354,8 @@
     "edit": { "title": "Editar puesto" },
     "delete": {
       "title": "Eliminar puesto",
-      "message": "¿Seguro que quieres eliminar el puesto <b>{name}</b>?"
+      "message": "¿Seguro que quieres eliminar el puesto <b>{name}</b>?",
+      "inUse": "El puesto no se puede eliminar porque está en uso"
     }
   },
   "languages": {
@@ -373,7 +375,8 @@
     "edit": { "title": "Editar idioma" },
     "delete": {
       "title": "Eliminar idioma",
-      "message": "¿Seguro que quieres eliminar el idioma <b>{name}</b>?"
+      "message": "¿Seguro que quieres eliminar el idioma <b>{name}</b>?",
+      "inUse": "El idioma no se puede eliminar porque está en uso"
     }
   },
   "userLanguage": {
@@ -422,7 +425,8 @@
     "edit": { "title": "Editar habilidad" },
     "delete": {
       "title": "Eliminar habilidad",
-      "message": "¿Seguro que quieres eliminar la habilidad <b>{name}</b>?"
+      "message": "¿Seguro que quieres eliminar la habilidad <b>{name}</b>?",
+      "inUse": "La habilidad no se puede eliminar porque está en uso"
     }
   },
   "userSkill": {
@@ -476,7 +480,8 @@
     "edit": { "title": "Editar proyecto" },
     "delete": {
       "title": "Eliminar proyecto",
-      "message": "¿Seguro que quieres eliminar el proyecto <b>{name}</b>?"
+      "message": "¿Seguro que quieres eliminar el proyecto <b>{name}</b>?",
+      "inUse": "El proyecto no se puede eliminar porque está en uso"
     }
   },
   "settings": {

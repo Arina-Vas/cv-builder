@@ -337,7 +337,8 @@
     "edit": { "title": "Modifier le département" },
     "delete": {
       "title": "Supprimer le département",
-      "message": "Voulez-vous vraiment supprimer le département <b>{name}</b> ?"
+      "message": "Voulez-vous vraiment supprimer le département <b>{name}</b> ?",
+      "inUse": "Le département ne peut pas être supprimé car il est actuellement utilisé"
     }
   },
   "positions": {
@@ -353,7 +354,8 @@
     "edit": { "title": "Modifier le poste" },
     "delete": {
       "title": "Supprimer le poste",
-      "message": "Voulez-vous vraiment supprimer le poste <b>{name}</b> ?"
+      "message": "Voulez-vous vraiment supprimer le poste <b>{name}</b> ?",
+      "inUse": "Le poste ne peut pas être supprimé car il est actuellement utilisé"
     }
   },
   "languages": {
@@ -373,7 +375,8 @@
     "edit": { "title": "Modifier la langue" },
     "delete": {
       "title": "Supprimer la langue",
-      "message": "Voulez-vous vraiment supprimer la langue <b>{name}</b> ?"
+      "message": "Voulez-vous vraiment supprimer la langue <b>{name}</b> ?",
+      "inUse": "La langue ne peut pas être supprimée car elle est actuellement utilisée"
     }
   },
   "userLanguage": {
@@ -422,7 +425,8 @@
     "edit": { "title": "Modifier la compétence" },
     "delete": {
       "title": "Supprimer la compétence",
-      "message": "Voulez-vous vraiment supprimer la compétence <b>{name}</b> ?"
+      "message": "Voulez-vous vraiment supprimer la compétence <b>{name}</b> ?",
+      "inUse": "La compétence ne peut pas être supprimée car elle est actuellement utilisée"
     }
   },
   "userSkill": {
@@ -476,7 +480,8 @@
     "edit": { "title": "Modifier le projet" },
     "delete": {
       "title": "Supprimer le projet",
-      "message": "Voulez-vous vraiment supprimer le projet <b>{name}</b> ?"
+      "message": "Voulez-vous vraiment supprimer le projet <b>{name}</b> ?",
+      "inUse": "Le projet ne peut pas être supprimé car il est actuellement utilisé"
     }
   },
   "settings": {
