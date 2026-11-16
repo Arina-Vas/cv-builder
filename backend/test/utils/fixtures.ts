@@ -18,6 +18,8 @@ export const REQUEST_RESET =
   'mutation ($input: RequestPasswordResetInput!) { requestPasswordReset(input: $input) }';
 export const RESET_PASSWORD =
   'mutation ($input: ResetPasswordInput!) { resetPassword(input: $input) }';
+export const CHANGE_PASSWORD =
+  'mutation ($input: ChangePasswordInput!) { changePassword(input: $input) }';
 export const ADMIN_PROBE = 'query { adminProbe }';
 export const VERIFIED_PROBE = 'mutation { verifiedProbe }';
 
