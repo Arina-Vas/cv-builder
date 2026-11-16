@@ -16,6 +16,7 @@ import { Pagination } from '@/shared/components/pagination';
 import { Avatar } from '@/shared/components/avatar/Avatar';
 import { ConfirmDialog } from '@/shared/components/dialog';
 import { UserFormModal } from './UserFormModal';
+import { useRefetchOnError } from '@/shared/lib/apollo/useRefetchOnError';
 
 const SORT_FIELDS: readonly UserSortField[] = [
   'firstName',
@@ -55,6 +56,8 @@ export const Users = () => {
     },
   });
 
+  const withRefetch = useRefetchOnError([USERS], ['NOT_FOUND']);
+
   const shown = data ?? previousData;
 
   const openUser = (user: UserListFieldsFragment) => router.push(`/users/${user.id}`);
@@ -64,7 +67,7 @@ export const Users = () => {
 
   const handleDelete = async () => {
     if (!userToDelete) return;
-    await deleteUser({ variables: { id: userToDelete.id } });
+    await withRefetch(() => deleteUser({ variables: { id: userToDelete.id } }));
     if (page > 1 && shown?.users.items.length === 1) setPage(page - 1);
   };
 
