@@ -126,7 +126,7 @@ describe('Skills', () => {
 
       const dialog = screen.getByRole('dialog', { name: 'Delete skill' });
       expect(await within(dialog).findByRole('alert')).toHaveTextContent(
-        "This item is in use and can't be deleted",
+        'Skill cannot be deleted because it is currently in use',
       );
       expect(screen.getByText('Cypress')).toBeInTheDocument();
     });

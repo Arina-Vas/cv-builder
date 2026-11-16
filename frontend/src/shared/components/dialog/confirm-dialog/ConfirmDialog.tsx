@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/shared/components/buttons';
 import { useTranslations } from 'next-intl';
 import { useErrorMessage } from '@/shared/lib/apollo/useErrorMessage';
+import type { ErrorCode } from '@/shared/lib/apollo/graphql-errors';
 import { parseError } from '@/shared/lib/apollo/graphql-errors';
 
 type Props = {
@@ -14,6 +15,9 @@ type Props = {
   onConfirm: () => Promise<unknown>;
   confirmLabel?: string;
   cancelLabel?: string;
+  // The page's own text for some error codes, e.g. { ENTITY_IN_USE: t('delete.inUse') };
+  // other codes show errors.<code>
+  errorMessages?: Partial<Record<ErrorCode, string>>;
 };
 export const ConfirmDialog = ({
   title,
@@ -23,6 +27,7 @@ export const ConfirmDialog = ({
   cancelLabel,
   confirmLabel,
   onConfirm,
+  errorMessages,
 }: Props) => {
   const t = useTranslations('common.actions');
 
@@ -44,9 +49,8 @@ export const ConfirmDialog = ({
       handleOpenChange(false);
     } catch (err) {
       const appError = parseError(err);
-      const message = errorMessage(appError);
 
-      setError(message);
+      setError((appError.code && errorMessages?.[appError.code]) ?? errorMessage(appError));
     } finally {
       setPending(false);
     }

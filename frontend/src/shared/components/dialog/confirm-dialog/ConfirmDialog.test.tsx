@@ -9,10 +9,14 @@ type Props = Partial<ComponentProps<typeof ConfirmDialog>>;
 
 const IN_USE_TEXT = "This item is in use and can't be deleted";
 
-const inUseError = () =>
+const DEPARTMENT_IN_USE_TEXT = 'Department cannot be deleted because it is currently in use';
+
+const apiError = (code: string) =>
   new CombinedGraphQLErrors({
-    errors: [{ message: 'backend text', extensions: { code: 'ENTITY_IN_USE' } }],
+    errors: [{ message: 'backend text', extensions: { code } }],
   });
+
+const inUseError = () => apiError('ENTITY_IN_USE');
 
 // a request that is still running when the test checks the dialog
 const pending = () => new Promise<never>(() => {});
@@ -119,6 +123,30 @@ describe('ConfirmDialog', () => {
       expect(await screen.findByRole('alert')).toHaveTextContent(IN_USE_TEXT);
       expect(screen.getByRole('button', { name: 'Confirm' })).toBeEnabled();
       expect(onOpenChange).not.toHaveBeenCalled();
+    });
+
+    it("shows the page's text for a code in errorMessages", async () => {
+      const { user } = renderConfirm({
+        onConfirm: () => Promise.reject(inUseError()),
+        errorMessages: { ENTITY_IN_USE: DEPARTMENT_IN_USE_TEXT },
+      });
+
+      await user.click(screen.getByRole('button', { name: 'Confirm' }));
+
+      expect(await screen.findByRole('alert')).toHaveTextContent(DEPARTMENT_IN_USE_TEXT);
+    });
+
+    it('shows errors.<code> for a code that is not in errorMessages', async () => {
+      const { user } = renderConfirm({
+        onConfirm: () => Promise.reject(apiError('FORBIDDEN')),
+        errorMessages: { ENTITY_IN_USE: DEPARTMENT_IN_USE_TEXT },
+      });
+
+      await user.click(screen.getByRole('button', { name: 'Confirm' }));
+
+      expect(await screen.findByRole('alert')).toHaveTextContent(
+        "You don't have permission to do this",
+      );
     });
 
     it('lets the user retry: the error goes away and the dialog closes', async () => {

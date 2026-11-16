@@ -107,23 +107,27 @@ const [deleteDepartment] = useMutation(DELETE_DEPARTMENT, DEPARTMENT_MUTATION_OP
     await deleteDepartment({ variables: { id: target.id } });
     // anything else that belongs to the action (e.g. go back a page) runs under the same spinner
   }}
+  // "Department cannot be deleted because it is currently in use" instead of the generic errors.ENTITY_IN_USE
+  errorMessages={{ ENTITY_IN_USE: t('delete.inUse') }}
 />;
 ```
 
-| Prop           | Values                    | Default                  |
-| -------------- | ------------------------- | ------------------------ |
-| `open`         | `boolean`                 | required                 |
-| `onOpenChange` | `(open: boolean) => void` | required                 |
-| `title`        | `string`                  | required                 |
-| `message`      | `ReactNode`               | required                 |
-| `onConfirm`    | `() => Promise<unknown>`  | required                 |
-| `confirmLabel` | `string`                  | `common.actions.confirm` |
-| `cancelLabel`  | `string`                  | `common.actions.cancel`  |
+| Prop            | Values                               | Default                  |
+| --------------- | ------------------------------------ | ------------------------ |
+| `open`          | `boolean`                            | required                 |
+| `onOpenChange`  | `(open: boolean) => void`            | required                 |
+| `title`         | `string`                             | required                 |
+| `message`       | `ReactNode`                          | required                 |
+| `onConfirm`     | `() => Promise<unknown>`             | required                 |
+| `confirmLabel`  | `string`                             | `common.actions.confirm` |
+| `cancelLabel`   | `string`                             | `common.actions.cancel`  |
+| `errorMessages` | `Partial<Record<ErrorCode, string>>` | —                        |
 
 - CONFIRM awaits `onConfirm`. While the promise runs: spinner on CONFIRM (`aria-busy`, disabled, so a second
   click is ignored), CANCEL and × disabled, the dialog can't be closed (`preventClose`).
-- Resolved → the dialog calls `onOpenChange(false)`. Rejected → it shows `useErrorMessage()(parseError(error))`
-  above the buttons and stays open; CONFIRM retries. The page needs no `try / catch`, `loading`, `error` or
+- Resolved → the dialog calls `onOpenChange(false)`. Rejected → it shows `errorMessages[code]` when the page
+  passed one for the error's code, otherwise `useErrorMessage()(parseError(error))`, above the buttons and stays
+  open; CONFIRM retries. The page needs no `try / catch`, `loading`, `error` or
   `reset()`.
 - The error is cleared whenever the dialog closes (CANCEL, ×, Esc, overlay), so the next opening starts clean.
 - `message` becomes the dialog's accessible description; the entity name is bold, as in Figma (`t.rich`).
@@ -149,10 +153,12 @@ A dialog shows request errors **inside itself**, above the buttons (`error`, `ro
 - the dialog makes the rest of the page inert, so a toast can't be reached with Tab or F8, and a click on it counts
   as a click outside and closes the dialog;
 - the requirements say the dialog stays open after a failed request and the user can retry;
-- the error explains why this action failed (`errors.ENTITY_IN_USE`: "This item is in use and can't be deleted"),
+- the error explains why this action failed ("Department cannot be deleted because it is currently in use"),
   so it belongs next to the button.
 
-The text comes from `useErrorMessage()(parseError(error))`, never the backend `message`. An error that belongs to a
+The text comes from `useErrorMessage()(parseError(error))`, never the backend `message`. A delete dialog passes
+its entity's text for `ENTITY_IN_USE` (`<namespace>.delete.inUse`, as the wiki asks) through `errorMessages`;
+`errors.ENTITY_IN_USE` ("This item is in use and can't be deleted") stays as the fallback. An error that belongs to a
 form field (`CONFLICT` / `BAD_USER_INPUT` with `field`) goes under that field, not into `error`.
 
 ## Sizing rules
@@ -202,10 +208,10 @@ Each behaviour is checked once, as `frontend/README.md` → Tests asks: unit tes
 browser: focus, the overlay click, layout, Radix portals, CSS and the page flow. Stories run in Storybook
 (Interactions panel) and in Vitest (`storybook` project, needs `pnpm exec playwright install chromium` once).
 
-| Unit test                | Checks                                                                                                                                                                                                                                       |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Dialog.test.tsx`        | closed → nothing; named by the title, × "Close"; description / no `aria-describedby`; footer and error only when passed; `size`, `className`; Esc and × call `onOpenChange(false)`; `preventClose` disables × and ignores Esc                |
-| `ConfirmDialog.test.tsx` | `sm`, title and message; default and own labels; closes after `onConfirm` resolves; CANCEL closes; while it runs the buttons and Esc are disabled, no second call; rejected → error shown, dialog open; retry closes; error cleared on close |
+| Unit test                | Checks                                                                                                                                                                                                                                                                                                      |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Dialog.test.tsx`        | closed → nothing; named by the title, × "Close"; description / no `aria-describedby`; footer and error only when passed; `size`, `className`; Esc and × call `onOpenChange(false)`; `preventClose` disables × and ignores Esc                                                                               |
+| `ConfirmDialog.test.tsx` | `sm`, title and message; default and own labels; closes after `onConfirm` resolves; CANCEL closes; while it runs the buttons and Esc are disabled, no second call; rejected → error shown, dialog open; `errorMessages` text for its code, `errors.<code>` for others; retry closes; error cleared on close |
 
 | Story (Shared/Dialog)                               | Checks                                                     |
 | --------------------------------------------------- | ---------------------------------------------------------- |
@@ -224,6 +230,7 @@ browser: focus, the overlay click, layout, Radix portals, CSS and the page flow.
 | `LongName`                                                                 | a long name wraps, the dialog keeps the `sm` width                                                  |
 | `Loading`                                                                  | the loading CONFIRM keeps its accessible name; the overlay does not close                           |
 | `WithError`                                                                | a rejected `onConfirm` shows the ENTITY_IN_USE text                                                 |
+| `WithEntityMessage`                                                        | with `errorMessages`, ENTITY_IN_USE shows the page's text                                           |
 | `FlowSuccess`, `FlowDoubleClick`, `FlowError`, `FlowRetryAfterError`       | `onConfirm` returns a simulated mutation: loading, close on success, error, retry, cleared on close |
 | `Default`, `CustomLabels`, `Light`, `Dark`, `DarkWithError`, `DarkLoading` | visual only; the request result can be changed in Controls (`outcome`)                              |
 

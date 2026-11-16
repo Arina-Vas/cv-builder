@@ -127,6 +127,7 @@ export const Projects = () => {
           b: (chunks) => <strong>{chunks}</strong>,
         })}
         onConfirm={handleDelete}
+        errorMessages={{ ENTITY_IN_USE: t('delete.inUse') }}
       />
     </div>
   );
