@@ -17,6 +17,8 @@ import { useSelection } from '@/shared/hooks/useSelection';
 import { AsyncList } from '@/shared/components/async-list/AsyncList';
 import { SelectionActions } from '@/shared/components/selection-actions/SelectionActions';
 import { PROFICIENCY_LEVEL } from '@/features/languages/user-languages/lib/proficiency';
+import { hasErrorCode } from '@/shared/lib/apollo/graphql-errors';
+import { notFound } from 'next/navigation';
 
 type Props = {
   userId: string;
@@ -40,12 +42,15 @@ export const UserLanguages = ({ userId, canEdit, emptyMessage }: Props) => {
     USER_LANGUAGES,
     userId ? { variables: { userId } } : skipToken,
   );
+
   const [deleteLanguages] = useMutation(DELETE_USER_LANGUAGES, USER_LANGUAGE_MUTATION_OPTIONS);
 
   const handleDeleteLanguages = async () => {
     await deleteLanguages({ variables: { ids: [...selectedIds], userId } });
     exit();
   };
+
+  if (hasErrorCode(error, 'NOT_FOUND')) notFound();
 
   return (
     <div className={s.root}>

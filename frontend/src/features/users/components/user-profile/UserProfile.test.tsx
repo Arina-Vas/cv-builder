@@ -2,9 +2,9 @@ import type { MockLink } from '@apollo/client/testing';
 import { screen, within } from '@testing-library/react';
 import { GraphQLError } from 'graphql';
 import { notFound } from 'next/navigation';
-import { Component, type ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { ME, RESEND_VERIFICATION_CODE } from '@/features/auth/api/auth.operations';
+import { CatchErrors } from '@/test/catch-errors';
 import { mockRouter } from '@/test/next-navigation';
 import { renderWithProviders } from '@/test/render';
 import {
@@ -44,17 +44,6 @@ const errorMock = (code: string): MockLink.MockedResponse => ({
   request,
   result: { errors: [new GraphQLError('raw backend text', { extensions: { code } })] },
 });
-
-// notFound() throws (like the real Next.js one), so something has to catch it
-class CatchErrors extends Component<{ children: ReactNode }, { caught: boolean }> {
-  state = { caught: false };
-  static getDerivedStateFromError() {
-    return { caught: true };
-  }
-  render() {
-    return this.state.caught ? null : this.props.children;
-  }
-}
 
 type Viewer = { id: string; role: 'ADMIN' | 'EMPLOYEE' };
 

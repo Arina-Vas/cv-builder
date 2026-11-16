@@ -16,6 +16,8 @@ import s from './UserSkills.module.css';
 import { ConfirmDialog } from '@/shared/components/dialog';
 import { AsyncList } from '@/shared/components/async-list/AsyncList';
 import { SelectionActions } from '@/shared/components/selection-actions/SelectionActions';
+import { notFound } from 'next/navigation';
+import { hasErrorCode } from '@/shared/lib/apollo/graphql-errors';
 
 type Props = {
   userId: string;
@@ -47,6 +49,8 @@ export const UserSkills = ({ userId, canEdit, emptyMessage }: Props) => {
   };
 
   const groupedSkills = useMemo(() => groupByCategory(data?.userSkills ?? []), [data?.userSkills]);
+
+  if (hasErrorCode(error, 'NOT_FOUND')) notFound();
 
   return (
     <div className={s.root}>

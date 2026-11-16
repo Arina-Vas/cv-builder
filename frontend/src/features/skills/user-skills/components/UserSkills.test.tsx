@@ -1,7 +1,10 @@
 import type { MockLink } from '@apollo/client/testing';
 import { screen, waitFor, within } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { GraphQLError } from 'graphql';
+import { notFound } from 'next/navigation';
+import { describe, expect, it, vi } from 'vitest';
 import { closedGate } from '@/test/action-gate';
+import { CatchErrors } from '@/test/catch-errors';
 import { renderWithProviders } from '@/test/render';
 import { DELETE_USER_SKILLS, USER_SKILLS } from '../api/userSkills.operations';
 import { UserSkills } from './UserSkills';
@@ -37,9 +40,12 @@ const renderList = ({
   canEdit = true,
   mocks = [listMock()],
 }: { canEdit?: boolean; mocks?: MockLink.MockedResponse[] } = {}) =>
-  renderWithProviders(<UserSkills userId={USER_ID} canEdit={canEdit} emptyMessage={EMPTY} />, {
-    mocks,
-  });
+  renderWithProviders(
+    <CatchErrors>
+      <UserSkills userId={USER_ID} canEdit={canEdit} emptyMessage={EMPTY} />
+    </CatchErrors>,
+    { mocks },
+  );
 
 async function openRowAction(user: ReturnType<typeof renderList>['user'], name: RegExp) {
   await user.click(await screen.findByRole('button', { name }));
@@ -87,6 +93,25 @@ describe('UserSkills', () => {
       await user.click(screen.getByRole('button', { name: 'Retry' }));
 
       expect(await screen.findByText('React')).toBeInTheDocument();
+    });
+
+    it('opens the 404 page instead of Retry when the user does not exist', async () => {
+      // React logs the error caught by the boundary; keep the test output clean
+      vi.spyOn(console, 'error').mockImplementation(() => {});
+
+      renderList({
+        mocks: [
+          {
+            request: { query: USER_SKILLS, variables: { userId: USER_ID } },
+            result: {
+              errors: [new GraphQLError('User not found', { extensions: { code: 'NOT_FOUND' } })],
+            },
+          },
+        ],
+      });
+
+      await vi.waitFor(() => expect(notFound).toHaveBeenCalled());
+      expect(screen.queryByRole('button', { name: 'Retry' })).not.toBeInTheDocument();
     });
   });
 
