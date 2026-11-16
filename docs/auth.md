@@ -106,8 +106,9 @@ Email Verification pages. Tables are described in [data-model.md](data-model.md)
 ### Unverified users are read-only
 
 - They can run queries, but every mutation is rejected with `EMAIL_NOT_VERIFIED` except the ones marked
-  `@AllowUnverified()` (verify email, resend code; theme and language when they are added) and the public ones
-  (refresh, logout, password reset).
+  `@AllowUnverified()` (verify email, resend code) and the public ones (refresh, logout, password reset).
+  Theme and language are kept in the browser, not on the backend, so an unverified user can still change them
+  (see [data-model.md](data-model.md#decisions)).
 - Changing the password in Settings is also blocked. Forgot / Reset password still works.
 - The spec does not list which features need a verified email (Email Verification AC-16), so this rule is a
   team decision.

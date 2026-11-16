@@ -41,6 +41,14 @@ export class DepartmentService {
     return { items: rows.map(toDepartment), page, pageSize, total };
   }
 
+  async findOptions(): Promise<Department[]> {
+    const rows = await this.prisma.department.findMany({
+      orderBy: [{ name: 'asc' }, { id: 'asc' }],
+    });
+
+    return rows.map(toDepartment);
+  }
+
   async create({ name }: CreateDepartmentInput): Promise<Department> {
     try {
       const row = await this.prisma.department.create({

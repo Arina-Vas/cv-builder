@@ -190,6 +190,39 @@ export const DisabledOption: Story = {
   },
 };
 
+// a catalog longer than the 240px list, e.g. every department in the user form
+const LONG_OPTIONS = Array.from({ length: 60 }, (_, i) => ({
+  value: `dep-${i + 1}`,
+  label: `Department ${String(i + 1).padStart(2, '0')}`,
+}));
+
+export const LongList: Story = {
+  args: {
+    options: LONG_OPTIONS,
+    label: 'Department',
+    placeholder: 'Department',
+    defaultValue: 'dep-45',
+  },
+  play: async ({ canvasElement }) => {
+    await userEvent.click(within(canvasElement).getByRole('combobox'));
+
+    const listbox = await getBody(canvasElement).findByRole('listbox');
+    await expect(within(listbox).getAllByRole('option')).toHaveLength(LONG_OPTIONS.length);
+
+    const viewport = listbox.querySelector<HTMLElement>('[data-radix-select-viewport]')!;
+    // capped at 240px and scrollable, with a visible scrollbar (Radix hides it by default)
+    await expect(viewport.scrollHeight).toBeGreaterThan(viewport.clientHeight);
+    await expect(getComputedStyle(viewport).scrollbarWidth).not.toBe('none');
+
+    // opens scrolled to the chosen value
+    const chosen = within(listbox).getByRole('option', { name: 'Department 45' });
+    await waitFor(() => expect(viewport.scrollTop).toBeGreaterThan(0));
+    const [option, box] = [chosen.getBoundingClientRect(), viewport.getBoundingClientRect()];
+    await expect(option.bottom).toBeGreaterThan(box.top);
+    await expect(option.top).toBeLessThan(box.bottom);
+  },
+};
+
 export const Dark: Story = {
   globals: {
     theme: 'dark',

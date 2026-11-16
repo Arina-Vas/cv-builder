@@ -294,6 +294,9 @@ type Query {
   Skills not yet assigned to the user, for the Add Skill modal; sorted by name. Fails with NOT_FOUND if the user does not exist
   """
   availableUserSkills(userId: ID!): [Skill!]!
+
+  """All departments for selects, sorted by name"""
+  departmentOptions: [Department!]!
   departments(
     """1-based page number"""
     page: Int! = 1
@@ -316,6 +319,9 @@ type Query {
     sortOrder: SortOrder! = ASC
   ): LanguagePage!
   me: User!
+
+  """All positions for selects, sorted by name"""
+  positionOptions: [Position!]!
   positions(
     """1-based page number"""
     page: Int! = 1

@@ -105,6 +105,20 @@ describe('DepartmentService', () => {
     });
   });
 
+  describe('findOptions', () => {
+    it('loads every department for selects, sorted by name, then id, with no page limit', async () => {
+      const result = await service.findOptions();
+
+      expect(prisma.department.findMany).toHaveBeenCalledWith({
+        orderBy: [{ name: 'asc' }, { id: 'asc' }],
+      });
+      expect(result).toEqual([
+        { id: 'id-Backend', name: 'Backend' },
+        { id: 'id-Frontend', name: 'Frontend' },
+      ]);
+    });
+  });
+
   describe('create', () => {
     it('saves the name and returns the mapped department', async () => {
       prisma.department.create.mockResolvedValue(row('Sales'));

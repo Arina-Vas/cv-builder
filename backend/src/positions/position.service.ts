@@ -46,6 +46,14 @@ export class PositionService {
     };
   }
 
+  async findOptions(): Promise<Position[]> {
+    const rows = await this.prisma.position.findMany({
+      orderBy: [{ name: 'asc' }, { id: 'asc' }],
+    });
+
+    return rows.map(toPosition);
+  }
+
   async create({ name }: CreatePositionInput): Promise<Position> {
     try {
       const row = await this.prisma.position.create({

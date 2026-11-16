@@ -135,7 +135,7 @@ by changing a client-supplied user ID").
 | Sign out                                             | Public, revokes the session of the refresh cookie |
 | Verify email, resend code                            | authenticated, email not verified yet (own only)  |
 | Current user (`me`)                                  | authenticated, verified or not                    |
-| Theme and language preferences                       | authenticated, own only, verified or not          |
+| Theme and language preferences                       | no API: stored in the browser                     |
 | Change password                                      | authenticated, own only, verified email           |
 
 "Public" for the Email Verification page in the wiki access table means no role is required; the verify and resend
@@ -180,21 +180,23 @@ otherwise).
 
 ### Departments
 
-| Operation          | Access |
-| ------------------ | ------ |
-| `departments`      | All    |
-| `createDepartment` | Admin  |
-| `updateDepartment` | Admin  |
-| `deleteDepartment` | Admin  |
+| Operation           | Access |
+| ------------------- | ------ |
+| `departments`       | All    |
+| `departmentOptions` | All    |
+| `createDepartment`  | Admin  |
+| `updateDepartment`  | Admin  |
+| `deleteDepartment`  | Admin  |
 
 ### Positions
 
-| Operation        | Access |
-| ---------------- | ------ |
-| `positions`      | All    |
-| `createPosition` | Admin  |
-| `updatePosition` | Admin  |
-| `deletePosition` | Admin  |
+| Operation         | Access |
+| ----------------- | ------ |
+| `positions`       | All    |
+| `positionOptions` | All    |
+| `createPosition`  | Admin  |
+| `updatePosition`  | Admin  |
+| `deletePosition`  | Admin  |
 
 ### Languages
 

@@ -105,6 +105,20 @@ describe('PositionService', () => {
     });
   });
 
+  describe('findOptions', () => {
+    it('loads every position for selects, sorted by name, then id, with no page limit', async () => {
+      const result = await service.findOptions();
+
+      expect(prisma.position.findMany).toHaveBeenCalledWith({
+        orderBy: [{ name: 'asc' }, { id: 'asc' }],
+      });
+      expect(result).toEqual([
+        { id: 'id-QA Engineer', name: 'QA Engineer' },
+        { id: 'id-Project Manager', name: 'Project Manager' },
+      ]);
+    });
+  });
+
   describe('create', () => {
     it('saves the name and returns the mapped position', async () => {
       prisma.position.create.mockResolvedValue(row('QA Engineer'));

@@ -218,7 +218,12 @@ pnpm db:migrate
   language share a native name (Portuguese / Brazilian Portuguese → "Português").
 - **Language ISO format** is checked by the input DTO: 2–3 letters with an optional 2-letter region (`EN`, `ENG`,
   `PT-BR`). The spec only says "a language ISO code, max 5 characters".
-- **User preferences (theme, language) are not stored.** The spec allows keeping them on the client.
+- **User preferences (theme, language) are not stored.** The spec allows keeping them on the client, so they
+  live in the browser: the theme in `localStorage['cv-builder-theme']`, the language in the `locale` cookie (the
+  server needs it to render the page in that language). They belong to the browser, not to the user: another
+  device or browser starts with Device settings and English, and signing in as another user in the same browser
+  keeps the previous choice. Moving them to the backend would need `theme` / `locale` columns on `users` and one
+  preferences mutation (the spec rules out a mutation per preference).
 - **Users created by an Admin are not verified** (`email_verified_at = null`), like users who sign up. Sending
   them a verification code on creation and redirecting unverified users to Email Verification after sign-in is an
   open item, outside the Users API task.

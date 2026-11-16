@@ -64,8 +64,8 @@ const optionsMock: MockLink.MockedResponse = {
   request: { query: USER_FORM_OPTIONS },
   result: {
     data: {
-      departments: { __typename: 'DepartmentPage', items: [department] },
-      positions: { __typename: 'PositionPage', items: [position] },
+      departmentOptions: [department],
+      positionOptions: [position],
     },
   },
 };

@@ -1,0 +1,495 @@
+{
+  "common": {
+    "errorPages": {
+      "notFound": {
+        "title": "Hmm...",
+        "message": "Parece que esta não é a página que você procurava. Vamos voltar ao caminho certo.",
+        "goBack": "Voltar"
+      },
+      "noInternet": {
+        "title": "Ops",
+        "message": "Algo deu errado. Já estamos trabalhando para corrigir. Tente novamente.",
+        "retry": "Tentar novamente"
+      },
+      "deviceError": {
+        "title": "Ops",
+        "message": "Este aplicativo não é compatível com dispositivos móveis. Abra-o em um computador ou tablet para continuar."
+      }
+    },
+    "pagination": {
+      "label": "Paginação",
+      "previous": "Página anterior",
+      "next": "Próxima página",
+      "page": "Página {page}",
+      "rowsPerPage": "Linhas por página"
+    },
+    "table": {
+      "actions": "Ações",
+      "rowActions": "Ações para {name}",
+      "openRow": "Abrir {name}",
+      "row": "linha {id}",
+      "loadingRows": "Carregando linhas",
+      "retry": "Tentar novamente"
+    },
+    "toast": {
+      "region": "Notificações",
+      "viewport": "Notificações ({hotkey})",
+      "close": "Fechar",
+      "types": {
+        "success": "Sucesso",
+        "error": "Erro",
+        "warning": "Aviso",
+        "info": "Informação"
+      }
+    },
+    "input": { "showPassword": "Mostrar senha", "hidePassword": "Ocultar senha" },
+    "searchField": { "label": "Pesquisar", "clear": "Limpar pesquisa" },
+    "datePicker": {
+      "placeholder": "Selecione uma data",
+      "previous": "Anterior",
+      "next": "Próximo"
+    },
+    "select": { "noOptions": "Nenhuma opção" },
+    "chip": { "remove": "Remover {label}" },
+    "avatarUploader": {
+      "upload": "Enviar avatar",
+      "hint": "png, jpg ou gif de até {maxSize}",
+      "remove": "Remover avatar",
+      "uploading": "Enviando avatar",
+      "invalidType": "Apenas png, jpg ou gif são permitidos",
+      "tooLarge": "O tamanho do arquivo não deve exceder {maxSize}"
+    },
+    "actions": {
+      "confirm": "Confirmar",
+      "cancel": "Cancelar",
+      "close": "Fechar",
+      "create": "Criar",
+      "update": "Atualizar",
+      "save": "Salvar",
+      "add": "Adicionar"
+    }
+  },
+  "errors": {
+    "UNAUTHENTICATED": "Sua sessão expirou. Entre novamente",
+    "FORBIDDEN": "Você não tem permissão para fazer isso",
+    "EMAIL_NOT_VERIFIED": "Verifique seu e-mail para fazer isso",
+    "NOT_FOUND": "Este item não existe mais",
+    "BAD_USER_INPUT": "Verifique os dados informados",
+    "CONFLICT": "Este valor já está em uso",
+    "ENTITY_IN_USE": "Este item está em uso e não pode ser excluído",
+    "OPERATION_NOT_ALLOWED": "Esta ação não é permitida",
+    "RATE_LIMITED": "{seconds, plural, =0 {Muitas tentativas. Tente novamente mais tarde} one {Muitas tentativas. Tente novamente em # segundo} other {Muitas tentativas. Tente novamente em # segundos}}",
+    "INTERNAL_SERVER_ERROR": "Algo deu errado. Tente novamente mais tarde"
+  },
+  "validation": {
+    "department": {
+      "required": "O nome do departamento é obrigatório",
+      "maxLength": "O nome do departamento não deve exceder {max} caracteres"
+    },
+    "position": {
+      "required": "O nome do cargo é obrigatório",
+      "maxLength": "O nome do cargo não deve exceder {max} caracteres"
+    },
+    "language": {
+      "name": {
+        "required": "O nome é obrigatório",
+        "maxLength": "O nome não deve exceder {max} caracteres"
+      },
+      "nativeName": {
+        "required": "O nome nativo é obrigatório",
+        "maxLength": "O nome nativo não deve exceder {max} caracteres"
+      },
+      "iso": {
+        "required": "O ISO é obrigatório",
+        "maxLength": "O ISO não deve exceder {max} caracteres",
+        "format": "O ISO deve ser um código de idioma, por exemplo EN ou PT-BR"
+      }
+    },
+    "userLanguage": {
+      "languageId": { "required": "O idioma é obrigatório" },
+      "proficiency": { "required": "O nível de proficiência é obrigatório" }
+    },
+    "skill": {
+      "name": {
+        "required": "A habilidade é obrigatória",
+        "maxLength": "O nome da habilidade não deve exceder {max} caracteres"
+      },
+      "categoryId": {
+        "required": "A categoria é obrigatória"
+      }
+    },
+    "userSkill": {
+      "skillId": { "required": "A habilidade é obrigatória" },
+      "mastery": { "required": "O nível de domínio é obrigatório" }
+    },
+    "project": {
+      "name": {
+        "required": "O nome do projeto é obrigatório",
+        "maxLength": "O nome do projeto não deve exceder {max} caracteres"
+      },
+      "domain": {
+        "required": "O domínio é obrigatório",
+        "maxLength": "O domínio não deve exceder {max} caracteres"
+      },
+      "startDate": {
+        "required": "A data de início é obrigatória"
+      },
+      "endDate": {
+        "required": "A data de término é obrigatória",
+        "beforeStart": "A data de término deve ser posterior à data de início"
+      },
+      "description": {
+        "required": "A descrição é obrigatória",
+        "maxLength": "A descrição não deve exceder {max} caracteres"
+      }
+    },
+    "email": {
+      "required": "O e-mail é obrigatório",
+      "invalid": "Insira um endereço de e-mail válido"
+    },
+    "password": {
+      "required": "A senha é obrigatória",
+      "newRequired": "A nova senha é obrigatória",
+      "minLength": "A senha deve ter pelo menos {min} caracteres",
+      "maxLength": "A senha não deve exceder {max} caracteres"
+    },
+    "confirmPassword": {
+      "required": "A confirmação da senha é obrigatória",
+      "mismatch": "As senhas não coincidem"
+    },
+    "changePassword": {
+      "confirmRequired": "A confirmação da senha é obrigatória",
+      "currentIncorrect": "A senha atual está incorreta",
+      "sameAsCurrent": "A nova senha deve ser diferente da atual",
+      "weakPassword": "A senha não atende aos requisitos de segurança"
+    },
+    "code": {
+      "required": "O código de verificação é obrigatório",
+      "invalid": "Insira um código válido de 6 dígitos"
+    },
+    "user": {
+      "email": { "required": "O e-mail é obrigatório", "invalid": "Endereço de e-mail inválido" },
+      "password": {
+        "required": "A senha é obrigatória",
+        "minLength": "A senha deve conter pelo menos {min} caracteres",
+        "maxLength": "A senha não deve exceder {max} caracteres"
+      },
+      "firstName": {
+        "required": "O nome é obrigatório",
+        "maxLength": "O nome não deve exceder {max} caracteres"
+      },
+      "lastName": {
+        "required": "O sobrenome é obrigatório",
+        "maxLength": "O sobrenome não deve exceder {max} caracteres"
+      },
+      "department": { "required": "O departamento é obrigatório" },
+      "position": { "required": "O cargo é obrigatório" },
+      "role": { "required": "A função é obrigatória" }
+    }
+  },
+  "layout": {
+    "appName": "CV Builder",
+    "collapseSidebar": "Recolher barra lateral",
+    "expandSidebar": "Expandir barra lateral",
+    "navigation": "Navegação principal",
+    "breadcrumbs": "Trilha de navegação",
+    "notAuthorized": "Você não tem autorização para acessar esta página",
+    "profile": "Perfil",
+    "settings": "Configurações",
+    "logout": "Sair",
+    "profileRetry": "Perfil não carregado. Tentar novamente"
+  },
+  "nav": {
+    "employees": "Funcionários",
+    "cvs": "Currículos",
+    "skills": "Habilidades",
+    "languages": "Idiomas",
+    "departments": "Departamentos",
+    "positions": "Cargos",
+    "projects": "Projetos"
+  },
+  "auth": {
+    "tabs": { "label": "Autenticação", "signIn": "Entrar", "signUp": "Cadastrar" },
+    "fields": { "email": "E-mail", "password": "Senha", "confirmPassword": "Confirmar senha" },
+    "signIn": {
+      "title": "Bem-vindo de volta",
+      "subtitle": "Olá novamente! Entre para continuar",
+      "submit": "Entrar",
+      "forgotPassword": "Esqueci a senha"
+    },
+    "signUp": {
+      "title": "Cadastre-se agora",
+      "subtitle": "Bem-vindo! Cadastre-se para continuar",
+      "submit": "Criar conta",
+      "haveAccount": "Já tenho uma conta"
+    },
+    "forgotPassword": {
+      "title": "Esqueci a senha",
+      "subtitle": "Enviaremos um e-mail com mais instruções",
+      "submit": "Redefinir senha",
+      "cancel": "Cancelar",
+      "sent": "Se existir uma conta com este e-mail, você receberá instruções para redefinir a senha."
+    },
+    "resetPassword": {
+      "title": "Redefinir senha",
+      "subtitle": "Digite aqui uma nova senha e confirme-a",
+      "newPassword": "Nova senha",
+      "confirmPassword": "Confirmar senha",
+      "submit": "Enviar",
+      "goToSignIn": "Ir para o login",
+      "success": "Sua senha foi redefinida. Entre novamente."
+    },
+    "verifyEmail": {
+      "title": "Verificação de e-mail",
+      "subtitle": "Digite o código de verificação que enviamos para o seu e-mail.",
+      "codeLabel": "Código de verificação",
+      "digit": "Dígito {index} de {length}",
+      "confirm": "Confirmar",
+      "resend": "{seconds, plural, =0 {Reenviar código} other {Reenviar código (# s)}}",
+      "later": "Mais tarde",
+      "verified": "E-mail verificado",
+      "codeSent": "Código de verificação enviado"
+    },
+    "errors": {
+      "invalidCredentials": "E-mail ou senha inválidos",
+      "emailTaken": "Já existe uma conta com este e-mail",
+      "codeInvalid": "O código é inválido ou expirou. Solicite um novo",
+      "alreadyVerified": "O e-mail já está verificado",
+      "resetLinkInvalid": "Este link de redefinição de senha é inválido ou expirou"
+    }
+  },
+  "users": {
+    "title": "Funcionários",
+    "createButton": "Criar usuário",
+    "table": {
+      "avatar": "Avatar",
+      "firstName": "Nome",
+      "lastName": "Sobrenome",
+      "email": "E-mail",
+      "department": "Departamento",
+      "position": "Cargo",
+      "empty": "Nenhum usuário encontrado",
+      "actions": { "view": "Ver", "update": "Atualizar", "delete": "Excluir" }
+    },
+    "profile": {
+      "memberSince": "Membro desde {date}",
+      "loading": "Carregando perfil",
+      "loadError": "Não foi possível carregar as informações do perfil",
+      "retry": "Tentar novamente",
+      "updated": "O perfil foi atualizado",
+      "verifyEmail": "Verificar e-mail",
+      "verificationSent": "O e-mail de verificação foi enviado",
+      "verificationFailed": "Não foi possível enviar o e-mail de verificação",
+      "avatarUpdated": "O avatar foi atualizado",
+      "avatarRemoved": "O avatar foi removido",
+      "avatarFailed": "Não foi possível atualizar o avatar"
+    },
+    "fields": {
+      "email": "E-mail",
+      "password": "Senha",
+      "firstName": "Nome",
+      "lastName": "Sobrenome",
+      "department": "Departamento",
+      "position": "Cargo",
+      "role": "Função"
+    },
+    "roles": { "ADMIN": "Administrador", "EMPLOYEE": "Funcionário" },
+    "create": { "title": "Criar usuário" },
+    "update": { "title": "Atualizar usuário" },
+    "delete": {
+      "title": "Excluir usuário",
+      "message": "Tem certeza de que deseja excluir o usuário <b>{name}</b>?"
+    },
+    "tabs": {
+      "label": "Seções do funcionário",
+      "profile": "Perfil",
+      "skills": "Habilidades",
+      "languages": "Idiomas",
+      "cvs": "Currículos"
+    }
+  },
+  "cvs": {
+    "tabs": {
+      "label": "Seções do currículo",
+      "details": "Detalhes",
+      "skills": "Habilidades",
+      "projects": "Projetos",
+      "preview": "Pré-visualização"
+    }
+  },
+  "departments": {
+    "title": "Departamentos",
+    "createButton": "Criar departamento",
+    "table": {
+      "name": "Nome",
+      "empty": "Nenhum departamento encontrado",
+      "actions": { "edit": "Editar", "delete": "Excluir" }
+    },
+    "fields": { "name": "Departamento" },
+    "create": { "title": "Criar departamento" },
+    "edit": { "title": "Editar departamento" },
+    "delete": {
+      "title": "Excluir departamento",
+      "message": "Tem certeza de que deseja excluir o departamento <b>{name}</b>?"
+    }
+  },
+  "positions": {
+    "title": "Cargos",
+    "createButton": "Criar cargo",
+    "table": {
+      "name": "Nome",
+      "empty": "Nenhum cargo encontrado",
+      "actions": { "edit": "Editar", "delete": "Excluir" }
+    },
+    "fields": { "name": "Cargo" },
+    "create": { "title": "Criar cargo" },
+    "edit": { "title": "Editar cargo" },
+    "delete": {
+      "title": "Excluir cargo",
+      "message": "Tem certeza de que deseja excluir o cargo <b>{name}</b>?"
+    }
+  },
+  "languages": {
+    "title": "Idiomas",
+    "createButton": "Criar idioma",
+    "table": {
+      "columns": {
+        "name": "Nome",
+        "iso": "ISO",
+        "nativeName": "Nome nativo"
+      },
+      "empty": "Nenhum idioma encontrado",
+      "actions": { "edit": "Editar", "delete": "Excluir" }
+    },
+    "fields": { "name": "Nome", "iso": "ISO", "nativeName": "Nome nativo" },
+    "create": { "title": "Criar idioma" },
+    "edit": { "title": "Editar idioma" },
+    "delete": {
+      "title": "Excluir idioma",
+      "message": "Tem certeza de que deseja excluir o idioma <b>{name}</b>?"
+    }
+  },
+  "userLanguage": {
+    "title": "Idiomas atuais",
+    "addButton": "Adicionar idioma",
+    "removeButton": "Remover idiomas",
+    "removeCount": "Remover ({count})",
+    "remove": {
+      "title": "Remover idiomas",
+      "message": "Tem certeza de que deseja remover {count, plural, one {# idioma} other {# idiomas}}?"
+    },
+    "empty": "Nenhum idioma adicionado",
+    "emptyProfile": "Nenhum idioma adicionado ainda",
+    "loading": "Carregando idiomas",
+    "loadError": "Não foi possível carregar os idiomas",
+    "retry": "Tentar novamente",
+    "form": {
+      "updateTitle": "Atualizar idioma",
+      "createTitle": "Adicionar idioma",
+      "fields": { "languageId": "Idioma", "proficiency": "Proficiência" }
+    },
+    "proficiencyLevel": {
+      "A1": "A1",
+      "A2": "A2",
+      "B1": "B1",
+      "B2": "B2",
+      "C1": "C1",
+      "C2": "C2",
+      "NATIVE": "Nativo"
+    }
+  },
+  "skills": {
+    "title": "Habilidades",
+    "createButton": "Criar habilidade",
+    "table": {
+      "columns": {
+        "name": "Nome",
+        "type": "Tipo",
+        "category": "Categoria"
+      },
+      "empty": "Nenhuma habilidade encontrada",
+      "actions": { "edit": "Editar", "delete": "Excluir" }
+    },
+    "fields": { "name": "Nome", "category": "Categoria" },
+    "create": { "title": "Criar habilidade" },
+    "edit": { "title": "Editar habilidade" },
+    "delete": {
+      "title": "Excluir habilidade",
+      "message": "Tem certeza de que deseja excluir a habilidade <b>{name}</b>?"
+    }
+  },
+  "userSkill": {
+    "addButton": "Adicionar habilidade",
+    "removeButton": "Remover habilidades",
+    "removeCount": "Remover ({count})",
+    "remove": {
+      "title": "Remover habilidades",
+      "message": "Tem certeza de que deseja remover {count, plural, one {# habilidade} other {# habilidades}}?"
+    },
+    "empty": "Nenhuma habilidade adicionada",
+    "emptyProfile": "Nenhuma habilidade adicionada ainda",
+    "loading": "Carregando habilidades",
+    "loadError": "Não foi possível carregar as habilidades",
+    "retry": "Tentar novamente",
+    "form": {
+      "createTitle": "Adicionar habilidade",
+      "updateTitle": "Atualizar habilidade",
+      "fields": { "skillId": "Habilidade", "mastery": "Nível de domínio" }
+    },
+    "masteryLevel": {
+      "BEGINNER": "Iniciante",
+      "ELEMENTARY": "Básico",
+      "INTERMEDIATE": "Intermediário",
+      "ADVANCED": "Avançado",
+      "EXPERT": "Especialista"
+    }
+  },
+  "projects": {
+    "title": "Projetos",
+    "createButton": "Criar projeto",
+    "table": {
+      "columns": {
+        "name": "Nome",
+        "domain": "Domínio",
+        "startDate": "Data de início",
+        "endDate": "Data de término"
+      },
+      "empty": "Nenhum projeto encontrado",
+      "actions": { "edit": "Editar", "delete": "Excluir" }
+    },
+    "fields": {
+      "name": "Nome",
+      "domain": "Domínio",
+      "startDate": "Data de início",
+      "endDate": "Data de término",
+      "description": "Descrição",
+      "environment": "Ambiente"
+    },
+    "create": { "title": "Criar projeto" },
+    "edit": { "title": "Editar projeto" },
+    "delete": {
+      "title": "Excluir projeto",
+      "message": "Tem certeza de que deseja excluir o projeto <b>{name}</b>?"
+    }
+  },
+  "settings": {
+    "preferences": "Preferências",
+    "theme": {
+      "label": "Tema",
+      "LIGHT": "Claro",
+      "DARK": "Escuro",
+      "SYSTEM": "Configurações do dispositivo"
+    },
+    "language": {
+      "label": "Idioma"
+    },
+    "changePassword": {
+      "title": "Alterar senha",
+      "currentPassword": "Senha",
+      "newPassword": "Nova senha",
+      "confirmPassword": "Confirmar senha",
+      "submit": "Alterar",
+      "success": "A senha foi alterada"
+    }
+  }
+}

@@ -208,10 +208,14 @@ Lists without pagination extend `ListArgs` instead of `PaginatedListArgs` and re
 | `userSkills`, CV skills                                                    | —                | category name, then skill name                    | —                            | no        |
 | `userLanguages`                                                            | —                | language name                                     | —                            | no        |
 | lookups for selects (`skillCategories`, `technologies`, `projectRoles`, …) | `name`           | —                                                 | —                            | no        |
+| `departmentOptions`, `positionOptions` (lookups for the user form selects) | `name`           | —                                                 | —                            | no        |
 | `availableUserSkills` (skills not yet assigned to the user)                | `name`           | —                                                 | —                            | no        |
 | `availableUserLanguages` (languages not yet assigned to the user)          | `name`           | —                                                 | —                            | no        |
 
 Lists without pagination return `{ items, total }` (`Listed`) or a plain list for lookups.
+A select needs every value, so it uses a lookup, not the paginated list (`pageSize` is at most 50):
+the user form loads `departmentOptions` and `positionOptions`, the admin pages page `departments` and
+`positions`.
 
 User skills are returned as one flat list, sorted so that the skills of a category come together; the frontend
 groups them by `skill.category` (the wiki shows a category only when it has skills). A nested group type is not

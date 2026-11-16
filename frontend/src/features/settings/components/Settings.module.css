@@ -1,0 +1,39 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+  padding-block: var(--space-8);
+}
+
+.preferences {
+  display: grid;
+  gap: var(--form-row-gap);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.title {
+  margin: 0;
+  color: var(--text);
+  font-size: var(--type-subtitle1-size);
+  font-weight: var(--type-subtitle1-weight);
+  line-height: var(--type-subtitle1-lh);
+  letter-spacing: var(--type-subtitle1-ls);
+}
+
+.passwordForm {
+  display: grid;
+  gap: var(--form-row-gap);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+}
