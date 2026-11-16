@@ -263,17 +263,18 @@ describe('UserLanguageService', () => {
   });
 
   describe('delete', () => {
-    it('deletes the found assignments of the user and returns their ids', async () => {
+    it('deletes the assignments of the user and returns their ids', async () => {
       prisma.userLanguage.findMany.mockResolvedValue([
-        { id: 'user-language-English' },
-        { id: 'user-language-German' },
+        { id: 'user-language-English', userId: OWNER_ID },
+        { id: 'user-language-German', userId: OWNER_ID },
       ]);
 
       const result = await service.delete(OWNER, DELETE_ARGS);
 
+      // Looked up without userId, so an id of another user's assignment is found, not skipped
       expect(prisma.userLanguage.findMany).toHaveBeenCalledWith({
-        where: { userId: OWNER_ID, id: { in: DELETE_ARGS.ids } },
-        select: { id: true },
+        where: { id: { in: DELETE_ARGS.ids } },
+        select: { id: true, userId: true },
       });
       expect(prisma.userLanguage.deleteMany).toHaveBeenCalledWith({
         where: { userId: OWNER_ID, id: { in: ['user-language-English', 'user-language-German'] } },
@@ -281,8 +282,10 @@ describe('UserLanguageService', () => {
       expect(result).toEqual(['user-language-English', 'user-language-German']);
     });
 
-    it('skips ids that are already removed or belong to another user', async () => {
-      prisma.userLanguage.findMany.mockResolvedValue([{ id: 'user-language-English' }]);
+    it('skips ids that are already removed', async () => {
+      prisma.userLanguage.findMany.mockResolvedValue([
+        { id: 'user-language-English', userId: OWNER_ID },
+      ]);
 
       const result = await service.delete(OWNER, DELETE_ARGS);
 
@@ -292,8 +295,35 @@ describe('UserLanguageService', () => {
       expect(result).toEqual(['user-language-English']);
     });
 
+    it('returns an empty list when every id is already removed', async () => {
+      prisma.userLanguage.findMany.mockResolvedValue([]);
+
+      await expect(service.delete(OWNER, DELETE_ARGS)).resolves.toEqual([]);
+    });
+
+    it.each([
+      ['the owner', OWNER],
+      ['an Admin', ADMIN],
+    ])(
+      "rejects an id of another user's assignment for %s with FORBIDDEN and deletes nothing",
+      async (_who, user) => {
+        prisma.userLanguage.findMany.mockResolvedValue([
+          { id: 'user-language-English', userId: OWNER_ID },
+          { id: 'user-language-German', userId: 'user-2' },
+        ]);
+
+        await expect(service.delete(user, DELETE_ARGS)).rejects.toMatchObject({
+          message: 'Language assignment belongs to another user',
+          extensions: { code: ErrorCode.FORBIDDEN },
+        });
+        expect(prisma.userLanguage.deleteMany).not.toHaveBeenCalled();
+      },
+    );
+
     it("lets an Admin delete another user's assignments", async () => {
-      prisma.userLanguage.findMany.mockResolvedValue([{ id: 'user-language-English' }]);
+      prisma.userLanguage.findMany.mockResolvedValue([
+        { id: 'user-language-English', userId: OWNER_ID },
+      ]);
 
       await expect(service.delete(ADMIN, DELETE_ARGS)).resolves.toEqual(['user-language-English']);
     });

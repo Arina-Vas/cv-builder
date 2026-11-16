@@ -87,9 +87,13 @@ export class UserSkillService {
     await this.assertCanManage(currentUser, userId);
 
     const rows = await this.prisma.userSkill.findMany({
-      where: { userId, id: { in: ids } },
-      select: { id: true },
+      where: { id: { in: ids } },
+      select: { id: true, userId: true },
     });
+
+    if (rows.some((row) => row.userId !== userId)) {
+      throw forbidden('Skill assignment belongs to another user');
+    }
 
     const found = rows.map((row) => row.id);
 
