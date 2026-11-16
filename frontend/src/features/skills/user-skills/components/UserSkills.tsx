@@ -106,7 +106,7 @@ export const UserSkills = ({ userId, canEdit, emptyMessage }: Props) => {
           canRemove={data.userSkills.length > 0}
           addLabel={t('addButton')}
           removeLabel={t('removeButton')}
-          removeCountLabel={t('removeCount', { count: selectedIds.size })}
+          confirmRemoveLabel={t('confirmRemove')}
           cancelLabel={tActions('cancel')}
           onAdd={() => setModal({ type: 'create' })}
           onStartRemove={start}
@@ -126,7 +126,10 @@ export const UserSkills = ({ userId, canEdit, emptyMessage }: Props) => {
         title={t('remove.title')}
         open={openConfirmDialog}
         onOpenChange={setOpenConfirmDialog}
-        message={t('remove.message', { count: selectedIds.size })}
+        message={t.rich('remove.message', {
+          count: selectedIds.size,
+          b: (chunks) => <strong>{chunks}</strong>,
+        })}
         onConfirm={handleDeleteSkills}
       />
     </div>

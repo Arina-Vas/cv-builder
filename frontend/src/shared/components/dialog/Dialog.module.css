@@ -47,6 +47,12 @@
   margin: 0;
 }
 
+/* Highlighted part of a confirm message: "remove <b>1 skill</b>", "delete <b>{name}</b>" — [F] Roboto Bold 16/24, 0.15px */
+.description strong {
+  font-weight: 700;
+  letter-spacing: var(--type-body1-ls);
+}
+
 .body {
   flex: 1;
   overflow-y: auto;

@@ -206,7 +206,7 @@ describe('UserSkills', () => {
       const { user } = renderList();
 
       await user.click(await screen.findByRole('button', { name: 'Remove skills' }));
-      const remove = screen.getByRole('button', { name: 'Remove (0)' });
+      const remove = screen.getByRole('button', { name: 'Remove 0' });
       expect(remove).toBeDisabled();
 
       const reactButton = screen.getByRole('button', { name: /React/ });
@@ -215,7 +215,7 @@ describe('UserSkills', () => {
 
       expect(reactButton).toHaveAttribute('aria-pressed', 'true');
       expect(screen.getByRole('button', { name: /CSS/ })).toHaveAttribute('aria-pressed', 'false');
-      expect(screen.getByRole('button', { name: 'Remove (2)' })).toBeEnabled();
+      expect(screen.getByRole('button', { name: 'Remove 2' })).toBeEnabled();
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
 
@@ -250,7 +250,7 @@ describe('UserSkills', () => {
       await user.click(await screen.findByRole('button', { name: 'Remove skills' }));
       await user.click(screen.getByRole('button', { name: /React/ }));
       await user.click(screen.getByRole('button', { name: /NestJS/ }));
-      await user.click(screen.getByRole('button', { name: 'Remove (2)' }));
+      await user.click(screen.getByRole('button', { name: 'Remove 2' }));
 
       const dialog = screen.getByRole('dialog', { name: 'Remove skills' });
       expect(dialog).toHaveTextContent('Are you sure you want to remove 2 skills?');

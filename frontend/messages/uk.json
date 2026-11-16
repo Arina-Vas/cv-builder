@@ -373,10 +373,10 @@
     "title": "Поточні мови",
     "addButton": "Додати мову",
     "removeButton": "Видалити мови",
-    "removeCount": "Видалити ({count})",
+    "confirmRemove": "Видалити",
     "remove": {
       "title": "Видалити мови",
-      "message": "Ви впевнені, що хочете видалити {count, plural, one {# мову} few {# мови} many {# мов} other {# мови}}?"
+      "message": "Ви впевнені, що хочете видалити <b>{count, plural, one {# мову} few {# мови} many {# мов} other {# мови}}</b>?"
     },
     "empty": "Мови не додано",
     "emptyProfile": "Мови ще не додано",
@@ -421,10 +421,10 @@
   "userSkill": {
     "addButton": "Додати навичку",
     "removeButton": "Видалити навички",
-    "removeCount": "Видалити ({count})",
+    "confirmRemove": "Видалити",
     "remove": {
       "title": "Видалити навички",
-      "message": "Ви впевнені, що хочете видалити {count, plural, one {# навичку} few {# навички} many {# навичок} other {# навички}}?"
+      "message": "Ви впевнені, що хочете видалити <b>{count, plural, one {# навичку} few {# навички} many {# навичок} other {# навички}}</b>?"
     },
     "empty": "Навички не додано",
     "emptyProfile": "Навички ще не додано",

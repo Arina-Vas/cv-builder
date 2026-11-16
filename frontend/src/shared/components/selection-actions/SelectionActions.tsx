@@ -10,7 +10,7 @@ type Props = {
   canRemove: boolean;
   addLabel: string;
   removeLabel: string;
-  removeCountLabel: string;
+  confirmRemoveLabel: string;
   cancelLabel: string;
   onAdd: () => void;
   onStartRemove: () => void;
@@ -25,7 +25,7 @@ export const SelectionActions = ({
   canRemove,
   addLabel,
   removeLabel,
-  removeCountLabel,
+  confirmRemoveLabel,
   cancelLabel,
   onAdd,
   onStartRemove,
@@ -55,7 +55,7 @@ export const SelectionActions = ({
             {cancelLabel}
           </Button>
           <Button disabled={selectedCount === 0} size={'sm'} gated onClick={onRemove}>
-            {removeCountLabel}
+            {confirmRemoveLabel} <span className={s.badge}>{selectedCount}</span>
           </Button>
         </>
       )}

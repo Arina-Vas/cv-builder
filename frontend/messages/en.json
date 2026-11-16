@@ -369,10 +369,10 @@
     "title": "Current languages",
     "addButton": "Add language",
     "removeButton": "Remove languages",
-    "removeCount": "Remove ({count})",
+    "confirmRemove": "Remove",
     "remove": {
       "title": "Remove languages",
-      "message": "Are you sure you want to remove {count, plural, one {# language} other {# languages}}?"
+      "message": "Are you sure you want to remove <b>{count, plural, one {# language} other {# languages}}</b>?"
     },
     "empty": "No languages added",
     "emptyProfile": "No languages added yet",
@@ -417,10 +417,10 @@
   "userSkill": {
     "addButton": "Add skill",
     "removeButton": "Remove skills",
-    "removeCount": "Remove ({count})",
+    "confirmRemove": "Remove",
     "remove": {
       "title": "Remove skills",
-      "message": "Are you sure you want to remove {count, plural, one {# skill} other {# skills}}?"
+      "message": "Are you sure you want to remove <b>{count, plural, one {# skill} other {# skills}}</b>?"
     },
     "empty": "No skills added",
     "emptyProfile": "No skills added yet",
