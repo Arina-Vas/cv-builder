@@ -53,12 +53,25 @@ describe('SkillService', () => {
       findMany: jest.fn(),
       findUnique: jest.fn(),
     },
+    userSkill: {
+      count: jest.fn(),
+    },
+    projectSkill: {
+      count: jest.fn(),
+    },
+    cvSkill: {
+      count: jest.fn(),
+    },
     $transaction: jest.fn((operations: Promise<unknown>[]) => Promise.all(operations)),
   };
   const service = new SkillService(prisma as unknown as PrismaService);
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // By default nothing references the skill, so it can be deleted
+    prisma.userSkill.count.mockResolvedValue(0);
+    prisma.projectSkill.count.mockResolvedValue(0);
+    prisma.cvSkill.count.mockResolvedValue(0);
     prisma.skill.findMany.mockResolvedValue([skillRow('Angular'), skillRow('React')]);
     prisma.skill.count.mockResolvedValue(2);
     // By default the selected category exists
@@ -254,15 +267,37 @@ describe('SkillService', () => {
   });
 
   describe('delete', () => {
-    it('deletes the skill and returns its id', async () => {
+    it('deletes the skill and returns its id when nothing references it', async () => {
       prisma.skill.delete.mockResolvedValue(skillRow('React'));
 
       const result = await service.delete('id-React');
 
+      const bySkill = { where: { skillId: 'id-React' } };
+      expect(prisma.userSkill.count).toHaveBeenCalledWith(bySkill);
+      expect(prisma.projectSkill.count).toHaveBeenCalledWith(bySkill);
+      expect(prisma.cvSkill.count).toHaveBeenCalledWith(bySkill);
       expect(prisma.skill.delete).toHaveBeenCalledWith({ where: { id: 'id-React' } });
       expect(result).toBe('id-React');
     });
 
+    it.each([
+      ['users', 'userSkill'],
+      ['projects', 'projectSkill'],
+      ['CVs', 'cvSkill'],
+    ] as const)(
+      'throws ENTITY_IN_USE and does not delete when %s reference the skill',
+      async (_owners, model) => {
+        prisma[model].count.mockResolvedValue(1);
+
+        await expect(service.delete('id-React')).rejects.toMatchObject({
+          message: 'Skill cannot be deleted because it is currently in use',
+          extensions: { code: ErrorCode.ENTITY_IN_USE },
+        });
+        expect(prisma.skill.delete).not.toHaveBeenCalled();
+      },
+    );
+
+    // P2003 here means a reference was added between the check and the delete
     it.each(['P2003', 'P2025'])('leaves %s to the global filter', async (code) => {
       const error = prismaError(code);
       prisma.skill.delete.mockRejectedValue(error);

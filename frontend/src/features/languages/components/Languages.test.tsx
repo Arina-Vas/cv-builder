@@ -121,7 +121,7 @@ describe('Languages', () => {
 
       const dialog = screen.getByRole('dialog', { name: 'Delete language' });
       expect(await within(dialog).findByRole('alert')).toHaveTextContent(
-        "This item is in use and can't be deleted",
+        'Language cannot be deleted because it is currently in use',
       );
       expect(screen.getByText('Polish')).toBeInTheDocument();
     });

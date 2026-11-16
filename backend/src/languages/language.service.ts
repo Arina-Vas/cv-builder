@@ -7,7 +7,7 @@ import { SortOrder } from '@/common/graphql/sort-order.enum';
 import { toLanguage } from '@/languages/language.mapper';
 import { CreateLanguageInput } from '@/languages/dto/create-language.input';
 import { Language } from '@/languages/models/language.model';
-import { conflict } from '@/common/errors/app-errors';
+import { conflict, entityInUse } from '@/common/errors/app-errors';
 import { UpdateLanguageInput } from '@/languages/dto/update-language.input';
 
 @Injectable()
@@ -53,6 +53,11 @@ export class LanguageService {
   }
 
   async delete(id: string): Promise<string> {
+    const assigned = await this.prisma.userLanguage.count({ where: { languageId: id } });
+    if (assigned > 0) {
+      throw entityInUse('Language cannot be deleted because it is currently in use');
+    }
+
     const row = await this.prisma.language.delete({
       where: { id },
     });

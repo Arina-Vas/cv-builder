@@ -330,7 +330,8 @@
     "edit": { "title": "Edytuj dział" },
     "delete": {
       "title": "Usuń dział",
-      "message": "Czy na pewno chcesz usunąć dział <b>{name}</b>?"
+      "message": "Czy na pewno chcesz usunąć dział <b>{name}</b>?",
+      "inUse": "Nie można usunąć działu, ponieważ jest obecnie używany"
     }
   },
   "positions": {
@@ -346,7 +347,8 @@
     "edit": { "title": "Edytuj stanowisko" },
     "delete": {
       "title": "Usuń stanowisko",
-      "message": "Czy na pewno chcesz usunąć stanowisko <b>{name}</b>?"
+      "message": "Czy na pewno chcesz usunąć stanowisko <b>{name}</b>?",
+      "inUse": "Nie można usunąć stanowiska, ponieważ jest obecnie używane"
     }
   },
   "languages": {
@@ -366,7 +368,8 @@
     "edit": { "title": "Edytuj język" },
     "delete": {
       "title": "Usuń język",
-      "message": "Czy na pewno chcesz usunąć język <b>{name}</b>?"
+      "message": "Czy na pewno chcesz usunąć język <b>{name}</b>?",
+      "inUse": "Nie można usunąć języka, ponieważ jest obecnie używany"
     }
   },
   "userLanguage": {
@@ -415,7 +418,8 @@
     "edit": { "title": "Edytuj umiejętność" },
     "delete": {
       "title": "Usuń umiejętność",
-      "message": "Czy na pewno chcesz usunąć umiejętność <b>{name}</b>?"
+      "message": "Czy na pewno chcesz usunąć umiejętność <b>{name}</b>?",
+      "inUse": "Nie można usunąć umiejętności, ponieważ jest obecnie używana"
     }
   },
   "userSkill": {
@@ -469,7 +473,8 @@
     "edit": { "title": "Edytuj projekt" },
     "delete": {
       "title": "Usuń projekt",
-      "message": "Czy na pewno chcesz usunąć projekt <b>{name}</b>?"
+      "message": "Czy na pewno chcesz usunąć projekt <b>{name}</b>?",
+      "inUse": "Nie można usunąć projektu, ponieważ jest obecnie używany"
     }
   },
   "settings": {

@@ -326,7 +326,8 @@
     "edit": { "title": "Edit department" },
     "delete": {
       "title": "Delete department",
-      "message": "Are you sure you want to delete department <b>{name}</b>?"
+      "message": "Are you sure you want to delete department <b>{name}</b>?",
+      "inUse": "Department cannot be deleted because it is currently in use"
     }
   },
   "positions": {
@@ -342,7 +343,8 @@
     "edit": { "title": "Edit position" },
     "delete": {
       "title": "Delete position",
-      "message": "Are you sure you want to delete position <b>{name}</b>?"
+      "message": "Are you sure you want to delete position <b>{name}</b>?",
+      "inUse": "Position cannot be deleted because it is currently in use"
     }
   },
   "languages": {
@@ -362,7 +364,8 @@
     "edit": { "title": "Edit language" },
     "delete": {
       "title": "Delete language",
-      "message": "Are you sure you want to delete language <b>{name}</b>?"
+      "message": "Are you sure you want to delete language <b>{name}</b>?",
+      "inUse": "Language cannot be deleted because it is currently in use"
     }
   },
   "userLanguage": {
@@ -411,7 +414,8 @@
     "edit": { "title": "Edit skill" },
     "delete": {
       "title": "Delete skill",
-      "message": "Are you sure you want to delete skill <b>{name}</b>?"
+      "message": "Are you sure you want to delete skill <b>{name}</b>?",
+      "inUse": "Skill cannot be deleted because it is currently in use"
     }
   },
   "userSkill": {
@@ -465,7 +469,8 @@
     "edit": { "title": "Edit project" },
     "delete": {
       "title": "Delete project",
-      "message": "Are you sure you want to delete project <b>{name}</b>?"
+      "message": "Are you sure you want to delete project <b>{name}</b>?",
+      "inUse": "Project cannot be deleted because it is currently in use"
     }
   },
   "settings": {
