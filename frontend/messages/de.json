@@ -1,0 +1,494 @@
+{
+  "common": {
+    "errorPages": {
+      "notFound": {
+        "title": "Hmm...",
+        "message": "Das scheint nicht die Seite zu sein, die Sie gesucht haben. Kehren wir zurück.",
+        "goBack": "Zurück"
+      },
+      "noInternet": {
+        "title": "Hoppla",
+        "message": "Etwas ist schiefgelaufen. Wir arbeiten bereits an einer Lösung. Bitte versuchen Sie es erneut.",
+        "retry": "Erneut versuchen"
+      },
+      "deviceError": {
+        "title": "Hoppla",
+        "message": "Diese App wird auf Mobilgeräten nicht unterstützt. Öffnen Sie sie auf einem Desktop oder Tablet, um fortzufahren."
+      }
+    },
+    "pagination": {
+      "label": "Seitennavigation",
+      "previous": "Vorherige Seite",
+      "next": "Nächste Seite",
+      "page": "Seite {page}",
+      "rowsPerPage": "Zeilen pro Seite"
+    },
+    "table": {
+      "actions": "Aktionen",
+      "rowActions": "Aktionen für {name}",
+      "openRow": "{name} öffnen",
+      "row": "Zeile {id}",
+      "loadingRows": "Zeilen werden geladen",
+      "retry": "Erneut versuchen"
+    },
+    "toast": {
+      "region": "Benachrichtigungen",
+      "viewport": "Benachrichtigungen ({hotkey})",
+      "close": "Schließen",
+      "types": { "success": "Erfolg", "error": "Fehler", "warning": "Warnung", "info": "Info" }
+    },
+    "input": { "showPassword": "Passwort anzeigen", "hidePassword": "Passwort verbergen" },
+    "searchField": { "label": "Suche", "clear": "Suche löschen" },
+    "datePicker": {
+      "placeholder": "Datum auswählen",
+      "previous": "Zurück",
+      "next": "Weiter"
+    },
+    "select": { "noOptions": "Keine Optionen" },
+    "chip": { "remove": "{label} entfernen" },
+    "avatarUploader": {
+      "upload": "Profilbild hochladen",
+      "hint": "png, jpg oder gif, höchstens {maxSize}",
+      "remove": "Profilbild entfernen",
+      "uploading": "Profilbild wird hochgeladen",
+      "invalidType": "Nur png, jpg oder gif erlaubt",
+      "tooLarge": "Die Dateigröße darf {maxSize} nicht überschreiten"
+    },
+    "actions": {
+      "confirm": "Bestätigen",
+      "cancel": "Abbrechen",
+      "close": "Schließen",
+      "create": "Erstellen",
+      "update": "Aktualisieren",
+      "save": "Speichern",
+      "add": "Hinzufügen"
+    }
+  },
+  "errors": {
+    "UNAUTHENTICATED": "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an",
+    "FORBIDDEN": "Sie haben keine Berechtigung für diese Aktion",
+    "EMAIL_NOT_VERIFIED": "Bestätigen Sie Ihre E-Mail, um dies zu tun",
+    "NOT_FOUND": "Dieses Element existiert nicht mehr",
+    "BAD_USER_INPUT": "Überprüfen Sie die eingegebenen Daten",
+    "CONFLICT": "Dieser Wert ist bereits vergeben",
+    "ENTITY_IN_USE": "Dieses Element wird verwendet und kann nicht gelöscht werden",
+    "OPERATION_NOT_ALLOWED": "Diese Aktion ist nicht erlaubt",
+    "RATE_LIMITED": "{seconds, plural, =0 {Zu viele Versuche. Versuchen Sie es später erneut} one {Zu viele Versuche. Versuchen Sie es in # Sekunde erneut} other {Zu viele Versuche. Versuchen Sie es in # Sekunden erneut}}",
+    "INTERNAL_SERVER_ERROR": "Etwas ist schiefgelaufen. Bitte versuchen Sie es später erneut"
+  },
+  "validation": {
+    "department": {
+      "required": "Abteilungsname ist erforderlich",
+      "maxLength": "Der Abteilungsname darf {max} Zeichen nicht überschreiten"
+    },
+    "position": {
+      "required": "Positionsname ist erforderlich",
+      "maxLength": "Der Positionsname darf {max} Zeichen nicht überschreiten"
+    },
+    "language": {
+      "name": {
+        "required": "Name ist erforderlich",
+        "maxLength": "Der Name darf {max} Zeichen nicht überschreiten"
+      },
+      "nativeName": {
+        "required": "Name in der Landessprache ist erforderlich",
+        "maxLength": "Der Name in der Landessprache darf {max} Zeichen nicht überschreiten"
+      },
+      "iso": {
+        "required": "ISO ist erforderlich",
+        "maxLength": "ISO darf {max} Zeichen nicht überschreiten",
+        "format": "ISO muss ein Sprachcode sein, z. B. EN oder PT-BR"
+      }
+    },
+    "userLanguage": {
+      "languageId": { "required": "Sprache ist erforderlich" },
+      "proficiency": { "required": "Sprachniveau ist erforderlich" }
+    },
+    "skill": {
+      "name": {
+        "required": "Fähigkeit ist erforderlich",
+        "maxLength": "Der Name der Fähigkeit darf {max} Zeichen nicht überschreiten"
+      },
+      "categoryId": {
+        "required": "Kategorie ist erforderlich"
+      }
+    },
+    "userSkill": {
+      "skillId": { "required": "Fähigkeit ist erforderlich" },
+      "mastery": { "required": "Kenntnisstand ist erforderlich" }
+    },
+    "project": {
+      "name": {
+        "required": "Projektname ist erforderlich",
+        "maxLength": "Der Projektname darf {max} Zeichen nicht überschreiten"
+      },
+      "domain": {
+        "required": "Domäne ist erforderlich",
+        "maxLength": "Die Domäne darf {max} Zeichen nicht überschreiten"
+      },
+      "startDate": {
+        "required": "Startdatum ist erforderlich"
+      },
+      "endDate": {
+        "required": "Enddatum ist erforderlich",
+        "beforeStart": "Das Enddatum muss nach dem Startdatum liegen"
+      },
+      "description": {
+        "required": "Beschreibung ist erforderlich",
+        "maxLength": "Die Beschreibung darf {max} Zeichen nicht überschreiten"
+      }
+    },
+    "email": {
+      "required": "E-Mail ist erforderlich",
+      "invalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein"
+    },
+    "password": {
+      "required": "Passwort ist erforderlich",
+      "newRequired": "Neues Passwort ist erforderlich",
+      "minLength": "Das Passwort muss mindestens {min} Zeichen lang sein",
+      "maxLength": "Das Passwort darf {max} Zeichen nicht überschreiten"
+    },
+    "confirmPassword": {
+      "required": "Passwortbestätigung ist erforderlich",
+      "mismatch": "Die Passwörter stimmen nicht überein"
+    },
+    "changePassword": {
+      "confirmRequired": "Passwortbestätigung ist erforderlich",
+      "currentIncorrect": "Das aktuelle Passwort ist falsch",
+      "sameAsCurrent": "Das neue Passwort muss sich vom aktuellen unterscheiden",
+      "weakPassword": "Das Passwort erfüllt die Sicherheitsanforderungen nicht"
+    },
+    "code": {
+      "required": "Bestätigungscode ist erforderlich",
+      "invalid": "Bitte geben Sie einen gültigen 6-stelligen Code ein"
+    },
+    "user": {
+      "email": { "required": "E-Mail ist erforderlich", "invalid": "Ungültige E-Mail-Adresse" },
+      "password": {
+        "required": "Passwort ist erforderlich",
+        "minLength": "Das Passwort muss mindestens {min} Zeichen enthalten",
+        "maxLength": "Das Passwort darf {max} Zeichen nicht überschreiten"
+      },
+      "firstName": {
+        "required": "Vorname ist erforderlich",
+        "maxLength": "Der Vorname darf {max} Zeichen nicht überschreiten"
+      },
+      "lastName": {
+        "required": "Nachname ist erforderlich",
+        "maxLength": "Der Nachname darf {max} Zeichen nicht überschreiten"
+      },
+      "department": { "required": "Abteilung ist erforderlich" },
+      "position": { "required": "Position ist erforderlich" },
+      "role": { "required": "Rolle ist erforderlich" }
+    }
+  },
+  "layout": {
+    "appName": "CV Builder",
+    "collapseSidebar": "Seitenleiste einklappen",
+    "expandSidebar": "Seitenleiste ausklappen",
+    "navigation": "Hauptnavigation",
+    "breadcrumbs": "Brotkrümelnavigation",
+    "notAuthorized": "Sie sind nicht berechtigt, diese Seite aufzurufen",
+    "profile": "Profil",
+    "settings": "Einstellungen",
+    "logout": "Abmelden",
+    "profileRetry": "Profil nicht geladen. Erneut versuchen"
+  },
+  "nav": {
+    "employees": "Mitarbeiter",
+    "cvs": "Lebensläufe",
+    "skills": "Fähigkeiten",
+    "languages": "Sprachen",
+    "departments": "Abteilungen",
+    "positions": "Positionen",
+    "projects": "Projekte"
+  },
+  "auth": {
+    "tabs": { "label": "Authentifizierung", "signIn": "Anmelden", "signUp": "Registrieren" },
+    "fields": {
+      "email": "E-Mail",
+      "password": "Passwort",
+      "confirmPassword": "Passwort bestätigen"
+    },
+    "signIn": {
+      "title": "Willkommen zurück",
+      "subtitle": "Schön, Sie wiederzusehen! Melden Sie sich an, um fortzufahren",
+      "submit": "Anmelden",
+      "forgotPassword": "Passwort vergessen"
+    },
+    "signUp": {
+      "title": "Jetzt registrieren",
+      "subtitle": "Willkommen! Registrieren Sie sich, um fortzufahren",
+      "submit": "Konto erstellen",
+      "haveAccount": "Ich habe ein Konto"
+    },
+    "forgotPassword": {
+      "title": "Passwort vergessen",
+      "subtitle": "Wir senden Ihnen eine E-Mail mit weiteren Anweisungen",
+      "submit": "Passwort zurücksetzen",
+      "cancel": "Abbrechen",
+      "sent": "Wenn ein Konto mit dieser E-Mail existiert, erhalten Sie Anweisungen zum Zurücksetzen des Passworts."
+    },
+    "resetPassword": {
+      "title": "Passwort zurücksetzen",
+      "subtitle": "Geben Sie hier ein neues Passwort ein und bestätigen Sie es",
+      "newPassword": "Neues Passwort",
+      "confirmPassword": "Passwort bestätigen",
+      "submit": "Absenden",
+      "goToSignIn": "Zur Anmeldung",
+      "success": "Ihr Passwort wurde zurückgesetzt. Bitte melden Sie sich an."
+    },
+    "verifyEmail": {
+      "title": "E-Mail-Bestätigung",
+      "subtitle": "Geben Sie den Bestätigungscode ein, den wir an Ihre E-Mail gesendet haben.",
+      "codeLabel": "Bestätigungscode",
+      "digit": "Ziffer {index} von {length}",
+      "confirm": "Bestätigen",
+      "resend": "{seconds, plural, =0 {Code erneut senden} other {Code erneut senden (# s)}}",
+      "later": "Später",
+      "verified": "E-Mail bestätigt",
+      "codeSent": "Bestätigungscode gesendet"
+    },
+    "errors": {
+      "invalidCredentials": "Ungültige E-Mail oder ungültiges Passwort",
+      "emailTaken": "Ein Konto mit dieser E-Mail existiert bereits",
+      "codeInvalid": "Der Code ist ungültig oder abgelaufen. Fordern Sie einen neuen an",
+      "alreadyVerified": "Die E-Mail ist bereits bestätigt",
+      "resetLinkInvalid": "Dieser Link zum Zurücksetzen des Passworts ist ungültig oder abgelaufen"
+    }
+  },
+  "users": {
+    "title": "Mitarbeiter",
+    "createButton": "Benutzer erstellen",
+    "table": {
+      "avatar": "Profilbild",
+      "firstName": "Vorname",
+      "lastName": "Nachname",
+      "email": "E-Mail",
+      "department": "Abteilung",
+      "position": "Position",
+      "empty": "Keine Benutzer gefunden",
+      "actions": { "view": "Ansehen", "update": "Aktualisieren", "delete": "Löschen" }
+    },
+    "profile": {
+      "memberSince": "Mitglied seit {date}",
+      "loading": "Profil wird geladen",
+      "loadError": "Profilinformationen konnten nicht geladen werden",
+      "retry": "Erneut versuchen",
+      "updated": "Profil wurde aktualisiert",
+      "verifyEmail": "E-Mail bestätigen",
+      "verificationSent": "Bestätigungs-E-Mail wurde gesendet",
+      "verificationFailed": "Bestätigungs-E-Mail konnte nicht gesendet werden",
+      "avatarUpdated": "Profilbild wurde aktualisiert",
+      "avatarRemoved": "Profilbild wurde entfernt",
+      "avatarFailed": "Profilbild konnte nicht aktualisiert werden"
+    },
+    "fields": {
+      "email": "E-Mail",
+      "password": "Passwort",
+      "firstName": "Vorname",
+      "lastName": "Nachname",
+      "department": "Abteilung",
+      "position": "Position",
+      "role": "Rolle"
+    },
+    "roles": { "ADMIN": "Administrator", "EMPLOYEE": "Mitarbeiter" },
+    "create": { "title": "Benutzer erstellen" },
+    "update": { "title": "Benutzer aktualisieren" },
+    "delete": {
+      "title": "Benutzer löschen",
+      "message": "Möchten Sie den Benutzer <b>{name}</b> wirklich löschen?"
+    },
+    "tabs": {
+      "label": "Mitarbeiterbereiche",
+      "profile": "Profil",
+      "skills": "Fähigkeiten",
+      "languages": "Sprachen",
+      "cvs": "Lebensläufe"
+    }
+  },
+  "cvs": {
+    "tabs": {
+      "label": "Lebenslaufbereiche",
+      "details": "Details",
+      "skills": "Fähigkeiten",
+      "projects": "Projekte",
+      "preview": "Vorschau"
+    }
+  },
+  "departments": {
+    "title": "Abteilungen",
+    "createButton": "Abteilung erstellen",
+    "table": {
+      "name": "Name",
+      "empty": "Keine Abteilungen gefunden",
+      "actions": { "edit": "Bearbeiten", "delete": "Löschen" }
+    },
+    "fields": { "name": "Abteilung" },
+    "create": { "title": "Abteilung erstellen" },
+    "edit": { "title": "Abteilung bearbeiten" },
+    "delete": {
+      "title": "Abteilung löschen",
+      "message": "Möchten Sie die Abteilung <b>{name}</b> wirklich löschen?"
+    }
+  },
+  "positions": {
+    "title": "Positionen",
+    "createButton": "Position erstellen",
+    "table": {
+      "name": "Name",
+      "empty": "Keine Positionen gefunden",
+      "actions": { "edit": "Bearbeiten", "delete": "Löschen" }
+    },
+    "fields": { "name": "Position" },
+    "create": { "title": "Position erstellen" },
+    "edit": { "title": "Position bearbeiten" },
+    "delete": {
+      "title": "Position löschen",
+      "message": "Möchten Sie die Position <b>{name}</b> wirklich löschen?"
+    }
+  },
+  "languages": {
+    "title": "Sprachen",
+    "createButton": "Sprache erstellen",
+    "table": {
+      "columns": {
+        "name": "Name",
+        "iso": "ISO",
+        "nativeName": "Name in der Landessprache"
+      },
+      "empty": "Keine Sprachen gefunden",
+      "actions": { "edit": "Bearbeiten", "delete": "Löschen" }
+    },
+    "fields": { "name": "Name", "iso": "ISO", "nativeName": "Name in der Landessprache" },
+    "create": { "title": "Sprache erstellen" },
+    "edit": { "title": "Sprache bearbeiten" },
+    "delete": {
+      "title": "Sprache löschen",
+      "message": "Möchten Sie die Sprache <b>{name}</b> wirklich löschen?"
+    }
+  },
+  "userLanguage": {
+    "title": "Aktuelle Sprachen",
+    "addButton": "Sprache hinzufügen",
+    "removeButton": "Sprachen entfernen",
+    "removeCount": "Entfernen ({count})",
+    "remove": {
+      "title": "Sprachen entfernen",
+      "message": "Möchten Sie wirklich {count, plural, one {# Sprache} other {# Sprachen}} entfernen?"
+    },
+    "empty": "Keine Sprachen hinzugefügt",
+    "emptyProfile": "Noch keine Sprachen hinzugefügt",
+    "loading": "Sprachen werden geladen",
+    "loadError": "Sprachen konnten nicht geladen werden",
+    "retry": "Erneut versuchen",
+    "form": {
+      "updateTitle": "Sprache aktualisieren",
+      "createTitle": "Sprache hinzufügen",
+      "fields": { "languageId": "Sprache", "proficiency": "Sprachniveau" }
+    },
+    "proficiencyLevel": {
+      "A1": "A1",
+      "A2": "A2",
+      "B1": "B1",
+      "B2": "B2",
+      "C1": "C1",
+      "C2": "C2",
+      "NATIVE": "Muttersprache"
+    }
+  },
+  "skills": {
+    "title": "Fähigkeiten",
+    "createButton": "Fähigkeit erstellen",
+    "table": {
+      "columns": {
+        "name": "Name",
+        "type": "Typ",
+        "category": "Kategorie"
+      },
+      "empty": "Keine Fähigkeiten gefunden",
+      "actions": { "edit": "Bearbeiten", "delete": "Löschen" }
+    },
+    "fields": { "name": "Name", "category": "Kategorie" },
+    "create": { "title": "Fähigkeit erstellen" },
+    "edit": { "title": "Fähigkeit bearbeiten" },
+    "delete": {
+      "title": "Fähigkeit löschen",
+      "message": "Möchten Sie die Fähigkeit <b>{name}</b> wirklich löschen?"
+    }
+  },
+  "userSkill": {
+    "addButton": "Fähigkeit hinzufügen",
+    "removeButton": "Fähigkeiten entfernen",
+    "removeCount": "Entfernen ({count})",
+    "remove": {
+      "title": "Fähigkeiten entfernen",
+      "message": "Möchten Sie wirklich {count, plural, one {# Fähigkeit} other {# Fähigkeiten}} entfernen?"
+    },
+    "empty": "Keine Fähigkeiten hinzugefügt",
+    "emptyProfile": "Noch keine Fähigkeiten hinzugefügt",
+    "loading": "Fähigkeiten werden geladen",
+    "loadError": "Fähigkeiten konnten nicht geladen werden",
+    "retry": "Erneut versuchen",
+    "form": {
+      "createTitle": "Fähigkeit hinzufügen",
+      "updateTitle": "Fähigkeit aktualisieren",
+      "fields": { "skillId": "Fähigkeit", "mastery": "Kenntnisstand" }
+    },
+    "masteryLevel": {
+      "BEGINNER": "Anfänger",
+      "ELEMENTARY": "Grundkenntnisse",
+      "INTERMEDIATE": "Mittelstufe",
+      "ADVANCED": "Fortgeschritten",
+      "EXPERT": "Experte"
+    }
+  },
+  "projects": {
+    "title": "Projekte",
+    "createButton": "Projekt erstellen",
+    "table": {
+      "columns": {
+        "name": "Name",
+        "domain": "Domäne",
+        "startDate": "Startdatum",
+        "endDate": "Enddatum"
+      },
+      "empty": "Keine Projekte gefunden",
+      "actions": { "edit": "Bearbeiten", "delete": "Löschen" }
+    },
+    "fields": {
+      "name": "Name",
+      "domain": "Domäne",
+      "startDate": "Startdatum",
+      "endDate": "Enddatum",
+      "description": "Beschreibung",
+      "environment": "Umgebung"
+    },
+    "create": { "title": "Projekt erstellen" },
+    "edit": { "title": "Projekt bearbeiten" },
+    "delete": {
+      "title": "Projekt löschen",
+      "message": "Möchten Sie das Projekt <b>{name}</b> wirklich löschen?"
+    }
+  },
+  "settings": {
+    "preferences": "Einstellungen",
+    "theme": {
+      "label": "Design",
+      "LIGHT": "Hell",
+      "DARK": "Dunkel",
+      "SYSTEM": "Geräteeinstellungen"
+    },
+    "language": {
+      "label": "Sprache"
+    },
+    "changePassword": {
+      "title": "Passwort ändern",
+      "currentPassword": "Passwort",
+      "newPassword": "Neues Passwort",
+      "confirmPassword": "Passwort bestätigen",
+      "submit": "Ändern",
+      "success": "Das Passwort wurde geändert"
+    }
+  }
+}

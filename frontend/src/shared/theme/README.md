@@ -44,8 +44,9 @@ LIGHT | DARK | SYSTEM            prefers-color-scheme
 ## Persistence
 
 Client-side: `localStorage['cv-builder-theme']` = `LIGHT` | `DARK` | `SYSTEM`. Missing or invalid
-value → `SYSTEM`. This is the decision for AGENTS.md §8.4; if the team moves it to the backend
-(`theme` on User), only `setTheme` has to call the mutation in addition.
+value → `SYSTEM`. The team keeps it on the client (the spec allows it; see `docs/data-model.md`, decisions), so
+the choice belongs to the browser, not to the user. If it ever moves to the backend (`theme` on User), only
+`setTheme` has to call the mutation in addition.
 
 ## Usage
 
@@ -79,6 +80,6 @@ setTheme('DARK');
 - [x] Tokens, global styles, Roboto font
 - [x] No flash on first paint (`theme-script.ts`)
 - [x] `ThemeProvider` / `useTheme()`, SYSTEM follows the OS, sync between tabs
-- [ ] Theme select (Light / Dark / Device settings) on the Settings page (§14)
+- [x] Theme select (Light / Dark / Device settings) on the Settings page (§14)
 - [ ] Tests for `theme.ts` and `ThemeProvider` (blocked: Vitest is not set up yet)
 - [ ] Open designer questions in [TOKENS.md](TOKENS.md#missing--ambiguous-questions-for-the-designer)

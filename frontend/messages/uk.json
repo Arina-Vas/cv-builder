@@ -1,0 +1,495 @@
+{
+  "common": {
+    "errorPages": {
+      "notFound": {
+        "title": "Хм...",
+        "message": "Схоже, це не та сторінка, яку ви шукали. Повернімося назад.",
+        "goBack": "Назад"
+      },
+      "noInternet": {
+        "title": "Ой",
+        "message": "Щось пішло не так. Ми вже працюємо над виправленням. Спробуйте ще раз.",
+        "retry": "Повторити"
+      },
+      "deviceError": {
+        "title": "Ой",
+        "message": "Застосунок не підтримується на мобільних пристроях. Відкрийте його на комп'ютері або планшеті, щоб продовжити."
+      }
+    },
+    "pagination": {
+      "label": "Пагінація",
+      "previous": "Попередня сторінка",
+      "next": "Наступна сторінка",
+      "page": "Сторінка {page}",
+      "rowsPerPage": "Рядків на сторінці"
+    },
+    "table": {
+      "actions": "Дії",
+      "rowActions": "Дії для {name}",
+      "openRow": "Відкрити {name}",
+      "row": "рядок {id}",
+      "loadingRows": "Завантаження рядків",
+      "retry": "Повторити"
+    },
+    "toast": {
+      "region": "Сповіщення",
+      "viewport": "Сповіщення ({hotkey})",
+      "close": "Закрити",
+      "types": {
+        "success": "Успіх",
+        "error": "Помилка",
+        "warning": "Попередження",
+        "info": "Інформація"
+      }
+    },
+    "input": { "showPassword": "Показати пароль", "hidePassword": "Приховати пароль" },
+    "searchField": { "label": "Пошук", "clear": "Очистити пошук" },
+    "datePicker": {
+      "placeholder": "Оберіть дату",
+      "previous": "Попередній",
+      "next": "Наступний"
+    },
+    "select": { "noOptions": "Немає варіантів" },
+    "chip": { "remove": "Видалити {label}" },
+    "avatarUploader": {
+      "upload": "Завантажити аватар",
+      "hint": "png, jpg або gif не більше {maxSize}",
+      "remove": "Видалити аватар",
+      "uploading": "Завантаження аватара",
+      "invalidType": "Дозволено лише png, jpg або gif",
+      "tooLarge": "Розмір файлу не повинен перевищувати {maxSize}"
+    },
+    "actions": {
+      "confirm": "Підтвердити",
+      "cancel": "Скасувати",
+      "close": "Закрити",
+      "create": "Створити",
+      "update": "Оновити",
+      "save": "Зберегти",
+      "add": "Додати"
+    }
+  },
+  "errors": {
+    "UNAUTHENTICATED": "Ваша сесія завершилася. Увійдіть знову",
+    "FORBIDDEN": "У вас немає дозволу на цю дію",
+    "EMAIL_NOT_VERIFIED": "Підтвердьте email, щоб виконати цю дію",
+    "NOT_FOUND": "Цей елемент більше не існує",
+    "BAD_USER_INPUT": "Перевірте введені дані",
+    "CONFLICT": "Це значення вже зайняте",
+    "ENTITY_IN_USE": "Цей елемент використовується, і його не можна видалити",
+    "OPERATION_NOT_ALLOWED": "Ця дія заборонена",
+    "RATE_LIMITED": "{seconds, plural, =0 {Забагато спроб. Спробуйте пізніше} one {Забагато спроб. Спробуйте через # секунду} few {Забагато спроб. Спробуйте через # секунди} many {Забагато спроб. Спробуйте через # секунд} other {Забагато спроб. Спробуйте через # секунди}}",
+    "INTERNAL_SERVER_ERROR": "Щось пішло не так. Спробуйте пізніше"
+  },
+  "validation": {
+    "department": {
+      "required": "Назва відділу обов'язкова",
+      "maxLength": "Назва відділу не повинна перевищувати {max} символів"
+    },
+    "position": {
+      "required": "Назва посади обов'язкова",
+      "maxLength": "Назва посади не повинна перевищувати {max} символів"
+    },
+    "language": {
+      "name": {
+        "required": "Назва обов'язкова",
+        "maxLength": "Назва не повинна перевищувати {max} символів"
+      },
+      "nativeName": {
+        "required": "Власна назва обов'язкова",
+        "maxLength": "Власна назва не повинна перевищувати {max} символів"
+      },
+      "iso": {
+        "required": "ISO обов'язковий",
+        "maxLength": "ISO не повинен перевищувати {max} символів",
+        "format": "ISO має бути кодом мови, наприклад EN або PT-BR"
+      }
+    },
+    "userLanguage": {
+      "languageId": { "required": "Мова обов'язкова" },
+      "proficiency": { "required": "Рівень володіння мовою обов'язковий" }
+    },
+    "skill": {
+      "name": {
+        "required": "Навичка обов'язкова",
+        "maxLength": "Назва навички не повинна перевищувати {max} символів"
+      },
+      "categoryId": {
+        "required": "Категорія обов'язкова"
+      }
+    },
+    "userSkill": {
+      "skillId": { "required": "Навичка обов'язкова" },
+      "mastery": { "required": "Рівень володіння навичкою обов'язковий" }
+    },
+    "project": {
+      "name": {
+        "required": "Назва проєкту обов'язкова",
+        "maxLength": "Назва проєкту не повинна перевищувати {max} символів"
+      },
+      "domain": {
+        "required": "Домен обов'язковий",
+        "maxLength": "Домен не повинен перевищувати {max} символів"
+      },
+      "startDate": {
+        "required": "Дата початку обов'язкова"
+      },
+      "endDate": {
+        "required": "Дата завершення обов'язкова",
+        "beforeStart": "Дата завершення має бути пізнішою за дату початку"
+      },
+      "description": {
+        "required": "Опис обов'язковий",
+        "maxLength": "Опис не повинен перевищувати {max} символів"
+      }
+    },
+    "email": {
+      "required": "Email обов'язковий",
+      "invalid": "Введіть коректну email-адресу"
+    },
+    "password": {
+      "required": "Пароль обов'язковий",
+      "newRequired": "Новий пароль обов'язковий",
+      "minLength": "Пароль має містити щонайменше {min} символів",
+      "maxLength": "Пароль не повинен перевищувати {max} символів"
+    },
+    "confirmPassword": {
+      "required": "Підтвердження пароля обов'язкове",
+      "mismatch": "Паролі не збігаються"
+    },
+    "changePassword": {
+      "confirmRequired": "Підтвердження пароля обов'язкове",
+      "currentIncorrect": "Поточний пароль неправильний",
+      "sameAsCurrent": "Новий пароль має відрізнятися від поточного",
+      "weakPassword": "Пароль не відповідає вимогам безпеки"
+    },
+    "code": {
+      "required": "Код підтвердження обов'язковий",
+      "invalid": "Введіть коректний 6-значний код"
+    },
+    "user": {
+      "email": { "required": "Email обов'язковий", "invalid": "Некоректна email-адреса" },
+      "password": {
+        "required": "Пароль обов'язковий",
+        "minLength": "Пароль має містити щонайменше {min} символів",
+        "maxLength": "Пароль не повинен перевищувати {max} символів"
+      },
+      "firstName": {
+        "required": "Ім'я обов'язкове",
+        "maxLength": "Ім'я не повинно перевищувати {max} символів"
+      },
+      "lastName": {
+        "required": "Прізвище обов'язкове",
+        "maxLength": "Прізвище не повинно перевищувати {max} символів"
+      },
+      "department": { "required": "Відділ обов'язковий" },
+      "position": { "required": "Посада обов'язкова" },
+      "role": { "required": "Роль обов'язкова" }
+    }
+  },
+  "layout": {
+    "appName": "CV Builder",
+    "collapseSidebar": "Згорнути бічну панель",
+    "expandSidebar": "Розгорнути бічну панель",
+    "navigation": "Головна навігація",
+    "breadcrumbs": "Навігаційний ланцюжок",
+    "notAuthorized": "У вас немає доступу до цієї сторінки",
+    "profile": "Профіль",
+    "settings": "Налаштування",
+    "logout": "Вийти",
+    "profileRetry": "Профіль не завантажено. Повторити"
+  },
+  "nav": {
+    "employees": "Працівники",
+    "cvs": "Резюме",
+    "skills": "Навички",
+    "languages": "Мови",
+    "departments": "Відділи",
+    "positions": "Посади",
+    "projects": "Проєкти"
+  },
+  "auth": {
+    "tabs": { "label": "Автентифікація", "signIn": "Вхід", "signUp": "Реєстрація" },
+    "fields": { "email": "Email", "password": "Пароль", "confirmPassword": "Підтвердження пароля" },
+    "signIn": {
+      "title": "З поверненням",
+      "subtitle": "Привіт знову! Увійдіть, щоб продовжити",
+      "submit": "Увійти",
+      "forgotPassword": "Забули пароль"
+    },
+    "signUp": {
+      "title": "Зареєструйтеся",
+      "subtitle": "Вітаємо! Зареєструйтеся, щоб продовжити",
+      "submit": "Створити акаунт",
+      "haveAccount": "У мене є акаунт"
+    },
+    "forgotPassword": {
+      "title": "Забули пароль",
+      "subtitle": "Ми надішлемо вам лист із подальшими інструкціями",
+      "submit": "Скинути пароль",
+      "cancel": "Скасувати",
+      "sent": "Якщо акаунт із цим email існує, ви отримаєте інструкції зі скидання пароля."
+    },
+    "resetPassword": {
+      "title": "Скидання пароля",
+      "subtitle": "Введіть новий пароль і підтвердіть його",
+      "newPassword": "Новий пароль",
+      "confirmPassword": "Підтвердження пароля",
+      "submit": "Надіслати",
+      "goToSignIn": "Перейти до входу",
+      "success": "Ваш пароль скинуто. Увійдіть знову."
+    },
+    "verifyEmail": {
+      "title": "Підтвердження email",
+      "subtitle": "Введіть код підтвердження, який ми надіслали на вашу пошту.",
+      "codeLabel": "Код підтвердження",
+      "digit": "Цифра {index} з {length}",
+      "confirm": "Підтвердити",
+      "resend": "{seconds, plural, =0 {Надіслати код ще раз} other {Надіслати код ще раз (# с)}}",
+      "later": "Пізніше",
+      "verified": "Email підтверджено",
+      "codeSent": "Код підтвердження надіслано"
+    },
+    "errors": {
+      "invalidCredentials": "Неправильний email або пароль",
+      "emailTaken": "Акаунт із цим email уже існує",
+      "codeInvalid": "Код недійсний або прострочений. Запросіть новий",
+      "alreadyVerified": "Email уже підтверджено",
+      "resetLinkInvalid": "Посилання для скидання пароля недійсне або прострочене"
+    }
+  },
+  "users": {
+    "title": "Працівники",
+    "createButton": "Створити користувача",
+    "table": {
+      "avatar": "Аватар",
+      "firstName": "Ім'я",
+      "lastName": "Прізвище",
+      "email": "Email",
+      "department": "Відділ",
+      "position": "Посада",
+      "empty": "Користувачів не знайдено",
+      "actions": { "view": "Переглянути", "update": "Оновити", "delete": "Видалити" }
+    },
+    "profile": {
+      "memberSince": "Учасник з {date}",
+      "loading": "Завантаження профілю",
+      "loadError": "Не вдалося завантажити інформацію профілю",
+      "retry": "Повторити",
+      "updated": "Профіль оновлено",
+      "verifyEmail": "Підтвердити email",
+      "verificationSent": "Лист для підтвердження надіслано",
+      "verificationFailed": "Не вдалося надіслати лист для підтвердження",
+      "avatarUpdated": "Аватар оновлено",
+      "avatarRemoved": "Аватар видалено",
+      "avatarFailed": "Не вдалося оновити аватар"
+    },
+    "fields": {
+      "email": "Email",
+      "password": "Пароль",
+      "firstName": "Ім'я",
+      "lastName": "Прізвище",
+      "department": "Відділ",
+      "position": "Посада",
+      "role": "Роль"
+    },
+    "roles": { "ADMIN": "Адміністратор", "EMPLOYEE": "Працівник" },
+    "create": { "title": "Створити користувача" },
+    "update": { "title": "Оновити користувача" },
+    "delete": {
+      "title": "Видалити користувача",
+      "message": "Ви впевнені, що хочете видалити користувача <b>{name}</b>?"
+    },
+    "tabs": {
+      "label": "Розділи працівника",
+      "profile": "Профіль",
+      "skills": "Навички",
+      "languages": "Мови",
+      "cvs": "Резюме"
+    }
+  },
+  "cvs": {
+    "tabs": {
+      "label": "Розділи резюме",
+      "details": "Деталі",
+      "skills": "Навички",
+      "projects": "Проєкти",
+      "preview": "Попередній перегляд"
+    }
+  },
+  "departments": {
+    "title": "Відділи",
+    "createButton": "Створити відділ",
+    "table": {
+      "name": "Назва",
+      "empty": "Відділів не знайдено",
+      "actions": { "edit": "Редагувати", "delete": "Видалити" }
+    },
+    "fields": { "name": "Відділ" },
+    "create": { "title": "Створити відділ" },
+    "edit": { "title": "Редагувати відділ" },
+    "delete": {
+      "title": "Видалити відділ",
+      "message": "Ви впевнені, що хочете видалити відділ <b>{name}</b>?"
+    }
+  },
+  "positions": {
+    "title": "Посади",
+    "createButton": "Створити посаду",
+    "table": {
+      "name": "Назва",
+      "empty": "Посад не знайдено",
+      "actions": { "edit": "Редагувати", "delete": "Видалити" }
+    },
+    "fields": { "name": "Посада" },
+    "create": { "title": "Створити посаду" },
+    "edit": { "title": "Редагувати посаду" },
+    "delete": {
+      "title": "Видалити посаду",
+      "message": "Ви впевнені, що хочете видалити посаду <b>{name}</b>?"
+    }
+  },
+  "languages": {
+    "title": "Мови",
+    "createButton": "Створити мову",
+    "table": {
+      "columns": {
+        "name": "Назва",
+        "iso": "ISO",
+        "nativeName": "Власна назва"
+      },
+      "empty": "Мов не знайдено",
+      "actions": { "edit": "Редагувати", "delete": "Видалити" }
+    },
+    "fields": { "name": "Назва", "iso": "ISO", "nativeName": "Власна назва" },
+    "create": { "title": "Створити мову" },
+    "edit": { "title": "Редагувати мову" },
+    "delete": {
+      "title": "Видалити мову",
+      "message": "Ви впевнені, що хочете видалити мову <b>{name}</b>?"
+    }
+  },
+  "userLanguage": {
+    "title": "Поточні мови",
+    "addButton": "Додати мову",
+    "removeButton": "Видалити мови",
+    "removeCount": "Видалити ({count})",
+    "remove": {
+      "title": "Видалити мови",
+      "message": "Ви впевнені, що хочете видалити {count, plural, one {# мову} few {# мови} many {# мов} other {# мови}}?"
+    },
+    "empty": "Мови не додано",
+    "emptyProfile": "Мови ще не додано",
+    "loading": "Завантаження мов",
+    "loadError": "Не вдалося завантажити мови",
+    "retry": "Повторити",
+    "form": {
+      "updateTitle": "Оновити мову",
+      "createTitle": "Додати мову",
+      "fields": { "languageId": "Мова", "proficiency": "Рівень володіння" }
+    },
+    "proficiencyLevel": {
+      "A1": "A1",
+      "A2": "A2",
+      "B1": "B1",
+      "B2": "B2",
+      "C1": "C1",
+      "C2": "C2",
+      "NATIVE": "Рідна"
+    }
+  },
+  "skills": {
+    "title": "Навички",
+    "createButton": "Створити навичку",
+    "table": {
+      "columns": {
+        "name": "Назва",
+        "type": "Тип",
+        "category": "Категорія"
+      },
+      "empty": "Навичок не знайдено",
+      "actions": { "edit": "Редагувати", "delete": "Видалити" }
+    },
+    "fields": { "name": "Назва", "category": "Категорія" },
+    "create": { "title": "Створити навичку" },
+    "edit": { "title": "Редагувати навичку" },
+    "delete": {
+      "title": "Видалити навичку",
+      "message": "Ви впевнені, що хочете видалити навичку <b>{name}</b>?"
+    }
+  },
+  "userSkill": {
+    "addButton": "Додати навичку",
+    "removeButton": "Видалити навички",
+    "removeCount": "Видалити ({count})",
+    "remove": {
+      "title": "Видалити навички",
+      "message": "Ви впевнені, що хочете видалити {count, plural, one {# навичку} few {# навички} many {# навичок} other {# навички}}?"
+    },
+    "empty": "Навички не додано",
+    "emptyProfile": "Навички ще не додано",
+    "loading": "Завантаження навичок",
+    "loadError": "Не вдалося завантажити навички",
+    "retry": "Повторити",
+    "form": {
+      "createTitle": "Додати навичку",
+      "updateTitle": "Оновити навичку",
+      "fields": { "skillId": "Навичка", "mastery": "Рівень володіння" }
+    },
+    "masteryLevel": {
+      "BEGINNER": "Початківець",
+      "ELEMENTARY": "Базовий",
+      "INTERMEDIATE": "Середній",
+      "ADVANCED": "Просунутий",
+      "EXPERT": "Експерт"
+    }
+  },
+  "projects": {
+    "title": "Проєкти",
+    "createButton": "Створити проєкт",
+    "table": {
+      "columns": {
+        "name": "Назва",
+        "domain": "Домен",
+        "startDate": "Дата початку",
+        "endDate": "Дата завершення"
+      },
+      "empty": "Проєктів не знайдено",
+      "actions": { "edit": "Редагувати", "delete": "Видалити" }
+    },
+    "fields": {
+      "name": "Назва",
+      "domain": "Домен",
+      "startDate": "Дата початку",
+      "endDate": "Дата завершення",
+      "description": "Опис",
+      "environment": "Середовище"
+    },
+    "create": { "title": "Створити проєкт" },
+    "edit": { "title": "Редагувати проєкт" },
+    "delete": {
+      "title": "Видалити проєкт",
+      "message": "Ви впевнені, що хочете видалити проєкт <b>{name}</b>?"
+    }
+  },
+  "settings": {
+    "preferences": "Уподобання",
+    "theme": {
+      "label": "Тема",
+      "LIGHT": "Світла",
+      "DARK": "Темна",
+      "SYSTEM": "Налаштування пристрою"
+    },
+    "language": {
+      "label": "Мова"
+    },
+    "changePassword": {
+      "title": "Змінити пароль",
+      "currentPassword": "Пароль",
+      "newPassword": "Новий пароль",
+      "confirmPassword": "Підтвердіть пароль",
+      "submit": "Змінити",
+      "success": "Пароль змінено"
+    }
+  }
+}

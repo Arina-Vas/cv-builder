@@ -124,10 +124,21 @@ or stores them.
 ## Internationalization (i18n)
 
 [next-intl](https://next-intl.dev) without i18n routing: the locale is not part of the URL and `src/proxy.ts`
-does not deal with it. Only English for now.
+does not deal with it. Nine languages, the list from the Settings spec: English, French, German, Italian, Polish,
+Portuguese, Russian, Spanish, Ukrainian.
 
-- **Messages** live in `messages/<locale>.json`. `src/i18n/request.ts` picks the locale for a request and loads
-  its messages; `src/i18n/config.ts` lists the supported locales.
+- **Locales.** `src/i18n/config.ts` lists them (`LOCALES`, in the order of the Settings select) and the default
+  (`en`). Adding one = a code in `LOCALES`, its name in `LOCALE_NAMES` and a `messages/<code>.json`.
+- **Language names** in the select are in their own language (`Français`, `Українська`) and do not follow the UI
+  language, so someone who switched to a language they cannot read still finds theirs. They live in
+  `LOCALE_NAMES`, not in the messages files.
+- **Choosing the locale.** The Language select on the Settings page writes the `locale` cookie (one year) and
+  calls `router.refresh()`. `src/i18n/request.ts` reads the cookie on every request; a missing or unknown value
+  falls back to `en`. A cookie, not `localStorage`, because the server renders the texts. Like the theme, the
+  choice belongs to the browser, not to the user (`docs/data-model.md`, decisions).
+- **Messages** live in `messages/<locale>.json`. `en.json` is the source of every key: `request.ts` merges the
+  chosen translation over it (`src/i18n/merge-messages.ts`), so a key missing in a translation shows the English
+  text instead of the raw key.
 - **Provider.** The root layout mounts `NextIntlClientProvider`; `.storybook/preview.tsx` mounts it with the
   messages imported directly (Storybook has no server). Any component that calls `useTranslations` needs it.
 - **Usage.** Server components: `const t = await getTranslations('auth.signIn')`. Client components and

@@ -51,6 +51,7 @@ type Documents = {
     "\n  mutation CreateProject($input: CreateProjectInput!) {\n    createProject(input: $input) {\n      ...ProjectFields\n    }\n  }\n": typeof types.CreateProjectDocument,
     "\n  mutation UpdateProject($input: UpdateProjectInput!) {\n    updateProject(input: $input) {\n      ...ProjectFields\n    }\n  }\n": typeof types.UpdateProjectDocument,
     "\n  mutation DeleteProject($id: ID!) {\n    deleteProject(id: $id)\n  }\n": typeof types.DeleteProjectDocument,
+    "\n  mutation ChangePassword($input: ChangePasswordInput!) {\n    changePassword(input: $input)\n  }\n": typeof types.ChangePasswordDocument,
     "\n  fragment SkillFields on Skill {\n    id\n    name\n    category {\n      id\n      name\n      type\n    }\n  }\n": typeof types.SkillFieldsFragmentDoc,
     "\n  query Skills(\n    $page: Int!\n    $pageSize: Int!\n    $search: String\n    $sortBy: SkillSortField!\n    $sortOrder: SortOrder!\n  ) {\n    skills(\n      page: $page\n      pageSize: $pageSize\n      search: $search\n      sortBy: $sortBy\n      sortOrder: $sortOrder\n    ) {\n      items {\n        ...SkillFields\n      }\n      page\n      pageSize\n      total\n    }\n  }\n": typeof types.SkillsDocument,
     "\n  query SkillCategories {\n    skillCategories {\n      id\n      name\n      type\n    }\n  }\n": typeof types.SkillCategoriesDocument,
@@ -112,6 +113,7 @@ const documents: Documents = {
     "\n  mutation CreateProject($input: CreateProjectInput!) {\n    createProject(input: $input) {\n      ...ProjectFields\n    }\n  }\n": types.CreateProjectDocument,
     "\n  mutation UpdateProject($input: UpdateProjectInput!) {\n    updateProject(input: $input) {\n      ...ProjectFields\n    }\n  }\n": types.UpdateProjectDocument,
     "\n  mutation DeleteProject($id: ID!) {\n    deleteProject(id: $id)\n  }\n": types.DeleteProjectDocument,
+    "\n  mutation ChangePassword($input: ChangePasswordInput!) {\n    changePassword(input: $input)\n  }\n": types.ChangePasswordDocument,
     "\n  fragment SkillFields on Skill {\n    id\n    name\n    category {\n      id\n      name\n      type\n    }\n  }\n": types.SkillFieldsFragmentDoc,
     "\n  query Skills(\n    $page: Int!\n    $pageSize: Int!\n    $search: String\n    $sortBy: SkillSortField!\n    $sortOrder: SortOrder!\n  ) {\n    skills(\n      page: $page\n      pageSize: $pageSize\n      search: $search\n      sortBy: $sortBy\n      sortOrder: $sortOrder\n    ) {\n      items {\n        ...SkillFields\n      }\n      page\n      pageSize\n      total\n    }\n  }\n": types.SkillsDocument,
     "\n  query SkillCategories {\n    skillCategories {\n      id\n      name\n      type\n    }\n  }\n": types.SkillCategoriesDocument,
@@ -298,6 +300,10 @@ export function graphql(source: "\n  mutation UpdateProject($input: UpdateProjec
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation DeleteProject($id: ID!) {\n    deleteProject(id: $id)\n  }\n"): (typeof documents)["\n  mutation DeleteProject($id: ID!) {\n    deleteProject(id: $id)\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation ChangePassword($input: ChangePasswordInput!) {\n    changePassword(input: $input)\n  }\n"): (typeof documents)["\n  mutation ChangePassword($input: ChangePasswordInput!) {\n    changePassword(input: $input)\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
