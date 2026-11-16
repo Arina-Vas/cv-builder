@@ -40,6 +40,7 @@ Email Verification pages. Tables are described in [data-model.md](data-model.md)
   change, a revoked session or a deleted user takes effect immediately, not when the access token expires.
 - Logout revokes the current session and clears both cookies.
 - Password reset revokes all sessions of the user.
+- Changing the password in Settings revokes every other session of the user; the current one stays signed in.
 
 ## Operations
 
@@ -140,17 +141,43 @@ code in `backend/src/auth/password-reset/`.
 - Resetting does not mark the email as verified: verification stays a separate flow.
 - The user is not signed in automatically: the frontend redirects to Sign In with a success message.
 
+## Change password
+
+Mutation (signed-in, verified email): `changePassword(input: { currentPassword, newPassword, confirmPassword }): Boolean!`,
+code in `backend/src/auth/change-password/`. Used by the Change Password form on the Settings page.
+
+- The user comes from the auth context; the input has no `userId`, so nobody can change another user's password,
+  an Admin included.
+- Input validation: `Password is required` (field `currentPassword`), `New password is required`,
+  `Password must be at least 6 characters long`, `Password must not exceed 128 characters`,
+  `Confirm password is required` (lower-case "p", as on the Settings page; Sign Up uses `Confirm Password`) and
+  `Passwords do not match`. The current password has no minimum length: it is checked against the stored hash, so
+  an account with an older, shorter password can still change it. It is capped at 128 characters.
+- Errors from the service, both `BAD_USER_INPUT`:
+
+  | Case                            | Field             | Message                                                    |
+  | ------------------------------- | ----------------- | ---------------------------------------------------------- |
+  | current password does not match | `currentPassword` | `Current password is incorrect`                            |
+  | new password equals the current | `newPassword`     | `New password must be different from the current password` |
+
+  The second rule is a team decision; the spec only names `Password does not meet the security requirements`.
+
+- On success the new hash is stored and every other active session of the user is revoked, in one transaction.
+  The current session keeps working, so the user stays on the Settings page and the form is reset.
+- Rate-limited with `@AuthThrottle()` (see [Rate limiting](#rate-limiting)) against guessing the current password.
+- Passwords and hashes are never returned or logged.
+
 ## Rate limiting
 
 `@nestjs/throttler` counts requests per client IP in memory. `GqlThrottlerGuard`
 (`backend/src/common/throttling/`) is the first global guard, so a throttled request never reaches the auth guard
 or the database.
 
-| Operations                                                                                                               | Limit per IP                             |
-| ------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------- |
-| `signUp`, `signIn`, `requestPasswordReset`, `resetPassword`, `verifyEmail`, `resendVerificationCode` (`@AuthThrottle()`) | 10 per minute, each operation separately |
-| every other operation                                                                                                    | 100 per minute                           |
-| `health` query and `GET /health` (`@SkipThrottle()`)                                                                     | none                                     |
+| Operations                                                                                                                                 | Limit per IP                             |
+| ------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------- |
+| `signUp`, `signIn`, `requestPasswordReset`, `resetPassword`, `changePassword`, `verifyEmail`, `resendVerificationCode` (`@AuthThrottle()`) | 10 per minute, each operation separately |
+| every other operation                                                                                                                      | 100 per minute                           |
+| `health` query and `GET /health` (`@SkipThrottle()`)                                                                                       | none                                     |
 
 - Over the limit: `RATE_LIMITED` with `Please wait before trying again` and `retryAfter` in seconds. The HTTP
   response also has a `Retry-After` header, and every response has `X-RateLimit-Limit` / `-Remaining` / `-Reset`.

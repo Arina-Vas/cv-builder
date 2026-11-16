@@ -13,6 +13,8 @@ import { AccessTokenService } from './sessions/access-token.service';
 import { AuthGuard } from './guards/auth.guard';
 import { AuthResolver } from './auth.resolver';
 import { AuthService } from './auth.service';
+import { ChangePasswordResolver } from './change-password/change-password.resolver';
+import { ChangePasswordService } from './change-password/change-password.service';
 import { EmailVerificationResolver } from './email-verification/email-verification.resolver';
 import { EmailVerificationService } from './email-verification/email-verification.service';
 import { PasswordResetResolver } from './password-reset/password-reset.resolver';
@@ -41,6 +43,8 @@ import { SessionsService } from './sessions/sessions.service';
     EmailVerificationResolver,
     PasswordResetService,
     PasswordResetResolver,
+    ChangePasswordService,
+    ChangePasswordResolver,
     { provide: APP_GUARD, useClass: GqlThrottlerGuard },
     { provide: APP_GUARD, useClass: AuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
