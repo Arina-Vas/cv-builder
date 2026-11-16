@@ -482,17 +482,6 @@
     "language": {
       "label": "Sprache"
     },
-    "locales": {
-      "en": "Englisch",
-      "fr": "Französisch",
-      "de": "Deutsch",
-      "it": "Italienisch",
-      "pl": "Polnisch",
-      "pt": "Portugiesisch",
-      "ru": "Russisch",
-      "es": "Spanisch",
-      "uk": "Ukrainisch"
-    },
     "changePassword": {
       "title": "Passwort ändern",
       "currentPassword": "Passwort",

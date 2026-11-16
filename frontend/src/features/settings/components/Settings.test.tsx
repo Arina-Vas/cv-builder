@@ -51,22 +51,23 @@ describe('Settings', () => {
   });
 
   describe('language', () => {
-    it('shows the current language and offers the nine languages of the spec in order', async () => {
+    it('shows the current language and the nine languages of the spec, each in its own language', async () => {
       const { user } = renderWithProviders(<Settings />);
       const language = screen.getByRole('combobox', { name: 'Language' });
 
       expect(language).toHaveTextContent('English');
       await user.click(language);
+      // The UI is English here, yet French is "Français": the names do not follow the UI language
       expect(optionNames()).toEqual([
         'English',
-        'French',
-        'German',
-        'Italian',
-        'Polish',
-        'Portuguese',
-        'Russian',
-        'Spanish',
-        'Ukrainian',
+        'Français',
+        'Deutsch',
+        'Italiano',
+        'Polski',
+        'Português',
+        'Русский',
+        'Español',
+        'Українська',
       ]);
     });
 
@@ -74,7 +75,7 @@ describe('Settings', () => {
       const { user } = renderWithProviders(<Settings />);
 
       await user.click(screen.getByRole('combobox', { name: 'Language' }));
-      await user.click(within(document.body).getByRole('option', { name: 'Ukrainian' }));
+      await user.click(within(document.body).getByRole('option', { name: 'Українська' }));
 
       expect(localeCookie()).toBe('uk');
       expect(mockRouter.refresh).toHaveBeenCalledTimes(1);

@@ -490,17 +490,6 @@
     "language": {
       "label": "Langue"
     },
-    "locales": {
-      "en": "Anglais",
-      "fr": "Français",
-      "de": "Allemand",
-      "it": "Italien",
-      "pl": "Polonais",
-      "pt": "Portugais",
-      "ru": "Russe",
-      "es": "Espagnol",
-      "uk": "Ukrainien"
-    },
     "changePassword": {
       "title": "Changer le mot de passe",
       "currentPassword": "Mot de passe",

@@ -479,17 +479,6 @@
     "language": {
       "label": "Language"
     },
-    "locales": {
-      "en": "English",
-      "fr": "French",
-      "de": "German",
-      "it": "Italian",
-      "pl": "Polish",
-      "pt": "Portuguese",
-      "ru": "Russian",
-      "es": "Spanish",
-      "uk": "Ukrainian"
-    },
     "changePassword": {
       "title": "Change password",
       "currentPassword": "Password",

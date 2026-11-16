@@ -4,7 +4,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
 import { saveLocale } from '@/features/settings/settings.constants';
-import { isLocale, LOCALES } from '@/i18n/config';
+import { isLocale, LOCALE_NAMES, LOCALES } from '@/i18n/config';
 import { Select } from '@/shared/components/select/Select';
 import type { SelectOption } from '@/shared/components/select/Select.types';
 import { isThemeMode, THEME_MODES } from '@/shared/theme/theme';
@@ -25,7 +25,7 @@ export const Settings = () => {
   }));
   const localeOptions: SelectOption[] = LOCALES.map((code) => ({
     value: code,
-    label: t(`locales.${code}`),
+    label: LOCALE_NAMES[code],
   }));
 
   const handleThemeChange = (value: string) => {

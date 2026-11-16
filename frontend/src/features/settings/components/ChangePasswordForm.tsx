@@ -52,8 +52,6 @@ export const ChangePasswordForm = () => {
       if (appError.fieldErrors.currentPassword) {
         setServerError('currentPassword', 'changePassword.currentIncorrect');
       } else if (appError.fieldErrors.newPassword) {
-        // The schema already checks the new password like the backend does, so the only error the
-        // backend can still return for it is "equal to the current one"
         setServerError('newPassword', 'changePassword.sameAsCurrent');
       } else {
         toast.error(errorMessage(appError));

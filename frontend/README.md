@@ -128,8 +128,10 @@ does not deal with it. Nine languages, the list from the Settings spec: English,
 Portuguese, Russian, Spanish, Ukrainian.
 
 - **Locales.** `src/i18n/config.ts` lists them (`LOCALES`, in the order of the Settings select) and the default
-  (`en`). Adding one = a code in `LOCALES`, a `messages/<code>.json` and a `settings.locales.<code>` name in
-  every messages file.
+  (`en`). Adding one = a code in `LOCALES`, its name in `LOCALE_NAMES` and a `messages/<code>.json`.
+- **Language names** in the select are in their own language (`Français`, `Українська`) and do not follow the UI
+  language, so someone who switched to a language they cannot read still finds theirs. They live in
+  `LOCALE_NAMES`, not in the messages files.
 - **Choosing the locale.** The Language select on the Settings page writes the `locale` cookie (one year) and
   calls `router.refresh()`. `src/i18n/request.ts` reads the cookie on every request; a missing or unknown value
   falls back to `en`. A cookie, not `localStorage`, because the server renders the texts. Like the theme, the

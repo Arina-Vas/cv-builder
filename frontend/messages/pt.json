@@ -483,17 +483,6 @@
     "language": {
       "label": "Idioma"
     },
-    "locales": {
-      "en": "Inglês",
-      "fr": "Francês",
-      "de": "Alemão",
-      "it": "Italiano",
-      "pl": "Polonês",
-      "pt": "Português",
-      "ru": "Russo",
-      "es": "Espanhol",
-      "uk": "Ucraniano"
-    },
     "changePassword": {
       "title": "Alterar senha",
       "currentPassword": "Senha",

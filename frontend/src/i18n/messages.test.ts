@@ -42,10 +42,6 @@ describe('messages', () => {
     expect(files.sort()).toEqual([...LOCALES].sort());
   });
 
-  it('names every supported locale for the Language select', () => {
-    for (const locale of LOCALES) expect(english[`settings.locales.${locale}`]).toBeTruthy();
-  });
-
   describe.each(translations)('%s.json', (locale) => {
     const translated = flatten(load(locale));
 

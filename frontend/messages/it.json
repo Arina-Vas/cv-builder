@@ -483,17 +483,6 @@
     "language": {
       "label": "Lingua"
     },
-    "locales": {
-      "en": "Inglese",
-      "fr": "Francese",
-      "de": "Tedesco",
-      "it": "Italiano",
-      "pl": "Polacco",
-      "pt": "Portoghese",
-      "ru": "Russo",
-      "es": "Spagnolo",
-      "uk": "Ucraino"
-    },
     "changePassword": {
       "title": "Cambia password",
       "currentPassword": "Password",
