@@ -379,6 +379,7 @@
   --button-secondary-disabled-bg: #aeaeae; /* [F] */
   /* Button — ghost (text) */
   --button-ghost-hover-border: #626262; /* TODO: visual only, not measured */
+  --button-ghost-text: #C4C4C6;
   --button-ghost-pressed-bg: #aeaeae; /* [F] */
   --button-ghost-pressed-border: #626262; /* [F] */
   --button-ghost-pressed-text: #2e2e2e; /* TODO: visual only */

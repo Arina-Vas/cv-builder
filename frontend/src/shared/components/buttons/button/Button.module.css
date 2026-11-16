@@ -70,11 +70,10 @@
 .text:is(:disabled, [aria-disabled='true']) {
   background: var(--primary-disabled-bg);
   border-color: var(--primary-disabled-bg);
-  color: var(--on-primary);
+  color: var(--color-disabled);
 }
 
 .secondary {
-  background: var(--button-secondary-bg);
   border-color: var(--button-secondary-border);
   color: var(--button-secondary-text);
 }
@@ -98,7 +97,7 @@
 }
 
 .ghost {
-  color: var(--text);
+  color: var(--button-ghost-text);
 }
 
 .ghost:hover:not(:disabled, [aria-disabled='true']) {

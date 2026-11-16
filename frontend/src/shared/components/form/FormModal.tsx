@@ -94,7 +94,7 @@ export const FormModal = <TInput extends FieldValues, TOutput extends FieldValue
         loading={isSubmitting}
         disabled={!isValid || (requireDirty && !isDirty)}
       >
-        {submitLabel ?? (mode === 'update' ? t('save') : t('create'))}
+        {submitLabel ?? (mode === 'update' ? t('update') : t('create'))}
       </Button>
     </>
   );
