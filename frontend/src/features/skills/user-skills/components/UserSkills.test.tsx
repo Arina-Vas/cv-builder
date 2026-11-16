@@ -1,9 +1,12 @@
 import type { MockLink } from '@apollo/client/testing';
 import { screen, waitFor, within } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { GraphQLError } from 'graphql';
+import { notFound } from 'next/navigation';
+import { describe, expect, it, vi } from 'vitest';
 import { closedGate } from '@/test/action-gate';
+import { CatchErrors } from '@/test/catch-errors';
 import { renderWithProviders } from '@/test/render';
-import { DELETE_USER_SKILLS, USER_SKILLS } from '../api/userSkills.operations';
+import { DELETE_USER_SKILLS, UPDATE_USER_SKILL, USER_SKILLS } from '../api/userSkills.operations';
 import { UserSkills } from './UserSkills';
 
 const USER_ID = 'u1';
@@ -37,9 +40,12 @@ const renderList = ({
   canEdit = true,
   mocks = [listMock()],
 }: { canEdit?: boolean; mocks?: MockLink.MockedResponse[] } = {}) =>
-  renderWithProviders(<UserSkills userId={USER_ID} canEdit={canEdit} emptyMessage={EMPTY} />, {
-    mocks,
-  });
+  renderWithProviders(
+    <CatchErrors>
+      <UserSkills userId={USER_ID} canEdit={canEdit} emptyMessage={EMPTY} />
+    </CatchErrors>,
+    { mocks },
+  );
 
 async function openRowAction(user: ReturnType<typeof renderList>['user'], name: RegExp) {
   await user.click(await screen.findByRole('button', { name }));
@@ -87,6 +93,25 @@ describe('UserSkills', () => {
       await user.click(screen.getByRole('button', { name: 'Retry' }));
 
       expect(await screen.findByText('React')).toBeInTheDocument();
+    });
+
+    it('opens the 404 page instead of Retry when the user does not exist', async () => {
+      // React logs the error caught by the boundary; keep the test output clean
+      vi.spyOn(console, 'error').mockImplementation(() => {});
+
+      renderList({
+        mocks: [
+          {
+            request: { query: USER_SKILLS, variables: { userId: USER_ID } },
+            result: {
+              errors: [new GraphQLError('User not found', { extensions: { code: 'NOT_FOUND' } })],
+            },
+          },
+        ],
+      });
+
+      await vi.waitFor(() => expect(notFound).toHaveBeenCalled());
+      expect(screen.queryByRole('button', { name: 'Retry' })).not.toBeInTheDocument();
     });
   });
 
@@ -139,6 +164,40 @@ describe('UserSkills', () => {
 
       const dialog = screen.getByRole('dialog', { name: 'Update skill' });
       expect(within(dialog).getByRole('combobox', { name: 'Skill' })).toHaveTextContent('React');
+    });
+  });
+
+  describe('update', () => {
+    it('reloads the list when the skill was already removed (NOT_FOUND) and keeps the error', async () => {
+      const { user } = renderList({
+        mocks: [
+          listMock(),
+          {
+            request: {
+              query: UPDATE_USER_SKILL,
+              variables: { input: { id: 'us1', userId: USER_ID, mastery: 'EXPERT' } },
+            },
+            result: {
+              errors: [new GraphQLError('Not found', { extensions: { code: 'NOT_FOUND' } })],
+            },
+          },
+          // useRefetchOnError: React is gone
+          listMock([css, nest]),
+        ],
+      });
+
+      await user.click(await screen.findByRole('button', { name: /React/ }));
+      const dialog = screen.getByRole('dialog', { name: 'Update skill' });
+      await user.click(within(dialog).getByRole('combobox', { name: 'Skill mastery' }));
+      await user.click(within(document.body).getByRole('option', { name: 'Expert' }));
+      await user.click(within(dialog).getByRole('button', { name: 'Save' }));
+
+      // the list row (its meter) is gone; the open dialog hides the page from the a11y tree
+      await waitFor(() =>
+        expect(screen.queryByRole('meter', { name: 'React', hidden: true })).toBeNull(),
+      );
+      expect(screen.getByRole('meter', { name: 'CSS', hidden: true })).toBeInTheDocument();
+      expect(within(dialog).getByRole('alert')).toHaveTextContent('This item no longer exists');
     });
   });
 

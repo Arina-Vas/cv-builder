@@ -116,13 +116,17 @@ The select owns its **height and look** (`--input-height`); its **width comes fr
 - One-off width → `className` on the `Field` root.
 - The list always matches the trigger width (`--radix-select-trigger-width`) and is capped at
   `240px` or the space left on screen, whichever is smaller.
+- A longer list scrolls (wheel, arrows, Home / End, type-ahead) and opens scrolled to the chosen value.
+  Radix hides the scrollbar by default (it expects scroll buttons); `.viewport` shows a thin one
+  (`--scrollbar-size`, `--scrollbar-thumb`) so the list does not look complete after six rows.
 - No room below → Radix flips the list above; the joint border follows via `[data-side]`.
 - A long value is cut with an ellipsis, the chevron never shrinks.
 
 ## Tokens
 
 Styles use component / semantic tokens from [`theme/tokens.css`](../../theme/tokens.css) only, so Light / Dark
-switch automatically: `--input-*`, `--menu-bg`, `--select-option-*`, `--text-*`, `--icon-size`.
+switch automatically: `--input-*`, `--menu-bg`, `--select-option-*`, `--text-*`, `--icon-size`,
+`--scrollbar-*`.
 To change a size or colour, change the token, not the component CSS.
 
 ## Tests
@@ -138,6 +142,7 @@ To change a size or colour, change the token, not the component CSS.
 | `Disabled`            | can't be opened                                                             |
 | `Invalid`             | `aria-invalid`, error as the accessible description                         |
 | `DisabledOption`      | a disabled option can't be chosen                                           |
+| `LongList`            | 60 options: all rendered, list scrolls, scrollbar shown, opens at the value |
 | `SelectsWithMouse`    | click → `onValueChange`, list closes, focus back on the trigger             |
 | `SelectsWithKeyboard` | Tab / Enter / arrows / Home / End                                           |
 | `Closes`              | Escape and click outside close without changing the value                   |

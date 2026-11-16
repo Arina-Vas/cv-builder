@@ -180,21 +180,23 @@ otherwise).
 
 ### Departments
 
-| Operation          | Access |
-| ------------------ | ------ |
-| `departments`      | All    |
-| `createDepartment` | Admin  |
-| `updateDepartment` | Admin  |
-| `deleteDepartment` | Admin  |
+| Operation           | Access |
+| ------------------- | ------ |
+| `departments`       | All    |
+| `departmentOptions` | All    |
+| `createDepartment`  | Admin  |
+| `updateDepartment`  | Admin  |
+| `deleteDepartment`  | Admin  |
 
 ### Positions
 
-| Operation        | Access |
-| ---------------- | ------ |
-| `positions`      | All    |
-| `createPosition` | Admin  |
-| `updatePosition` | Admin  |
-| `deletePosition` | Admin  |
+| Operation         | Access |
+| ----------------- | ------ |
+| `positions`       | All    |
+| `positionOptions` | All    |
+| `createPosition`  | Admin  |
+| `updatePosition`  | Admin  |
+| `deletePosition`  | Admin  |
 
 ### Languages
 

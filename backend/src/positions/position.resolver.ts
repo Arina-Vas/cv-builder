@@ -18,6 +18,11 @@ export class PositionResolver {
     return this.positionService.findAll(args);
   }
 
+  @Query(() => [Position], { description: 'All positions for selects, sorted by name' })
+  positionOptions(): Promise<Position[]> {
+    return this.positionService.findOptions();
+  }
+
   @Roles(UserRole.ADMIN)
   @Mutation(() => Position)
   createPosition(@Args('input') input: CreatePositionInput): Promise<Position> {

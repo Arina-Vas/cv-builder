@@ -1,11 +1,12 @@
 import type { MockLink } from '@apollo/client/testing';
 import { screen, waitFor, within } from '@testing-library/react';
 import { GraphQLError } from 'graphql';
-import { describe, expect, it } from 'vitest';
+import { useSearchParams } from 'next/navigation';
+import { describe, expect, it, vi } from 'vitest';
 import { renderWithProviders } from '@/test/render';
 import { mockRouter } from '@/test/next-navigation';
 import { ME } from '@/features/auth/api/auth.operations';
-import { DELETE_USER, USERS } from '../api/users.operations';
+import { DELETE_USER, UPDATE_USER, USER_FORM_OPTIONS, USERS } from '../api/users.operations';
 import { Users } from './Users';
 
 const department = { __typename: 'Department' as const, id: 'd1', name: 'Engineering' };
@@ -59,6 +60,18 @@ const listMock = (items = [admin, jane, john]): MockLink.MockedResponse => ({
   },
 });
 
+const optionsMock: MockLink.MockedResponse = {
+  request: { query: USER_FORM_OPTIONS },
+  result: {
+    data: {
+      departmentOptions: [department],
+      positionOptions: [position],
+    },
+  },
+};
+
+const notFoundError = new GraphQLError('User not found', { extensions: { code: 'NOT_FOUND' } });
+
 const renderPage = (mocks: MockLink.MockedResponse[]) => renderWithProviders(<Users />, { mocks });
 
 async function openRowAction(
@@ -96,6 +109,49 @@ describe('Users', () => {
     await user.click(await screen.findByRole('button', { name: 'Retry' }));
 
     expect(await screen.findByText('jane@example.com')).toBeInTheDocument();
+  });
+
+  describe('page past the end', () => {
+    // the URL says ?page=2; the setup file resets the mock after each test
+    const openPage2 = () =>
+      vi
+        .mocked(useSearchParams)
+        .mockReturnValue(new URLSearchParams('page=2') as ReturnType<typeof useSearchParams>);
+
+    const page2Request = { ...listRequest, variables: { ...listRequest.variables, page: 2 } };
+
+    const page2Mock = (items: (typeof jane)[], total: number): MockLink.MockedResponse => ({
+      request: page2Request,
+      result: { data: { users: { __typename: 'UserPage', items, page: 2, pageSize: 10, total } } },
+    });
+
+    it('goes to the last page instead of showing an empty table', async () => {
+      openPage2();
+      renderPage([meMock(admin), page2Mock([], 3)]);
+
+      await waitFor(() => expect(mockRouter.replace).toHaveBeenCalledWith('/', { scroll: false }));
+      expect(mockRouter.push).not.toHaveBeenCalled();
+    });
+
+    it('goes back a page after deleting its last user', async () => {
+      openPage2();
+      const { user } = renderPage([
+        meMock(admin),
+        page2Mock([jane], 11),
+        {
+          request: { query: DELETE_USER, variables: { id: 'u1' } },
+          result: { data: { deleteUser: 'u1' } },
+        },
+        // refetchQueries: page 2 is empty now
+        page2Mock([], 10),
+      ]);
+
+      await openRowAction(user, 'Jane Doe', 'Delete');
+      await user.click(screen.getByRole('button', { name: 'Confirm' }));
+
+      await waitFor(() => expect(mockRouter.replace).toHaveBeenCalledWith('/', { scroll: false }));
+      expect(mockRouter.push).not.toHaveBeenCalled();
+    });
   });
 
   describe('employee', () => {
@@ -193,6 +249,67 @@ describe('Users', () => {
         'This action is not allowed',
       );
       expect(screen.getByText('jane@example.com')).toBeInTheDocument();
+    });
+
+    it('removes the row when the user to delete is already gone (NOT_FOUND)', async () => {
+      const { user } = renderPage([
+        meMock(admin),
+        listMock(),
+        {
+          request: { query: DELETE_USER, variables: { id: 'u1' } },
+          result: { errors: [notFoundError] },
+        },
+        // useRefetchOnError: the list without the missing user
+        listMock([admin, john]),
+      ]);
+
+      await openRowAction(user, 'Jane Doe', 'Delete');
+      await user.click(screen.getByRole('button', { name: 'Confirm' }));
+
+      const dialog = screen.getByRole('dialog', { name: 'Delete user' });
+      expect(await within(dialog).findByRole('alert')).toHaveTextContent(
+        'This item no longer exists',
+      );
+      await waitFor(() => expect(screen.queryByText('jane@example.com')).not.toBeInTheDocument());
+      expect(screen.getByText('john@example.com')).toBeInTheDocument();
+    });
+
+    it('removes the row when the user to update is already gone (NOT_FOUND)', async () => {
+      const { user } = renderPage([
+        meMock(admin),
+        listMock(),
+        optionsMock,
+        {
+          request: {
+            query: UPDATE_USER,
+            variables: {
+              input: {
+                id: 'u1',
+                firstName: 'Janet',
+                lastName: 'Doe',
+                departmentId: 'd1',
+                positionId: 'p1',
+                role: 'EMPLOYEE',
+              },
+            },
+          },
+          result: { errors: [notFoundError] },
+        },
+        // useRefetchOnError: the list without the missing user
+        listMock([admin, john]),
+      ]);
+
+      await openRowAction(user, 'Jane Doe', 'Update');
+      const dialog = screen.getByRole('dialog', { name: 'Update user' });
+      await user.type(within(dialog).getByLabelText('First Name'), 't');
+      await user.click(within(dialog).getByRole('button', { name: 'Save' }));
+
+      expect(await within(dialog).findByRole('alert')).toHaveTextContent(
+        'This item no longer exists',
+      );
+      // the email in the dialog is an input value, so this only finds the table cell
+      await waitFor(() => expect(screen.queryByText('jane@example.com')).not.toBeInTheDocument());
+      expect(screen.getByText('john@example.com')).toBeInTheDocument();
     });
   });
 });
