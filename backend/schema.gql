@@ -2,6 +2,12 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+input ChangePasswordInput {
+  confirmPassword: String!
+  currentPassword: String!
+  newPassword: String!
+}
+
 input CreateDepartmentInput {
   name: String!
 }
@@ -116,6 +122,10 @@ enum Mastery {
 }
 
 type Mutation {
+  """
+  Changes the password of the signed-in user. Fails with BAD_USER_INPUT (field "currentPassword") when the current password is incorrect. Signs out every other session of the user; the current session stays signed in.
+  """
+  changePassword(input: ChangePasswordInput!): Boolean!
   createDepartment(input: CreateDepartmentInput!): Department!
   createLanguage(input: CreateLanguageInput!): Language!
   createPosition(input: CreatePositionInput!): Position!
