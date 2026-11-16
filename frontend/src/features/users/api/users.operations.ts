@@ -57,17 +57,13 @@ export const USER = graphql(`
 
 export const USER_FORM_OPTIONS = graphql(`
   query UserFormOptions {
-    departments(pageSize: 50) {
-      items {
-        id
-        name
-      }
+    departmentOptions {
+      id
+      name
     }
-    positions(pageSize: 50) {
-      items {
-        id
-        name
-      }
+    positionOptions {
+      id
+      name
     }
   }
 `);

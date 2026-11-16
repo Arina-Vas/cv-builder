@@ -23,14 +23,8 @@ const optionsMock = {
   request: { query: USER_FORM_OPTIONS },
   result: {
     data: {
-      departments: {
-        __typename: 'DepartmentPage' as const,
-        items: [department, { ...department, id: 'd2', name: 'Marketing' }],
-      },
-      positions: {
-        __typename: 'PositionPage' as const,
-        items: [position, { ...position, id: 'p2', name: 'Designer' }],
-      },
+      departmentOptions: [department, { ...department, id: 'd2', name: 'Marketing' }],
+      positionOptions: [position, { ...position, id: 'p2', name: 'Designer' }],
     },
   },
 };
@@ -92,6 +86,30 @@ describe('UserFormModal', () => {
     await user.click(create);
 
     await expect.poll(() => onOpenChange).toHaveBeenCalledWith(false);
+  });
+
+  it('offers every department, not only the first page of 50', async () => {
+    const many = Array.from({ length: 60 }, (_, i) => ({
+      ...department,
+      id: `d${i + 1}`,
+      name: `Department ${String(i + 1).padStart(2, '0')}`,
+    }));
+    const { user } = renderWithProviders(<UserFormModal open onOpenChange={vi.fn()} />, {
+      mocks: [
+        {
+          ...optionsMock,
+          result: { data: { ...optionsMock.result.data, departmentOptions: many } },
+        },
+      ],
+    });
+
+    const trigger = screen.getByRole('combobox', { name: 'Department' });
+    await expect.poll(() => trigger).toBeEnabled();
+    await user.click(trigger);
+
+    const options = within(document.body).getAllByRole('option');
+    expect(options).toHaveLength(60);
+    expect(options.at(-1)).toHaveTextContent('Department 60');
   });
 
   it('shows the spec message after leaving an empty field', async () => {
