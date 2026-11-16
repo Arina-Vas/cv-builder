@@ -4,7 +4,7 @@ import { useMutation, useQuery } from '@apollo/client/react';
 import { useTableParams } from '@/shared/hooks/useTableParams';
 import { type Column, DataTable, TableToolbar } from '@/shared/components/table';
 import type { SkillFieldsFragment } from '@/gql/graphql';
-import { Pagination } from '@/shared/components/pagination';
+import { Pagination, usePagination } from '@/shared/components/pagination';
 import { useTranslations } from 'next-intl';
 import { parseError } from '@/shared/lib/apollo/graphql-errors';
 import { useErrorMessage } from '@/shared/lib/apollo/useErrorMessage';
@@ -28,12 +28,12 @@ export const Skills = () => {
 
   const [modal, setModal] = useState<ModalState | null>(null);
 
-  const { search, sort, page, pageSize, setSearch, setSort, setPage, setPageSize } = useTableParams(
-    {
-      sortFields: ['name'],
-      defaultSort: { field: 'name', order: 'ASC' },
-    },
-  );
+  const tableParams = useTableParams({
+    sortFields: ['name'],
+    defaultSort: { field: 'name', order: 'ASC' },
+  });
+
+  const { search, sort, page, pageSize, setSearch, setSort } = tableParams;
 
   const { data, previousData, loading, error, refetch } = useQuery(SKILLS, {
     variables: {
@@ -46,6 +46,11 @@ export const Skills = () => {
   });
 
   const shown = data ?? previousData;
+
+  const pagination = usePagination(tableParams, {
+    total: shown?.skills.total,
+    freshTotal: data?.skills.total,
+  });
 
   const skillsColumns: Column<SkillFieldsFragment>[] = [
     {
@@ -73,7 +78,6 @@ export const Skills = () => {
   const handleDelete = async () => {
     if (!skillToDelete) return;
     await deleteSkill({ variables: { id: skillToDelete.id } });
-    if (page > 1 && shown?.skills.items.length === 1) setPage(page - 1);
   };
 
   return (
@@ -107,13 +111,7 @@ export const Skills = () => {
           },
         ]}
       />
-      <Pagination
-        page={page}
-        pageSize={pageSize}
-        total={shown?.skills.total ?? 0}
-        onPageSizeChange={setPageSize}
-        onPageChange={setPage}
-      />
+      <Pagination {...pagination} />
       <SkillFormModal
         open={modal?.type === 'create' || modal?.type === 'update'}
         onOpenChange={(open) => !open && setModal(null)}

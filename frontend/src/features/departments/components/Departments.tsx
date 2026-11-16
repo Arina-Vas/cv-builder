@@ -9,7 +9,7 @@ import { useMutation, useQuery } from '@apollo/client/react';
 import { useTableParams } from '@/shared/hooks/useTableParams';
 import { type Column, DataTable, TableToolbar } from '@/shared/components/table';
 import type { DepartmentFieldsFragment } from '@/gql/graphql';
-import { Pagination } from '@/shared/components/pagination';
+import { Pagination, usePagination } from '@/shared/components/pagination';
 import { useTranslations } from 'next-intl';
 import { parseError } from '@/shared/lib/apollo/graphql-errors';
 import { useErrorMessage } from '@/shared/lib/apollo/useErrorMessage';
@@ -28,12 +28,12 @@ export const Departments = () => {
 
   const [modal, setModal] = useState<ModalState | null>(null);
 
-  const { search, sort, page, pageSize, setSearch, setSort, setPage, setPageSize } = useTableParams(
-    {
-      sortFields: ['name'],
-      defaultSort: { field: 'name', order: 'ASC' },
-    },
-  );
+  const tableParams = useTableParams({
+    sortFields: ['name'],
+    defaultSort: { field: 'name', order: 'ASC' },
+  });
+
+  const { search, sort, page, pageSize, setSearch, setSort } = tableParams;
 
   const { data, previousData, loading, error, refetch } = useQuery(DEPARTMENTS, {
     variables: {
@@ -46,6 +46,11 @@ export const Departments = () => {
   });
 
   const shown = data ?? previousData;
+
+  const pagination = usePagination(tableParams, {
+    total: shown?.departments.total,
+    freshTotal: data?.departments.total,
+  });
 
   const departmentToDelete = modal?.type === 'delete' ? modal.department : null;
 
@@ -63,7 +68,6 @@ export const Departments = () => {
   const handleDelete = async () => {
     if (!departmentToDelete) return;
     await deleteDepartment({ variables: { id: departmentToDelete.id } });
-    if (page > 1 && shown?.departments.items.length === 1) setPage(page - 1);
   };
 
   return (
@@ -98,13 +102,7 @@ export const Departments = () => {
           },
         ]}
       />
-      <Pagination
-        page={page}
-        pageSize={pageSize}
-        total={shown?.departments.total ?? 0}
-        onPageSizeChange={setPageSize}
-        onPageChange={setPage}
-      />
+      <Pagination {...pagination} />
 
       <ConfirmDialog
         open={!!departmentToDelete}

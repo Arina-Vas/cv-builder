@@ -8,6 +8,7 @@ import {
   UPDATE_USER,
   USER_FORM_OPTIONS,
   USER_MUTATION_OPTIONS,
+  USERS,
 } from '@/features/users/api/users.operations';
 import {
   USER_ROLES,
@@ -21,6 +22,7 @@ import { Input } from '@/shared/components/inputs';
 import { Select } from '@/shared/components/select/Select';
 import type { SelectOption } from '@/shared/components/select/Select.types';
 import { useAppForm } from '@/shared/lib/form';
+import { useRefetchOnError } from '@/shared/lib/apollo/useRefetchOnError';
 
 type Props = {
   open: boolean;
@@ -65,9 +67,11 @@ export const UserFormModal = ({ open, onOpenChange, user, isSelf = false }: Prop
   const [createUser] = useMutation(CREATE_USER, USER_MUTATION_OPTIONS);
   const [updateUser] = useMutation(UPDATE_USER, USER_MUTATION_OPTIONS);
 
+  const withRefetch = useRefetchOnError([USERS], ['NOT_FOUND']);
+
   const handleSubmit = ({ email, password, ...editable }: UserFormValues) =>
     user
-      ? updateUser({ variables: { input: { id: user.id, ...editable } } })
+      ? withRefetch(() => updateUser({ variables: { input: { id: user.id, ...editable } } }))
       : createUser({ variables: { input: { email, password, ...editable } } });
 
   const values: DefaultValues<UserFormInput> = user

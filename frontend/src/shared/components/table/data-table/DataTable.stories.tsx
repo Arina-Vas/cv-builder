@@ -4,7 +4,7 @@ import { fn } from 'storybook/test';
 
 import { Avatar } from '@/shared/components/avatar/Avatar';
 import { Chip } from '@/shared/components/chip/Chip';
-import { Pagination } from '@/shared/components/pagination';
+import { getPageCount, Pagination } from '@/shared/components/pagination';
 
 import { cvs, type CvRow } from '../__fixtures__/cvs';
 import { positions, type PositionRow } from '../__fixtures__/positions';
@@ -364,6 +364,7 @@ function PaginatedUsersTable({ failOnPage }: { failOnPage?: number }) {
             page={page}
             pageSize={pageSize}
             total={result.total}
+            pageCount={getPageCount(result.total, pageSize)}
             onPageChange={(next) => {
               startRequest();
               setPage(next);

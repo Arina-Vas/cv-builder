@@ -4,6 +4,11 @@ import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import type { SortOrder, SortState } from '../components/table/types';
 import { DEFAULT_PAGE_SIZE_OPTIONS } from '../components/pagination';
 
+export interface SetPageOptions {
+  /** correct the URL in place (no new history entry), e.g. when the page is past the end */
+  replace?: boolean;
+}
+
 export interface TableSort<TSortField extends string> {
   field: TSortField;
   order: SortOrder;
@@ -23,7 +28,7 @@ export interface TableParams<TSortField extends string> {
 
   setSearch: (search: string) => void;
   setSort: (sort: SortState) => void;
-  setPage: (page: number) => void;
+  setPage: (page: number, options?: SetPageOptions) => void;
   setPageSize: (pageSize: number) => void;
 }
 
@@ -71,7 +76,11 @@ export function useTableParams<TSortField extends string>(
     setSearch: (nextSearch) => updateParams({ search: nextSearch, page: null }, 'replace'),
     setSort: (nextSort) =>
       updateParams({ sortBy: nextSort.field, sortOrder: nextSort.order, page: null }),
-    setPage: (nextPage) => updateParams({ page: nextPage === 1 ? null : nextPage }),
+    setPage: (nextPage, options) =>
+      updateParams(
+        { page: nextPage === 1 ? null : nextPage },
+        options?.replace ? 'replace' : 'push',
+      ),
     setPageSize: (nextPageSize) => updateParams({ pageSize: nextPageSize, page: null }),
   };
 }

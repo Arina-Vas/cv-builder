@@ -7,6 +7,8 @@ import {
   CREATE_USER_LANGUAGE,
   UPDATE_USER_LANGUAGE,
   USER_LANGUAGE_MUTATION_OPTIONS,
+  USER_LANGUAGE_REFETCH_ERROR_CODES,
+  USER_LANGUAGE_REFETCH_QUERIES,
 } from '@/features/languages/user-languages/api/userLanguages.operations';
 import { useTranslations } from 'next-intl';
 import { useErrorMessage } from '@/shared/lib/apollo/useErrorMessage';
@@ -18,6 +20,7 @@ import type { SelectOption } from '@/shared/components/select/Select.types';
 import { PROFICIENCIES } from '../lib/proficiency';
 import { parseError } from '@/shared/lib/apollo/graphql-errors';
 import type { UserLanguageFieldsFragment } from '@/gql/graphql';
+import { useRefetchOnError } from '@/shared/lib/apollo/useRefetchOnError';
 
 type Props = {
   open: boolean;
@@ -33,6 +36,10 @@ export const UserLanguageFormModal = ({ open, onOpenChange, userId, userLanguage
   const tActions = useTranslations('common.actions');
 
   const errorMessage = useErrorMessage();
+  const withRefetch = useRefetchOnError(
+    USER_LANGUAGE_REFETCH_QUERIES,
+    USER_LANGUAGE_REFETCH_ERROR_CODES,
+  );
 
   const schema = useMemo(() => userLanguageSchema(tValidation), [tValidation]);
   const form = useAppForm({
@@ -63,12 +70,14 @@ export const UserLanguageFormModal = ({ open, onOpenChange, userId, userLanguage
   const [createUserLanguage] = useMutation(CREATE_USER_LANGUAGE, USER_LANGUAGE_MUTATION_OPTIONS);
   const [updateUserLanguage] = useMutation(UPDATE_USER_LANGUAGE, USER_LANGUAGE_MUTATION_OPTIONS);
 
-  const onSubmit = async (values: UserLanguageFormValues) => {
-    return userLanguage
-      ? await updateUserLanguage({
-          variables: { input: { id: userLanguage.id, userId, proficiency: values.proficiency } },
-        })
-      : await createUserLanguage({ variables: { input: { userId, ...values } } });
+  const onSubmit = (values: UserLanguageFormValues) => {
+    return withRefetch(() => {
+      return userLanguage
+        ? updateUserLanguage({
+            variables: { input: { id: userLanguage.id, userId, proficiency: values.proficiency } },
+          })
+        : createUserLanguage({ variables: { input: { userId, ...values } } });
+    });
   };
 
   return (

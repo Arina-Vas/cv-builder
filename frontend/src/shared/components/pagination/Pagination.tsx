@@ -1,6 +1,6 @@
 import { ChevronIcon } from '../icons/ChevronIcon';
 import { Select } from '../select/Select';
-import { getPageCount, getPageItems } from './getPageItems';
+import { getPageItems } from './getPageItems';
 import styles from './Pagination.module.css';
 import { useTranslations } from 'next-intl';
 
@@ -14,6 +14,7 @@ export interface PaginationProps {
   onPageSizeChange: (pageSize: number) => void;
   pageSizeOptions?: number[];
   label?: string;
+  pageCount: number;
 }
 
 export function Pagination({
@@ -24,14 +25,13 @@ export function Pagination({
   onPageSizeChange,
   pageSizeOptions = DEFAULT_PAGE_SIZE_OPTIONS,
   label,
+  pageCount,
 }: PaginationProps) {
   const t = useTranslations('common.pagination');
   const smallestPageSize = Math.min(...pageSizeOptions, pageSize);
   if (total <= smallestPageSize) {
     return null;
   }
-
-  const pageCount = getPageCount(total, pageSize);
 
   const pageItemClass = `${styles.item} ${styles.page}`;
   const arrowClass = `${styles.item} ${styles.arrow}`;

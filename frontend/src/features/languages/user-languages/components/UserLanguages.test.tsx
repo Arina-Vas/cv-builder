@@ -1,9 +1,16 @@
 import type { MockLink } from '@apollo/client/testing';
 import { screen, waitFor, within } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { GraphQLError } from 'graphql';
+import { notFound } from 'next/navigation';
+import { describe, expect, it, vi } from 'vitest';
 import { closedGate } from '@/test/action-gate';
+import { CatchErrors } from '@/test/catch-errors';
 import { renderWithProviders } from '@/test/render';
-import { DELETE_USER_LANGUAGES, USER_LANGUAGES } from '../api/userLanguages.operations';
+import {
+  DELETE_USER_LANGUAGES,
+  UPDATE_USER_LANGUAGE,
+  USER_LANGUAGES,
+} from '../api/userLanguages.operations';
 import { UserLanguages } from './UserLanguages';
 
 const USER_ID = 'u1';
@@ -29,9 +36,12 @@ const renderList = ({
   canEdit = true,
   mocks = [listMock()],
 }: { canEdit?: boolean; mocks?: MockLink.MockedResponse[] } = {}) =>
-  renderWithProviders(<UserLanguages userId={USER_ID} canEdit={canEdit} emptyMessage={EMPTY} />, {
-    mocks,
-  });
+  renderWithProviders(
+    <CatchErrors>
+      <UserLanguages userId={USER_ID} canEdit={canEdit} emptyMessage={EMPTY} />
+    </CatchErrors>,
+    { mocks },
+  );
 
 describe('UserLanguages', () => {
   describe('states', () => {
@@ -76,6 +86,25 @@ describe('UserLanguages', () => {
 
       expect(await screen.findByText('English')).toBeInTheDocument();
     });
+
+    it('opens the 404 page instead of Retry when the user does not exist', async () => {
+      // React logs the error caught by the boundary; keep the test output clean
+      vi.spyOn(console, 'error').mockImplementation(() => {});
+
+      renderList({
+        mocks: [
+          {
+            request: { query: USER_LANGUAGES, variables: { userId: USER_ID } },
+            result: {
+              errors: [new GraphQLError('User not found', { extensions: { code: 'NOT_FOUND' } })],
+            },
+          },
+        ],
+      });
+
+      await vi.waitFor(() => expect(notFound).toHaveBeenCalled());
+      expect(screen.queryByRole('button', { name: 'Retry' })).not.toBeInTheDocument();
+    });
   });
 
   describe('read-only (another user, not Admin)', () => {
@@ -105,6 +134,40 @@ describe('UserLanguages', () => {
       expect(within(dialog).getByRole('combobox', { name: 'Language' })).toHaveTextContent(
         'English',
       );
+    });
+  });
+
+  describe('update', () => {
+    it('reloads the list when the language was already removed (NOT_FOUND) and keeps the error', async () => {
+      const { user } = renderList({
+        mocks: [
+          listMock(),
+          {
+            request: {
+              query: UPDATE_USER_LANGUAGE,
+              variables: { input: { id: 'ul1', userId: USER_ID, proficiency: 'C1' } },
+            },
+            result: {
+              errors: [new GraphQLError('Not found', { extensions: { code: 'NOT_FOUND' } })],
+            },
+          },
+          // useRefetchOnError: English is gone
+          listMock([russian, german]),
+        ],
+      });
+
+      await user.click(await screen.findByRole('button', { name: /English/ }));
+      const dialog = screen.getByRole('dialog', { name: 'Update language' });
+      await user.click(within(dialog).getByRole('combobox', { name: 'Proficiency' }));
+      await user.click(within(document.body).getByRole('option', { name: 'C1' }));
+      await user.click(within(dialog).getByRole('button', { name: 'Save' }));
+
+      // the list row (its meter) is gone; the open dialog hides the page from the a11y tree
+      await waitFor(() =>
+        expect(screen.queryByRole('meter', { name: 'English', hidden: true })).toBeNull(),
+      );
+      expect(screen.getByRole('meter', { name: 'Russian', hidden: true })).toBeInTheDocument();
+      expect(within(dialog).getByRole('alert')).toHaveTextContent('This item no longer exists');
     });
   });
 

@@ -10,6 +10,8 @@ import {
   CREATE_USER_SKILL,
   UPDATE_USER_SKILL,
   USER_SKILL_MUTATION_OPTIONS,
+  USER_SKILL_REFETCH_ERROR_CODES,
+  USER_SKILL_REFETCH_QUERIES,
 } from '@/features/skills/user-skills/api/userSkills.operations';
 import { useErrorMessage } from '@/shared/lib/apollo/useErrorMessage';
 import { useMemo } from 'react';
@@ -20,6 +22,7 @@ import {
 } from '@/features/skills/user-skills/lib/userSkill.schema';
 import type { SelectOption } from '@/shared/components/select/Select.types';
 import { MASTERIES } from '@/features/skills/user-skills/lib/mastery';
+import { useRefetchOnError } from '@/shared/lib/apollo/useRefetchOnError';
 
 type Props = {
   open: boolean;
@@ -33,6 +36,7 @@ export const UserSkillFormModal = ({ open, onOpenChange, userSkill, userId }: Pr
   const tValidation = useTranslations('validation');
 
   const errorMessage = useErrorMessage();
+  const withRefetch = useRefetchOnError(USER_SKILL_REFETCH_QUERIES, USER_SKILL_REFETCH_ERROR_CODES);
 
   const schema = useMemo(() => userSkillSchema(tValidation), [tValidation]);
   const form = useAppForm({
@@ -61,12 +65,14 @@ export const UserSkillFormModal = ({ open, onOpenChange, userSkill, userId }: Pr
     label: t(`masteryLevel.${mastery}`),
   }));
 
-  const onSubmit = async (values: UserSkillFormValues) => {
-    return userSkill
-      ? await updateUserSkill({
-          variables: { input: { id: userSkill.id, userId, mastery: values.mastery } },
-        })
-      : await createUserSkill({ variables: { input: { userId, ...values } } });
+  const onSubmit = (values: UserSkillFormValues) => {
+    return withRefetch(() =>
+      userSkill
+        ? updateUserSkill({
+            variables: { input: { id: userSkill.id, userId, mastery: values.mastery } },
+          })
+        : createUserSkill({ variables: { input: { userId, ...values } } }),
+    );
   };
 
   return (
