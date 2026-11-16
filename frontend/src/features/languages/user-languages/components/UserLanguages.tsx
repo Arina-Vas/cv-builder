@@ -4,6 +4,8 @@ import { skipToken, useMutation, useQuery } from '@apollo/client/react';
 import {
   DELETE_USER_LANGUAGES,
   USER_LANGUAGE_MUTATION_OPTIONS,
+  USER_LANGUAGE_REFETCH_ERROR_CODES,
+  USER_LANGUAGE_REFETCH_QUERIES,
   USER_LANGUAGES,
 } from '@/features/languages/user-languages/api/userLanguages.operations';
 import type { UserLanguageFieldsFragment } from '@/gql/graphql';
@@ -19,6 +21,7 @@ import { SelectionActions } from '@/shared/components/selection-actions/Selectio
 import { PROFICIENCY_LEVEL } from '@/features/languages/user-languages/lib/proficiency';
 import { hasErrorCode } from '@/shared/lib/apollo/graphql-errors';
 import { notFound } from 'next/navigation';
+import { useRefetchOnError } from '@/shared/lib/apollo/useRefetchOnError';
 
 type Props = {
   userId: string;
@@ -43,10 +46,15 @@ export const UserLanguages = ({ userId, canEdit, emptyMessage }: Props) => {
     userId ? { variables: { userId } } : skipToken,
   );
 
+  const withRefetch = useRefetchOnError(
+    USER_LANGUAGE_REFETCH_QUERIES,
+    USER_LANGUAGE_REFETCH_ERROR_CODES,
+  );
+
   const [deleteLanguages] = useMutation(DELETE_USER_LANGUAGES, USER_LANGUAGE_MUTATION_OPTIONS);
 
   const handleDeleteLanguages = async () => {
-    await deleteLanguages({ variables: { ids: [...selectedIds], userId } });
+    await withRefetch(() => deleteLanguages({ variables: { ids: [...selectedIds], userId } }));
     exit();
   };
 

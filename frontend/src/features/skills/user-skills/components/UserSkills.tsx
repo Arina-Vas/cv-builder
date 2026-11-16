@@ -2,6 +2,8 @@ import { skipToken, useMutation, useQuery } from '@apollo/client/react';
 import {
   DELETE_USER_SKILLS,
   USER_SKILL_MUTATION_OPTIONS,
+  USER_SKILL_REFETCH_ERROR_CODES,
+  USER_SKILL_REFETCH_QUERIES,
   USER_SKILLS,
 } from '@/features/skills/user-skills/api/userSkills.operations';
 import { groupByCategory } from '@/features/skills/user-skills/lib/groupByCategory';
@@ -18,6 +20,7 @@ import { AsyncList } from '@/shared/components/async-list/AsyncList';
 import { SelectionActions } from '@/shared/components/selection-actions/SelectionActions';
 import { notFound } from 'next/navigation';
 import { hasErrorCode } from '@/shared/lib/apollo/graphql-errors';
+import { useRefetchOnError } from '@/shared/lib/apollo/useRefetchOnError';
 
 type Props = {
   userId: string;
@@ -41,10 +44,12 @@ export const UserSkills = ({ userId, canEdit, emptyMessage }: Props) => {
     userId ? { variables: { userId } } : skipToken,
   );
 
+  const withRefetch = useRefetchOnError(USER_SKILL_REFETCH_QUERIES, USER_SKILL_REFETCH_ERROR_CODES);
+
   const [deleteSkills] = useMutation(DELETE_USER_SKILLS, USER_SKILL_MUTATION_OPTIONS);
 
   const handleDeleteSkills = async () => {
-    await deleteSkills({ variables: { ids: [...selectedIds], userId } });
+    await withRefetch(() => deleteSkills({ variables: { ids: [...selectedIds], userId } }));
     exit();
   };
 

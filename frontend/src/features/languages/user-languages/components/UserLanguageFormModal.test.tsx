@@ -14,6 +14,7 @@ const USER_ID = 'u1';
 
 const english = { __typename: 'Language' as const, id: 'l1', name: 'English' };
 const german = { __typename: 'Language' as const, id: 'l2', name: 'German' };
+const french = { __typename: 'Language' as const, id: 'l3', name: 'French' };
 
 const userLanguage = {
   __typename: 'UserLanguage' as const,
@@ -108,7 +109,7 @@ describe('UserLanguageFormModal', () => {
       await expect.poll(() => onOpenChange).toHaveBeenCalledWith(false);
     });
 
-    it('shows an already added language (CONFLICT) under Language', async () => {
+    it('shows an already added language (CONFLICT) under Language and reloads the options', async () => {
       const onOpenChange = vi.fn();
       const { user } = renderWithProviders(
         <UserLanguageFormModal open onOpenChange={onOpenChange} userId={USER_ID} />,
@@ -125,6 +126,8 @@ describe('UserLanguageFormModal', () => {
                 ],
               },
             },
+            // useRefetchOnError: German was added elsewhere, so it is no longer offered
+            { ...availableMock, result: { data: { availableUserLanguages: [french] } } },
           ],
         },
       );
@@ -136,6 +139,15 @@ describe('UserLanguageFormModal', () => {
       const language = screen.getByRole('combobox', { name: 'Language' });
       await expect.poll(() => language).toHaveAccessibleDescription('This value is already taken');
       expect(onOpenChange).not.toHaveBeenCalled();
+
+      await user.click(language);
+      await expect
+        .poll(() =>
+          within(document.body)
+            .queryAllByRole('option')
+            .map((o) => o.textContent),
+        )
+        .toEqual(['French']);
     });
   });
 

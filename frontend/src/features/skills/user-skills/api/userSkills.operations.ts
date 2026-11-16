@@ -1,5 +1,6 @@
 import { graphql } from '@/gql';
 import { NO_ERROR_TOAST } from '@/shared/lib/apollo/error-toast-link';
+import type { ErrorCode } from '@/shared/lib/apollo/graphql-errors';
 
 graphql(`
   fragment UserSkillFields on UserSkill {
@@ -55,9 +56,13 @@ export const DELETE_USER_SKILLS = graphql(`
   }
 `);
 
-/** add / update / remove: the dialog shows the error; both lists are refetched before it closes */
+export const USER_SKILL_REFETCH_QUERIES = [USER_SKILLS, AVAILABLE_USER_SKILLS];
+export const USER_SKILL_REFETCH_ERROR_CODES: ErrorCode[] = ['CONFLICT', 'NOT_FOUND'];
+
+/** add / update / remove: the dialog shows the error; both lists are refetched on success
+ *  and, via useRefetchOnError, after CONFLICT / NOT_FOUND */
 export const USER_SKILL_MUTATION_OPTIONS = {
   context: NO_ERROR_TOAST,
-  refetchQueries: [USER_SKILLS, AVAILABLE_USER_SKILLS],
+  refetchQueries: USER_SKILL_REFETCH_QUERIES,
   awaitRefetchQueries: true,
 };

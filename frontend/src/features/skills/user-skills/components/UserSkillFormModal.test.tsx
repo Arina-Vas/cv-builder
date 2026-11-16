@@ -16,6 +16,7 @@ const frontend = { id: 'c1', name: 'Frontend' };
 
 const react = { id: 's1', name: 'React' };
 const vue = { id: 's2', name: 'Vue' };
+const angular = { id: 's3', name: 'Angular' };
 
 const userSkill = {
   __typename: 'UserSkill' as const,
@@ -110,7 +111,7 @@ describe('UserSkillFormModal', () => {
       await expect.poll(() => onOpenChange).toHaveBeenCalledWith(false);
     });
 
-    it('shows an already added skill (CONFLICT) under Skill', async () => {
+    it('shows an already added skill (CONFLICT) under Skill and reloads the options', async () => {
       const onOpenChange = vi.fn();
       const { user } = renderWithProviders(
         <UserSkillFormModal open onOpenChange={onOpenChange} userId={USER_ID} />,
@@ -127,6 +128,8 @@ describe('UserSkillFormModal', () => {
                 ],
               },
             },
+            // useRefetchOnError: Vue was added elsewhere, so it is no longer offered
+            { ...availableMock, result: { data: { availableUserSkills: [angular] } } },
           ],
         },
       );
@@ -138,6 +141,15 @@ describe('UserSkillFormModal', () => {
       const skill = screen.getByRole('combobox', { name: 'Skill' });
       await expect.poll(() => skill).toHaveAccessibleDescription('This value is already taken');
       expect(onOpenChange).not.toHaveBeenCalled();
+
+      await user.click(skill);
+      await expect
+        .poll(() =>
+          within(document.body)
+            .queryAllByRole('option')
+            .map((o) => o.textContent),
+        )
+        .toEqual(['Angular']);
     });
   });
 
