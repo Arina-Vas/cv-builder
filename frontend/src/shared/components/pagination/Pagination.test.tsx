@@ -1,23 +1,18 @@
 import { screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { renderWithProviders } from '@/test/render';
+import { getPageCount } from './getPageItems';
 import { Pagination, type PaginationProps } from './Pagination';
 
 // Hidden on one page, Next disabled on the last page and moving forward are covered by
 // Pagination.stories.tsx (OnePage, LastPage, Interactive); only the rest is tested here.
 
-function renderPagination(props: Partial<PaginationProps> = {}) {
+function renderPagination(props: Partial<Omit<PaginationProps, 'pageCount'>> = {}) {
   const onPageChange = vi.fn();
   const onPageSizeChange = vi.fn();
+  const merged = { page: 1, pageSize: 10, total: 45, onPageChange, onPageSizeChange, ...props };
   const result = renderWithProviders(
-    <Pagination
-      page={1}
-      pageSize={10}
-      total={45}
-      onPageChange={onPageChange}
-      onPageSizeChange={onPageSizeChange}
-      {...props}
-    />,
+    <Pagination {...merged} pageCount={getPageCount(merged.total, merged.pageSize)} />,
   );
   return { ...result, onPageChange, onPageSizeChange };
 }

@@ -12,7 +12,7 @@ import { useTableParams } from '@/shared/hooks/useTableParams';
 import { parseError } from '@/shared/lib/apollo/graphql-errors';
 import { useErrorMessage } from '@/shared/lib/apollo/useErrorMessage';
 import { type Column, DataTable, TableToolbar } from '@/shared/components/table';
-import { Pagination } from '@/shared/components/pagination';
+import { Pagination, usePagination } from '@/shared/components/pagination';
 import { Avatar } from '@/shared/components/avatar/Avatar';
 import { ConfirmDialog } from '@/shared/components/dialog';
 import { UserFormModal } from './UserFormModal';
@@ -40,11 +40,12 @@ export const Users = () => {
 
   const [modal, setModal] = useState<ModalState | null>(null);
 
-  const { search, sort, page, pageSize, setSearch, setSort, setPage, setPageSize } =
-    useTableParams<UserSortField>({
-      sortFields: SORT_FIELDS,
-      defaultSort: { field: 'createdAt', order: 'DESC' },
-    });
+  const tableParams = useTableParams<UserSortField>({
+    sortFields: SORT_FIELDS,
+    defaultSort: { field: 'createdAt', order: 'DESC' },
+  });
+
+  const { search, sort, page, pageSize, setSearch, setSort } = tableParams;
 
   const { data, previousData, loading, error, refetch } = useQuery(USERS, {
     variables: {
@@ -60,6 +61,11 @@ export const Users = () => {
 
   const shown = data ?? previousData;
 
+  const pagination = usePagination(tableParams, {
+    total: shown?.users.total,
+    freshTotal: data?.users.total,
+  });
+
   const openUser = (user: UserListFieldsFragment) => router.push(`/users/${user.id}`);
 
   const userToDelete = modal?.type === 'delete' ? modal.user : null;
@@ -68,7 +74,6 @@ export const Users = () => {
   const handleDelete = async () => {
     if (!userToDelete) return;
     await withRefetch(() => deleteUser({ variables: { id: userToDelete.id } }));
-    if (page > 1 && shown?.users.items.length === 1) setPage(page - 1);
   };
 
   const usersColumns: Column<UserListFieldsFragment>[] = [
@@ -159,13 +164,7 @@ export const Users = () => {
         }
       />
 
-      <Pagination
-        page={page}
-        pageSize={pageSize}
-        total={shown?.users.total ?? 0}
-        onPageChange={setPage}
-        onPageSizeChange={setPageSize}
-      />
+      <Pagination {...pagination} />
 
       {isAdmin && (
         <UserFormModal

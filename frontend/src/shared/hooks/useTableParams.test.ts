@@ -128,6 +128,12 @@ describe('useTableParams', () => {
       expectPushed('/departments?search=dev');
     });
 
+    it('setPage with replace corrects the page without a new history entry', () => {
+      renderAt('search=dev&page=9').setPage(3, { replace: true });
+
+      expectReplaced('/departments?search=dev&page=3');
+    });
+
     it('setPageSize writes the size and resets the page', () => {
       renderAt('page=4').setPageSize(20);
 
