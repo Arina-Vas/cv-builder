@@ -103,6 +103,7 @@ export function EmailVerificationForm({ codeJustSent = false }: EmailVerificatio
     <AuthForm
       title={t('verifyEmail.title')}
       subtitle={t('verifyEmail.subtitle')}
+      submitWidth="regular"
       onSubmit={handleSubmit}
       actions={
         <>

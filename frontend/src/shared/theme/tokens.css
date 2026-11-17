@@ -191,7 +191,9 @@
   --content-max-width: 1536px; /* [A] Container maxWidth "xl" */
   --content-padding-x: 24px; /* [M] Container gutters ≥600px */
   --settings-max-width: 720px; /* [A] */
-  --auth-form-max-width: 220px; /* [A] */
+  --auth-submit-width: 220px; /* [F] SIGN IN, CREATE ACCOUNT, … on the auth pages */
+  --auth-submit-width-regular: var(--button-min-width); /* [F] 160, Email Verification CONFIRM */
+  --auth-submit-width-narrow: 120px; /* [F] Reset Password SUBMIT */
   --auth-form-width: 560px; /* [F] auth pages "Form" frame */
   --auth-actions-offset: 44px; /* [F] last field → primary button */
   --otp-cell-size: 48px; /* [F] Email verification code cell */
@@ -334,13 +336,14 @@
   --border-strong: #626262; /* [F] */
 
   --primary: #c63031; /* [F] */
+  --primary-text: var(--color-grey-50); /* [F] #F5F5F7, both themes */
   --primary-hover-bg: transparent; /* [F] Primary Hover = outlined look */
   --primary-hover-border: #c63031; /* [F] */
   --primary-hover-text: #c63031; /* [F] */
   --primary-pressed-bg: #e9b0b0; /* [F] */
   --primary-pressed-border: #c63031; /* [F] */
   --primary-disabled-bg: #aeaeae; /* [F] */
-  --primary-disabled-text: #E2E2E4; /* [M] primary.contrastText, as before */
+  --button-disabled-text: #e2e2e4; /* [F] text of every disabled button: primary, secondary, ghost */
   --primary-tint-hover: rgba(198, 48, 49, 0.04); /* [M] outlined/text button hover bg */
   --primary-tint-selected: rgba(198, 48, 49, 0.08); /* [M] */
 
@@ -373,7 +376,7 @@
   --button-secondary-text: #2e2e2e; /* TODO: text colour not measured */
   --button-secondary-hover-bg: #aeaeae; /* [F] */
   --button-secondary-hover-border: #626262; /* [F] */
-  --button-secondary-hover-text: #2e2e2e; /* TODO: visual only */
+  --button-secondary-hover-text: var(--color-grey-50); /* [F] #F5F5F7 on the grey hover fill */
   --button-secondary-pressed-bg: #626262; /* [F] */
   --button-secondary-pressed-border: #626262; /* [F] */
   --button-secondary-pressed-text: #ffffff; /* TODO: visual only */
@@ -536,7 +539,7 @@
   --border-strong: #e2e2e4; /* [F] */
 
   --primary-disabled-bg: #626262; /* [F] */
-  --primary-disabled-text: #aeaeae; /* grey, so a disabled button does not look active */
+  --button-disabled-text: #aeaeae; /* [F] text of every disabled button: primary, secondary, ghost */
   --primary-tint-hover: rgba(198, 48, 49, 0.08); /* [M] */
   --primary-tint-selected: rgba(198, 48, 49, 0.16); /* [M] */
 
@@ -560,7 +563,7 @@
 
   --button-secondary-bg: #454545; /* [F] */
   --button-secondary-border: #e2e2e4; /* [F] */
-  --button-secondary-text: #e2e2e4; 
+  --button-secondary-text: #e2e2e4;
   --button-secondary-hover-bg: #e2e2e4; /* [F] */
   --button-secondary-hover-border: #e2e2e4; /* TODO: not measured */
   --button-secondary-hover-text: #2e2e2e; /* TODO: visual only (dark text on light fill) */

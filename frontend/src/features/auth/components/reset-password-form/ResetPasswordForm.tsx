@@ -70,6 +70,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
     <AuthForm
       title={t('resetPassword.title')}
       subtitle={t('resetPassword.subtitle')}
+      submitWidth="narrow"
       onSubmit={handleSubmit}
       actions={
         <>

@@ -40,3 +40,19 @@
   gap: var(--space-2);
   margin-top: var(--auth-actions-offset);
 }
+
+/* the primary button of every auth page; LATER, FORGOT PASSWORD, … keep their own width */
+.actions > button[type='submit'] {
+  width: var(--auth-submit-width);
+}
+
+/* Email Verification: CONFIRM at the button's own 160 */
+.form[data-submit='regular'] > .actions > button[type='submit'] {
+  width: var(--auth-submit-width-regular);
+}
+
+/* Reset Password: a narrower SUBMIT; min-width too, the button's own min-width is 160 */
+.form[data-submit='narrow'] > .actions > button[type='submit'] {
+  width: var(--auth-submit-width-narrow);
+  min-width: var(--auth-submit-width-narrow);
+}
