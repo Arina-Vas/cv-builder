@@ -51,11 +51,19 @@ export const SelectionActions = ({
 
       {selecting && (
         <>
-          <Button size={'sm'} onClick={onCancel} variant={'secondary'}>
+          <Button onClick={onCancel} variant={'secondary'}>
             {cancelLabel}
           </Button>
-          <Button disabled={selectedCount === 0} size={'sm'} gated onClick={onRemove}>
-            {confirmRemoveLabel} <span className={s.badge}>{selectedCount}</span>
+          {/* the count badge appears from the first selected item; the 12px gap comes from the flex
+              gap of Button's label (the space is not drawn there, it only keeps the name "Remove 2") */}
+          <Button disabled={selectedCount === 0} gated onClick={onRemove}>
+            {confirmRemoveLabel}
+            {selectedCount > 0 && (
+              <>
+                {' '}
+                <span className={s.badge}>{selectedCount}</span>
+              </>
+            )}
           </Button>
         </>
       )}

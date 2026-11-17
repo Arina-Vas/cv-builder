@@ -206,7 +206,7 @@ describe('UserSkills', () => {
       const { user } = renderList();
 
       await user.click(await screen.findByRole('button', { name: 'Remove skills' }));
-      const remove = screen.getByRole('button', { name: 'Remove 0' });
+      const remove = screen.getByRole('button', { name: 'Remove' });
       expect(remove).toBeDisabled();
 
       const reactButton = screen.getByRole('button', { name: /React/ });

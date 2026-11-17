@@ -176,7 +176,7 @@ describe('UserLanguages', () => {
       const { user } = renderList();
 
       await user.click(await screen.findByRole('button', { name: 'Remove languages' }));
-      const remove = screen.getByRole('button', { name: 'Remove 0' });
+      const remove = screen.getByRole('button', { name: 'Remove' });
       expect(remove).toBeDisabled();
 
       const english = screen.getByRole('button', { name: /English/ });

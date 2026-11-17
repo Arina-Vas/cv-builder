@@ -79,7 +79,7 @@ describe('SelectionActions', () => {
     expect(onCancel).toHaveBeenCalled();
   });
 
-  it('disables Remove(n) when nothing is selected', () => {
+  it('disables Remove when nothing is selected and shows no count badge', () => {
     renderWithProviders(
       <SelectionActions
         canEdit
@@ -94,6 +94,7 @@ describe('SelectionActions', () => {
       />,
     );
 
-    expect(screen.getByRole('button', { name: 'Remove 0' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Remove' })).toBeDisabled();
+    expect(screen.queryByText('0')).not.toBeInTheDocument();
   });
 });
