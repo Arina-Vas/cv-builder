@@ -233,7 +233,7 @@ describe('Users', () => {
           request: { query: DELETE_USER, variables: { id: 'u1' } },
           result: {
             errors: [
-              new GraphQLError('The last admin cannot be deleted', {
+              new GraphQLError('backend text', {
                 extensions: { code: 'OPERATION_NOT_ALLOWED' },
               }),
             ],
@@ -245,8 +245,9 @@ describe('Users', () => {
       await user.click(screen.getByRole('button', { name: 'Confirm' }));
 
       const dialog = screen.getByRole('dialog', { name: 'Delete user' });
+      // the UI hides Delete on the own row, so OPERATION_NOT_ALLOWED here means the last admin
       expect(await within(dialog).findByRole('alert')).toHaveTextContent(
-        'This action is not allowed',
+        'The last admin cannot be deleted. Assign the Admin role to another user first',
       );
       expect(screen.getByText('jane@example.com')).toBeInTheDocument();
     });

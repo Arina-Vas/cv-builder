@@ -264,6 +264,7 @@
     "table": {
       "avatar": "Awatar",
       "firstName": "Imię",
+
       "lastName": "Nazwisko",
       "email": "E-mail",
       "department": "Dział",
@@ -298,7 +299,8 @@
     "update": { "title": "Aktualizuj użytkownika" },
     "delete": {
       "title": "Usuń użytkownika",
-      "message": "Czy na pewno chcesz usunąć użytkownika <b>{name}</b>?"
+      "message": "Czy na pewno chcesz usunąć użytkownika <b>{name}</b>?",
+      "lastAdmin": "Nie można usunąć ostatniego administratora. Najpierw nadaj rolę administratora innemu użytkownikowi"
     },
     "tabs": {
       "label": "Sekcje pracownika",
@@ -306,6 +308,10 @@
       "skills": "Umiejętności",
       "languages": "Języki",
       "cvs": "CV"
+    },
+    "errors": {
+      "emailTaken": "Konto z tym adresem e-mail już istnieje",
+      "lastAdminDemote": "Nie można odebrać roli ostatniemu administratorowi. Najpierw nadaj rolę administratora innemu użytkownikowi"
     }
   },
   "cvs": {
@@ -332,6 +338,9 @@
       "title": "Usuń dział",
       "message": "Czy na pewno chcesz usunąć dział <b>{name}</b>?",
       "inUse": "Nie można usunąć działu, ponieważ jest obecnie używany"
+    },
+    "errors": {
+      "nameTaken": "Taki dział już istnieje"
     }
   },
   "positions": {
@@ -349,6 +358,9 @@
       "title": "Usuń stanowisko",
       "message": "Czy na pewno chcesz usunąć stanowisko <b>{name}</b>?",
       "inUse": "Nie można usunąć stanowiska, ponieważ jest obecnie używane"
+    },
+    "errors": {
+      "nameTaken": "Takie stanowisko już istnieje"
     }
   },
   "languages": {
@@ -370,6 +382,10 @@
       "title": "Usuń język",
       "message": "Czy na pewno chcesz usunąć język <b>{name}</b>?",
       "inUse": "Nie można usunąć języka, ponieważ jest obecnie używany"
+    },
+    "errors": {
+      "nameTaken": "Taki język już istnieje",
+      "isoTaken": "Taki kod ISO już istnieje"
     }
   },
   "userLanguage": {
@@ -391,6 +407,7 @@
       "createTitle": "Dodaj język",
       "fields": { "languageId": "Język", "proficiency": "Poziom znajomości" }
     },
+    "errors": { "languageAssigned": "Ten język jest już przypisany" },
     "proficiencyLevel": {
       "A1": "A1",
       "A2": "A2",
@@ -420,6 +437,9 @@
       "title": "Usuń umiejętność",
       "message": "Czy na pewno chcesz usunąć umiejętność <b>{name}</b>?",
       "inUse": "Nie można usunąć umiejętności, ponieważ jest obecnie używana"
+    },
+    "errors": {
+      "nameTaken": "Taka umiejętność już istnieje"
     }
   },
   "userSkill": {
@@ -440,6 +460,7 @@
       "updateTitle": "Aktualizuj umiejętność",
       "fields": { "skillId": "Umiejętność", "mastery": "Poziom umiejętności" }
     },
+    "errors": { "skillAssigned": "Ta umiejętność jest już przypisana" },
     "masteryLevel": {
       "BEGINNER": "Początkujący",
       "ELEMENTARY": "Podstawowy",

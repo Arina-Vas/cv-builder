@@ -57,6 +57,7 @@ export const SkillFormModal = ({ open, onOpenChange, skill }: Props) => {
         categoryId: skill?.category.id ?? '',
       }}
       requireDirty={!!skill}
+      errorMessages={{ CONFLICT: t('errors.nameTaken') }}
     >
       <Input
         label={t('fields.name')}

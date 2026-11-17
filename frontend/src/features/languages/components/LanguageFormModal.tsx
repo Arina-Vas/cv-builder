@@ -47,6 +47,7 @@ export const LanguageFormModal = ({ open, onOpenChange, language }: Props) => {
         nativeName: language?.nativeName ?? '',
       }}
       requireDirty={!!language}
+      errorMessages={{ CONFLICT: { name: t('errors.nameTaken'), iso: t('errors.isoTaken') } }}
     >
       <Input
         label={t('fields.name')}

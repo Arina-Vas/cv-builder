@@ -45,6 +45,7 @@ export const DepartmentFormModal = ({ open, onOpenChange, department }: Props) =
       mode={department ? 'update' : 'create'}
       values={{ name: department?.name ?? '' }}
       requireDirty={!!department}
+      errorMessages={{ CONFLICT: t('errors.nameTaken') }}
     >
       <Input
         label={t('fields.name')}

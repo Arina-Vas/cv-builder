@@ -184,6 +184,7 @@ export const Users = () => {
             b: (chunks) => <strong>{chunks}</strong>,
           })}
           onConfirm={handleDelete}
+          errorMessages={{ OPERATION_NOT_ALLOWED: t('delete.lastAdmin') }}
         />
       )}
     </div>

@@ -50,7 +50,7 @@ describe('LanguageFormModal', () => {
           request: createRequest,
           result: {
             errors: [
-              new GraphQLError('ISO code already exists', {
+              new GraphQLError('backend text', {
                 extensions: { code: 'CONFLICT', field: 'iso' },
               }),
             ],
@@ -63,7 +63,7 @@ describe('LanguageFormModal', () => {
 
     const iso = screen.getByLabelText('ISO');
     await expect.poll(() => iso).toHaveAttribute('aria-invalid', 'true');
-    expect(iso).toHaveAccessibleDescription('This value is already taken');
+    expect(iso).toHaveAccessibleDescription('ISO code already exists');
     expect(screen.getByLabelText('Name')).not.toHaveAttribute('aria-invalid');
     expect(onOpenChange).not.toHaveBeenCalled();
   });

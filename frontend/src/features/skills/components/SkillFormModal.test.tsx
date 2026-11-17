@@ -95,7 +95,7 @@ describe('SkillFormModal', () => {
           },
           result: {
             errors: [
-              new GraphQLError('Skill already exists', {
+              new GraphQLError('backend text', {
                 extensions: { code: 'CONFLICT', field: 'name' },
               }),
             ],
@@ -110,7 +110,7 @@ describe('SkillFormModal', () => {
 
     const name = screen.getByLabelText('Name');
     await expect.poll(() => name).toHaveAttribute('aria-invalid', 'true');
-    expect(name).toHaveAccessibleDescription('This value is already taken');
+    expect(name).toHaveAccessibleDescription('Skill already exists');
     expect(onOpenChange).not.toHaveBeenCalled();
   });
 
