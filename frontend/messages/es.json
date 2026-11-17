@@ -271,6 +271,7 @@
     "table": {
       "avatar": "Avatar",
       "firstName": "Nombre",
+
       "lastName": "Apellido",
       "email": "Correo electrónico",
       "department": "Departamento",
@@ -305,7 +306,8 @@
     "update": { "title": "Actualizar usuario" },
     "delete": {
       "title": "Eliminar usuario",
-      "message": "¿Seguro que quieres eliminar al usuario <b>{name}</b>?"
+      "message": "¿Seguro que quieres eliminar al usuario <b>{name}</b>?",
+      "lastAdmin": "No se puede eliminar al último administrador. Asigna primero el rol de administrador a otro usuario"
     },
     "tabs": {
       "label": "Secciones del empleado",
@@ -313,6 +315,10 @@
       "skills": "Habilidades",
       "languages": "Idiomas",
       "cvs": "CV"
+    },
+    "errors": {
+      "emailTaken": "Ya existe una cuenta con este correo electrónico",
+      "lastAdminDemote": "No se puede quitar el rol al último administrador. Asigna primero el rol de administrador a otro usuario"
     }
   },
   "cvs": {
@@ -339,6 +345,9 @@
       "title": "Eliminar departamento",
       "message": "¿Seguro que quieres eliminar el departamento <b>{name}</b>?",
       "inUse": "El departamento no se puede eliminar porque está en uso"
+    },
+    "errors": {
+      "nameTaken": "El departamento ya existe"
     }
   },
   "positions": {
@@ -356,6 +365,9 @@
       "title": "Eliminar puesto",
       "message": "¿Seguro que quieres eliminar el puesto <b>{name}</b>?",
       "inUse": "El puesto no se puede eliminar porque está en uso"
+    },
+    "errors": {
+      "nameTaken": "El puesto ya existe"
     }
   },
   "languages": {
@@ -377,6 +389,10 @@
       "title": "Eliminar idioma",
       "message": "¿Seguro que quieres eliminar el idioma <b>{name}</b>?",
       "inUse": "El idioma no se puede eliminar porque está en uso"
+    },
+    "errors": {
+      "nameTaken": "El idioma ya existe",
+      "isoTaken": "El código ISO ya existe"
     }
   },
   "userLanguage": {
@@ -398,6 +414,7 @@
       "createTitle": "Añadir idioma",
       "fields": { "languageId": "Idioma", "proficiency": "Nivel" }
     },
+    "errors": { "languageAssigned": "El idioma ya está asignado" },
     "proficiencyLevel": {
       "A1": "A1",
       "A2": "A2",
@@ -427,6 +444,9 @@
       "title": "Eliminar habilidad",
       "message": "¿Seguro que quieres eliminar la habilidad <b>{name}</b>?",
       "inUse": "La habilidad no se puede eliminar porque está en uso"
+    },
+    "errors": {
+      "nameTaken": "La habilidad ya existe"
     }
   },
   "userSkill": {
@@ -447,6 +467,7 @@
       "updateTitle": "Actualizar habilidad",
       "fields": { "skillId": "Habilidad", "mastery": "Nivel de dominio" }
     },
+    "errors": { "skillAssigned": "La habilidad ya está asignada" },
     "masteryLevel": {
       "BEGINNER": "Principiante",
       "ELEMENTARY": "Básico",

@@ -137,7 +137,7 @@ describe('UserLanguageFormModal', () => {
       await user.click(screen.getByRole('button', { name: 'Add' }));
 
       const language = screen.getByRole('combobox', { name: 'Language' });
-      await expect.poll(() => language).toHaveAccessibleDescription('This value is already taken');
+      await expect.poll(() => language).toHaveAccessibleDescription('Language already assigned');
       expect(onOpenChange).not.toHaveBeenCalled();
 
       await user.click(language);

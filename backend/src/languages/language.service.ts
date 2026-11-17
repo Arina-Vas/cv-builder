@@ -9,6 +9,7 @@ import { CreateLanguageInput } from '@/languages/dto/create-language.input';
 import { Language } from '@/languages/models/language.model';
 import { conflict, entityInUse } from '@/common/errors/app-errors';
 import { UpdateLanguageInput } from '@/languages/dto/update-language.input';
+import { isPrismaError } from '@/prisma/prisma-errors';
 
 @Injectable()
 export class LanguageService {
@@ -43,13 +44,25 @@ export class LanguageService {
   async create(input: CreateLanguageInput): Promise<Language> {
     await this.assertUnique(input);
 
-    return toLanguage(await this.prisma.language.create({ data: input }));
+    try {
+      return toLanguage(await this.prisma.language.create({ data: input }));
+    } catch (error) {
+      // Another request saved the same name / ISO after the check: check again to name the field
+      if (isPrismaError(error, 'P2002')) await this.assertUnique(input);
+      throw error;
+    }
   }
 
   async update({ id, ...input }: UpdateLanguageInput): Promise<Language> {
     await this.assertUnique(input, id);
 
-    return toLanguage(await this.prisma.language.update({ where: { id }, data: input }));
+    try {
+      return toLanguage(await this.prisma.language.update({ where: { id }, data: input }));
+    } catch (error) {
+      // Same race as in create
+      if (isPrismaError(error, 'P2002')) await this.assertUnique(input, id);
+      throw error;
+    }
   }
 
   async delete(id: string): Promise<string> {

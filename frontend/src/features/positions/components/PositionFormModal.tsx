@@ -42,6 +42,7 @@ export const PositionFormModal = ({ open, onOpenChange, position }: Props) => {
       mode={position ? 'update' : 'create'}
       values={{ name: position?.name ?? '' }}
       requireDirty={!!position}
+      errorMessages={{ CONFLICT: t('errors.nameTaken') }}
     >
       <Input
         label={t('fields.name')}

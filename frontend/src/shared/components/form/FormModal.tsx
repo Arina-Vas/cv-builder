@@ -8,10 +8,15 @@ import {
   FormProvider,
 } from 'react-hook-form';
 import { Button } from '@/shared/components/buttons';
-import { parseError } from '@/shared/lib/apollo/graphql-errors';
+import { parseError, type ErrorCode } from '@/shared/lib/apollo/graphql-errors';
 import { useErrorMessage } from '@/shared/lib/apollo/useErrorMessage';
 import { useTranslations } from 'next-intl';
 import layout from './FormLayout.module.css';
+
+// A string for the whole code, or a text per field (CONFLICT on `name` and on `iso` differ)
+type ErrorMessages<TInput extends FieldValues> = Partial<
+  Record<ErrorCode, string | Partial<Record<Path<TInput>, string>>>
+>;
 
 type Props<TInput extends FieldValues, TOutput extends FieldValues> = {
   children: ReactNode;
@@ -27,7 +32,9 @@ type Props<TInput extends FieldValues, TOutput extends FieldValues> = {
   size?: 'sm' | 'md';
   // layout of the fields, set on <form>: FormLayout.module.css `grid` (+ `full` on a field) or own
   className?: string;
+  errorMessages?: ErrorMessages<TInput>;
 };
+
 export const FormModal = <TInput extends FieldValues, TOutput extends FieldValues>({
   values,
   requireDirty = false,
@@ -41,6 +48,7 @@ export const FormModal = <TInput extends FieldValues, TOutput extends FieldValue
   submitLabel,
   size = 'sm',
   className,
+  errorMessages,
 }: Props<TInput, TOutput>) => {
   const [submitError, setSubmitError] = useState<string>();
   const { isValid, isDirty, isSubmitting } = form.formState;
@@ -69,10 +77,13 @@ export const FormModal = <TInput extends FieldValues, TOutput extends FieldValue
       handleOpenChange(false);
     } catch (error) {
       const appError = parseError(error);
-      const message = errorMessage(appError);
       const field = Object.keys(appError.fieldErrors).find(
         (name): name is Path<TInput> => name in form.getValues(),
       );
+
+      const custom = appError.code && errorMessages?.[appError.code];
+      const message =
+        (typeof custom === 'string' ? custom : field && custom?.[field]) ?? errorMessage(appError);
 
       if (field) {
         form.setError(field, { type: 'server', message }, { shouldFocus: true });
