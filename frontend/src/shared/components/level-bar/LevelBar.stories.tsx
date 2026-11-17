@@ -22,6 +22,10 @@ const meta = {
       control: 'text',
       description: 'Text value for screen readers (aria-valuetext): mastery or proficiency',
     },
+    muted: {
+      control: 'boolean',
+      description: 'Grey track without fill: item selected for removal',
+    },
     'aria-label': {
       control: 'text',
       description: 'Name of what is measured. Next to a visible name use aria-labelledby instead',
@@ -69,6 +73,24 @@ export const WithoutLabel: Story = {
     // no label → no empty aria-valuetext, the reader falls back to the number
     const meter = within(canvasElement).getByRole('meter');
     await expect(meter).not.toHaveAttribute('aria-valuetext');
+  },
+};
+
+// Item selected in the Remove skills / languages mode (Figma: REMOVE SKILLS / LANGUAGES).
+export const Muted: Story = {
+  args: { muted: true },
+  play: async ({ args, canvasElement }) => {
+    const meter = within(canvasElement).getByRole('meter');
+    const fill = meter.firstElementChild as HTMLElement;
+    const style = getComputedStyle(meter);
+
+    // muted wins over the level colours, whatever the level
+    await expect(getComputedStyle(fill).backgroundColor).toBe('rgba(0, 0, 0, 0)');
+    await expect(style.getPropertyValue('--track').trim()).toBe(
+      style.getPropertyValue('--level-muted-track').trim(),
+    );
+    // visual only: the value stays the real level
+    await expect(meter).toHaveAttribute('aria-valuenow', String(args.level));
   },
 };
 

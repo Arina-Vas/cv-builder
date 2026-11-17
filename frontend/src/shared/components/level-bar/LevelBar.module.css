@@ -18,6 +18,11 @@
   background-color: var(--fill);
 }
 
+.root[data-level][data-muted] {
+  --track: var(--level-muted-track);
+  --fill: transparent;
+}
+
 .root[data-level='1'] {
   --fill: var(--level-1-fill);
   --track: var(--level-1-track);

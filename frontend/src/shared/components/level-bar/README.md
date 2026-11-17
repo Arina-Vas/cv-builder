@@ -16,12 +16,14 @@ import type { LevelType } from '@/shared/components/level-bar/LevelBar.types';
 <LevelBar level={3} label="Intermediate" />                         // skill
 <LevelBar level={3} label="B2" />                                   // language
 <LevelBar level={3} label="Intermediate" aria-labelledby={nameId} /> // named by a text next to it
+<LevelBar level={3} label="Intermediate" muted />                   // grey: item selected for removal
 ```
 
 | Prop        | Values                                  | Default  |
 | ----------- | --------------------------------------- | -------- |
 | `level`     | `LevelType`: `1 \| 2 \| 3 \| 4 \| 5`    | required |
 | `label`     | `string`: text value for screen readers | —        |
+| `muted`     | `boolean`: grey track, no fill          | `false`  |
 | `className` | on the root, e.g. a different width     | —        |
 
 Plus every native `<div>` attribute (`aria-label`, `aria-labelledby`, `title`, `data-*`, `style`).
@@ -33,6 +35,10 @@ Plus every native `<div>` attribute (`aria-label`, `aria-labelledby`, `title`, `
 - The **name** of what is measured ("React", "English") is not part of the bar. Put it next to the bar
   and link it with `aria-labelledby`, or pass `aria-label`.
 - The bar has no text, no click and no focus. A clickable skill / language item wraps it.
+- `muted` is visual only: the bar turns into a plain grey track (`--level-muted-track`, no fill).
+  `LevelItem` sets it on items selected in the Remove skills / languages mode, as in Figma
+  (REMOVE SKILLS / REMOVE LANGUAGES). `aria-valuenow` keeps the real level; the selected state belongs
+  to the item (`aria-pressed`), not to the bar.
 - `LevelType`, `LEVEL_MIN` and `LEVEL_MAX` are exported from `LevelBar.types.ts`.
 
 ## Levels
@@ -76,12 +82,13 @@ The screen reader reads "React, meter, Intermediate". Storybook → **In List** 
 
 Styles use tokens from [`theme/tokens.css`](../../theme/tokens.css):
 
-| Token                                       | Value                                  |
-| ------------------------------------------- | -------------------------------------- |
-| `--skill-bar-width`                         | 80px (not measured in Figma)           |
-| `--skill-bar-height`                        | 4px                                    |
-| `--skill-bar-track-opacity`                 | 0.9                                    |
-| `--level-{1…4}-track`, `--level-{1…5}-fill` | colour of each level (see `TOKENS.md`) |
+| Token                                       | Value                                     |
+| ------------------------------------------- | ----------------------------------------- |
+| `--skill-bar-width`                         | 80px (not measured in Figma)              |
+| `--skill-bar-height`                        | 4px                                       |
+| `--skill-bar-track-opacity`                 | 0.9                                       |
+| `--level-{1…4}-track`, `--level-{1…5}-fill` | colour of each level (see `TOKENS.md`)    |
+| `--level-muted-track`                       | `muted` track: `#AEAEAE` / dark `#454545` |
 
 To change a size or a colour, change the token, not the component CSS.
 Light and dark themes use different palettes (light and dark User Skills frames in Figma); the dark

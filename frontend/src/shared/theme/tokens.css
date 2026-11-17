@@ -309,6 +309,7 @@
   --skill-bar-height: 4px; /* [F] Progressbar */
   --skill-bar-width: 80px; /* [F] Progressbar */
   --skill-bar-track-opacity: 0.9; /* [F] Progressbar opacity 90% */
+  --level-item-width: 284px; /* [F] User Skills / Languages `Button`, 284×48, items touch (no gap) */
 
   --form-row-gap: 21px; /* [F] Create project: between rows of fields, on top of Field's own 16px */
   --form-column-gap: 12px; /* [F] Create project: between the two columns */
@@ -465,6 +466,7 @@
      Mapping [A]: Beginner|A1|A2 → 1, Elementary|B1 → 2, Intermediate|B2 → 3,
      Advanced|C1|C2 → 4, Expert|Native → 5; value = level × 20%.
      Level 5 is 100% filled, so it has no track colour. */
+  --level-muted-track: #aeaeae; /* [F] REMOVE SKILLS / LANGUAGES light: selected item, no fill */
   --level-1-fill: #626262;
   --level-1-track: #aeaeae;
   --level-2-fill: #0288d1;
@@ -617,6 +619,7 @@
 
   /* Levels [F] 1440w dark User Skills (= components page Progressbar);
      fills of levels 1, 4, 5 are the same as light, inherited from :root */
+  --level-muted-track: #454545; /* [F] REMOVE SKILLS / LANGUAGES dark */
   --level-1-track: #454545;
   --level-2-fill: #29b6f6;
   --level-2-track: #145b7b;
