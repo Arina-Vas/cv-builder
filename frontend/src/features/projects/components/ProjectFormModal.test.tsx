@@ -1,5 +1,5 @@
 import type { MockLink } from '@apollo/client/testing';
-import { screen, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { renderWithProviders } from '@/test/render';
 import { TECHNOLOGIES, UPDATE_PROJECT } from '../api/projects.operations';
@@ -25,13 +25,22 @@ const technologiesMock: MockLink.MockedResponse = {
 };
 
 describe('ProjectFormModal', () => {
-  it('keeps Create disabled until the required fields are filled', () => {
-    renderWithProviders(<ProjectFormModal open onOpenChange={vi.fn()} />, {
+  it('keeps Create enabled on an empty form; a click marks the required fields', async () => {
+    const onOpenChange = vi.fn();
+    const { user } = renderWithProviders(<ProjectFormModal open onOpenChange={onOpenChange} />, {
       mocks: [technologiesMock],
     });
 
-    expect(screen.getByRole('dialog', { name: 'Create project' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Create' })).toBeDisabled();
+    const dialog = screen.getByRole('dialog', { name: 'Create project' });
+    const create = screen.getByRole('button', { name: 'Create' });
+    expect(create).toBeEnabled();
+
+    await user.click(create);
+
+    await waitFor(() =>
+      expect(dialog.querySelectorAll('[aria-invalid="true"]').length).toBeGreaterThan(0),
+    );
+    expect(onOpenChange).not.toHaveBeenCalled();
   });
 
   it('offers the technologies from the API and keeps Environment disabled while they load', async () => {

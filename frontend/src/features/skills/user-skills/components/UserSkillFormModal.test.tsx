@@ -101,8 +101,12 @@ describe('UserSkillFormModal', () => {
         },
       );
 
+      // empty form: Add stays enabled, a click marks both selects red and sends nothing
       const add = screen.getByRole('button', { name: 'Add' });
-      expect(add).toBeDisabled();
+      expect(add).toBeEnabled();
+      await user.click(add);
+      expect(await screen.findByText('Skill is required')).toBeInTheDocument();
+      expect(screen.getByText('Skill mastery is required')).toBeInTheDocument();
 
       await choose(user, 'Skill', 'Vue');
       await choose(user, 'Skill mastery', 'Expert');

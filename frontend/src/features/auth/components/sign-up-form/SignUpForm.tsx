@@ -23,7 +23,7 @@ export function SignUpForm() {
   const toast = useToast();
   const [signUp, { loading }] = useMutation(SIGN_UP, { context: NO_ERROR_TOAST });
 
-  const { values, isValid, register, setServerErrors } = useFormFields(
+  const { values, validateAll, register, setServerErrors } = useFormFields(
     { email: '', password: '', confirmPassword: '' },
     ({ email, password, confirmPassword }, tValidation) => ({
       email: validateEmail(email, tValidation),
@@ -33,7 +33,7 @@ export function SignUpForm() {
   );
 
   const handleSubmit = async () => {
-    if (!isValid || loading) return;
+    if (loading || !validateAll()) return;
 
     try {
       await signUp({
@@ -66,7 +66,7 @@ export function SignUpForm() {
       onSubmit={handleSubmit}
       actions={
         <>
-          <Button type="submit" disabled={!isValid} loading={loading}>
+          <Button type="submit" loading={loading}>
             {t('signUp.submit')}
           </Button>
           <Button variant="ghost" onClick={() => router.push(AuthRoute.signIn)}>

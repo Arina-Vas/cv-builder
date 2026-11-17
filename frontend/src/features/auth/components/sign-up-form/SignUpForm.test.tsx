@@ -34,7 +34,7 @@ describe('SignUpForm', () => {
     await user.tab();
 
     expect(screen.getByText('Passwords do not match')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Create account' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Create account' })).toBeEnabled();
   });
 
   it('creates the account and goes to email verification', async () => {

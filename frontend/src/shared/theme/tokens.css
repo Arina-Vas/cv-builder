@@ -514,7 +514,7 @@
 [data-theme='dark'] {
   color-scheme: dark;
 
-  --bg: #2e2e2e; /* [F] Dark frame (app uses #353535 — see Missing) */
+  --bg: #454545; /* [F] Dark frame (app uses #353535 — see Missing) */
   --surface: #121212; /* [A] background.paper */
   --surface-overlay-8: linear-gradient(
     rgba(255, 255, 255, 0.11),
@@ -560,7 +560,7 @@
 
   --button-secondary-bg: #454545; /* [F] */
   --button-secondary-border: #e2e2e4; /* [F] */
-  --button-secondary-text: #ffffff; /* TODO: visual only */
+  --button-secondary-text: #e2e2e4; 
   --button-secondary-hover-bg: #e2e2e4; /* [F] */
   --button-secondary-hover-border: #e2e2e4; /* TODO: not measured */
   --button-secondary-hover-text: #2e2e2e; /* TODO: visual only (dark text on light fill) */

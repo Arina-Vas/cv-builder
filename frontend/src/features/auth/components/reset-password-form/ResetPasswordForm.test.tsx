@@ -27,7 +27,17 @@ describe('ResetPasswordForm', () => {
     await user.tab();
 
     expect(screen.getByText('New password is required')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Submit' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Submit' })).toBeEnabled();
+  });
+
+  it('a click on the empty form shows every error and focuses the first field', async () => {
+    const { user } = renderWithProviders(<ResetPasswordForm token={TOKEN} />);
+
+    await user.click(screen.getByRole('button', { name: 'Submit' }));
+
+    expect(screen.getByText('New password is required')).toBeInTheDocument();
+    expect(screen.getByText('Confirm Password is required')).toBeInTheDocument();
+    expect(screen.getByLabelText('New password')).toHaveFocus();
   });
 
   it('resets the password, ends the old session and goes to Sign In with a message', async () => {

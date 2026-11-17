@@ -108,7 +108,7 @@ Send a date to the API as `format(date, 'yyyy-MM-dd')` (see the `DatePicker` REA
 | `mode`           | `'onTouched'` | an error shows after the user leaves the field, not on the first letter |
 | `reValidateMode` | `'onChange'`  | a shown error is re-checked on every change and disappears at once      |
 
-`isValid` is still recomputed on every change, so the submit button can be disabled while the form is invalid.
+The submit button in `FormModal` is not disabled while the form is invalid: a click runs the schema, marks every invalid field red, focuses the first one and does not call `onSubmit`. It is disabled only with `requireDirty` (nothing changed yet) and while the request runs.
 
 ## Connecting the fields
 

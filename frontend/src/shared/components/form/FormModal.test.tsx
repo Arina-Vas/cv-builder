@@ -147,14 +147,21 @@ describe('FormModal', () => {
   });
 
   describe('submit button', () => {
-    it('is disabled while the form is invalid', async () => {
-      const { user } = renderModal();
+    it('stays enabled on an empty form; a click shows the errors and does not submit', async () => {
+      const onSubmit = vi.fn(() => Promise.resolve());
+      const { user } = renderModal({ onSubmit });
       const create = screen.getByRole('button', { name: 'Create' });
 
-      await waitFor(() => expect(create).toBeDisabled());
+      expect(create).toBeEnabled();
+
+      await user.click(create);
+
+      expect(await screen.findByText('Name is required')).toBeInTheDocument();
+      expect(getInput()).toHaveFocus();
+      expect(onSubmit).not.toHaveBeenCalled();
 
       await user.type(getInput(), 'QA');
-      await waitFor(() => expect(create).toBeEnabled());
+      await waitFor(() => expect(screen.queryByText('Name is required')).not.toBeInTheDocument());
     });
 
     it('with requireDirty, is disabled until something changes', async () => {
@@ -315,7 +322,7 @@ describe('FormModal', () => {
       expect(onOpenChange).not.toHaveBeenCalled();
     });
 
-    it('disables submit until the field changes, then clears the error', async () => {
+    it('keeps the error until the field changes, then clears it', async () => {
       const { user } = renderModal({
         onSubmit: () => Promise.reject(conflictError('name')),
         values: { name: 'Engineering' },
@@ -324,7 +331,6 @@ describe('FormModal', () => {
 
       await user.click(create);
       await screen.findByText(CONFLICT_TEXT);
-      await waitFor(() => expect(create).toBeDisabled());
 
       await user.type(getInput(), ' Team');
 

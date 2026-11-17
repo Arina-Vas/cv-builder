@@ -99,8 +99,12 @@ describe('UserLanguageFormModal', () => {
         },
       );
 
+      // empty form: Add stays enabled, a click marks both selects red and sends nothing
       const add = screen.getByRole('button', { name: 'Add' });
-      expect(add).toBeDisabled();
+      expect(add).toBeEnabled();
+      await user.click(add);
+      expect(await screen.findByText('Language is required')).toBeInTheDocument();
+      expect(screen.getByText('Language proficiency is required')).toBeInTheDocument();
 
       await choose(user, 'Language', 'German');
       await choose(user, 'Proficiency', 'Native');

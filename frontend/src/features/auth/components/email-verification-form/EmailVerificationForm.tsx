@@ -45,9 +45,11 @@ export function EmailVerificationForm({ codeJustSent = false }: EmailVerificatio
 
   const [code, setCode] = useState('');
   const [serverError, setServerError] = useState<string>();
+  // the code error shows only after a submit, so an empty form does not open red
+  const [submitted, setSubmitted] = useState(false);
   const [cooldown, setCooldown] = useCooldown(codeJustSent ? RESEND_CODE_COOLDOWN_SECONDS : 0);
 
-  const isValid = !validateCode(code, tValidation);
+  const codeError = validateCode(code, tValidation);
 
   const handleCodeChange = (value: string) => {
     setCode(value);
@@ -55,7 +57,8 @@ export function EmailVerificationForm({ codeJustSent = false }: EmailVerificatio
   };
 
   const handleSubmit = async () => {
-    if (!isValid || loading) return;
+    setSubmitted(true);
+    if (codeError || loading) return;
 
     try {
       await verifyEmail({ variables: { input: { code } } });
@@ -81,6 +84,7 @@ export function EmailVerificationForm({ codeJustSent = false }: EmailVerificatio
     try {
       await resendCode();
       handleCodeChange('');
+      setSubmitted(false);
       setCooldown(RESEND_CODE_COOLDOWN_SECONDS);
       toast.success(t('verifyEmail.codeSent'));
     } catch (error) {
@@ -102,7 +106,7 @@ export function EmailVerificationForm({ codeJustSent = false }: EmailVerificatio
       onSubmit={handleSubmit}
       actions={
         <>
-          <Button type="submit" disabled={!isValid} loading={loading}>
+          <Button type="submit" loading={loading}>
             {t('verifyEmail.confirm')}
           </Button>
           <Button variant="text" disabled={cooldown > 0} loading={resending} onClick={handleResend}>
@@ -114,7 +118,12 @@ export function EmailVerificationForm({ codeJustSent = false }: EmailVerificatio
         </>
       }
     >
-      <OtpInput value={code} onChange={handleCodeChange} error={serverError} disabled={loading} />
+      <OtpInput
+        value={code}
+        onChange={handleCodeChange}
+        error={serverError ?? (submitted ? codeError : undefined)}
+        disabled={loading}
+      />
     </AuthForm>
   );
 }

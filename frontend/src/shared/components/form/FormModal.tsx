@@ -43,7 +43,7 @@ export const FormModal = <TInput extends FieldValues, TOutput extends FieldValue
   className,
 }: Props<TInput, TOutput>) => {
   const [submitError, setSubmitError] = useState<string>();
-  const { isValid, isDirty, isSubmitting } = form.formState;
+  const { isDirty, isSubmitting } = form.formState;
 
   const t = useTranslations('common.actions');
   const formId = useId();
@@ -92,7 +92,8 @@ export const FormModal = <TInput extends FieldValues, TOutput extends FieldValue
         type={'submit'}
         form={formId}
         loading={isSubmitting}
-        disabled={!isValid || (requireDirty && !isDirty)}
+        // stays enabled while the form is invalid: a click runs the validation and marks the fields red
+        disabled={requireDirty && !isDirty}
       >
         {submitLabel ?? (mode === 'update' ? t('update') : t('create'))}
       </Button>

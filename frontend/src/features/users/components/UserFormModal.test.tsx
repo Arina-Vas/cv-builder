@@ -72,7 +72,7 @@ describe('UserFormModal', () => {
 
     expect(screen.getByRole('dialog', { name: 'Create user' })).toBeInTheDocument();
     const create = screen.getByRole('button', { name: 'Create' });
-    expect(create).toBeDisabled();
+    expect(create).toBeEnabled();
 
     await user.type(screen.getByLabelText('Email'), ' john@example.com ');
     await user.type(screen.getByLabelText('Password'), 'secret1');

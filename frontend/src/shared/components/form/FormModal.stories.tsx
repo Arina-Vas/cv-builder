@@ -274,10 +274,10 @@ export const CreateDepartment: Story = {
     const input = within(dialog).getByRole('textbox', { name: 'Department' });
     const create = within(dialog).getByRole('button', { name: 'Create' });
 
-    await step('empty form: Create is disabled, no error before the field is touched', async () => {
+    await step('empty form: Create is enabled, no error before the field is touched', async () => {
       // one field: the narrow window, as in Figma (CREATE DEPARTMENT)
       await expect(dialog).toHaveAttribute('data-size', 'sm');
-      await expect(create).toBeDisabled();
+      await expect(create).toBeEnabled();
       await expect(within(dialog).queryByRole('alert')).not.toBeInTheDocument();
     });
 
@@ -296,7 +296,7 @@ export const CreateDepartment: Story = {
       await expect(
         await within(dialog).findByText('Department name must not exceed 100 characters'),
       ).toBeVisible();
-      await expect(create).toBeDisabled();
+      await expect(create).toBeEnabled();
     });
 
     await step('a valid name enables Create; the value is trimmed on submit', async () => {
@@ -430,11 +430,7 @@ export const ConflictOnField: Story = {
       await expect(input).toHaveValue('Engineering');
     });
 
-    await step('submit is disabled until the name changes', async () => {
-      await waitFor(() => expect(create).toBeDisabled());
-    });
-
-    await step('changing the name clears the error and enables submit', async () => {
+    await step('changing the name clears the error', async () => {
       await userEvent.type(input, ' Team');
 
       await waitFor(() =>
