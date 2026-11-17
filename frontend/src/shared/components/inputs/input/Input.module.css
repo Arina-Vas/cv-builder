@@ -30,7 +30,7 @@
 
 .toggle:not(:disabled) {
   border: 0;
-  color: var(--input-label);
+  color: var(--input-toggle-icon);
 }
 
 .toggle:disabled {

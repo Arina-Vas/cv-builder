@@ -281,6 +281,15 @@ export const CreateDepartment: Story = {
       await expect(within(dialog).queryByRole('alert')).not.toBeInTheDocument();
     });
 
+    await step(
+      'the border of the field is 67px below the top of the dialog (--modal-form-field-top)',
+      async () => {
+        // the input's parent is the Field control, whose box is the field border
+        const fieldTop = input.parentElement!.getBoundingClientRect().top;
+        await expect(Math.round(fieldTop - dialog.getBoundingClientRect().top)).toBe(67);
+      },
+    );
+
     await step('leaving the empty field shows the translated required error', async () => {
       await userEvent.click(input);
       await userEvent.tab();

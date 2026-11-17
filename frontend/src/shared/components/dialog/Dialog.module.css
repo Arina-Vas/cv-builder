@@ -28,6 +28,10 @@
 }
 
 .header {
+  position: relative;
+  /* the × stays clickable over the form body pulled up under it (see .body:has(> form));
+     no fill, so the label of the first field above its border stays visible */
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -47,9 +51,9 @@
   margin: 0;
 }
 
-/* Highlighted part of a confirm message: "remove <b>1 skill</b>", "delete <b>{name}</b>" — [F] Roboto Bold 16/24, 0.15px */
+/* Highlighted part of a confirm message: "remove <b>1 skill</b>", "delete <b>{name}</b>" — [F] Roboto Medium 16/24, 0.15px */
 .description strong {
-  font-weight: 700;
+  font-weight: var(--font-weight-medium);
   letter-spacing: var(--type-body1-ls);
 }
 
@@ -57,6 +61,16 @@
   flex: 1;
   overflow-y: auto;
   min-height: 0;
+}
+
+/* Form dialogs: the border of the first field sits --modal-form-field-top from the top of the dialog.
+   Without this it is 16 (padding) + 40 (header row) + 26 (section gap) + 16 (Field label space) = 98,
+   so the body is pulled up by the difference; only the empty label space goes under the header */
+.body:has(> form) {
+  margin-top: calc(
+    var(--modal-form-field-top) - var(--space-4) - var(--icon-button-size) -
+      var(--modal-section-gap) - var(--space-4)
+  );
 }
 
 .error {
