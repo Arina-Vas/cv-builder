@@ -68,6 +68,32 @@ describe('LanguageFormModal', () => {
     expect(onOpenChange).not.toHaveBeenCalled();
   });
 
+  it('shows a duplicate name under the Name field, not under ISO', async () => {
+    const onOpenChange = vi.fn();
+    const { user } = renderWithProviders(<LanguageFormModal open onOpenChange={onOpenChange} />, {
+      mocks: [
+        {
+          request: createRequest,
+          result: {
+            errors: [
+              new GraphQLError('backend text', {
+                extensions: { code: 'CONFLICT', field: 'name' },
+              }),
+            ],
+          },
+        },
+      ],
+    });
+
+    await fillCreateForm(user);
+
+    const name = screen.getByLabelText('Name');
+    await expect.poll(() => name).toHaveAttribute('aria-invalid', 'true');
+    expect(name).toHaveAccessibleDescription('Language already exists');
+    expect(screen.getByLabelText('ISO')).not.toHaveAttribute('aria-invalid');
+    expect(onOpenChange).not.toHaveBeenCalled();
+  });
+
   it('edits the language: prefilled, saves only after a change', async () => {
     const onOpenChange = vi.fn();
     const { user } = renderWithProviders(
