@@ -83,8 +83,8 @@ describe('ProjectFormModal', () => {
     expect(screen.getByLabelText('Name')).toHaveValue('Blog');
     expect(screen.getByLabelText('Domain')).toHaveValue('Blogging');
     expect(screen.getByLabelText('Description')).toHaveValue('A blogging website');
-    expect(screen.getByLabelText('Start Date')).toHaveTextContent('01.03.2024');
-    expect(screen.getByLabelText('End Date')).toHaveTextContent('31.12.2024');
+    expect(screen.getByLabelText('Start Date')).toHaveTextContent('03/01/2024');
+    expect(screen.getByLabelText('End Date')).toHaveTextContent('12/31/2024');
     // the chip of the preselected technology appears once the options are loaded
     expect(await screen.findByText('React')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();

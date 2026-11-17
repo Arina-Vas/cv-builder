@@ -166,13 +166,13 @@ export const SelectsDate: Story = {
     const trigger = getTrigger(canvasElement);
     const body = getBody(canvasElement);
 
-    await expect(trigger).toHaveTextContent('04.09.2025');
+    await expect(trigger).toHaveTextContent('09/04/2025');
 
     await userEvent.click(trigger);
     await userEvent.click(await body.findByText('12'));
 
     await expect(args.onChange).toHaveBeenCalledWith(new Date(2025, 8, 12));
-    await expect(trigger).toHaveTextContent('12.09.2025');
+    await expect(trigger).toHaveTextContent('09/12/2025');
     await waitFor(() => expect(body.queryByRole('dialog')).not.toBeInTheDocument());
     // a form marks the field as touched on close, so picking a day must report it too
     await expect(args.onOpenChange).toHaveBeenLastCalledWith(false);
