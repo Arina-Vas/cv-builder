@@ -5,7 +5,7 @@ import { expect, within } from 'storybook/test';
 import { LevelBar } from './LevelBar';
 import { LEVEL_MAX, LEVEL_MIN, type LevelType } from './LevelBar.types';
 
-const LEVELS: LevelType[] = [0, 1, 2, 3, 4, 5];
+const LEVELS: LevelType[] = [1, 2, 3, 4, 5];
 
 const meta = {
   title: 'Shared/LevelBar',
@@ -73,7 +73,7 @@ export const WithoutLabel: Story = {
 };
 
 /* ------------------------------------------------------------------ */
-/* Overview: Level 0–5, Light and Dark (Figma: Notifications › Frame)  */
+/* Overview: Level 1–5, Light and Dark (Figma: User Skills light/dark) */
 /* ------------------------------------------------------------------ */
 
 const gridStyle: CSSProperties = {
@@ -117,7 +117,7 @@ export const AllLevels: Story = {
   play: async ({ canvasElement, step }) => {
     const meters = within(canvasElement).getAllByRole('meter');
 
-    await step('6 levels × 2 themes, none collapsed to 0×0', async () => {
+    await step(`${LEVELS.length} levels × 2 themes, none collapsed to 0×0`, async () => {
       await expect(meters).toHaveLength(LEVELS.length * 2);
       for (const meter of meters) {
         const { width, height } = meter.getBoundingClientRect();
@@ -127,8 +127,8 @@ export const AllLevels: Story = {
     });
 
     await step('each bar is named by its "Level N" caption', async () => {
-      await expect(meters[0]).toHaveAccessibleName('Level 0');
-      await expect(meters[LEVEL_MAX]).toHaveAccessibleName(`Level ${LEVEL_MAX} (Max)`);
+      await expect(meters[0]).toHaveAccessibleName(`Level ${LEVEL_MIN}`);
+      await expect(meters[LEVELS.length - 1]).toHaveAccessibleName(`Level ${LEVEL_MAX} (Max)`);
     });
 
     await step('track is drawn (::before), fill grows by level', async () => {

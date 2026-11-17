@@ -29,7 +29,7 @@
   --color-bg-light: #f5f5f7;
   --color-grey-100: #e2e2e4; /* [F] Dark Secondary border / hover fill */
   --color-grey-200: #c4c4c6; /* [F] Light input placeholder, disabled input fill */
-  --color-grey-600: #454545; /* [F] Dark Secondary fill, Level 0/1 track */
+  --color-grey-600: #454545; /* [F] Dark Secondary fill, dark Level 1 track */
   --color-bg-canvas: #454545;
   --color-grey-700: #353535; /* [A] dark background.default (app) */
   --color-bg-dark: #353535;
@@ -460,20 +460,20 @@
   --toast-info-bg: #29b6f6;
   --toast-info-fg: #145b7b; /* [F] */
 
-  /* Skill mastery / language proficiency: fill + track  [F] Level 0–5,
-     mapping [A]: Beginner|A1|A2 → 1, Elementary|B1 → 2, Intermediate|B2 → 3,
-     Advanced|C1|C2 → 4, Expert|Native → 5; value = index × 20% */
-  --level-0-track: #454545;
+  /* Skill mastery / language proficiency: fill + track  [F] Level 1–5, light theme
+     (1440w light User Skills; dark values are overridden in [data-theme='dark']).
+     Mapping [A]: Beginner|A1|A2 → 1, Elementary|B1 → 2, Intermediate|B2 → 3,
+     Advanced|C1|C2 → 4, Expert|Native → 5; value = level × 20%.
+     Level 5 is 100% filled, so it has no track colour. */
   --level-1-fill: #626262;
-  --level-1-track: #454545;
-  --level-2-fill: #29b6f6;
-  --level-2-track: #145b7b;
-  --level-3-fill: #66bb6a;
-  --level-3-track: #335d35;
+  --level-1-track: #aeaeae;
+  --level-2-fill: #0288d1;
+  --level-2-track: #9ed1ed;
+  --level-3-fill: #2e7d32;
+  --level-3-track: #afcdb1;
   --level-4-fill: #ffb800;
-  --level-4-track: #7f5c00;
+  --level-4-track: #ffe49e;
   --level-5-fill: #c63031;
-  --level-5-track: #631818;
 
   /* Checkbox (selection mode) — [M], not in Figma */
   --checkbox-checked: #c63031;
@@ -612,6 +612,15 @@
   --chip-border: #aeaeae;
   --chip-remove-hover: #f5f5f7;
 
-  /* Toasts and level colours: Figma has only one (light) frame —
+  /* Toast colours: Figma has only one (light) frame —
      values inherited from :root. TODO: confirm for dark. */
+
+  /* Levels [F] 1440w dark User Skills (= components page Progressbar);
+     fills of levels 1, 4, 5 are the same as light, inherited from :root */
+  --level-1-track: #454545;
+  --level-2-fill: #29b6f6;
+  --level-2-track: #145b7b;
+  --level-3-fill: #66bb6a;
+  --level-3-track: #335d35;
+  --level-4-track: #7f5c00;
 }

@@ -18,10 +18,6 @@
   background-color: var(--fill);
 }
 
-.root[data-level='0'] {
-  --track: var(--level-0-track);
-}
-
 .root[data-level='1'] {
   --fill: var(--level-1-fill);
   --track: var(--level-1-track);
@@ -44,5 +40,5 @@
 
 .root[data-level='5'] {
   --fill: var(--level-5-fill);
-  --track: var(--level-5-track);
+  --track: var(--level-5-fill);
 }
