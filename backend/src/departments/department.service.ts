@@ -7,7 +7,7 @@ import { SortOrder } from '@/common/graphql/sort-order.enum';
 import { toDepartment } from '@/departments/department.mapper';
 import { Department } from '@/departments/models/department.model';
 import { CreateDepartmentInput } from '@/departments/dto/create-department.input';
-import { conflict } from '@/common/errors/app-errors';
+import { conflict, entityInUse } from '@/common/errors/app-errors';
 import { isPrismaError } from '@/prisma/prisma-errors';
 import { UpdateDepartmentInput } from '@/departments/dto/update-department.input';
 
@@ -78,6 +78,11 @@ export class DepartmentService {
   }
 
   async delete(id: string): Promise<string> {
+    const assigned = await this.prisma.user.count({ where: { departmentId: id } });
+    if (assigned > 0) {
+      throw entityInUse('Department cannot be deleted because it is currently in use');
+    }
+
     const row = await this.prisma.department.delete({ where: { id } });
 
     return row.id;

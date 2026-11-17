@@ -263,6 +263,7 @@
     "table": {
       "avatar": "Profilbild",
       "firstName": "Vorname",
+
       "lastName": "Nachname",
       "email": "E-Mail",
       "department": "Abteilung",
@@ -297,7 +298,8 @@
     "update": { "title": "Benutzer aktualisieren" },
     "delete": {
       "title": "Benutzer löschen",
-      "message": "Möchten Sie den Benutzer <b>{name}</b> wirklich löschen?"
+      "message": "Möchten Sie den Benutzer <b>{name}</b> wirklich löschen?",
+      "lastAdmin": "Der letzte Administrator kann nicht gelöscht werden. Weisen Sie zuerst einem anderen Benutzer die Administratorrolle zu"
     },
     "tabs": {
       "label": "Mitarbeiterbereiche",
@@ -305,6 +307,10 @@
       "skills": "Fähigkeiten",
       "languages": "Sprachen",
       "cvs": "Lebensläufe"
+    },
+    "errors": {
+      "emailTaken": "Ein Konto mit dieser E-Mail existiert bereits",
+      "lastAdminDemote": "Dem letzten Administrator kann die Rolle nicht entzogen werden. Weisen Sie zuerst einem anderen Benutzer die Administratorrolle zu"
     }
   },
   "cvs": {
@@ -329,7 +335,11 @@
     "edit": { "title": "Abteilung bearbeiten" },
     "delete": {
       "title": "Abteilung löschen",
-      "message": "Möchten Sie die Abteilung <b>{name}</b> wirklich löschen?"
+      "message": "Möchten Sie die Abteilung <b>{name}</b> wirklich löschen?",
+      "inUse": "Die Abteilung kann nicht gelöscht werden, da sie derzeit verwendet wird"
+    },
+    "errors": {
+      "nameTaken": "Diese Abteilung existiert bereits"
     }
   },
   "positions": {
@@ -345,7 +355,11 @@
     "edit": { "title": "Position bearbeiten" },
     "delete": {
       "title": "Position löschen",
-      "message": "Möchten Sie die Position <b>{name}</b> wirklich löschen?"
+      "message": "Möchten Sie die Position <b>{name}</b> wirklich löschen?",
+      "inUse": "Die Position kann nicht gelöscht werden, da sie derzeit verwendet wird"
+    },
+    "errors": {
+      "nameTaken": "Diese Position existiert bereits"
     }
   },
   "languages": {
@@ -365,7 +379,12 @@
     "edit": { "title": "Sprache bearbeiten" },
     "delete": {
       "title": "Sprache löschen",
-      "message": "Möchten Sie die Sprache <b>{name}</b> wirklich löschen?"
+      "message": "Möchten Sie die Sprache <b>{name}</b> wirklich löschen?",
+      "inUse": "Die Sprache kann nicht gelöscht werden, da sie derzeit verwendet wird"
+    },
+    "errors": {
+      "nameTaken": "Diese Sprache existiert bereits",
+      "isoTaken": "Dieser ISO-Code existiert bereits"
     }
   },
   "userLanguage": {
@@ -387,6 +406,7 @@
       "createTitle": "Sprache hinzufügen",
       "fields": { "languageId": "Sprache", "proficiency": "Sprachniveau" }
     },
+    "errors": { "languageAssigned": "Diese Sprache ist bereits zugewiesen" },
     "proficiencyLevel": {
       "A1": "A1",
       "A2": "A2",
@@ -414,7 +434,11 @@
     "edit": { "title": "Fähigkeit bearbeiten" },
     "delete": {
       "title": "Fähigkeit löschen",
-      "message": "Möchten Sie die Fähigkeit <b>{name}</b> wirklich löschen?"
+      "message": "Möchten Sie die Fähigkeit <b>{name}</b> wirklich löschen?",
+      "inUse": "Die Fähigkeit kann nicht gelöscht werden, da sie derzeit verwendet wird"
+    },
+    "errors": {
+      "nameTaken": "Diese Fähigkeit existiert bereits"
     }
   },
   "userSkill": {
@@ -435,6 +459,7 @@
       "updateTitle": "Fähigkeit aktualisieren",
       "fields": { "skillId": "Fähigkeit", "mastery": "Kenntnisstand" }
     },
+    "errors": { "skillAssigned": "Diese Fähigkeit ist bereits zugewiesen" },
     "masteryLevel": {
       "BEGINNER": "Anfänger",
       "ELEMENTARY": "Grundkenntnisse",
@@ -468,7 +493,8 @@
     "edit": { "title": "Projekt bearbeiten" },
     "delete": {
       "title": "Projekt löschen",
-      "message": "Möchten Sie das Projekt <b>{name}</b> wirklich löschen?"
+      "message": "Möchten Sie das Projekt <b>{name}</b> wirklich löschen?",
+      "inUse": "Das Projekt kann nicht gelöscht werden, da es derzeit verwendet wird"
     }
   },
   "settings": {

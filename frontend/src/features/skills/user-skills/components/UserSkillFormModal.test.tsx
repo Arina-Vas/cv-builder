@@ -143,7 +143,7 @@ describe('UserSkillFormModal', () => {
       await user.click(screen.getByRole('button', { name: 'Add' }));
 
       const skill = screen.getByRole('combobox', { name: 'Skill' });
-      await expect.poll(() => skill).toHaveAccessibleDescription('This value is already taken');
+      await expect.poll(() => skill).toHaveAccessibleDescription('Skill already assigned');
       expect(onOpenChange).not.toHaveBeenCalled();
 
       await user.click(skill);

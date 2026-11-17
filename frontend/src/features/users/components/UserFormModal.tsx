@@ -100,6 +100,10 @@ export const UserFormModal = ({ open, onOpenChange, user, isSelf = false }: Prop
       requireDirty={isUpdate}
       size="md"
       className={layout.grid}
+      errorMessages={{
+        CONFLICT: t('errors.emailTaken'),
+        OPERATION_NOT_ALLOWED: t('errors.lastAdminDemote'),
+      }}
     >
       <Input
         label={t('fields.email')}

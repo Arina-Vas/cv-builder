@@ -7,7 +7,7 @@ import { SortOrder } from '@/common/graphql/sort-order.enum';
 import { skillInclude, toSkill, toSkillCategory } from '@/skills/skill.mapper';
 import { CreateSkillInput } from '@/skills/dto/create-skill.input';
 import { isPrismaError } from '@/prisma/prisma-errors';
-import { badUserInput, conflict } from '@/common/errors/app-errors';
+import { badUserInput, conflict, entityInUse } from '@/common/errors/app-errors';
 import { Skill } from '@/skills/models/skill.model';
 import { UpdateSkillInput } from '@/skills/dto/update-skill.input';
 import { SkillCategory } from '@/skills/models/skill-category.model';
@@ -82,6 +82,16 @@ export class SkillService {
   }
 
   async delete(id: string): Promise<string> {
+    const assigned = await this.prisma.$transaction([
+      this.prisma.userSkill.count({ where: { skillId: id } }),
+      this.prisma.projectSkill.count({ where: { skillId: id } }),
+      this.prisma.cvSkill.count({ where: { skillId: id } }),
+    ]);
+    const assignedCount = assigned.reduce((acc, value) => acc + value, 0);
+    if (assignedCount > 0) {
+      throw entityInUse('Skill cannot be deleted because it is currently in use');
+    }
+
     const row = await this.prisma.skill.delete({ where: { id } });
 
     return row.id;

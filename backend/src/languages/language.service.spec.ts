@@ -38,6 +38,9 @@ describe('LanguageService', () => {
       update: jest.fn(),
       delete: jest.fn(),
     },
+    userLanguage: {
+      count: jest.fn(),
+    },
     $transaction: jest.fn((operations: Promise<unknown>[]) => Promise.all(operations)),
   };
   const service = new LanguageService(prisma as unknown as PrismaService);
@@ -55,8 +58,19 @@ describe('LanguageService', () => {
     );
   };
 
+  // Another request saves the same value between the first check and this write: the write fails
+  // with P2002, and only from then on the value is found as taken
+  const takenDuringWrite = (write: jest.Mock, taken: { name?: string; iso?: string }) => {
+    write.mockImplementation(() => {
+      takenBy(taken);
+      return Promise.reject(prismaError('P2002'));
+    });
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
+    // By default nothing references the language, so it can be deleted
+    prisma.userLanguage.count.mockResolvedValue(0);
     prisma.language.findMany.mockResolvedValue([
       row('English', 'EN'),
       row('German', 'DE', 'Deutsch'),
@@ -167,7 +181,20 @@ describe('LanguageService', () => {
       ).resolves.toMatchObject({ nativeName: 'English' });
     });
 
-    it('leaves a concurrent duplicate (P2002) to the global filter', async () => {
+    it.each(['name', 'iso'] as const)(
+      'turns a concurrent duplicate (P2002) into CONFLICT on the %s field',
+      async (field) => {
+        takenDuringWrite(prisma.language.create, { [field]: ENGLISH[field] });
+
+        await expect(service.create(ENGLISH)).rejects.toMatchObject({
+          extensions: { code: ErrorCode.CONFLICT, field },
+        });
+        // checked before the write and once more after the P2002
+        expect(prisma.language.findUnique).toHaveBeenCalledTimes(4);
+      },
+    );
+
+    it('leaves a P2002 to the global filter when the second check finds no duplicate', async () => {
       const error = prismaError('P2002');
       prisma.language.create.mockRejectedValue(error);
 
@@ -217,6 +244,24 @@ describe('LanguageService', () => {
       },
     );
 
+    it.each(['name', 'iso'] as const)(
+      'turns a concurrent duplicate (P2002) into CONFLICT on the %s field',
+      async (field) => {
+        takenDuringWrite(prisma.language.update, { [field]: ENGLISH[field] });
+
+        await expect(service.update({ id: 'id-EN', ...ENGLISH })).rejects.toMatchObject({
+          extensions: { code: ErrorCode.CONFLICT, field },
+        });
+      },
+    );
+
+    it('leaves a P2002 to the global filter when the second check finds no duplicate', async () => {
+      const error = prismaError('P2002');
+      prisma.language.update.mockRejectedValue(error);
+
+      await expect(service.update({ id: 'id-EN', ...ENGLISH })).rejects.toBe(error);
+    });
+
     it('leaves a missing language (P2025) to the global filter', async () => {
       const error = prismaError('P2025');
       prisma.language.update.mockRejectedValue(error);
@@ -226,15 +271,27 @@ describe('LanguageService', () => {
   });
 
   describe('delete', () => {
-    it('deletes the language and returns its id', async () => {
+    it('deletes the language and returns its id when nothing references it', async () => {
       prisma.language.delete.mockResolvedValue(row('English', 'EN'));
 
       const result = await service.delete('id-EN');
 
+      expect(prisma.userLanguage.count).toHaveBeenCalledWith({ where: { languageId: 'id-EN' } });
       expect(prisma.language.delete).toHaveBeenCalledWith({ where: { id: 'id-EN' } });
       expect(result).toBe('id-EN');
     });
 
+    it('throws ENTITY_IN_USE and does not delete when users reference the language', async () => {
+      prisma.userLanguage.count.mockResolvedValue(2);
+
+      await expect(service.delete('id-EN')).rejects.toMatchObject({
+        message: 'Language cannot be deleted because it is currently in use',
+        extensions: { code: ErrorCode.ENTITY_IN_USE },
+      });
+      expect(prisma.language.delete).not.toHaveBeenCalled();
+    });
+
+    // P2003 here means a reference was added between the check and the delete
     it.each(['P2003', 'P2025'])('leaves %s to the global filter', async (code) => {
       const error = prismaError(code);
       prisma.language.delete.mockRejectedValue(error);

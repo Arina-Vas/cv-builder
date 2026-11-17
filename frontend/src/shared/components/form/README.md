@@ -149,19 +149,20 @@ The submit button in `FormModal` is not disabled while the form is invalid: a cl
 
 The page owns the form (`useAppForm`) and passes it in; `FormModal` runs the modal around it.
 
-| Prop           | Values                                                                                                      | Default                                               |
-| -------------- | ----------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| `form`         | the result of `useAppForm`                                                                                  | required                                              |
-| `open`         | `boolean`                                                                                                   | required                                              |
-| `onOpenChange` | `(open: boolean) => void`                                                                                   | required                                              |
-| `title`        | `string`                                                                                                    | required                                              |
-| `values`       | the form values for this opening                                                                            | required                                              |
-| `onSubmit`     | `(values) => Promise<unknown>`: the mutation, rejects on error; the mutation uses `context: NO_ERROR_TOAST` | required                                              |
-| `mode`         | `'create'` · `'update'`                                                                                     | `'create'`                                            |
-| `submitLabel`  | `string`                                                                                                    | `create` → Create, `update` → Save (`common.actions`) |
-| `requireDirty` | `boolean`: unchanged form closes without a request                                                          | `false`                                               |
-| `size`         | `'sm'` · `'md'`                                                                                             | `'sm'`                                                |
-| `className`    | layout of the fields, set on `<form>`                                                                       | `layout.stack`                                        |
+| Prop            | Values                                                                                                      | Default                                                 |
+| --------------- | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| `form`          | the result of `useAppForm`                                                                                  | required                                                |
+| `open`          | `boolean`                                                                                                   | required                                                |
+| `onOpenChange`  | `(open: boolean) => void`                                                                                   | required                                                |
+| `title`         | `string`                                                                                                    | required                                                |
+| `values`        | the form values for this opening                                                                            | required                                                |
+| `onSubmit`      | `(values) => Promise<unknown>`: the mutation, rejects on error; the mutation uses `context: NO_ERROR_TOAST` | required                                                |
+| `mode`          | `'create'` · `'update'`                                                                                     | `'create'`                                              |
+| `submitLabel`   | `string`                                                                                                    | `create` → Create, `update` → Update (`common.actions`) |
+| `requireDirty`  | `boolean`: unchanged form closes without a request                                                          | `false`                                                 |
+| `size`          | `'sm'` · `'md'`                                                                                             | `'sm'`                                                  |
+| `className`     | layout of the fields, set on `<form>`                                                                       | `layout.stack`                                          |
+| `errorMessages` | the page's texts by error code: a string, or a text per field (`{ CONFLICT: { name: '…' } }`)               | —                                                       |
 
 - **Opening** resets the form to `values`: empty for Create, the entity for Edit. Without it the previous row's
   values, errors and touched state would stay, because the form object lives on the page.
@@ -185,6 +186,22 @@ The page owns the form (`useAppForm`) and passes it in; `FormModal` runs the mod
   `formState.errors.<field>?.message` to the field. The submit button stays disabled until the field changes; the
   change re-checks the field and clears the server error. A field the form does not have falls back to the text
   above the buttons.
+- **The page's own texts** (`errorMessages`). `errors.<CODE>` is generic ("This value is already taken"); the spec
+  wants the form's wording, so the page passes it by code. A string covers the whole code, wherever it is shown
+  (under the field or above the buttons); an object gives a text per field, for forms where one code means
+  different things (`CONFLICT` on `name` vs `iso`). Anything not listed keeps `errors.<CODE>`, so a
+  `BAD_USER_INPUT` on `email` never shows the `CONFLICT` text of `email`:
+
+  ```tsx
+  <FormModal
+    errorMessages={{
+      CONFLICT: { name: t('errors.nameTaken'), iso: t('errors.isoTaken') },
+      OPERATION_NOT_ALLOWED: t('errors.lastAdminDemote'),
+    }}
+    …
+  />
+  ```
+
 - **List refresh after a mutation** (catalog pages: one options object per catalog, used by create, update and
   delete). `refetchQueries` + `awaitRefetchQueries` reload only the list on screen, before the modal closes.
   Pages, sorts and searches opened earlier stay in the Apollo cache and would show stale rows (a row on two
@@ -229,24 +246,25 @@ Page forms (Profile, CV Details, Settings) use the same classes on their own `<f
 
 Unit tests (jsdom) cover the logic and states:
 
-| Test                                  | Checks                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `shared/lib/form/schemas.test.ts`     | each block: required / trim / min / `Date`, the error path, a message from the `validation` translator                                                                                                                                                                                                                                                                                                                                                                        |
-| `shared/lib/form/useAppForm.test.tsx` | `onTouched` / `onChange` modes and override, `isValid`, `handleSubmit` gets the schema output                                                                                                                                                                                                                                                                                                                                                                                 |
-| `FormModal.test.tsx`                  | `sm` / `md`, button labels, Cancel, layout class and `form` link; values on opening and reset on reopening; disabled while invalid / unchanged; submit and close, Enter; loading state; error text by code and for a network error, kept input, cleared on retry and on reopening; `CONFLICT` with a field: text under the field and focus, submit disabled until the field changes, cleared on change and on reopening, a field not in the form falls back above the buttons |
+| Test                                  | Checks                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `shared/lib/form/schemas.test.ts`     | each block: required / trim / min / `Date`, the error path, a message from the `validation` translator                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `shared/lib/form/useAppForm.test.tsx` | `onTouched` / `onChange` modes and override, `isValid`, `handleSubmit` gets the schema output                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `FormModal.test.tsx`                  | `sm` / `md`, button labels, Cancel, layout class and `form` link; values on opening and reset on reopening; disabled while invalid / unchanged; submit and close, Enter; loading state; error text by code and for a network error, kept input, cleared on retry and on reopening; `CONFLICT` with a field: text under the field and focus, submit disabled until the field changes, cleared on change and on reopening, a field not in the form falls back above the buttons; `errorMessages`: text per code and field under the field, a string for the code above the buttons or under the field, another code on the same field and a `CONFLICT` without a field keep `errors.<CODE>` |
 
 The stories cover what needs a real browser (layout widths, errors after leaving a field, the full flows with every
 field):
 
-| Story              | Checks                                                                                                                                                             |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `CreateDepartment` | `sm` window; Create disabled while empty; translated "required" after leaving the field and "must not exceed 100 characters"; submit gets the trimmed name; closes |
-| `EditDepartment`   | `update` mode: filled from `values`, Update closes without a request until changed (`requireDirty`), Enter submits                                                 |
-| `Submitting`       | spinner, CANCEL and × disabled, Esc ignored, submit button disabled; closes after one submit                                                                       |
-| `SubmitError`      | `errors.FORBIDDEN` text in the dialog, the input is kept, retry possible; reopening resets values and error                                                        |
-| `ConflictOnField`  | `CONFLICT` (`field: 'name'`): `errors.CONFLICT` under the field, focus, no text above the buttons; submit disabled until the name changes, then the error is gone  |
-| `AllFields`        | `md` + `grid`: short fields half, `full` fields the whole row; all five fields; submit gets trimmed text, ids, a `Date`                                            |
-| `Dark`             | visual                                                                                                                                                             |
+| Story                  | Checks                                                                                                                                                            |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CreateDepartment`     | `sm` window; Create enabled while empty; translated "required" after leaving the field and "must not exceed 100 characters"; submit gets the trimmed name; closes |
+| `EditDepartment`       | `update` mode: filled from `values`, Update closes without a request until changed (`requireDirty`), Enter submits                                                |
+| `Submitting`           | spinner, CANCEL and × disabled, Esc ignored, submit button disabled; closes after one submit                                                                      |
+| `SubmitError`          | `errors.FORBIDDEN` text in the dialog, the input is kept, retry possible; reopening resets values and error                                                       |
+| `ConflictOnField`      | `CONFLICT` (`field: 'name'`): `errors.CONFLICT` under the field, focus, no text above the buttons; changing the name clears the error                             |
+| `ConflictWithPageText` | `errorMessages={{ CONFLICT: { name: … } }}`: the page's "Department already exists" under the field instead of `errors.CONFLICT`                                  |
+| `AllFields`            | `md` + `grid`: short fields half, `full` fields the whole row; all five fields; submit gets trimmed text, ids, a `Date`                                           |
+| `Dark`                 | visual                                                                                                                                                            |
 
 The request is simulated with a promise; the error is a real `CombinedGraphQLErrors` with `extensions.code`.
 

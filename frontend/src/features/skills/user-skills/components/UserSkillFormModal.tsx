@@ -89,6 +89,7 @@ export const UserSkillFormModal = ({ open, onOpenChange, userSkill, userId }: Pr
       }}
       requireDirty={!!userSkill}
       submitLabel={userSkill ? undefined : tActions('add')}
+      errorMessages={{ CONFLICT: t('errors.skillAssigned') }}
     >
       <Controller
         control={form.control}

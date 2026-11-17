@@ -264,6 +264,7 @@
     "table": {
       "avatar": "Avatar",
       "firstName": "Nome",
+
       "lastName": "Sobrenome",
       "email": "E-mail",
       "department": "Departamento",
@@ -298,7 +299,8 @@
     "update": { "title": "Atualizar usuário" },
     "delete": {
       "title": "Excluir usuário",
-      "message": "Tem certeza de que deseja excluir o usuário <b>{name}</b>?"
+      "message": "Tem certeza de que deseja excluir o usuário <b>{name}</b>?",
+      "lastAdmin": "O último administrador não pode ser excluído. Atribua primeiro a função de administrador a outro usuário"
     },
     "tabs": {
       "label": "Seções do funcionário",
@@ -306,6 +308,10 @@
       "skills": "Habilidades",
       "languages": "Idiomas",
       "cvs": "Currículos"
+    },
+    "errors": {
+      "emailTaken": "Já existe uma conta com este e-mail",
+      "lastAdminDemote": "O último administrador não pode ser rebaixado. Atribua primeiro a função de administrador a outro usuário"
     }
   },
   "cvs": {
@@ -330,7 +336,11 @@
     "edit": { "title": "Editar departamento" },
     "delete": {
       "title": "Excluir departamento",
-      "message": "Tem certeza de que deseja excluir o departamento <b>{name}</b>?"
+      "message": "Tem certeza de que deseja excluir o departamento <b>{name}</b>?",
+      "inUse": "O departamento não pode ser excluído porque está em uso"
+    },
+    "errors": {
+      "nameTaken": "O departamento já existe"
     }
   },
   "positions": {
@@ -346,7 +356,11 @@
     "edit": { "title": "Editar cargo" },
     "delete": {
       "title": "Excluir cargo",
-      "message": "Tem certeza de que deseja excluir o cargo <b>{name}</b>?"
+      "message": "Tem certeza de que deseja excluir o cargo <b>{name}</b>?",
+      "inUse": "O cargo não pode ser excluído porque está em uso"
+    },
+    "errors": {
+      "nameTaken": "O cargo já existe"
     }
   },
   "languages": {
@@ -366,7 +380,12 @@
     "edit": { "title": "Editar idioma" },
     "delete": {
       "title": "Excluir idioma",
-      "message": "Tem certeza de que deseja excluir o idioma <b>{name}</b>?"
+      "message": "Tem certeza de que deseja excluir o idioma <b>{name}</b>?",
+      "inUse": "O idioma não pode ser excluído porque está em uso"
+    },
+    "errors": {
+      "nameTaken": "O idioma já existe",
+      "isoTaken": "O código ISO já existe"
     }
   },
   "userLanguage": {
@@ -388,6 +407,7 @@
       "createTitle": "Adicionar idioma",
       "fields": { "languageId": "Idioma", "proficiency": "Proficiência" }
     },
+    "errors": { "languageAssigned": "O idioma já está atribuído" },
     "proficiencyLevel": {
       "A1": "A1",
       "A2": "A2",
@@ -415,7 +435,11 @@
     "edit": { "title": "Editar habilidade" },
     "delete": {
       "title": "Excluir habilidade",
-      "message": "Tem certeza de que deseja excluir a habilidade <b>{name}</b>?"
+      "message": "Tem certeza de que deseja excluir a habilidade <b>{name}</b>?",
+      "inUse": "A habilidade não pode ser excluída porque está em uso"
+    },
+    "errors": {
+      "nameTaken": "A habilidade já existe"
     }
   },
   "userSkill": {
@@ -436,6 +460,7 @@
       "updateTitle": "Atualizar habilidade",
       "fields": { "skillId": "Habilidade", "mastery": "Nível de domínio" }
     },
+    "errors": { "skillAssigned": "A habilidade já está atribuída" },
     "masteryLevel": {
       "BEGINNER": "Iniciante",
       "ELEMENTARY": "Básico",
@@ -469,7 +494,8 @@
     "edit": { "title": "Editar projeto" },
     "delete": {
       "title": "Excluir projeto",
-      "message": "Tem certeza de que deseja excluir o projeto <b>{name}</b>?"
+      "message": "Tem certeza de que deseja excluir o projeto <b>{name}</b>?",
+      "inUse": "O projeto não pode ser excluído porque está em uso"
     }
   },
   "settings": {

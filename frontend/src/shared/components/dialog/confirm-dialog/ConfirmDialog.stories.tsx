@@ -197,6 +197,21 @@ export const WithError: Story = {
   },
 };
 
+// The page passes its own text for ENTITY_IN_USE (departments.delete.inUse in messages/en.json)
+const DEPARTMENT_IN_USE_TEXT = 'Department cannot be deleted because it is currently in use';
+
+export const WithEntityMessage: Story = {
+  args: { outcome: 'error', errorMessages: { ENTITY_IN_USE: DEPARTMENT_IN_USE_TEXT } },
+  play: async ({ canvasElement }) => {
+    await openDialog(canvasElement);
+    const dialog = await clickConfirm(canvasElement);
+
+    await expect(await within(dialog).findByRole('alert')).toHaveTextContent(
+      DEPARTMENT_IN_USE_TEXT,
+    );
+  },
+};
+
 /* ------------------------------------------------------------------ */
 /* Flows: onConfirm returns the mutation's promise                     */
 /* ------------------------------------------------------------------ */

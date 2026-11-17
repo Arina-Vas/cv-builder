@@ -151,7 +151,7 @@ describe('Projects', () => {
 
       const dialog = screen.getByRole('dialog', { name: 'Delete project' });
       expect(await within(dialog).findByRole('alert')).toHaveTextContent(
-        "This item is in use and can't be deleted",
+        'Project cannot be deleted because it is currently in use',
       );
       expect(screen.getByText('CRM')).toBeInTheDocument();
     });

@@ -41,7 +41,8 @@ export class GraphqlExceptionFilter implements GqlExceptionFilter {
           extensions: { code: ErrorCode.CONFLICT },
         });
       case 'P2003':
-        // On create/update services validate references first, so here it is a blocked delete
+        // Services check references before create/update/delete and throw their own errors, so this is a
+        // reference added to an item between the delete's check and the delete itself
         return entityInUse('This item is in use and cannot be deleted');
       case 'P2025':
         return notFound();

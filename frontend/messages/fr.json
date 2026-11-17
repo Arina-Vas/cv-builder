@@ -271,6 +271,7 @@
     "table": {
       "avatar": "Avatar",
       "firstName": "Prénom",
+
       "lastName": "Nom",
       "email": "E-mail",
       "department": "Département",
@@ -305,7 +306,8 @@
     "update": { "title": "Mettre à jour l'utilisateur" },
     "delete": {
       "title": "Supprimer l'utilisateur",
-      "message": "Voulez-vous vraiment supprimer l'utilisateur <b>{name}</b> ?"
+      "message": "Voulez-vous vraiment supprimer l'utilisateur <b>{name}</b> ?",
+      "lastAdmin": "Le dernier administrateur ne peut pas être supprimé. Attribuez d'abord le rôle d'administrateur à un autre utilisateur"
     },
     "tabs": {
       "label": "Sections de l'employé",
@@ -313,6 +315,10 @@
       "skills": "Compétences",
       "languages": "Langues",
       "cvs": "CV"
+    },
+    "errors": {
+      "emailTaken": "Un compte avec cet e-mail existe déjà",
+      "lastAdminDemote": "Le dernier administrateur ne peut pas être rétrogradé. Attribuez d'abord le rôle d'administrateur à un autre utilisateur"
     }
   },
   "cvs": {
@@ -337,7 +343,11 @@
     "edit": { "title": "Modifier le département" },
     "delete": {
       "title": "Supprimer le département",
-      "message": "Voulez-vous vraiment supprimer le département <b>{name}</b> ?"
+      "message": "Voulez-vous vraiment supprimer le département <b>{name}</b> ?",
+      "inUse": "Le département ne peut pas être supprimé car il est actuellement utilisé"
+    },
+    "errors": {
+      "nameTaken": "Ce département existe déjà"
     }
   },
   "positions": {
@@ -353,7 +363,11 @@
     "edit": { "title": "Modifier le poste" },
     "delete": {
       "title": "Supprimer le poste",
-      "message": "Voulez-vous vraiment supprimer le poste <b>{name}</b> ?"
+      "message": "Voulez-vous vraiment supprimer le poste <b>{name}</b> ?",
+      "inUse": "Le poste ne peut pas être supprimé car il est actuellement utilisé"
+    },
+    "errors": {
+      "nameTaken": "Ce poste existe déjà"
     }
   },
   "languages": {
@@ -373,7 +387,12 @@
     "edit": { "title": "Modifier la langue" },
     "delete": {
       "title": "Supprimer la langue",
-      "message": "Voulez-vous vraiment supprimer la langue <b>{name}</b> ?"
+      "message": "Voulez-vous vraiment supprimer la langue <b>{name}</b> ?",
+      "inUse": "La langue ne peut pas être supprimée car elle est actuellement utilisée"
+    },
+    "errors": {
+      "nameTaken": "Cette langue existe déjà",
+      "isoTaken": "Ce code ISO existe déjà"
     }
   },
   "userLanguage": {
@@ -395,6 +414,7 @@
       "createTitle": "Ajouter une langue",
       "fields": { "languageId": "Langue", "proficiency": "Niveau" }
     },
+    "errors": { "languageAssigned": "Cette langue est déjà attribuée" },
     "proficiencyLevel": {
       "A1": "A1",
       "A2": "A2",
@@ -422,7 +442,11 @@
     "edit": { "title": "Modifier la compétence" },
     "delete": {
       "title": "Supprimer la compétence",
-      "message": "Voulez-vous vraiment supprimer la compétence <b>{name}</b> ?"
+      "message": "Voulez-vous vraiment supprimer la compétence <b>{name}</b> ?",
+      "inUse": "La compétence ne peut pas être supprimée car elle est actuellement utilisée"
+    },
+    "errors": {
+      "nameTaken": "Cette compétence existe déjà"
     }
   },
   "userSkill": {
@@ -443,6 +467,7 @@
       "updateTitle": "Mettre à jour la compétence",
       "fields": { "skillId": "Compétence", "mastery": "Niveau de maîtrise" }
     },
+    "errors": { "skillAssigned": "Cette compétence est déjà attribuée" },
     "masteryLevel": {
       "BEGINNER": "Débutant",
       "ELEMENTARY": "Élémentaire",
@@ -476,7 +501,8 @@
     "edit": { "title": "Modifier le projet" },
     "delete": {
       "title": "Supprimer le projet",
-      "message": "Voulez-vous vraiment supprimer le projet <b>{name}</b> ?"
+      "message": "Voulez-vous vraiment supprimer le projet <b>{name}</b> ?",
+      "inUse": "Le projet ne peut pas être supprimé car il est actuellement utilisé"
     }
   },
   "settings": {

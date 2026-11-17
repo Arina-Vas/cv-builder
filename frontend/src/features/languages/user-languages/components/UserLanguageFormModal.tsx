@@ -30,8 +30,7 @@ type Props = {
 };
 
 export const UserLanguageFormModal = ({ open, onOpenChange, userId, userLanguage }: Props) => {
-  const t = useTranslations('userLanguage.form');
-  const tProficiency = useTranslations('userLanguage.proficiencyLevel');
+  const t = useTranslations('userLanguage');
   const tValidation = useTranslations('validation');
   const tActions = useTranslations('common.actions');
 
@@ -64,7 +63,7 @@ export const UserLanguageFormModal = ({ open, onOpenChange, userId, userLanguage
 
   const proficiencyOptions: SelectOption[] = PROFICIENCIES.map((proficiency) => ({
     value: proficiency,
-    label: tProficiency(proficiency),
+    label: t(`proficiencyLevel.${proficiency}`),
   }));
 
   const [createUserLanguage] = useMutation(CREATE_USER_LANGUAGE, USER_LANGUAGE_MUTATION_OPTIONS);
@@ -85,7 +84,7 @@ export const UserLanguageFormModal = ({ open, onOpenChange, userId, userLanguage
       open={open}
       onOpenChange={onOpenChange}
       onSubmit={onSubmit}
-      title={userLanguage ? t('updateTitle') : t('createTitle')}
+      title={userLanguage ? t('form.updateTitle') : t('form.createTitle')}
       form={form}
       mode={userLanguage ? 'update' : 'create'}
       values={{
@@ -94,6 +93,7 @@ export const UserLanguageFormModal = ({ open, onOpenChange, userId, userLanguage
       }}
       requireDirty={!!userLanguage}
       submitLabel={userLanguage ? undefined : tActions('add')}
+      errorMessages={{ CONFLICT: t('errors.languageAssigned') }}
     >
       <Controller
         control={form.control}
@@ -102,7 +102,7 @@ export const UserLanguageFormModal = ({ open, onOpenChange, userId, userLanguage
           <Select
             ref={field.ref}
             name={field.name}
-            label={t('fields.languageId')}
+            label={t('form.fields.languageId')}
             options={languageOptions}
             value={field.value}
             onValueChange={field.onChange}
@@ -122,7 +122,7 @@ export const UserLanguageFormModal = ({ open, onOpenChange, userId, userLanguage
           <Select
             ref={field.ref}
             name={field.name}
-            label={t('fields.proficiency')}
+            label={t('form.fields.proficiency')}
             options={proficiencyOptions}
             value={field.value}
             onValueChange={field.onChange}

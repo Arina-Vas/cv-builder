@@ -12,11 +12,11 @@ import {
   PROJECT_MUTATION_OPTIONS,
   PROJECTS,
 } from '@/features/projects/api/projects.operations';
-import { parseISO, format } from 'date-fns';
 import { ProjectDetails } from '@/features/projects/components/projectDetails/ProjectDetails';
 import { useState } from 'react';
 import { ProjectFormModal } from '@/features/projects/components/ProjectFormModal';
 import { ConfirmDialog } from '@/shared/components/dialog';
+import { formatDate } from '@/shared/lib/date/format-date';
 
 type ModalState =
   | { type: 'create' }
@@ -59,13 +59,13 @@ export const Projects = () => {
     {
       key: 'startDate',
       header: t('table.columns.startDate'),
-      render: (project) => format(parseISO(project.startDate), 'MM/dd/yyyy'),
+      render: (project) => formatDate(project.startDate),
       sortable: true,
     },
     {
       key: 'endDate',
       header: t('table.columns.endDate'),
-      render: (project) => format(parseISO(project.endDate), 'MM/dd/yyyy'),
+      render: (project) => formatDate(project.endDate),
       sortable: true,
     },
   ];
@@ -127,6 +127,7 @@ export const Projects = () => {
           b: (chunks) => <strong>{chunks}</strong>,
         })}
         onConfirm={handleDelete}
+        errorMessages={{ ENTITY_IN_USE: t('delete.inUse') }}
       />
     </div>
   );

@@ -115,8 +115,9 @@ All tables have `id` (uuid), `created_at` and `updated_at`. Only the meaningful 
 
 The spec asks each catalog to define its deletion policy explicitly. One rule is used everywhere:
 
-- **A catalog item cannot be deleted while something references it** (`Restrict`). The API returns a business
-  error, e.g. "Skill cannot be deleted because it is assigned to users".
+- **A catalog item cannot be deleted while something references it** (`Restrict`). The service checks the
+  references below before deleting and returns `ENTITY_IN_USE`, e.g. "Skill cannot be deleted because it is
+  currently in use"; `Restrict` is the safety net for a reference added meanwhile.
 - **Deleting an owner removes its own links** (`Cascade`). Global catalog items are never deleted as a side effect.
 
 | Relation (FK)                                  | On delete of the referenced row | Effect                                               |
@@ -179,8 +180,8 @@ The same limits are validated in the input DTOs, so the client gets a validation
 
 ### Rules enforced outside Prisma
 
-Prisma cannot express these; they are added by hand to the initial migration (Foundation task)
-or checked in services.
+Prisma cannot express these. The `citext` extension is enabled in the initial migration, the date `CHECK`
+constraints are added in the `add_dates_checks` migration; the rest is checked in DTOs or services.
 
 | Rule                                                                         | Where                                                                                                                          |
 | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
@@ -193,11 +194,11 @@ or checked in services.
 | Names are trimmed, repeated spaces collapsed; ISO upper-cased                | Input DTO (`@NormalizeText()`, `@ToUpperCaseText()`, see [conventions](api/conventions.md#shared-building-blocks))             |
 | A new verification code invalidates the previous one; resend is rate-limited | Service                                                                                                                        |
 
-Create the initial migration without applying it, add the SQL above, then apply it:
+To add such a rule, create a migration without applying it, write the SQL by hand, then apply it:
 
 ```bash
-pnpm db:migrate --name init --create-only
-# edit backend/prisma/migrations/<timestamp>_init/migration.sql
+pnpm db:migrate --name <short-description> --create-only
+# edit backend/prisma/migrations/<timestamp>_<short-description>/migration.sql
 pnpm db:migrate
 ```
 

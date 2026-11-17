@@ -1,4 +1,5 @@
 import { screen, within } from '@testing-library/react';
+import { GraphQLError } from 'graphql';
 import { describe, expect, it, vi } from 'vitest';
 import { renderWithProviders } from '@/test/render';
 import { CREATE_USER, UPDATE_USER, USER_FORM_OPTIONS } from '../api/users.operations';
@@ -177,5 +178,95 @@ describe('UserFormModal', () => {
     });
 
     expect(screen.getByRole('combobox', { name: 'Role' })).toBeDisabled();
+  });
+
+  it('shows the spec text for a taken email under Email and stays open', async () => {
+    const onOpenChange = vi.fn();
+    const { user } = renderWithProviders(<UserFormModal open onOpenChange={onOpenChange} />, {
+      mocks: [
+        optionsMock,
+        {
+          request: {
+            query: CREATE_USER,
+            variables: {
+              input: {
+                email: 'jane@example.com',
+                password: 'secret1',
+                firstName: 'Jane',
+                lastName: 'Doe',
+                departmentId: 'd1',
+                positionId: 'p1',
+                role: 'EMPLOYEE',
+              },
+            },
+          },
+          result: {
+            errors: [
+              new GraphQLError('backend text', {
+                extensions: { code: 'CONFLICT', field: 'email' },
+              }),
+            ],
+          },
+        },
+      ],
+    });
+
+    await user.type(screen.getByLabelText('Email'), 'jane@example.com');
+    await user.type(screen.getByLabelText('Password'), 'secret1');
+    await user.type(screen.getByLabelText('First Name'), 'Jane');
+    await user.type(screen.getByLabelText('Last Name'), 'Doe');
+    await choose(user, 'Department', 'Engineering');
+    await choose(user, 'Position', 'Developer');
+    await choose(user, 'Role', 'Employee');
+    await user.click(screen.getByRole('button', { name: 'Create' }));
+
+    const email = screen.getByLabelText('Email');
+    await expect.poll(() => email).toHaveAttribute('aria-invalid', 'true');
+    expect(email).toHaveAccessibleDescription('An account with this email already exists');
+    expect(onOpenChange).not.toHaveBeenCalled();
+  });
+
+  it('explains why the last admin cannot be demoted, above the buttons', async () => {
+    const onOpenChange = vi.fn();
+    const admin = { ...existing, role: 'ADMIN' as const };
+    const { user } = renderWithProviders(
+      <UserFormModal open onOpenChange={onOpenChange} user={admin} />,
+      {
+        mocks: [
+          optionsMock,
+          {
+            request: {
+              query: UPDATE_USER,
+              variables: {
+                input: {
+                  id: 'u1',
+                  firstName: 'Jane',
+                  lastName: 'Doe',
+                  departmentId: 'd1',
+                  positionId: 'p1',
+                  role: 'EMPLOYEE',
+                },
+              },
+            },
+            result: {
+              errors: [
+                new GraphQLError('backend text', {
+                  extensions: { code: 'OPERATION_NOT_ALLOWED' },
+                }),
+              ],
+            },
+          },
+        ],
+      },
+    );
+
+    await choose(user, 'Role', 'Employee');
+    await user.click(screen.getByRole('button', { name: 'Update' }));
+
+    const dialog = screen.getByRole('dialog', { name: 'Update user' });
+    expect(await within(dialog).findByRole('alert')).toHaveTextContent(
+      'The last admin cannot be demoted. Assign the Admin role to another user first',
+    );
+    expect(onOpenChange).not.toHaveBeenCalled();
   });
 });

@@ -264,6 +264,7 @@
     "table": {
       "avatar": "Avatar",
       "firstName": "Nome",
+
       "lastName": "Cognome",
       "email": "Email",
       "department": "Reparto",
@@ -298,7 +299,8 @@
     "update": { "title": "Aggiorna utente" },
     "delete": {
       "title": "Elimina utente",
-      "message": "Vuoi davvero eliminare l'utente <b>{name}</b>?"
+      "message": "Vuoi davvero eliminare l'utente <b>{name}</b>?",
+      "lastAdmin": "L'ultimo amministratore non può essere eliminato. Assegna prima il ruolo di amministratore a un altro utente"
     },
     "tabs": {
       "label": "Sezioni del dipendente",
@@ -306,6 +308,10 @@
       "skills": "Competenze",
       "languages": "Lingue",
       "cvs": "CV"
+    },
+    "errors": {
+      "emailTaken": "Esiste già un account con questa email",
+      "lastAdminDemote": "L'ultimo amministratore non può essere declassato. Assegna prima il ruolo di amministratore a un altro utente"
     }
   },
   "cvs": {
@@ -330,7 +336,11 @@
     "edit": { "title": "Modifica reparto" },
     "delete": {
       "title": "Elimina reparto",
-      "message": "Vuoi davvero eliminare il reparto <b>{name}</b>?"
+      "message": "Vuoi davvero eliminare il reparto <b>{name}</b>?",
+      "inUse": "Il reparto non può essere eliminato perché è attualmente in uso"
+    },
+    "errors": {
+      "nameTaken": "Il reparto esiste già"
     }
   },
   "positions": {
@@ -346,7 +356,11 @@
     "edit": { "title": "Modifica posizione" },
     "delete": {
       "title": "Elimina posizione",
-      "message": "Vuoi davvero eliminare la posizione <b>{name}</b>?"
+      "message": "Vuoi davvero eliminare la posizione <b>{name}</b>?",
+      "inUse": "La posizione non può essere eliminata perché è attualmente in uso"
+    },
+    "errors": {
+      "nameTaken": "La posizione esiste già"
     }
   },
   "languages": {
@@ -366,7 +380,12 @@
     "edit": { "title": "Modifica lingua" },
     "delete": {
       "title": "Elimina lingua",
-      "message": "Vuoi davvero eliminare la lingua <b>{name}</b>?"
+      "message": "Vuoi davvero eliminare la lingua <b>{name}</b>?",
+      "inUse": "La lingua non può essere eliminata perché è attualmente in uso"
+    },
+    "errors": {
+      "nameTaken": "La lingua esiste già",
+      "isoTaken": "Il codice ISO esiste già"
     }
   },
   "userLanguage": {
@@ -388,6 +407,7 @@
       "createTitle": "Aggiungi lingua",
       "fields": { "languageId": "Lingua", "proficiency": "Livello" }
     },
+    "errors": { "languageAssigned": "La lingua è già assegnata" },
     "proficiencyLevel": {
       "A1": "A1",
       "A2": "A2",
@@ -415,7 +435,11 @@
     "edit": { "title": "Modifica competenza" },
     "delete": {
       "title": "Elimina competenza",
-      "message": "Vuoi davvero eliminare la competenza <b>{name}</b>?"
+      "message": "Vuoi davvero eliminare la competenza <b>{name}</b>?",
+      "inUse": "La competenza non può essere eliminata perché è attualmente in uso"
+    },
+    "errors": {
+      "nameTaken": "La competenza esiste già"
     }
   },
   "userSkill": {
@@ -436,6 +460,7 @@
       "updateTitle": "Aggiorna competenza",
       "fields": { "skillId": "Competenza", "mastery": "Livello di padronanza" }
     },
+    "errors": { "skillAssigned": "La competenza è già assegnata" },
     "masteryLevel": {
       "BEGINNER": "Principiante",
       "ELEMENTARY": "Elementare",
@@ -469,7 +494,8 @@
     "edit": { "title": "Modifica progetto" },
     "delete": {
       "title": "Elimina progetto",
-      "message": "Vuoi davvero eliminare il progetto <b>{name}</b>?"
+      "message": "Vuoi davvero eliminare il progetto <b>{name}</b>?",
+      "inUse": "Il progetto non può essere eliminato perché è attualmente in uso"
     }
   },
   "settings": {
