@@ -241,6 +241,8 @@ otherwise).
 (`canManageUser`, `backend/src/common/auth/can-manage-user.ts`); the client-sent id is never proof of ownership.
 Like every mutation, these need a verified email. An Employee changing another user's skills or languages gets
 `FORBIDDEN` before the user is looked up, so the response does not reveal whether that user exists.
+The assignment ids must belong to that `userId` too: `updateUser*` with another user's assignment id returns
+`NOT_FOUND`, and `deleteUser*` with one returns `FORBIDDEN` and removes nothing, for an Admin as well.
 
 ### Projects
 

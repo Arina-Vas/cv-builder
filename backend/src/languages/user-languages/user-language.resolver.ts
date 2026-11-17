@@ -61,7 +61,9 @@ export class UserLanguageResolver {
 
   @Mutation(() => [ID], {
     description:
-      'Own profile or Admin. Removes the given UserLanguage ids of the user; returns the removed ids',
+      'Own profile or Admin. Removes the given UserLanguage ids of the user; returns the removed ids. ' +
+      'Ids already removed are skipped. Fails with FORBIDDEN and removes nothing ' +
+      "if an id belongs to another user's assignment",
   })
   deleteUserLanguages(
     @CurrentUser() currentUser: User,
