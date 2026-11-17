@@ -197,6 +197,12 @@
     "navigation": "Navegación principal",
     "breadcrumbs": "Ruta de navegación",
     "notAuthorized": "No tienes autorización para acceder a esta página",
+    "accessCheck": {
+      "loading": "Comprobando el acceso",
+      "title": "Vaya",
+      "message": "No se pudo comprobar tu acceso a esta página. Inténtalo de nuevo.",
+      "retry": "Reintentar"
+    },
     "profile": "Perfil",
     "settings": "Configuración",
     "logout": "Cerrar sesión",
@@ -244,6 +250,7 @@
       "confirmPassword": "Confirmar contraseña",
       "submit": "Enviar",
       "goToSignIn": "Ir a iniciar sesión",
+      "requestNewLink": "Solicitar un nuevo enlace",
       "success": "Tu contraseña se ha restablecido. Inicia sesión."
     },
     "verifyEmail": {
@@ -260,9 +267,12 @@
     "errors": {
       "invalidCredentials": "Correo electrónico o contraseña no válidos",
       "emailTaken": "Ya existe una cuenta con este correo electrónico",
-      "codeInvalid": "El código no es válido o ha caducado. Solicita uno nuevo",
+      "codeInvalid": "Código de verificación no válido",
+      "codeExpired": "El código de verificación ha caducado",
+      "codeUsed": "El código de verificación ya se ha utilizado",
       "alreadyVerified": "El correo electrónico ya está verificado",
-      "resetLinkInvalid": "Este enlace para restablecer la contraseña no es válido o ha caducado"
+      "resetLinkInvalid": "Este enlace para restablecer la contraseña no es válido",
+      "resetLinkExpired": "Este enlace para restablecer la contraseña ha caducado"
     }
   },
   "users": {

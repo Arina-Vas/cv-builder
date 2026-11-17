@@ -194,6 +194,12 @@
     "navigation": "Nawigacja główna",
     "breadcrumbs": "Ścieżka nawigacji",
     "notAuthorized": "Nie masz dostępu do tej strony",
+    "accessCheck": {
+      "loading": "Sprawdzanie dostępu",
+      "title": "Ups",
+      "message": "Nie udało się sprawdzić dostępu do tej strony. Spróbuj ponownie.",
+      "retry": "Ponów"
+    },
     "profile": "Profil",
     "settings": "Ustawienia",
     "logout": "Wyloguj",
@@ -237,6 +243,7 @@
       "confirmPassword": "Potwierdź hasło",
       "submit": "Wyślij",
       "goToSignIn": "Przejdź do logowania",
+      "requestNewLink": "Poproś o nowy link",
       "success": "Twoje hasło zostało zresetowane. Zaloguj się."
     },
     "verifyEmail": {
@@ -253,9 +260,12 @@
     "errors": {
       "invalidCredentials": "Nieprawidłowy e-mail lub hasło",
       "emailTaken": "Konto z tym adresem e-mail już istnieje",
-      "codeInvalid": "Kod jest nieprawidłowy lub wygasł. Poproś o nowy",
+      "codeInvalid": "Nieprawidłowy kod weryfikacyjny",
+      "codeExpired": "Kod weryfikacyjny wygasł",
+      "codeUsed": "Kod weryfikacyjny został już użyty",
       "alreadyVerified": "Adres e-mail jest już zweryfikowany",
-      "resetLinkInvalid": "Ten link do resetowania hasła jest nieprawidłowy lub wygasł"
+      "resetLinkInvalid": "Ten link do resetowania hasła jest nieprawidłowy",
+      "resetLinkExpired": "Ten link do resetowania hasła wygasł"
     }
   },
   "users": {

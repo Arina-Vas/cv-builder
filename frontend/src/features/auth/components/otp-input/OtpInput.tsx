@@ -18,11 +18,20 @@ export interface OtpInputProps {
   label?: string;
   error?: string;
   disabled?: boolean;
+  onBlur?: () => void;
 }
 
 const onlyDigits = (text: string) => text.replace(/\D/g, '');
 
-export function OtpInput({ value, onChange, length = 6, label, error, disabled }: OtpInputProps) {
+export function OtpInput({
+  value,
+  onChange,
+  length = 6,
+  label,
+  error,
+  disabled,
+  onBlur,
+}: OtpInputProps) {
   const t = useTranslations('auth.verifyEmail');
   const errorId = useId();
   const cells = useRef<(HTMLInputElement | null)[]>([]);
@@ -64,6 +73,10 @@ export function OtpInput({ value, onChange, length = 6, label, error, disabled }
     }
   };
 
+  const handleGroupBlur = (event: FocusEvent<HTMLDivElement>) => {
+    if (!event.currentTarget.contains(event.relatedTarget)) onBlur?.();
+  };
+
   const handlePaste = (index: number) => (event: ClipboardEvent<HTMLInputElement>) => {
     event.preventDefault();
     const digits = onlyDigits(event.clipboardData.getData('text'));
@@ -78,6 +91,7 @@ export function OtpInput({ value, onChange, length = 6, label, error, disabled }
         aria-label={label ?? t('codeLabel')}
         aria-describedby={error ? errorId : undefined}
         data-error={error ? true : undefined}
+        onBlur={handleGroupBlur}
       >
         {Array.from({ length }, (_, index) => (
           <input

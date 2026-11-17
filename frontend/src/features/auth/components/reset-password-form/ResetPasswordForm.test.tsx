@@ -48,10 +48,13 @@ describe('ResetPasswordForm', () => {
     expect(mockRouter.replace).toHaveBeenCalledWith('/login');
   });
 
-  // The backend does not say which of the two it is, so the form shows one text for both
-  it.each(['This password reset link is invalid', 'This password reset link has expired'])(
-    'on "%s" from the backend shows the link error, keeps the passwords and stays on the page',
-    async (message) => {
+  it.each([
+    ['This password reset link is invalid', 'This password reset link is invalid'],
+    ['This password reset link has expired', 'This password reset link has expired'],
+    ['Some new backend text', 'This password reset link is invalid'],
+  ])(
+    'on "%s" from the backend shows "%s", keeps the passwords and stays on the page',
+    async (message, shown) => {
       const { user } = renderWithProviders(<ResetPasswordForm token={TOKEN} />, {
         mocks: [
           {
@@ -70,14 +73,25 @@ describe('ResetPasswordForm', () => {
 
       await fillAndSubmit(user);
 
-      expect(
-        await screen.findByText('This password reset link is invalid or has expired'),
-      ).toBeInTheDocument();
+      expect(await screen.findByText(shown)).toBeInTheDocument();
       expect(screen.getByLabelText('New password')).toHaveValue(PASSWORD);
       expect(screen.getByLabelText('Confirm password')).toHaveValue(PASSWORD);
       expect(mockRouter.replace).not.toHaveBeenCalled();
     },
   );
+
+  it('without a token shows the invalid link state instead of the form', async () => {
+    const { user } = renderWithProviders(<ResetPasswordForm token="" />);
+
+    expect(screen.getByText('This password reset link is invalid')).toBeInTheDocument();
+    expect(screen.queryByLabelText('New password')).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Request a new link' }));
+    expect(mockRouter.push).toHaveBeenCalledWith('/forgot-password');
+
+    await user.click(screen.getByRole('button', { name: 'Go to sign in' }));
+    expect(mockRouter.push).toHaveBeenCalledWith('/login');
+  });
 
   it('shows a backend password error as a toast (the client validation runs first)', async () => {
     const { user } = renderWithProviders(<ResetPasswordForm token={TOKEN} />, {

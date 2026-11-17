@@ -194,6 +194,12 @@
     "navigation": "Navegação principal",
     "breadcrumbs": "Trilha de navegação",
     "notAuthorized": "Você não tem autorização para acessar esta página",
+    "accessCheck": {
+      "loading": "Verificando o acesso",
+      "title": "Ops",
+      "message": "Não foi possível verificar seu acesso a esta página. Tente novamente.",
+      "retry": "Tentar novamente"
+    },
     "profile": "Perfil",
     "settings": "Configurações",
     "logout": "Sair",
@@ -237,6 +243,7 @@
       "confirmPassword": "Confirmar senha",
       "submit": "Enviar",
       "goToSignIn": "Ir para o login",
+      "requestNewLink": "Solicitar um novo link",
       "success": "Sua senha foi redefinida. Entre novamente."
     },
     "verifyEmail": {
@@ -253,9 +260,12 @@
     "errors": {
       "invalidCredentials": "E-mail ou senha inválidos",
       "emailTaken": "Já existe uma conta com este e-mail",
-      "codeInvalid": "O código é inválido ou expirou. Solicite um novo",
+      "codeInvalid": "Código de verificação inválido",
+      "codeExpired": "O código de verificação expirou",
+      "codeUsed": "O código de verificação já foi usado",
       "alreadyVerified": "O e-mail já está verificado",
-      "resetLinkInvalid": "Este link de redefinição de senha é inválido ou expirou"
+      "resetLinkInvalid": "Este link de redefinição de senha é inválido",
+      "resetLinkExpired": "Este link de redefinição de senha expirou"
     }
   },
   "users": {

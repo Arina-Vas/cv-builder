@@ -25,10 +25,27 @@ const meMock = (role: UserRole) => ({
 });
 
 describe('AdminGuard', () => {
-  it('renders nothing while the role is still loading', () => {
+  it('shows a loader, not the page, while the role is still loading', () => {
     renderWithProviders(<AdminGuard>Admin page</AdminGuard>, { mocks: [meMock('ADMIN')] });
 
+    expect(screen.getByRole('status', { name: 'Checking access' })).toBeInTheDocument();
     expect(screen.queryByText('Admin page')).not.toBeInTheDocument();
+  });
+
+  it('shows an error with Retry when ME fails, and the page after a successful retry', async () => {
+    const { user } = renderWithProviders(<AdminGuard>Admin page</AdminGuard>, {
+      mocks: [{ request: { query: ME }, error: new Error('Network down') }, meMock('ADMIN')],
+    });
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      "We couldn't check your access to this page. Please try again.",
+    );
+    expect(screen.queryByText('Admin page')).not.toBeInTheDocument();
+    expect(mockRouter.replace).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole('button', { name: 'Retry' }));
+
+    expect(await screen.findByText('Admin page')).toBeInTheDocument();
   });
 
   it('renders the page for an admin', async () => {

@@ -2,7 +2,7 @@ import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { mockRouter } from '@/test/next-navigation';
 import { renderWithProviders } from '@/test/render';
-import { RESEND_VERIFICATION_CODE, VERIFY_EMAIL } from '../../api/auth.operations';
+import { ME, RESEND_VERIFICATION_CODE, VERIFY_EMAIL } from '../../api/auth.operations';
 import { EmailVerificationForm } from './EmailVerificationForm';
 
 const CODE = '123456';
@@ -66,30 +66,90 @@ describe('EmailVerificationForm', () => {
     expect(mockRouter.replace).toHaveBeenCalledWith('/');
   });
 
-  it('shows an invalid code under the input and keeps the entered code', async () => {
-    const { user } = renderWithProviders(<EmailVerificationForm />, {
+  it.each([
+    ['Invalid verification code', 'Invalid verification code'],
+    ['Verification code has expired', 'Verification code has expired'],
+    ['Verification code has already been used', 'Verification code has already been used'],
+    ['Some new backend text', 'Invalid verification code'],
+  ])(
+    'on "%s" from the backend shows "%s" under the input and keeps the code',
+    async (message, shown) => {
+      const { user } = renderWithProviders(<EmailVerificationForm />, {
+        mocks: [
+          {
+            request: verifyRequest,
+            result: {
+              errors: [{ message, extensions: { code: 'BAD_USER_INPUT', field: 'code' } }],
+            },
+          },
+        ],
+      });
+
+      await enterCodeAndConfirm(user);
+
+      expect(await screen.findByRole('alert')).toHaveTextContent(shown);
+      expect(enteredCode()).toBe(CODE);
+      expect(mockRouter.replace).not.toHaveBeenCalled();
+    },
+  );
+
+  it('shows the validation error only after the code field is left', async () => {
+    const { user } = renderWithProviders(
+      <>
+        <EmailVerificationForm />
+        <button type="button">outside</button>
+      </>,
+    );
+
+    await user.click(screen.getByLabelText('Digit 1 of 6'));
+    await user.keyboard('123');
+    // moving between the cells is not leaving the field
+    await user.click(screen.getByLabelText('Digit 4 of 6'));
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'outside' }));
+    expect(screen.getByRole('alert')).toHaveTextContent('Please enter a valid 6-digit code');
+  });
+
+  it('says the code is required when the field is left empty', async () => {
+    const { user } = renderWithProviders(
+      <>
+        <EmailVerificationForm />
+        <button type="button">outside</button>
+      </>,
+    );
+
+    await user.click(screen.getByLabelText('Digit 1 of 6'));
+    await user.click(screen.getByRole('button', { name: 'outside' }));
+
+    expect(screen.getByRole('alert')).toHaveTextContent('Verification code is required');
+  });
+
+  it('sends a user with an already verified email away from the page', async () => {
+    renderWithProviders(<EmailVerificationForm />, {
       mocks: [
         {
-          request: verifyRequest,
+          request: { query: ME },
           result: {
-            errors: [
-              {
-                message: 'Invalid verification code',
-                extensions: { code: 'BAD_USER_INPUT', field: 'code' },
+            data: {
+              me: {
+                __typename: 'User' as const,
+                id: '1',
+                email: 'user@example.com',
+                role: 'EMPLOYEE' as const,
+                emailVerifiedAt: '2026-10-30T10:00:00.000Z',
+                firstName: null,
+                lastName: null,
+                avatarUrl: null,
               },
-            ],
+            },
           },
         },
       ],
     });
 
-    await enterCodeAndConfirm(user);
-
-    expect(await screen.findByRole('alert')).toHaveTextContent(
-      'The code is invalid or has expired. Request a new one',
-    );
-    expect(enteredCode()).toBe(CODE);
-    expect(mockRouter.replace).not.toHaveBeenCalled();
+    await waitFor(() => expect(mockRouter.replace).toHaveBeenCalledWith('/'));
+    expect(screen.queryByRole('button', { name: 'Confirm' })).not.toBeInTheDocument();
   });
 
   it('sends an already verified user into the app', async () => {
