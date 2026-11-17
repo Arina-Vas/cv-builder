@@ -96,10 +96,10 @@ describe('ProjectFormModal', () => {
     expect(screen.getByLabelText('End Date')).toHaveTextContent('31.12.2024');
     // the chip of the preselected technology appears once the options are loaded
     expect(await screen.findByText('React')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Update' })).toBeEnabled();
 
     await user.type(screen.getByLabelText('Name'), ' v2');
-    await user.click(screen.getByRole('button', { name: 'Save' }));
+    await user.click(screen.getByRole('button', { name: 'Update' }));
 
     await expect.poll(() => onOpenChange).toHaveBeenCalledWith(false);
   });

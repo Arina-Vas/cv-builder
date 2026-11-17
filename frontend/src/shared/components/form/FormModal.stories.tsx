@@ -322,16 +322,15 @@ export const EditDepartment: Story = {
   play: async ({ args, canvasElement, step }) => {
     const dialog = await openDialog(canvasElement, 'Edit department');
     const input = within(dialog).getByRole('textbox', { name: 'Department' });
-    const save = within(dialog).getByRole('button', { name: 'Save' });
+    const save = within(dialog).getByRole('button', { name: 'Update' });
 
-    await step('the field is filled, Save is disabled until something changes', async () => {
+    await step('the field is filled, Update is enabled from the start', async () => {
       await expect(input).toHaveValue('Engineering');
-      await expect(save).toBeDisabled();
+      await expect(save).toBeEnabled();
     });
 
     await step('Enter in the field submits the changed value', async () => {
       await userEvent.type(input, ' Team');
-      await waitFor(() => expect(save).toBeEnabled());
       await userEvent.keyboard('{Enter}');
 
       await expect(args.onSubmit).toHaveBeenCalledWith({ name: 'Engineering Team' });
@@ -344,7 +343,7 @@ export const Submitting: Story = {
   play: async ({ args, canvasElement, step }) => {
     const body = getBody(canvasElement);
     const dialog = await openDialog(canvasElement, 'Edit department');
-    const save = within(dialog).getByRole('button', { name: 'Save' });
+    const save = within(dialog).getByRole('button', { name: 'Update' });
 
     await step(
       'while the request runs: loading, CANCEL and × disabled, Esc does not close',
@@ -386,14 +385,14 @@ export const SubmitError: Story = {
 
     await step('the error is shown in the dialog, the input is kept', async () => {
       await userEvent.type(input, ' Team');
-      await userEvent.click(within(dialog).getByRole('button', { name: 'Save' }));
+      await userEvent.click(within(dialog).getByRole('button', { name: 'Update' }));
 
       await expect(await within(dialog).findByRole('alert')).toHaveTextContent(
         "You don't have permission to do this",
       );
       await expect(body.getByRole('dialog')).toBeInTheDocument();
       await expect(input).toHaveValue('Engineering Team');
-      await expect(within(dialog).getByRole('button', { name: 'Save' })).toBeEnabled();
+      await expect(within(dialog).getByRole('button', { name: 'Update' })).toBeEnabled();
     });
 
     await step('reopening starts from the entity again, without the error', async () => {

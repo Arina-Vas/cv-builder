@@ -185,10 +185,10 @@ describe('UserSkillFormModal', () => {
       expect(skill).toBeDisabled();
       expect(skill).toHaveTextContent('React');
       expect(screen.getByRole('combobox', { name: 'Skill mastery' })).toHaveTextContent('Advanced');
-      expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
+      expect(screen.getByRole('button', { name: 'Update' })).toBeEnabled();
 
       await choose(user, 'Skill mastery', 'Expert');
-      await user.click(screen.getByRole('button', { name: 'Save' }));
+      await user.click(screen.getByRole('button', { name: 'Update' }));
 
       await expect.poll(() => onOpenChange).toHaveBeenCalledWith(false);
     });

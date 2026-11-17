@@ -160,7 +160,7 @@ describe('UserLanguages', () => {
       const dialog = screen.getByRole('dialog', { name: 'Update language' });
       await user.click(within(dialog).getByRole('combobox', { name: 'Proficiency' }));
       await user.click(within(document.body).getByRole('option', { name: 'C1' }));
-      await user.click(within(dialog).getByRole('button', { name: 'Save' }));
+      await user.click(within(dialog).getByRole('button', { name: 'Update' }));
 
       // the list row (its meter) is gone; the open dialog hides the page from the a11y tree
       await waitFor(() =>

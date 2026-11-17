@@ -302,7 +302,7 @@ describe('Users', () => {
       await openRowAction(user, 'Jane Doe', 'Update');
       const dialog = screen.getByRole('dialog', { name: 'Update user' });
       await user.type(within(dialog).getByLabelText('First Name'), 't');
-      await user.click(within(dialog).getByRole('button', { name: 'Save' }));
+      await user.click(within(dialog).getByRole('button', { name: 'Update' }));
 
       expect(await within(dialog).findByRole('alert')).toHaveTextContent(
         'This item no longer exists',

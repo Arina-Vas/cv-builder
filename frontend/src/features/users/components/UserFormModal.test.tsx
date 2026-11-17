@@ -161,8 +161,8 @@ describe('UserFormModal', () => {
     expect(screen.getByLabelText('First Name')).toBeEnabled();
     expect(screen.getByLabelText('Last Name')).toBeEnabled();
 
-    const save = screen.getByRole('button', { name: 'Save' });
-    expect(save).toBeDisabled();
+    const save = screen.getByRole('button', { name: 'Update' });
+    expect(save).toBeEnabled();
 
     await user.type(screen.getByLabelText('First Name'), 't ');
     await choose(user, 'Position', 'Designer');

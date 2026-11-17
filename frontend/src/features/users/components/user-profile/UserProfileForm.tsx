@@ -56,7 +56,7 @@ export const UserProfileForm = ({
 
   const schema = useMemo(() => profileSchema(tValidation), [tValidation]);
   const form = useAppForm({ schema, defaultValues: toFormValues(user) });
-  const { errors, isDirty, isValid, isSubmitting } = form.formState;
+  const { errors, isDirty, isSubmitting } = form.formState;
 
   const { data: optionsData, loading: optionsLoading } = useQuery(USER_FORM_OPTIONS, {
     skip: !canEdit,
@@ -76,6 +76,7 @@ export const UserProfileForm = ({
 
   const handleSubmit = form.handleSubmit(async (values) => {
     setSubmitError(undefined);
+    if (!isDirty) return;
     try {
       const { data } = await updateProfile({ variables: { input: { id: user.id, ...values } } });
       form.reset(data ? toFormValues(data.updateProfile) : values);
@@ -152,13 +153,7 @@ export const UserProfileForm = ({
             </p>
           )}
           {canVerifyEmail && <VerifyEmailButton onAlreadyVerified={onEmailAlreadyVerified} />}
-          <Button
-            type="submit"
-            variant="primary"
-            gated
-            loading={isSubmitting}
-            disabled={!isDirty || !isValid}
-          >
+          <Button type="submit" variant="primary" gated loading={isSubmitting}>
             {tActions('update')}
           </Button>
         </div>

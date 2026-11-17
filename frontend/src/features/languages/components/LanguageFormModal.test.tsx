@@ -91,10 +91,10 @@ describe('LanguageFormModal', () => {
     expect(screen.getByLabelText('Name')).toHaveValue('German');
     expect(screen.getByLabelText('ISO')).toHaveValue('DE');
     expect(screen.getByLabelText('Native name')).toHaveValue('Deutsch');
-    expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Update' })).toBeEnabled();
 
     await user.type(screen.getByLabelText('Native name'), ' (DE)');
-    await user.click(screen.getByRole('button', { name: 'Save' }));
+    await user.click(screen.getByRole('button', { name: 'Update' }));
 
     await expect.poll(() => onOpenChange).toHaveBeenCalledWith(false);
   });

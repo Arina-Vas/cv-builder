@@ -64,6 +64,11 @@ export const FormModal = <TInput extends FieldValues, TOutput extends FieldValue
 
   const handleSubmit = form.handleSubmit(async (submitted) => {
     setSubmitError(undefined);
+    // nothing changed: there is nothing to save, so the dialog just closes
+    if (requireDirty && !isDirty) {
+      handleOpenChange(false);
+      return;
+    }
     try {
       await onSubmit(submitted);
       handleOpenChange(false);
@@ -91,9 +96,8 @@ export const FormModal = <TInput extends FieldValues, TOutput extends FieldValue
         variant={'primary'}
         type={'submit'}
         form={formId}
+        // always enabled: a click runs the validation and marks the invalid fields red
         loading={isSubmitting}
-        // stays enabled while the form is invalid: a click runs the validation and marks the fields red
-        disabled={requireDirty && !isDirty}
       >
         {submitLabel ?? (mode === 'update' ? t('update') : t('create'))}
       </Button>

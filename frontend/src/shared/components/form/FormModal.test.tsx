@@ -99,7 +99,7 @@ describe('FormModal', () => {
       unmount();
 
       const second = renderModal({ mode: 'update' });
-      expect(screen.getByRole('button', { name: 'Save' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Update' })).toBeInTheDocument();
       second.unmount();
 
       renderModal({ submitLabel: 'Add' });
@@ -164,18 +164,37 @@ describe('FormModal', () => {
       await waitFor(() => expect(screen.queryByText('Name is required')).not.toBeInTheDocument());
     });
 
-    it('with requireDirty, is disabled until something changes', async () => {
-      const { user } = renderModal({
+    it('with requireDirty, an unchanged form closes without onSubmit; a changed one submits', async () => {
+      const onSubmit = vi.fn(() => Promise.resolve());
+      const { user, onOpenChange, rerender } = renderModal({
         mode: 'update',
         requireDirty: true,
         values: { name: 'Engineering' },
+        onSubmit,
       });
-      const save = screen.getByRole('button', { name: 'Save' });
+      const save = screen.getByRole('button', { name: 'Update' });
 
-      await waitFor(() => expect(save).toBeDisabled());
+      expect(save).toBeEnabled();
+      await user.click(save);
 
+      await waitFor(() => expect(getDialog()).not.toBeInTheDocument());
+      expect(onOpenChange).toHaveBeenCalledWith(false);
+      expect(onSubmit).not.toHaveBeenCalled();
+
+      rerender(
+        <Harness
+          onOpenChange={onOpenChange}
+          mode="update"
+          requireDirty
+          values={{ name: 'Engineering' }}
+          onSubmit={onSubmit}
+        />,
+      );
+      await user.click(screen.getByRole('button', { name: 'Open' }));
       await user.type(getInput(), ' Team');
-      await waitFor(() => expect(save).toBeEnabled());
+      await user.click(screen.getByRole('button', { name: 'Update' }));
+
+      expect(onSubmit).toHaveBeenCalledWith({ name: 'Engineering Team' });
     });
   });
 
