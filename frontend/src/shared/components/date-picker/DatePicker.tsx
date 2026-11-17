@@ -9,6 +9,7 @@ import { ChevronIcon } from '@/shared/components/icons/ChevronIcon';
 import { CalendarIcon } from '@/shared/components/icons/CalendarIcon';
 import { useTranslations } from 'next-intl';
 import { Field, getErrorId } from '@/shared/components/field/Field';
+import { formatDate } from '@/shared/lib/date/format-date';
 
 type Props = {
   value: Date | null;
@@ -100,11 +101,7 @@ export const DatePicker = ({
             aria-describedby={error ? getErrorId(triggerId) : undefined}
           >
             <span>
-              {value
-                ? format(value, 'dd.MM.yyyy')
-                : open
-                  ? (placeholder ?? t('placeholder'))
-                  : null}
+              {value ? formatDate(value) : open ? (placeholder ?? t('placeholder')) : null}
             </span>
             <CalendarIcon className={s.icon} />
           </button>
