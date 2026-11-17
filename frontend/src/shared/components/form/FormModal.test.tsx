@@ -147,54 +147,28 @@ describe('FormModal', () => {
   });
 
   describe('submit button', () => {
-    it('stays enabled on an empty form; a click shows the errors and does not submit', async () => {
-      const onSubmit = vi.fn(() => Promise.resolve());
-      const { user } = renderModal({ onSubmit });
+    it('is disabled while the form is invalid', async () => {
+      const { user } = renderModal();
       const create = screen.getByRole('button', { name: 'Create' });
 
-      expect(create).toBeEnabled();
-
-      await user.click(create);
-
-      expect(await screen.findByText('Name is required')).toBeInTheDocument();
-      expect(getInput()).toHaveFocus();
-      expect(onSubmit).not.toHaveBeenCalled();
+      await waitFor(() => expect(create).toBeDisabled());
 
       await user.type(getInput(), 'QA');
-      await waitFor(() => expect(screen.queryByText('Name is required')).not.toBeInTheDocument());
+      await waitFor(() => expect(create).toBeEnabled());
     });
 
-    it('with requireDirty, an unchanged form closes without onSubmit; a changed one submits', async () => {
-      const onSubmit = vi.fn(() => Promise.resolve());
-      const { user, onOpenChange, rerender } = renderModal({
+    it('with requireDirty, is disabled until something changes', async () => {
+      const { user } = renderModal({
         mode: 'update',
         requireDirty: true,
         values: { name: 'Engineering' },
-        onSubmit,
       });
       const save = screen.getByRole('button', { name: 'Update' });
 
-      expect(save).toBeEnabled();
-      await user.click(save);
+      await waitFor(() => expect(save).toBeDisabled());
 
-      await waitFor(() => expect(getDialog()).not.toBeInTheDocument());
-      expect(onOpenChange).toHaveBeenCalledWith(false);
-      expect(onSubmit).not.toHaveBeenCalled();
-
-      rerender(
-        <Harness
-          onOpenChange={onOpenChange}
-          mode="update"
-          requireDirty
-          values={{ name: 'Engineering' }}
-          onSubmit={onSubmit}
-        />,
-      );
-      await user.click(screen.getByRole('button', { name: 'Open' }));
       await user.type(getInput(), ' Team');
-      await user.click(screen.getByRole('button', { name: 'Update' }));
-
-      expect(onSubmit).toHaveBeenCalledWith({ name: 'Engineering Team' });
+      await waitFor(() => expect(save).toBeEnabled());
     });
   });
 
@@ -341,7 +315,7 @@ describe('FormModal', () => {
       expect(onOpenChange).not.toHaveBeenCalled();
     });
 
-    it('keeps the error until the field changes, then clears it', async () => {
+    it('disables submit until the field changes, then clears the error', async () => {
       const { user } = renderModal({
         onSubmit: () => Promise.reject(conflictError('name')),
         values: { name: 'Engineering' },
@@ -350,6 +324,7 @@ describe('FormModal', () => {
 
       await user.click(create);
       await screen.findByText(CONFLICT_TEXT);
+      await waitFor(() => expect(create).toBeDisabled());
 
       await user.type(getInput(), ' Team');
 

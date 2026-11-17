@@ -47,7 +47,7 @@ describe('DepartmentFormModal', () => {
     const input = screen.getByLabelText('Department');
     expect(screen.getByRole('dialog', { name: 'Edit department' })).toBeInTheDocument();
     expect(input).toHaveValue('Engineering');
-    expect(screen.getByRole('button', { name: 'Update' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Update' })).toBeDisabled();
 
     await user.clear(input);
     await user.type(input, 'Research');

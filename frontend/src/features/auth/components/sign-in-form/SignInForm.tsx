@@ -23,7 +23,7 @@ export function SignInForm() {
   const errorMessage = useErrorMessage();
   const [signIn, { loading }] = useMutation(SIGN_IN, { context: NO_ERROR_TOAST });
 
-  const { values, validateAll, register, setServerErrors } = useFormFields(
+  const { values, isValid, validateAll, register, setServerErrors } = useFormFields(
     { email: '', password: '' },
     ({ email, password }, tValidation) => ({
       email: validateEmail(email, tValidation),
@@ -58,7 +58,7 @@ export function SignInForm() {
       onSubmit={handleSubmit}
       actions={
         <>
-          <Button type="submit" loading={loading}>
+          <Button type="submit" disabled={!isValid} loading={loading}>
             {t('signIn.submit')}
           </Button>
           <Button variant="ghost" onClick={() => router.push(AuthRoute.forgotPassword)}>

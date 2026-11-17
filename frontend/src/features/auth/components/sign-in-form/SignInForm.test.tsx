@@ -32,7 +32,7 @@ describe('SignInForm', () => {
     expect(screen.getByText('Hello again! Sign in to continue')).toBeInTheDocument();
   });
 
-  it('validates the fields after leaving them and keeps Sign in enabled', async () => {
+  it('validates the fields after leaving them and keeps Sign in disabled', async () => {
     const { user: ui } = renderWithProviders(<SignInForm />);
 
     await ui.click(screen.getByLabelText('Email'));
@@ -42,18 +42,7 @@ describe('SignInForm', () => {
 
     expect(screen.getByText('Email is required')).toBeInTheDocument();
     expect(screen.getByText('Password must be at least 6 characters long')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Sign in' })).toBeEnabled();
-  });
-
-  it('a click on the empty form shows both errors, focuses Email and sends nothing', async () => {
-    const { user: ui } = renderWithProviders(<SignInForm />);
-
-    await ui.click(screen.getByRole('button', { name: 'Sign in' }));
-
-    expect(screen.getByText('Email is required')).toBeInTheDocument();
-    expect(screen.getByText('Password is required')).toBeInTheDocument();
-    expect(screen.getByLabelText('Email')).toHaveFocus();
-    expect(mockRouter.replace).not.toHaveBeenCalled();
+    expect(screen.getByRole('button', { name: 'Sign in' })).toBeDisabled();
   });
 
   it('signs in and goes to the app', async () => {

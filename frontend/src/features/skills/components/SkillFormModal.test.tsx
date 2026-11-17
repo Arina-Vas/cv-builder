@@ -136,7 +136,7 @@ describe('SkillFormModal', () => {
     expect(screen.getByLabelText('Name')).toHaveValue('React');
     const trigger = screen.getByRole('combobox', { name: 'Category' });
     await expect.poll(() => trigger).toHaveTextContent('Frontend');
-    expect(screen.getByRole('button', { name: 'Update' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Update' })).toBeDisabled();
 
     await choose(user, 'Category', 'Testing');
     await user.click(screen.getByRole('button', { name: 'Update' }));

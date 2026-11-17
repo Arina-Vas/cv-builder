@@ -1,6 +1,6 @@
 import { useRef, useState, type ChangeEvent } from 'react';
 
-import { type FieldErrors, type ValidationT } from './validation';
+import { hasErrors, type FieldErrors, type ValidationT } from './validation';
 import { useTranslations } from 'next-intl';
 
 export function useFormFields<TField extends string>(
@@ -45,6 +45,7 @@ export function useFormFields<TField extends string>(
 
   return {
     values,
+    isValid: !hasErrors(errors),
     validateAll,
     register,
     setServerErrors,

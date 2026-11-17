@@ -51,7 +51,7 @@ export const FormModal = <TInput extends FieldValues, TOutput extends FieldValue
   errorMessages,
 }: Props<TInput, TOutput>) => {
   const [submitError, setSubmitError] = useState<string>();
-  const { isDirty, isSubmitting } = form.formState;
+  const { isValid, isDirty, isSubmitting } = form.formState;
 
   const t = useTranslations('common.actions');
   const formId = useId();
@@ -72,11 +72,6 @@ export const FormModal = <TInput extends FieldValues, TOutput extends FieldValue
 
   const handleSubmit = form.handleSubmit(async (submitted) => {
     setSubmitError(undefined);
-    // nothing changed: there is nothing to save, so the dialog just closes
-    if (requireDirty && !isDirty) {
-      handleOpenChange(false);
-      return;
-    }
     try {
       await onSubmit(submitted);
       handleOpenChange(false);
@@ -107,8 +102,9 @@ export const FormModal = <TInput extends FieldValues, TOutput extends FieldValue
         variant={'primary'}
         type={'submit'}
         form={formId}
-        // always enabled: a click runs the validation and marks the invalid fields red
         loading={isSubmitting}
+        // wiki: CREATE / ADD disabled until the form is valid; with requireDirty also until something changes
+        disabled={!isValid || (requireDirty && !isDirty)}
       >
         {submitLabel ?? (mode === 'update' ? t('update') : t('create'))}
       </Button>

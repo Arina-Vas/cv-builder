@@ -280,10 +280,10 @@ export const CreateDepartment: Story = {
     const input = within(dialog).getByRole('textbox', { name: 'Department' });
     const create = within(dialog).getByRole('button', { name: 'Create' });
 
-    await step('empty form: Create is enabled, no error before the field is touched', async () => {
+    await step('empty form: Create is disabled, no error before the field is touched', async () => {
       // one field: the narrow window, as in Figma (CREATE DEPARTMENT)
       await expect(dialog).toHaveAttribute('data-size', 'sm');
-      await expect(create).toBeEnabled();
+      await expect(create).toBeDisabled();
       await expect(within(dialog).queryByRole('alert')).not.toBeInTheDocument();
     });
 
@@ -311,7 +311,7 @@ export const CreateDepartment: Story = {
       await expect(
         await within(dialog).findByText('Department name must not exceed 100 characters'),
       ).toBeVisible();
-      await expect(create).toBeEnabled();
+      await expect(create).toBeDisabled();
     });
 
     await step('a valid name enables Create; the value is trimmed on submit', async () => {
@@ -339,13 +339,14 @@ export const EditDepartment: Story = {
     const input = within(dialog).getByRole('textbox', { name: 'Department' });
     const save = within(dialog).getByRole('button', { name: 'Update' });
 
-    await step('the field is filled, Update is enabled from the start', async () => {
+    await step('the field is filled, Save is disabled until something changes', async () => {
       await expect(input).toHaveValue('Engineering');
-      await expect(save).toBeEnabled();
+      await expect(save).toBeDisabled();
     });
 
     await step('Enter in the field submits the changed value', async () => {
       await userEvent.type(input, ' Team');
+      await waitFor(() => expect(save).toBeEnabled());
       await userEvent.keyboard('{Enter}');
 
       await expect(args.onSubmit).toHaveBeenCalledWith({ name: 'Engineering Team' });
@@ -444,7 +445,11 @@ export const ConflictOnField: Story = {
       await expect(input).toHaveValue('Engineering');
     });
 
-    await step('changing the name clears the error', async () => {
+    await step('submit is disabled until the name changes', async () => {
+      await waitFor(() => expect(create).toBeDisabled());
+    });
+
+    await step('changing the name clears the error and enables submit', async () => {
       await userEvent.type(input, ' Team');
 
       await waitFor(() =>

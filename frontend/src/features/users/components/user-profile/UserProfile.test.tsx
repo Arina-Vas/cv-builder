@@ -241,8 +241,7 @@ describe('UserProfile', () => {
 });
 
 describe('UserProfile — editing', () => {
-  it('lets the owner edit the fields; UPDATE is always enabled, an unchanged form sends nothing', async () => {
-    // no updateProfile mock: a sent request would show the failed save message
+  it('lets the owner edit the fields; UPDATE is disabled until something changes', async () => {
     const { user } = renderProfile([userMock(), optionsMock], OWNER);
 
     const firstName = await screen.findByRole('textbox', { name: 'First Name' });
@@ -250,14 +249,17 @@ describe('UserProfile — editing', () => {
 
     expect(firstName).toBeEnabled();
     expect(screen.getByRole('textbox', { name: 'Last Name' })).toBeEnabled();
+    expect(update).toBeDisabled();
+
+    await user.type(firstName, 'x');
     expect(update).toBeEnabled();
 
-    await user.click(update);
-    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
-    expect(screen.queryByText('Profile has been updated')).not.toBeInTheDocument();
+    // back to the saved value → nothing changed again
+    await user.type(firstName, '{Backspace}');
+    expect(update).toBeDisabled();
   });
 
-  it('saves the changes, shows a toast and keeps the saved values', async () => {
+  it('saves the changes, shows a toast and disables UPDATE again with the saved values', async () => {
     const saved = {
       ...rostislav,
       firstName: 'Ross',
@@ -279,7 +281,7 @@ describe('UserProfile — editing', () => {
     expect(screen.getByRole('heading', { level: 1, name: 'Ross Harlanov' })).toBeInTheDocument();
     expect(firstName).toHaveValue('Ross');
     expect(screen.getByRole('combobox', { name: 'Department' })).toHaveTextContent('Angular');
-    expect(screen.getByRole('button', { name: 'Update' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Update' })).toBeDisabled();
   });
 
   it('lets an admin edit another user and change the position', async () => {
@@ -300,7 +302,7 @@ describe('UserProfile — editing', () => {
     expect(screen.getByRole('combobox', { name: 'Position' })).toHaveTextContent('QA Engineer');
   });
 
-  it('shows the spec messages and keeps UPDATE enabled while a field is invalid', async () => {
+  it('shows the spec messages and keeps UPDATE disabled while a field is invalid', async () => {
     const { user } = renderProfile([userMock(), optionsMock], OWNER);
 
     const firstName = await screen.findByRole('textbox', { name: 'First Name' });
@@ -308,27 +310,13 @@ describe('UserProfile — editing', () => {
     await user.tab();
 
     expect(await screen.findByText('First name is required')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Update' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Update' })).toBeDisabled();
 
     await user.type(firstName, 'a'.repeat(101));
     expect(
       await screen.findByText('First name must not exceed 100 characters'),
     ).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Update' })).toBeEnabled();
-  });
-
-  it('a click on UPDATE with an invalid field focuses it and sends nothing', async () => {
-    // no updateProfile mock: a sent request would fail the test with an error message
-    const { user } = renderProfile([userMock(), optionsMock], OWNER);
-
-    const firstName = await screen.findByRole('textbox', { name: 'First Name' });
-    await user.clear(firstName);
-    await user.click(screen.getByRole('button', { name: 'Update' }));
-
-    expect(await screen.findByText('First name is required')).toBeInTheDocument();
-    expect(firstName).toHaveFocus();
-    // only the field error is shown, no failed save message above the button
-    expect(screen.getAllByRole('alert')).toHaveLength(1);
+    expect(screen.getByRole('button', { name: 'Update' })).toBeDisabled();
   });
 
   it('keeps the entered values and shows a friendly message when the save fails', async () => {

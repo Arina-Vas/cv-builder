@@ -73,7 +73,7 @@ describe('UserFormModal', () => {
 
     expect(screen.getByRole('dialog', { name: 'Create user' })).toBeInTheDocument();
     const create = screen.getByRole('button', { name: 'Create' });
-    expect(create).toBeEnabled();
+    expect(create).toBeDisabled();
 
     await user.type(screen.getByLabelText('Email'), ' john@example.com ');
     await user.type(screen.getByLabelText('Password'), 'secret1');
@@ -163,7 +163,7 @@ describe('UserFormModal', () => {
     expect(screen.getByLabelText('Last Name')).toBeEnabled();
 
     const save = screen.getByRole('button', { name: 'Update' });
-    expect(save).toBeEnabled();
+    expect(save).toBeDisabled();
 
     await user.type(screen.getByLabelText('First Name'), 't ');
     await choose(user, 'Position', 'Designer');

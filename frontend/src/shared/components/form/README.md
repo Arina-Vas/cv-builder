@@ -62,7 +62,7 @@ const [updateDepartment] = useMutation(UPDATE_DEPARTMENT, DEPARTMENT_MUTATION_OP
   title={department ? t('edit.title') : t('create.title')}
   mode={department ? 'update' : 'create'}
   values={{ name: department?.name ?? '' }}
-  requireDirty={!!department} // unchanged: Update just closes the dialog
+  requireDirty={!!department} // Update stays disabled until the name changes
   onSubmit={(values) =>
     department
       ? updateDepartment({ variables: { input: { id: department.id, ...values } } })
@@ -108,7 +108,7 @@ Send a date to the API as `format(date, 'yyyy-MM-dd')` (see the `DatePicker` REA
 | `mode`           | `'onTouched'` | an error shows after the user leaves the field, not on the first letter |
 | `reValidateMode` | `'onChange'`  | a shown error is re-checked on every change and disappears at once      |
 
-The submit button in `FormModal` is not disabled while the form is invalid: a click runs the schema, marks every invalid field red, focuses the first one and does not call `onSubmit`. It is disabled only while the request runs; with `requireDirty` a click on an unchanged form closes the dialog without a request.
+`isValid` is recomputed on every change, so the submit button is disabled while the form is invalid (wiki: CREATE / ADD disabled until valid).
 
 ## Connecting the fields
 
@@ -159,14 +159,14 @@ The page owns the form (`useAppForm`) and passes it in; `FormModal` runs the mod
 | `onSubmit`      | `(values) => Promise<unknown>`: the mutation, rejects on error; the mutation uses `context: NO_ERROR_TOAST` | required                                                |
 | `mode`          | `'create'` · `'update'`                                                                                     | `'create'`                                              |
 | `submitLabel`   | `string`                                                                                                    | `create` → Create, `update` → Update (`common.actions`) |
-| `requireDirty`  | `boolean`: unchanged form closes without a request                                                          | `false`                                                 |
+| `requireDirty`  | `boolean`: submit disabled until something changes                                                          | `false`                                                 |
 | `size`          | `'sm'` · `'md'`                                                                                             | `'sm'`                                                  |
 | `className`     | layout of the fields, set on `<form>`                                                                       | `layout.stack`                                          |
 | `errorMessages` | the page's texts by error code: a string, or a text per field (`{ CONFLICT: { name: '…' } }`)               | —                                                       |
 
 - **Opening** resets the form to `values`: empty for Create, the entity for Edit. Without it the previous row's
   values, errors and touched state would stay, because the form object lives on the page.
-- **Submit** is always enabled: an invalid form shows its errors, an unchanged one (`requireDirty`) just closes. The button sits in the
+- **Submit** is disabled while the form is invalid (and, with `requireDirty`, unchanged). The button sits in the
   dialog footer and is linked with `form="<id>"`, so it stays in place when a long form scrolls and Enter in a field
   still submits.
 - **While the request runs** (`isSubmitting`, i.e. until the `onSubmit` promise settles) the submit button shows a
@@ -255,16 +255,16 @@ Unit tests (jsdom) cover the logic and states:
 The stories cover what needs a real browser (layout widths, errors after leaving a field, the full flows with every
 field):
 
-| Story                  | Checks                                                                                                                                                            |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `CreateDepartment`     | `sm` window; Create enabled while empty; translated "required" after leaving the field and "must not exceed 100 characters"; submit gets the trimmed name; closes |
-| `EditDepartment`       | `update` mode: filled from `values`, Update closes without a request until changed (`requireDirty`), Enter submits                                                |
-| `Submitting`           | spinner, CANCEL and × disabled, Esc ignored, submit button disabled; closes after one submit                                                                      |
-| `SubmitError`          | `errors.FORBIDDEN` text in the dialog, the input is kept, retry possible; reopening resets values and error                                                       |
-| `ConflictOnField`      | `CONFLICT` (`field: 'name'`): `errors.CONFLICT` under the field, focus, no text above the buttons; changing the name clears the error                             |
-| `ConflictWithPageText` | `errorMessages={{ CONFLICT: { name: … } }}`: the page's "Department already exists" under the field instead of `errors.CONFLICT`                                  |
-| `AllFields`            | `md` + `grid`: short fields half, `full` fields the whole row; all five fields; submit gets trimmed text, ids, a `Date`                                           |
-| `Dark`                 | visual                                                                                                                                                            |
+| Story                  | Checks                                                                                                                                                             |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `CreateDepartment`     | `sm` window; Create disabled while empty; translated "required" after leaving the field and "must not exceed 100 characters"; submit gets the trimmed name; closes |
+| `EditDepartment`       | `update` mode: filled from `values`, Update disabled until changed (`requireDirty`), Enter submits                                                                 |
+| `Submitting`           | spinner, CANCEL and × disabled, Esc ignored, submit button disabled; closes after one submit                                                                       |
+| `SubmitError`          | `errors.FORBIDDEN` text in the dialog, the input is kept, retry possible; reopening resets values and error                                                        |
+| `ConflictOnField`      | `CONFLICT` (`field: 'name'`): `errors.CONFLICT` under the field, focus, no text above the buttons; submit disabled until the name changes, then the error is gone  |
+| `ConflictWithPageText` | `errorMessages={{ CONFLICT: { name: … } }}`: the page's "Department already exists" under the field instead of `errors.CONFLICT`                                   |
+| `AllFields`            | `md` + `grid`: short fields half, `full` fields the whole row; all five fields; submit gets trimmed text, ids, a `Date`                                            |
+| `Dark`                 | visual                                                                                                                                                             |
 
 The request is simulated with a promise; the error is a real `CombinedGraphQLErrors` with `extensions.code`.
 

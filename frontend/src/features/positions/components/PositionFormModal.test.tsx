@@ -56,7 +56,7 @@ describe('PositionFormModal', () => {
     const input = screen.getByLabelText('Position');
     expect(screen.getByRole('dialog', { name: 'Edit position' })).toBeInTheDocument();
     expect(input).toHaveValue('Software Engineer');
-    expect(screen.getByRole('button', { name: 'Update' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Update' })).toBeDisabled();
 
     await user.clear(input);
     await user.type(input, 'Senior Engineer');
