@@ -5,13 +5,15 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useRef, type ReactNode } from 'react';
 import { AuthRoute } from '@/features/auth/auth.constants';
 import { useCurrentUser } from '@/features/auth/hooks/useCurrentUser';
+import { ErrorState } from '@/shared/components/error-state/ErrorState';
 import { useToast } from '@/shared/components/toast/ToastProvider';
+import s from './AdminGuard.module.css';
 
 export function AdminGuard({ children }: { children: ReactNode }) {
   const t = useTranslations('layout');
   const router = useRouter();
   const toast = useToast();
-  const { user } = useCurrentUser();
+  const { user, loading, error, refetch } = useCurrentUser();
   const notified = useRef(false);
 
   const isAdmin = user?.role === 'ADMIN';
@@ -24,5 +26,32 @@ export function AdminGuard({ children }: { children: ReactNode }) {
     router.replace(AuthRoute.home);
   }, [isForbidden, router, t, toast]);
 
-  return isAdmin ? children : null;
+  if (isAdmin) return children;
+
+  if (error && !user) {
+    return (
+      <div role="alert">
+        <ErrorState
+          inline
+          title={t('accessCheck.title')}
+          message={t('accessCheck.message')}
+          action={{
+            label: t('accessCheck.retry'),
+            onClick: () => void refetch(),
+            loading,
+          }}
+        />
+      </div>
+    );
+  }
+
+  if (!user && loading) {
+    return (
+      <div className={s.state} role="status" aria-label={t('accessCheck.loading')}>
+        <span className={s.spinner} aria-hidden="true" />
+      </div>
+    );
+  }
+
+  return null;
 }

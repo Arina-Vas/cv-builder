@@ -189,6 +189,12 @@
     "navigation": "Hauptnavigation",
     "breadcrumbs": "Brotkrümelnavigation",
     "notAuthorized": "Sie sind nicht berechtigt, diese Seite aufzurufen",
+    "accessCheck": {
+      "loading": "Zugriff wird geprüft",
+      "title": "Hoppla",
+      "message": "Der Zugriff auf diese Seite konnte nicht geprüft werden. Bitte versuchen Sie es erneut.",
+      "retry": "Erneut versuchen"
+    },
     "profile": "Profil",
     "settings": "Einstellungen",
     "logout": "Abmelden",
@@ -236,6 +242,7 @@
       "confirmPassword": "Passwort bestätigen",
       "submit": "Absenden",
       "goToSignIn": "Zur Anmeldung",
+      "requestNewLink": "Neuen Link anfordern",
       "success": "Ihr Passwort wurde zurückgesetzt. Bitte melden Sie sich an."
     },
     "verifyEmail": {
@@ -252,9 +259,12 @@
     "errors": {
       "invalidCredentials": "Ungültige E-Mail oder ungültiges Passwort",
       "emailTaken": "Ein Konto mit dieser E-Mail existiert bereits",
-      "codeInvalid": "Der Code ist ungültig oder abgelaufen. Fordern Sie einen neuen an",
+      "codeInvalid": "Ungültiger Bestätigungscode",
+      "codeExpired": "Der Bestätigungscode ist abgelaufen",
+      "codeUsed": "Der Bestätigungscode wurde bereits verwendet",
       "alreadyVerified": "Die E-Mail ist bereits bestätigt",
-      "resetLinkInvalid": "Dieser Link zum Zurücksetzen des Passworts ist ungültig oder abgelaufen"
+      "resetLinkInvalid": "Dieser Link zum Zurücksetzen des Passworts ist ungültig",
+      "resetLinkExpired": "Dieser Link zum Zurücksetzen des Passworts ist abgelaufen"
     }
   },
   "users": {

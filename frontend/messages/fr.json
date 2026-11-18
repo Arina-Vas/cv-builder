@@ -197,6 +197,12 @@
     "navigation": "Navigation principale",
     "breadcrumbs": "Fil d'Ariane",
     "notAuthorized": "Vous n'êtes pas autorisé à accéder à cette page",
+    "accessCheck": {
+      "loading": "Vérification de l'accès",
+      "title": "Oups",
+      "message": "Impossible de vérifier votre accès à cette page. Veuillez réessayer.",
+      "retry": "Réessayer"
+    },
     "profile": "Profil",
     "settings": "Paramètres",
     "logout": "Déconnexion",
@@ -244,6 +250,7 @@
       "confirmPassword": "Confirmer le mot de passe",
       "submit": "Valider",
       "goToSignIn": "Aller à la connexion",
+      "requestNewLink": "Demander un nouveau lien",
       "success": "Votre mot de passe a été réinitialisé. Veuillez vous connecter."
     },
     "verifyEmail": {
@@ -260,9 +267,12 @@
     "errors": {
       "invalidCredentials": "E-mail ou mot de passe invalide",
       "emailTaken": "Un compte avec cet e-mail existe déjà",
-      "codeInvalid": "Le code est invalide ou a expiré. Demandez-en un nouveau",
+      "codeInvalid": "Code de vérification invalide",
+      "codeExpired": "Le code de vérification a expiré",
+      "codeUsed": "Le code de vérification a déjà été utilisé",
       "alreadyVerified": "L'e-mail est déjà vérifié",
-      "resetLinkInvalid": "Ce lien de réinitialisation du mot de passe est invalide ou a expiré"
+      "resetLinkInvalid": "Ce lien de réinitialisation du mot de passe est invalide",
+      "resetLinkExpired": "Ce lien de réinitialisation du mot de passe a expiré"
     }
   },
   "users": {

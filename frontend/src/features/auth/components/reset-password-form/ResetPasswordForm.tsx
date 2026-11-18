@@ -12,6 +12,7 @@ import { parseError } from '@/shared/lib/apollo/graphql-errors';
 import { useErrorMessage } from '@/shared/lib/apollo/useErrorMessage';
 import { LOGOUT, RESET_PASSWORD } from '../../api/auth.operations';
 import { AuthRoute } from '../../auth.constants';
+import { resetLinkErrorKey } from '../../lib/authErrors';
 import { useFormFields } from '../../lib/useFormFields';
 import { validateConfirmPassword, validatePassword } from '../../lib/validation';
 import { AuthForm } from '../auth-form/AuthForm';
@@ -52,12 +53,11 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
       });
     } catch (error) {
       const appError = parseError(error);
+      const tokenError = appError.fieldErrors.token;
 
-      // the backend does not say whether the link is invalid or expired, so one text covers both;
+      // the form stays filled in (spec: a failed request keeps the passwords);
       // password field errors are caught by the client validation first, so they go to the toast
-      toast.error(
-        appError.fieldErrors.token ? t('errors.resetLinkInvalid') : errorMessage(appError),
-      );
+      toast.error(tokenError ? t(resetLinkErrorKey(tokenError)) : errorMessage(appError));
       return;
     }
 
@@ -65,6 +65,24 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
     toast.success(t('resetPassword.success'));
     router.replace(AuthRoute.signIn);
   };
+
+  if (!token) {
+    return (
+      <AuthForm
+        title={t('resetPassword.title')}
+        subtitle={t('errors.resetLinkInvalid')}
+        onSubmit={() => router.push(AuthRoute.forgotPassword)}
+        actions={
+          <>
+            <Button type="submit">{t('resetPassword.requestNewLink')}</Button>
+            <Button variant="ghost" onClick={() => router.push(AuthRoute.signIn)}>
+              {t('resetPassword.goToSignIn')}
+            </Button>
+          </>
+        }
+      />
+    );
+  }
 
   return (
     <AuthForm

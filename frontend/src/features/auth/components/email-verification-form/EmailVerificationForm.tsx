@@ -12,6 +12,8 @@ import { parseError } from '@/shared/lib/apollo/graphql-errors';
 import { useErrorMessage } from '@/shared/lib/apollo/useErrorMessage';
 import { RESEND_VERIFICATION_CODE, VERIFY_EMAIL } from '../../api/auth.operations';
 import { AuthRoute, RESEND_CODE_COOLDOWN_SECONDS } from '../../auth.constants';
+import { useCurrentUser } from '../../hooks/useCurrentUser';
+import { codeErrorKey } from '../../lib/authErrors';
 import { validateCode } from '../../lib/validation';
 import { AuthForm } from '../auth-form/AuthForm';
 import { OtpInput } from '../otp-input/OtpInput';
@@ -45,11 +47,18 @@ export function EmailVerificationForm({ codeJustSent = false }: EmailVerificatio
 
   const [code, setCode] = useState('');
   const [serverError, setServerError] = useState<string>();
-  // the code error shows only after a submit, so an empty form does not open red
-  const [submitted, setSubmitted] = useState(false);
+  const [touched, setTouched] = useState(false);
   const [cooldown, setCooldown] = useCooldown(codeJustSent ? RESEND_CODE_COOLDOWN_SECONDS : 0);
+  const { user } = useCurrentUser();
+  const isVerified = Boolean(user?.emailVerifiedAt);
 
-  const codeError = validateCode(code, tValidation);
+  const validationError = validateCode(code, tValidation);
+  const isValid = !validationError;
+  const codeError = serverError ?? (touched ? validationError : undefined);
+
+  useEffect(() => {
+    if (isVerified) router.replace(AuthRoute.home);
+  }, [isVerified, router]);
 
   const handleCodeChange = (value: string) => {
     setCode(value);
@@ -57,8 +66,8 @@ export function EmailVerificationForm({ codeJustSent = false }: EmailVerificatio
   };
 
   const handleSubmit = async () => {
-    setSubmitted(true);
-    if (codeError || loading) return;
+    setTouched(true);
+    if (!isValid || loading) return;
 
     try {
       await verifyEmail({ variables: { input: { code } } });
@@ -68,7 +77,7 @@ export function EmailVerificationForm({ codeJustSent = false }: EmailVerificatio
       const appError = parseError(error);
 
       if (appError.code === 'BAD_USER_INPUT') {
-        setServerError(t('errors.codeInvalid'));
+        setServerError(t(codeErrorKey(appError.fieldErrors.code ?? appError.message)));
       } else if (appError.code === 'CONFLICT') {
         toast.info(t('errors.alreadyVerified'));
         router.replace(AuthRoute.home);
@@ -84,7 +93,7 @@ export function EmailVerificationForm({ codeJustSent = false }: EmailVerificatio
     try {
       await resendCode();
       handleCodeChange('');
-      setSubmitted(false);
+      setTouched(false);
       setCooldown(RESEND_CODE_COOLDOWN_SECONDS);
       toast.success(t('verifyEmail.codeSent'));
     } catch (error) {
@@ -99,6 +108,8 @@ export function EmailVerificationForm({ codeJustSent = false }: EmailVerificatio
     }
   };
 
+  if (isVerified) return null;
+
   return (
     <AuthForm
       title={t('verifyEmail.title')}
@@ -107,7 +118,7 @@ export function EmailVerificationForm({ codeJustSent = false }: EmailVerificatio
       onSubmit={handleSubmit}
       actions={
         <>
-          <Button type="submit" disabled={Boolean(codeError)} loading={loading}>
+          <Button type="submit" disabled={!isValid} loading={loading}>
             {t('verifyEmail.confirm')}
           </Button>
           <Button variant="text" disabled={cooldown > 0} loading={resending} onClick={handleResend}>
@@ -122,7 +133,8 @@ export function EmailVerificationForm({ codeJustSent = false }: EmailVerificatio
       <OtpInput
         value={code}
         onChange={handleCodeChange}
-        error={serverError ?? (submitted ? codeError : undefined)}
+        onBlur={() => setTouched(true)}
+        error={codeError}
         disabled={loading}
       />
     </AuthForm>

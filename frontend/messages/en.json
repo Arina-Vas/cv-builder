@@ -189,6 +189,12 @@
     "navigation": "Main navigation",
     "breadcrumbs": "Breadcrumb",
     "notAuthorized": "You are not authorized to access this page",
+    "accessCheck": {
+      "loading": "Checking access",
+      "title": "Oops",
+      "message": "We couldn't check your access to this page. Please try again.",
+      "retry": "Retry"
+    },
     "profile": "Profile",
     "settings": "Settings",
     "logout": "Logout",
@@ -232,6 +238,7 @@
       "confirmPassword": "Confirm password",
       "submit": "Submit",
       "goToSignIn": "Go to sign in",
+      "requestNewLink": "Request a new link",
       "success": "Your password has been reset. Please sign in."
     },
     "verifyEmail": {
@@ -248,9 +255,12 @@
     "errors": {
       "invalidCredentials": "Invalid email or password",
       "emailTaken": "An account with this email already exists",
-      "codeInvalid": "The code is invalid or has expired. Request a new one",
+      "codeInvalid": "Invalid verification code",
+      "codeExpired": "Verification code has expired",
+      "codeUsed": "Verification code has already been used",
       "alreadyVerified": "Email is already verified",
-      "resetLinkInvalid": "This password reset link is invalid or has expired"
+      "resetLinkInvalid": "This password reset link is invalid",
+      "resetLinkExpired": "This password reset link has expired"
     }
   },
   "users": {
