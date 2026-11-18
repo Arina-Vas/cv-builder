@@ -40,6 +40,7 @@ describe('AdminGuard', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(
       "We couldn't check your access to this page. Please try again.",
     );
+    expect(screen.getByRole('heading', { level: 1, name: 'Oops' })).toBeInTheDocument();
     expect(screen.queryByText('Admin page')).not.toBeInTheDocument();
     expect(mockRouter.replace).not.toHaveBeenCalled();
 

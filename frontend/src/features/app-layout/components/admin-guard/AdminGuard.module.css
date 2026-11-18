@@ -1,23 +1,9 @@
-/* Loading and error states while the role is checked: centred in the content area */
+/* Loading state while the role is checked: centred in the content area */
 .state {
   display: flex;
   min-height: 240px;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--space-4);
-  text-align: center;
-}
-
-.title {
-  margin: 0;
-  font-size: var(--type-h6-size);
-  font-weight: var(--font-weight-medium);
-}
-
-.message {
-  margin: 0;
-  color: var(--text-secondary);
 }
 
 /* Same look as the Button spinner, a bit larger */
