@@ -2,7 +2,15 @@
 
 import type { ToastApi, ToastItem, ToastOptions } from './Toast.types';
 import { Toast as RadixToast } from 'radix-ui';
-import { createContext, useState, useContext, useMemo, useRef, type ReactNode } from 'react';
+import {
+  createContext,
+  useState,
+  useContext,
+  useMemo,
+  useRef,
+  useEffect,
+  type ReactNode,
+} from 'react';
 import { Toast } from './Toast';
 import s from './Toast.module.css';
 import { useTranslations } from 'next-intl';
@@ -22,11 +30,20 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
   const [items, setItems] = useState<ToastItem[]>([]);
   const nextId = useRef(0);
 
+  const exitTimers = useRef(new Set<ReturnType<typeof setTimeout>>());
+
+  useEffect(() => {
+    const timers = exitTimers.current;
+    return () => timers.forEach(clearTimeout);
+  }, []);
+
   const close = (id: number) => {
     setItems((prev) => prev.map((item) => (item.id === id ? { ...item, open: false } : item)));
-    setTimeout(() => {
+    const timer = setTimeout(() => {
+      exitTimers.current.delete(timer);
       setItems((prev) => prev.filter((item) => item.id !== id));
     }, EXIT_ANIMATION_MS);
+    exitTimers.current.add(timer);
   };
 
   const api = useMemo<ToastApi>(() => {
