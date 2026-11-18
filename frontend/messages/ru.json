@@ -392,10 +392,10 @@
     "title": "Текущие языки",
     "addButton": "Добавить язык",
     "removeButton": "Удалить языки",
-    "removeCount": "Удалить ({count})",
+    "confirmRemove": "Удалить",
     "remove": {
       "title": "Удалить языки",
-      "message": "Вы уверены, что хотите удалить {count, plural, one {# язык} few {# языка} many {# языков} other {# языка}}?"
+      "message": "Вы уверены, что хотите удалить <b>{count, plural, one {# язык} few {# языка} many {# языков} other {# языка}}</b>?"
     },
     "empty": "Языки не добавлены",
     "emptyProfile": "Языки ещё не добавлены",
@@ -445,10 +445,10 @@
   "userSkill": {
     "addButton": "Добавить навык",
     "removeButton": "Удалить навыки",
-    "removeCount": "Удалить ({count})",
+    "confirmRemove": "Удалить",
     "remove": {
       "title": "Удалить навыки",
-      "message": "Вы уверены, что хотите удалить {count, plural, one {# навык} few {# навыка} many {# навыков} other {# навыка}}?"
+      "message": "Вы уверены, что хотите удалить <b>{count, plural, one {# навык} few {# навыка} many {# навыков} other {# навыка}}</b>?"
     },
     "empty": "Навыки не добавлены",
     "emptyProfile": "Навыки ещё не добавлены",

@@ -399,10 +399,10 @@
     "title": "Langues actuelles",
     "addButton": "Ajouter une langue",
     "removeButton": "Retirer des langues",
-    "removeCount": "Retirer ({count})",
+    "confirmRemove": "Retirer",
     "remove": {
       "title": "Retirer des langues",
-      "message": "Voulez-vous vraiment retirer {count, plural, one {# langue} other {# langues}} ?"
+      "message": "Voulez-vous vraiment retirer <b>{count, plural, one {# langue} other {# langues}}</b> ?"
     },
     "empty": "Aucune langue ajoutée",
     "emptyProfile": "Aucune langue ajoutée pour le moment",
@@ -452,10 +452,10 @@
   "userSkill": {
     "addButton": "Ajouter une compétence",
     "removeButton": "Retirer des compétences",
-    "removeCount": "Retirer ({count})",
+    "confirmRemove": "Retirer",
     "remove": {
       "title": "Retirer des compétences",
-      "message": "Voulez-vous vraiment retirer {count, plural, one {# compétence} other {# compétences}} ?"
+      "message": "Voulez-vous vraiment retirer <b>{count, plural, one {# compétence} other {# compétences}}</b> ?"
     },
     "empty": "Aucune compétence ajoutée",
     "emptyProfile": "Aucune compétence ajoutée pour le moment",

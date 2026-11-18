@@ -6,7 +6,7 @@ import { SelectionActions } from './SelectionActions';
 const labels = {
   addLabel: 'Add thing',
   removeLabel: 'Remove things',
-  removeCountLabel: 'Remove (0)',
+  confirmRemoveLabel: 'Remove',
   cancelLabel: 'Cancel',
 };
 
@@ -63,7 +63,6 @@ describe('SelectionActions', () => {
         selectedCount={2}
         canRemove
         {...labels}
-        removeCountLabel="Remove (2)"
         onAdd={vi.fn()}
         onStartRemove={vi.fn()}
         onCancel={onCancel}
@@ -73,14 +72,14 @@ describe('SelectionActions', () => {
 
     expect(screen.queryByRole('button', { name: 'Add thing' })).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: 'Remove (2)' }));
+    await user.click(screen.getByRole('button', { name: 'Remove 2' }));
     expect(onRemove).toHaveBeenCalled();
 
     await user.click(screen.getByRole('button', { name: 'Cancel' }));
     expect(onCancel).toHaveBeenCalled();
   });
 
-  it('disables Remove(n) when nothing is selected', () => {
+  it('disables Remove when nothing is selected and shows no count badge', () => {
     renderWithProviders(
       <SelectionActions
         canEdit
@@ -95,6 +94,7 @@ describe('SelectionActions', () => {
       />,
     );
 
-    expect(screen.getByRole('button', { name: 'Remove (0)' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Remove' })).toBeDisabled();
+    expect(screen.queryByText('0')).not.toBeInTheDocument();
   });
 });

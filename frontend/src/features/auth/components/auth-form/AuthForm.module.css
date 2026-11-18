@@ -12,7 +12,7 @@
 }
 
 .title {
-  margin: 0 0 var(--space-6);
+  margin: 0 0 var(--auth-title-gap);
   font-size: var(--type-h4-size);
   font-weight: var(--type-h4-weight);
   line-height: var(--type-h4-lh);
@@ -20,7 +20,7 @@
 }
 
 .subtitle {
-  margin: 0 0 var(--space-6);
+  margin: 0 0 var(--auth-subtitle-gap);
   font-size: var(--type-body1-size);
   line-height: var(--type-body1-lh);
   letter-spacing: var(--type-body1-ls);
@@ -39,4 +39,20 @@
   align-items: center;
   gap: var(--space-2);
   margin-top: var(--auth-actions-offset);
+}
+
+/* the primary button of every auth page; LATER, FORGOT PASSWORD, … keep their own width */
+.actions > button[type='submit'] {
+  width: var(--auth-submit-width);
+}
+
+/* Email Verification: CONFIRM at the button's own 160 */
+.form[data-submit='regular'] > .actions > button[type='submit'] {
+  width: var(--auth-submit-width-regular);
+}
+
+/* Reset Password: a narrower SUBMIT; min-width too, the button's own min-width is 160 */
+.form[data-submit='narrow'] > .actions > button[type='submit'] {
+  width: var(--auth-submit-width-narrow);
+  min-width: var(--auth-submit-width-narrow);
 }

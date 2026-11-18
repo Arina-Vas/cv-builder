@@ -36,10 +36,10 @@
 .email,
 .memberSince {
   margin: 0;
-  font-size: var(--type-body2-size);
-  font-weight: var(--type-body2-weight);
-  line-height: var(--type-body2-lh);
-  letter-spacing: var(--type-body2-ls);
+  font-size: var(--type-body1-size);
+  font-weight: var(--type-body1-weight);
+  line-height: var(--type-body1-lh);
+  letter-spacing: var(--type-body1-ls);
 }
 
 .email {
@@ -52,6 +52,8 @@
 
 .form {
   width: 100%;
+  /* the shared form grid has 12 between the columns (modals); the profile page has 32 */
+  --form-column-gap: var(--space-8);
 }
 
 /* UPDATE on the right under the fields, a failed save message to its left */
@@ -59,7 +61,7 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: var(--space-4);
+  gap: var(--space-6);
 }
 
 .submitError {

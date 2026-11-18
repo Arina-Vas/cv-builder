@@ -29,7 +29,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
   // a failed logout is ignored on purpose (the user leaves anyway), so no toast either
   const [logout] = useMutation(LOGOUT, { context: NO_ERROR_TOAST });
 
-  const { values, isValid, register } = useFormFields(
+  const { values, validateAll, register } = useFormFields(
     { password: '', confirmPassword: '' },
     ({ password, confirmPassword }, tValidation) => ({
       password: validatePassword(password, tValidation, tValidation('password.newRequired')),
@@ -38,7 +38,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
   );
 
   const handleSubmit = async () => {
-    if (!isValid || loading) return;
+    if (loading || !validateAll()) return;
 
     try {
       await resetPassword({
@@ -70,10 +70,11 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
     <AuthForm
       title={t('resetPassword.title')}
       subtitle={t('resetPassword.subtitle')}
+      submitWidth="narrow"
       onSubmit={handleSubmit}
       actions={
         <>
-          <Button type="submit" disabled={!isValid} loading={loading}>
+          <Button type="submit" loading={loading}>
             {t('resetPassword.submit')}
           </Button>
           <Button variant="ghost" onClick={() => router.push(AuthRoute.signIn)}>

@@ -103,9 +103,10 @@ export const FormModal = <TInput extends FieldValues, TOutput extends FieldValue
         type={'submit'}
         form={formId}
         loading={isSubmitting}
+        // wiki: CREATE / ADD disabled until the form is valid; with requireDirty also until something changes
         disabled={!isValid || (requireDirty && !isDirty)}
       >
-        {submitLabel ?? (mode === 'update' ? t('save') : t('create'))}
+        {submitLabel ?? (mode === 'update' ? t('update') : t('create'))}
       </Button>
     </>
   );
