@@ -202,7 +202,8 @@ Lists without pagination extend `ListArgs` instead of `PaginatedListArgs` and re
 | `positions`                                                                | `name`           | `name`                                            | name                         | yes       |
 | `skills`                                                                   | `name`           | `name`                                            | name                         | yes       |
 | `languages`                                                                | `name`           | `name`, `iso`                                     | name                         | yes       |
-| `cvs`                                                                      | `name`           | `name`                                            | name                         | yes       |
+| `cvs`                                                                      | `name`           | `name`                                            | name; Admin: name, email     | yes       |
+| `userCvs` (CVs of one user, User CVs tab)                                  | `name`           | `name`                                            | name                         | yes       |
 | `projects`                                                                 | `name`           | `name`, `startDate`, `endDate`                    | name, domain                 | no        |
 | `cvProjects`                                                               | `name`           | `name`, `startDate`, `endDate`                    | name, domain                 | no        |
 | `userSkills`, CV skills                                                    | —                | category name, then skill name                    | —                            | no        |
@@ -279,6 +280,11 @@ avoid a column-key → enum map in every table.
   - An id of another user's assignment rejects the whole request with `FORBIDDEN` and nothing is removed: the UI
     never sends one, so it means a tampered request (wiki: "Assignment belongs to the selected user").
 - Mutations take one argument named `input` of an `@InputType`, except deletes, which take ids directly.
+  A delete of an owned entity also takes the owner id, which scopes it like `userId` in `deleteUserSkills`:
+  `deleteCv(id: ID!, userId: ID!): ID!`.
+- Owned entities (`UserSkill`, `UserLanguage`, `Cv`) carry the owner's `userId` in every create / update input.
+  In an update it is not a changeable field: it is the current owner, checked against the record, and the owner
+  never changes (`UpdateCvInput extends CreateCvInput` keeps `userId` for that reason).
 - `update*` inputs contain `id` and only the fields the user can change.
 - `update*` is a full update: `Update<Entity>Input extends Create<Entity>Input` and adds `id`, so the form sends
   every field. A list of ids (`technologyIds`) replaces the whole set; an omitted list defaults to `[]` and
@@ -534,6 +540,9 @@ and fails with `BAD_USER_INPUT` (`field: file`) otherwise.
   do them, using the current user from the request, never a user id sent by the client as proof of ownership:
   the resolver passes `@CurrentUser()` to the service, which throws `forbidden()` when
   `canManageUser(currentUser, userId)` is false, before checking that the user exists.
+- An operation that gets only a CV id reads the owner from the CV: `CvAccessService.getAccessibleCv(cvId,
+currentUser)` (`backend/src/cvs/cv-access.service.ts`, exported by `CvModule`) returns the CV or throws
+  `NOT_FOUND` / `FORBIDDEN`. CV skills, CV projects, preview and PDF reuse it instead of their own checks.
 - Catalogs (departments, positions, skills, languages, projects) are readable by every authenticated user, because
   employees pick values from them in forms; only changes are Admin-only.
 - Who may do what in each feature is described in [permissions.md](permissions.md).

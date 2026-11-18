@@ -8,6 +8,17 @@ input ChangePasswordInput {
   newPassword: String!
 }
 
+input CreateCvInput {
+  description: String!
+  education: String!
+  name: String!
+
+  """
+  CV owner. An Employee may pass only their own id. In updateCv it is checked against the current owner and never changes it
+  """
+  userId: ID!
+}
+
 input CreateDepartmentInput {
   name: String!
 }
@@ -56,6 +67,29 @@ input CreateUserSkillInput {
   mastery: Mastery!
   skillId: ID!
   userId: ID!
+}
+
+type Cv {
+  description: String!
+  education: String!
+  id: ID!
+  name: String!
+  user: User!
+}
+
+type CvPage {
+  items: [Cv!]!
+
+  """Current page, 1-based"""
+  page: Int!
+  pageSize: Int!
+
+  """Items matching the search, not the page size"""
+  total: Int!
+}
+
+enum CvSortField {
+  name
 }
 
 """Calendar date without time and time zone, format YYYY-MM-DD"""
@@ -126,6 +160,11 @@ type Mutation {
   Changes the password of the signed-in user. Fails with BAD_USER_INPUT (field "currentPassword") when the current password is incorrect. Signs out every other session of the user; the current session stays signed in.
   """
   changePassword(input: ChangePasswordInput!): Boolean!
+
+  """
+  Creates a CV for `input.userId`: an Employee only for themselves, an Admin for any user. Fails with FORBIDDEN for another user and NOT_FOUND if the user does not exist
+  """
+  createCv(input: CreateCvInput!): Cv!
   createDepartment(input: CreateDepartmentInput!): Department!
   createLanguage(input: CreateLanguageInput!): Language!
   createPosition(input: CreatePositionInput!): Position!
@@ -146,6 +185,11 @@ type Mutation {
   Own profile or Admin. Fails with BAD_USER_INPUT (skillId) if the skill does not exist and with CONFLICT (skillId) if it is already assigned
   """
   createUserSkill(input: CreateUserSkillInput!): UserSkill!
+
+  """
+  Own CV or Admin; `userId` is the CV owner, used only to check access. Returns the deleted id; the CV's skills and projects are deleted with it. Fails with FORBIDDEN for another user, NOT_FOUND if the user does not exist or the CV does not belong to them
+  """
+  deleteCv(id: ID!, userId: ID!): ID!
 
   """Fails with ENTITY_IN_USE if the department is assigned to users"""
   deleteDepartment(id: ID!): ID!
@@ -196,6 +240,11 @@ type Mutation {
   resetPassword(input: ResetPasswordInput!): Boolean!
   signIn(input: SignInInput!): User!
   signUp(input: SignUpInput!): User!
+
+  """
+  Own CV or Admin. Changes name, education and description; `input.userId` is the current owner, used only to check access, the owner never changes. Fails with FORBIDDEN for another user, NOT_FOUND if the user does not exist or the CV does not belong to them
+  """
+  updateCv(input: UpdateCvInput!): Cv!
   updateDepartment(input: UpdateDepartmentInput!): Department!
   updateLanguage(input: UpdateLanguageInput!): Language!
   updatePosition(input: UpdatePositionInput!): Position!
@@ -295,6 +344,25 @@ type Query {
   """
   availableUserSkills(userId: ID!): [Skill!]!
 
+  """
+  Own CV or Admin. Fails with NOT_FOUND if the CV does not exist and FORBIDDEN for another user's CV
+  """
+  cv(id: ID!): Cv!
+
+  """
+  CVs page: own CVs for an Employee, all CVs for an Admin. Search is case-insensitive: by CV name, for an Admin also by the owner email
+  """
+  cvs(
+    """1-based page number"""
+    page: Int! = 1
+
+    """One of 10, 20, 50"""
+    pageSize: Int! = 10
+    search: String
+    sortBy: CvSortField! = name
+    sortOrder: SortOrder! = ASC
+  ): CvPage!
+
   """All departments for selects, sorted by name"""
   departmentOptions: [Department!]!
   departments(
@@ -350,6 +418,21 @@ type Query {
 
   """Fails with NOT_FOUND if the user does not exist"""
   user(id: ID!): User!
+
+  """
+  CVs of one user (User CVs tab), own profile or Admin. Search is case-insensitive, by CV name only. Fails with FORBIDDEN for another user and NOT_FOUND if the user does not exist
+  """
+  userCvs(
+    """1-based page number"""
+    page: Int! = 1
+
+    """One of 10, 20, 50"""
+    pageSize: Int! = 10
+    search: String
+    sortBy: CvSortField! = name
+    sortOrder: SortOrder! = ASC
+    userId: ID!
+  ): CvPage!
 
   """
   Languages of the user, readable by any authenticated user; sorted by language name. Fails with NOT_FOUND if the user does not exist
@@ -427,6 +510,18 @@ enum SkillSortField {
 enum SortOrder {
   ASC
   DESC
+}
+
+input UpdateCvInput {
+  description: String!
+  education: String!
+  id: ID!
+  name: String!
+
+  """
+  CV owner. An Employee may pass only their own id. In updateCv it is checked against the current owner and never changes it
+  """
+  userId: ID!
 }
 
 input UpdateDepartmentInput {

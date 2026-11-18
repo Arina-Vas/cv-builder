@@ -123,9 +123,21 @@ other users' skills and languages through the User Details tabs.
 | Update, delete a CV and its skills / projects  | own CVs only   | any CV           |
 | CVs tab of a selected employee (User Details)  | ❌             | ✅               |
 
-In the User CVs tab every operation is scoped to the selected employee; the backend rejects a CV of another employee
-even for an Admin (wiki: "The Admin must not be able to use this page to create or modify a CV for another employee
-by changing a client-supplied user ID").
+The CV owner is never taken on trust from the client (audit question 3; wiki: "The backend must determine the
+ownership of the CV using the authenticated user rather than trusting an employee ID supplied by the frontend"):
+
+- `createCv`, `updateCv` and `deleteCv` take the owner's `userId`, like the user skills mutations. An Employee may
+  pass only their own id, otherwise `FORBIDDEN`; an Admin may pass any existing user.
+- In `updateCv` and `deleteCv` the `userId` only scopes the operation: a CV that does not belong to that user is
+  `NOT_FOUND`, for an Admin as well. The owner of a CV never changes.
+- In the User CVs tab every operation is therefore scoped to the selected employee (wiki: "The Admin must not be
+  able to use this page to create or modify a CV for another employee by changing a client-supplied user ID").
+- The CV list has two queries: `cvs` for the CVs page (own CVs for an Employee, all for an Admin) and
+  `userCvs(userId)` for the User CVs tab. The tab is Admin-only in the UI; the API allows "own or Admin", like
+  `userSkills`.
+- Operations that get only a CV id (`cv`, and later CV skills, CV projects, preview and PDF) check access with
+  `CvAccessService.getAccessibleCv(cvId, currentUser)` (`backend/src/cvs/cv-access.service.ts`): `NOT_FOUND` if
+  the CV does not exist, `FORBIDDEN` if an Employee asks for another user's CV.
 
 ### Authentication and settings
 
@@ -253,3 +265,33 @@ The assignment ids must belong to that `userId` too: `updateUser*` with another 
 | `createProject` | Admin  |
 | `updateProject` | Admin  |
 | `deleteProject` | Admin  |
+
+### CVs
+
+| Operation  | Access                                      |
+| ---------- | ------------------------------------------- |
+| `cvs`      | All: own CVs for an Employee, all for Admin |
+| `userCvs`  | Own or Admin \*                             |
+| `cv`       | Own or Admin †                              |
+| `createCv` | Own or Admin \*                             |
+| `updateCv` | Own or Admin \*                             |
+| `deleteCv` | Own or Admin \*                             |
+
+\* The owner is the `userId` argument or input field, checked with `canManageUser` before the user is looked up,
+as for user skills. In `updateCv` and `deleteCv` it must also be the CV's current owner.
+† The owner is read from the CV (`CvAccessService`); the request carries only the CV id.
+
+Search on `cvs` matches the CV name; for an Admin it also matches the owner's email (wiki CVs page: "Admin searches
+CVs by Name, Employee email"). `userCvs` searches by CV name only (wiki User CVs page). Both are case-insensitive.
+
+Errors thrown by the service:
+
+| Operation                                     | Case                                       | Code        | Message                                            |
+| --------------------------------------------- | ------------------------------------------ | ----------- | -------------------------------------------------- |
+| `userCvs`, `createCv`, `updateCv`, `deleteCv` | an Employee sends another user's id        | `FORBIDDEN` | `You are not authorized to perform this action`    |
+| `userCvs`, `createCv`, `updateCv`, `deleteCv` | the user does not exist                    | `NOT_FOUND` | `User not found`                                   |
+| `cv`                                          | the CV does not exist                      | `NOT_FOUND` | `CV not found`                                     |
+| `cv`                                          | an Employee asks for another user's CV     | `FORBIDDEN` | `You are not authorized to perform this action`    |
+| `updateCv`, `deleteCv`                        | the CV does not exist or has another owner | `NOT_FOUND` | `Not found` (Prisma `P2025`, mapped by the filter) |
+
+Deleting a CV removes its skills and projects (DB cascade, see [data-model.md](../data-model.md)).
