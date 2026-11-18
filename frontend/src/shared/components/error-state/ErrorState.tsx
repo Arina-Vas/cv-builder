@@ -15,13 +15,14 @@ interface ErrorStateProps {
   title: string;
   message: string;
   action?: ErrorStateAction;
+  inline?: boolean;
 }
 
-export function ErrorState({ title, message, action }: ErrorStateProps) {
+export function ErrorState({ title, message, action, inline = false }: ErrorStateProps) {
   const titleId = useId();
 
   return (
-    <section className={s.root} aria-labelledby={titleId}>
+    <section className={inline ? `${s.root} ${s.inline}` : s.root} aria-labelledby={titleId}>
       <div className={s.content}>
         <ErrorMonitorIcon className={s.illustration} />
         <h1 id={titleId} className={s.title}>

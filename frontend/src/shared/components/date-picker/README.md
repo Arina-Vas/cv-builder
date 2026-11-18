@@ -10,7 +10,7 @@ Live examples of every state, Light and Dark: Storybook → **Shared/DatePicker*
 
 The default placeholder and the ← / → names come from `common.datePicker` in `messages/en.json`, so
 the picker needs `NextIntlClientProvider` above it: the root layout mounts it in the app,
-`.storybook/preview.tsx` in Storybook. Month names, week days and the `dd.MM.yyyy` format are not
+`.storybook/preview.tsx` in Storybook. Month names, week days and the `MM/dd/yyyy` format are not
 translated yet: `date-fns` and `react-datepicker` run without a locale (English) until a second
 language is added.
 
@@ -63,7 +63,8 @@ const [endDate, setEndDate] = useState<Date | null>(null);
 - ⚠️ **Controlled only**: there is no `defaultValue`, the parent always owns the date. Empty is `null`, not `undefined`.
 - `onChange` is called only when a **day** is clicked; it gets a local `Date` at 00:00. The popover closes after it.
   There is no "clear" button yet, so `onChange` is never called with `null` by the component itself.
-- The trigger shows the value as `dd.MM.yyyy`. The format is fixed in the component.
+- The trigger shows the value as `MM/dd/yyyy` (Figma), via `formatDate` from `@/shared/lib/date/format-date`,
+  the same helper the tables use, so a date looks the same everywhere in the app.
 - Disabled days (`minDate` / `maxDate` / `excludeDates`) are greyed out and struck through, they can't be clicked.
 - `onOpenChange` is called on every open and close, including the close after a day is picked; `onBlur` on
   every close.
@@ -79,7 +80,7 @@ is chosen (`filled`):
 | --------------- | ------ | -------------- |
 | closed, empty   | inside | —              |
 | open, empty     | raised | `placeholder`  |
-| a date selected | raised | `dd.MM.yyyy`   |
+| a date selected | raised | `MM/dd/yyyy`   |
 
 ## Calendar views
 
@@ -106,7 +107,10 @@ any timezone ahead of UTC the day moves back by one (`2025-09-04T00:00` in Minsk
 ```tsx
 format(date, 'yyyy-MM-dd'); // send
 parseISO('2025-09-04'); // receive → local midnight
+formatDate('2025-09-04'); // show → '09/04/2025' (also takes a Date)
 ```
+
+`formatDate` is for display only; the API always gets `yyyy-MM-dd`.
 
 ## Usage with react-hook-form
 

@@ -5,6 +5,7 @@ import { NestFactory } from '@nestjs/core';
 import { GraphQLSchemaBuilderModule, GraphQLSchemaFactory } from '@nestjs/graphql';
 import { buildSchema, type GraphQLSchema, lexicographicSortSchema, printSchema } from 'graphql';
 import { AuthResolver } from '@/auth/auth.resolver';
+import { ChangePasswordResolver } from '@/auth/change-password/change-password.resolver';
 import { EmailVerificationResolver } from '@/auth/email-verification/email-verification.resolver';
 import { PasswordResetResolver } from '@/auth/password-reset/password-reset.resolver';
 import { DepartmentResolver } from '@/departments/department.resolver';
@@ -26,6 +27,7 @@ const RESOLVERS = [
   AuthResolver,
   EmailVerificationResolver,
   PasswordResetResolver,
+  ChangePasswordResolver,
   HealthResolver,
   UsersResolver,
   DepartmentResolver,

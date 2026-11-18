@@ -8,6 +8,7 @@ import {
   UPDATE_USER,
   USER_FORM_OPTIONS,
   USER_MUTATION_OPTIONS,
+  USERS,
 } from '@/features/users/api/users.operations';
 import {
   USER_ROLES,
@@ -21,6 +22,7 @@ import { Input } from '@/shared/components/inputs';
 import { Select } from '@/shared/components/select/Select';
 import type { SelectOption } from '@/shared/components/select/Select.types';
 import { useAppForm } from '@/shared/lib/form';
+import { useRefetchOnError } from '@/shared/lib/apollo/useRefetchOnError';
 
 type Props = {
   open: boolean;
@@ -55,8 +57,8 @@ export const UserFormModal = ({ open, onOpenChange, user, isSelf = false }: Prop
   const { data: optionsData, loading: optionsLoading } = useQuery(USER_FORM_OPTIONS, {
     skip: !open,
   });
-  const departments = useMemo(() => toOptions(optionsData?.departments.items), [optionsData]);
-  const positions = useMemo(() => toOptions(optionsData?.positions.items), [optionsData]);
+  const departments = useMemo(() => toOptions(optionsData?.departmentOptions), [optionsData]);
+  const positions = useMemo(() => toOptions(optionsData?.positionOptions), [optionsData]);
   const roles: SelectOption[] = USER_ROLES.map((role) => ({
     value: role,
     label: t(`roles.${role}`),
@@ -65,9 +67,11 @@ export const UserFormModal = ({ open, onOpenChange, user, isSelf = false }: Prop
   const [createUser] = useMutation(CREATE_USER, USER_MUTATION_OPTIONS);
   const [updateUser] = useMutation(UPDATE_USER, USER_MUTATION_OPTIONS);
 
+  const withRefetch = useRefetchOnError([USERS], ['NOT_FOUND']);
+
   const handleSubmit = ({ email, password, ...editable }: UserFormValues) =>
     user
-      ? updateUser({ variables: { input: { id: user.id, ...editable } } })
+      ? withRefetch(() => updateUser({ variables: { input: { id: user.id, ...editable } } }))
       : createUser({ variables: { input: { email, password, ...editable } } });
 
   const values: DefaultValues<UserFormInput> = user
@@ -96,6 +100,10 @@ export const UserFormModal = ({ open, onOpenChange, user, isSelf = false }: Prop
       requireDirty={isUpdate}
       size="md"
       className={layout.grid}
+      errorMessages={{
+        CONFLICT: t('errors.emailTaken'),
+        OPERATION_NOT_ALLOWED: t('errors.lastAdminDemote'),
+      }}
     >
       <Input
         label={t('fields.email')}

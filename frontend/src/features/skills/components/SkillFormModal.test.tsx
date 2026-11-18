@@ -52,7 +52,7 @@ describe('SkillFormModal', () => {
 
     expect(screen.getByRole('dialog', { name: 'Create skill' })).toBeInTheDocument();
 
-    await user.type(screen.getByLabelText('Name'), ' Cypress ');
+    await user.type(screen.getByLabelText('Skill name'), ' Cypress ');
     await choose(user, 'Category', 'Testing');
     await user.click(screen.getByRole('button', { name: 'Create' }));
 
@@ -95,7 +95,7 @@ describe('SkillFormModal', () => {
           },
           result: {
             errors: [
-              new GraphQLError('Skill already exists', {
+              new GraphQLError('backend text', {
                 extensions: { code: 'CONFLICT', field: 'name' },
               }),
             ],
@@ -104,13 +104,13 @@ describe('SkillFormModal', () => {
       ],
     });
 
-    await user.type(screen.getByLabelText('Name'), 'React');
+    await user.type(screen.getByLabelText('Skill name'), 'React');
     await choose(user, 'Category', 'Frontend');
     await user.click(screen.getByRole('button', { name: 'Create' }));
 
-    const name = screen.getByLabelText('Name');
+    const name = screen.getByLabelText('Skill name');
     await expect.poll(() => name).toHaveAttribute('aria-invalid', 'true');
-    expect(name).toHaveAccessibleDescription('This value is already taken');
+    expect(name).toHaveAccessibleDescription('Skill already exists');
     expect(onOpenChange).not.toHaveBeenCalled();
   });
 
@@ -133,13 +133,13 @@ describe('SkillFormModal', () => {
     );
 
     expect(screen.getByRole('dialog', { name: 'Edit skill' })).toBeInTheDocument();
-    expect(screen.getByLabelText('Name')).toHaveValue('React');
+    expect(screen.getByLabelText('Skill name')).toHaveValue('React');
     const trigger = screen.getByRole('combobox', { name: 'Category' });
     await expect.poll(() => trigger).toHaveTextContent('Frontend');
-    expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Update' })).toBeDisabled();
 
     await choose(user, 'Category', 'Testing');
-    await user.click(screen.getByRole('button', { name: 'Save' }));
+    await user.click(screen.getByRole('button', { name: 'Update' }));
 
     await expect.poll(() => onOpenChange).toHaveBeenCalledWith(false);
   });

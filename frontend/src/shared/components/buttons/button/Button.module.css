@@ -44,7 +44,7 @@
 .primary {
   background: var(--primary);
   border-color: var(--primary);
-  color: var(--on-primary);
+  color: var(--primary-text);
 }
 
 .text {
@@ -70,11 +70,10 @@
 .text:is(:disabled, [aria-disabled='true']) {
   background: var(--primary-disabled-bg);
   border-color: var(--primary-disabled-bg);
-  color: var(--on-primary);
+  color: var(--button-disabled-text);
 }
 
 .secondary {
-  background: var(--button-secondary-bg);
   border-color: var(--button-secondary-border);
   color: var(--button-secondary-text);
 }
@@ -94,11 +93,11 @@
 .secondary:is(:disabled, [aria-disabled='true']) {
   background: var(--button-secondary-disabled-bg);
   border-color: var(--button-secondary-disabled-bg);
-  color: var(--on-primary);
+  color: var(--button-disabled-text);
 }
 
 .ghost {
-  color: var(--text);
+  color: var(--button-ghost-text);
 }
 
 .ghost:hover:not(:disabled, [aria-disabled='true']) {
@@ -113,7 +112,7 @@
 
 .ghost:is(:disabled, [aria-disabled='true']) {
   background: var(--button-secondary-disabled-bg);
-  color: var(--on-primary);
+  color: var(--button-disabled-text);
 }
 
 /* Content: an optional icon before the text, centred with it ("+ CREATE …", "🗑 REMOVE …") */
@@ -129,9 +128,9 @@
   height: var(--icon-size);
 }
 
-/* Loading */
+/* Loading: the text is invisible but stays in the accessibility tree, so the button keeps its name */
 .loading .label {
-  visibility: hidden;
+  opacity: 0;
 }
 
 .spinner {

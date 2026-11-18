@@ -1,5 +1,5 @@
 import { act, fireEvent, screen, waitFor } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { renderWithProviders } from '@/test/render';
 import type { ToastApi } from './Toast.types';
 import { useToast } from './ToastProvider';
@@ -67,6 +67,25 @@ describe('ToastProvider', () => {
     show((toast) => toast.error('Could not delete the skill'));
 
     expect(screen.getByText('Could not delete the skill')).toBeInTheDocument();
+  });
+
+  describe('exit timers', () => {
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    // A timer left after unmount fires once Vitest has torn jsdom down: "window is not defined" in CI
+    it('leaves no pending timers after unmount', () => {
+      // only the timers ToastProvider uses, so React and Radix scheduling stay real
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+      const { show, unmount } = renderToastApi();
+
+      show((toast) => toast.error('Could not delete the skill'));
+      fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+      unmount();
+
+      expect(vi.getTimerCount()).toBe(0);
+    });
   });
 
   it('keeps only the last three toasts', () => {

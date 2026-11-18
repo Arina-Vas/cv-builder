@@ -135,7 +135,7 @@ by changing a client-supplied user ID").
 | Sign out                                             | Public, revokes the session of the refresh cookie |
 | Verify email, resend code                            | authenticated, email not verified yet (own only)  |
 | Current user (`me`)                                  | authenticated, verified or not                    |
-| Theme and language preferences                       | authenticated, own only, verified or not          |
+| Theme and language preferences                       | no API: stored in the browser                     |
 | Change password                                      | authenticated, own only, verified email           |
 
 "Public" for the Email Verification page in the wiki access table means no role is required; the verify and resend
@@ -180,21 +180,23 @@ otherwise).
 
 ### Departments
 
-| Operation          | Access |
-| ------------------ | ------ |
-| `departments`      | All    |
-| `createDepartment` | Admin  |
-| `updateDepartment` | Admin  |
-| `deleteDepartment` | Admin  |
+| Operation           | Access |
+| ------------------- | ------ |
+| `departments`       | All    |
+| `departmentOptions` | All    |
+| `createDepartment`  | Admin  |
+| `updateDepartment`  | Admin  |
+| `deleteDepartment`  | Admin  |
 
 ### Positions
 
-| Operation        | Access |
-| ---------------- | ------ |
-| `positions`      | All    |
-| `createPosition` | Admin  |
-| `updatePosition` | Admin  |
-| `deletePosition` | Admin  |
+| Operation         | Access |
+| ----------------- | ------ |
+| `positions`       | All    |
+| `positionOptions` | All    |
+| `createPosition`  | Admin  |
+| `updatePosition`  | Admin  |
+| `deletePosition`  | Admin  |
 
 ### Languages
 
@@ -239,6 +241,8 @@ otherwise).
 (`canManageUser`, `backend/src/common/auth/can-manage-user.ts`); the client-sent id is never proof of ownership.
 Like every mutation, these need a verified email. An Employee changing another user's skills or languages gets
 `FORBIDDEN` before the user is looked up, so the response does not reveal whether that user exists.
+The assignment ids must belong to that `userId` too: `updateUser*` with another user's assignment id returns
+`NOT_FOUND`, and `deleteUser*` with one returns `FORBIDDEN` and removes nothing, for an Admin as well.
 
 ### Projects
 

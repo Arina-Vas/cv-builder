@@ -18,6 +18,11 @@ export class DepartmentResolver {
     return this.departmentService.findAll(args);
   }
 
+  @Query(() => [Department], { description: 'All departments for selects, sorted by name' })
+  departmentOptions(): Promise<Department[]> {
+    return this.departmentService.findOptions();
+  }
+
   @Roles(UserRole.ADMIN)
   @Mutation(() => Department)
   createDepartment(@Args('input') input: CreateDepartmentInput): Promise<Department> {

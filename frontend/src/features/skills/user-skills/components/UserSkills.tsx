@@ -2,6 +2,8 @@ import { skipToken, useMutation, useQuery } from '@apollo/client/react';
 import {
   DELETE_USER_SKILLS,
   USER_SKILL_MUTATION_OPTIONS,
+  USER_SKILL_REFETCH_ERROR_CODES,
+  USER_SKILL_REFETCH_QUERIES,
   USER_SKILLS,
 } from '@/features/skills/user-skills/api/userSkills.operations';
 import { groupByCategory } from '@/features/skills/user-skills/lib/groupByCategory';
@@ -16,6 +18,9 @@ import s from './UserSkills.module.css';
 import { ConfirmDialog } from '@/shared/components/dialog';
 import { AsyncList } from '@/shared/components/async-list/AsyncList';
 import { SelectionActions } from '@/shared/components/selection-actions/SelectionActions';
+import { notFound } from 'next/navigation';
+import { hasErrorCode } from '@/shared/lib/apollo/graphql-errors';
+import { useRefetchOnError } from '@/shared/lib/apollo/useRefetchOnError';
 
 type Props = {
   userId: string;
@@ -39,14 +44,18 @@ export const UserSkills = ({ userId, canEdit, emptyMessage }: Props) => {
     userId ? { variables: { userId } } : skipToken,
   );
 
+  const withRefetch = useRefetchOnError(USER_SKILL_REFETCH_QUERIES, USER_SKILL_REFETCH_ERROR_CODES);
+
   const [deleteSkills] = useMutation(DELETE_USER_SKILLS, USER_SKILL_MUTATION_OPTIONS);
 
   const handleDeleteSkills = async () => {
-    await deleteSkills({ variables: { ids: [...selectedIds], userId } });
+    await withRefetch(() => deleteSkills({ variables: { ids: [...selectedIds], userId } }));
     exit();
   };
 
   const groupedSkills = useMemo(() => groupByCategory(data?.userSkills ?? []), [data?.userSkills]);
+
+  if (hasErrorCode(error, 'NOT_FOUND')) notFound();
 
   return (
     <div className={s.root}>
@@ -97,7 +106,7 @@ export const UserSkills = ({ userId, canEdit, emptyMessage }: Props) => {
           canRemove={data.userSkills.length > 0}
           addLabel={t('addButton')}
           removeLabel={t('removeButton')}
-          removeCountLabel={t('removeCount', { count: selectedIds.size })}
+          confirmRemoveLabel={t('confirmRemove')}
           cancelLabel={tActions('cancel')}
           onAdd={() => setModal({ type: 'create' })}
           onStartRemove={start}
@@ -117,7 +126,10 @@ export const UserSkills = ({ userId, canEdit, emptyMessage }: Props) => {
         title={t('remove.title')}
         open={openConfirmDialog}
         onOpenChange={setOpenConfirmDialog}
-        message={t('remove.message', { count: selectedIds.size })}
+        message={t.rich('remove.message', {
+          count: selectedIds.size,
+          b: (chunks) => <strong>{chunks}</strong>,
+        })}
         onConfirm={handleDeleteSkills}
       />
     </div>

@@ -2,6 +2,12 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+input ChangePasswordInput {
+  confirmPassword: String!
+  currentPassword: String!
+  newPassword: String!
+}
+
 input CreateDepartmentInput {
   name: String!
 }
@@ -116,6 +122,10 @@ enum Mastery {
 }
 
 type Mutation {
+  """
+  Changes the password of the signed-in user. Fails with BAD_USER_INPUT (field "currentPassword") when the current password is incorrect. Signs out every other session of the user; the current session stays signed in.
+  """
+  changePassword(input: ChangePasswordInput!): Boolean!
   createDepartment(input: CreateDepartmentInput!): Department!
   createLanguage(input: CreateLanguageInput!): Language!
   createPosition(input: CreatePositionInput!): Position!
@@ -160,12 +170,12 @@ type Mutation {
   deleteUser(id: ID!): ID!
 
   """
-  Own profile or Admin. Removes the given UserLanguage ids of the user; returns the removed ids
+  Own profile or Admin. Removes the given UserLanguage ids of the user; returns the removed ids. Ids already removed are skipped. Fails with FORBIDDEN and removes nothing if an id belongs to another user's assignment
   """
   deleteUserLanguages(ids: [ID!]!, userId: ID!): [ID!]!
 
   """
-  Own profile or Admin. Removes the given UserSkill ids of the user; returns the removed ids
+  Own profile or Admin. Removes the given UserSkill ids of the user; returns the removed ids. Ids already removed are skipped. Fails with FORBIDDEN and removes nothing if an id belongs to another user's assignment
   """
   deleteUserSkills(ids: [ID!]!, userId: ID!): [ID!]!
   logout: Boolean!
@@ -284,6 +294,9 @@ type Query {
   Skills not yet assigned to the user, for the Add Skill modal; sorted by name. Fails with NOT_FOUND if the user does not exist
   """
   availableUserSkills(userId: ID!): [Skill!]!
+
+  """All departments for selects, sorted by name"""
+  departmentOptions: [Department!]!
   departments(
     """1-based page number"""
     page: Int! = 1
@@ -306,6 +319,9 @@ type Query {
     sortOrder: SortOrder! = ASC
   ): LanguagePage!
   me: User!
+
+  """All positions for selects, sorted by name"""
+  positionOptions: [Position!]!
   positions(
     """1-based page number"""
     page: Int! = 1

@@ -1,4 +1,5 @@
 import { screen } from '@testing-library/react';
+import { GraphQLError } from 'graphql';
 import { describe, expect, it, vi } from 'vitest';
 import { renderWithProviders } from '@/test/render';
 import { CREATE_DEPARTMENT, UPDATE_DEPARTMENT } from '../api/departments.operations';
@@ -46,12 +47,36 @@ describe('DepartmentFormModal', () => {
     const input = screen.getByLabelText('Department');
     expect(screen.getByRole('dialog', { name: 'Edit department' })).toBeInTheDocument();
     expect(input).toHaveValue('Engineering');
-    expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Update' })).toBeDisabled();
 
     await user.clear(input);
     await user.type(input, 'Research');
-    await user.click(screen.getByRole('button', { name: 'Save' }));
+    await user.click(screen.getByRole('button', { name: 'Update' }));
 
     await expect.poll(() => onOpenChange).toHaveBeenCalledWith(false);
+  });
+
+  it('shows the spec text for a duplicate name under the field and stays open', async () => {
+    const onOpenChange = vi.fn();
+    const { user } = renderWithProviders(<DepartmentFormModal open onOpenChange={onOpenChange} />, {
+      mocks: [
+        {
+          request: { query: CREATE_DEPARTMENT, variables: { input: { name: 'Marketing' } } },
+          result: {
+            errors: [
+              new GraphQLError('backend text', { extensions: { code: 'CONFLICT', field: 'name' } }),
+            ],
+          },
+        },
+      ],
+    });
+
+    await user.type(screen.getByLabelText('Department'), 'Marketing');
+    await user.click(screen.getByRole('button', { name: 'Create' }));
+
+    const name = screen.getByLabelText('Department');
+    await expect.poll(() => name).toHaveAttribute('aria-invalid', 'true');
+    expect(name).toHaveAccessibleDescription('Department already exists');
+    expect(onOpenChange).not.toHaveBeenCalled();
   });
 });

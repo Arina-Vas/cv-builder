@@ -12,16 +12,21 @@ const CONFIRMATION =
 const request = { query: REQUEST_PASSWORD_RESET, variables: { input: { email: EMAIL } } };
 
 describe('ForgotPasswordForm', () => {
-  it('keeps Reset password disabled until the email is valid', async () => {
+  it('keeps Reset password enabled; a click on an invalid form shows the error and focuses the field', async () => {
     const { user } = renderWithProviders(<ForgotPasswordForm />);
     const submit = screen.getByRole('button', { name: 'Reset password' });
+    const email = screen.getByLabelText('Email');
 
-    expect(submit).toBeDisabled();
+    expect(submit).toBeEnabled();
 
-    await user.type(screen.getByLabelText('Email'), 'not-an-email');
-    await user.tab();
+    await user.click(submit);
+    expect(screen.getByText('Email is required')).toBeInTheDocument();
+    expect(email).toHaveFocus();
+
+    await user.type(email, 'not-an-email');
+    await user.click(submit);
     expect(screen.getByText('Please enter a valid email address')).toBeInTheDocument();
-    expect(submit).toBeDisabled();
+    expect(screen.queryByText(CONFIRMATION)).not.toBeInTheDocument();
   });
 
   it('sends the request and shows the neutral confirmation (no account enumeration)', async () => {

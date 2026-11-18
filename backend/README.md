@@ -58,6 +58,8 @@ database. Requirements: `docker compose up -d`. Nothing else: the tests set thei
 - `@nestjs/config` and `@nestjs/jwt` are ESM-only. `test/jest-int.json` compiles them to CommonJS for Jest, so the
   integration tests use the real modules; unit tests mock them instead.
 - Files: `test/*.int-spec.ts`; they run in one process (`--runInBand`) because they share the database.
+- CI: the `backend-integration` job in `.github/workflows/ci.yml` runs them on every PR against a `postgres:17`
+  service with the `cv_builder_test` database.
 
 ## Database
 

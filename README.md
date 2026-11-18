@@ -212,6 +212,9 @@ The database and storage credentials in `docker-compose.yml` are for local devel
 - **Prisma Client** is generated into `backend/src/generated/prisma` (git-ignored, CommonJS output for NestJS)
   on `pnpm install`.
 - Prisma 7 does not read `.env` by itself: `prisma.config.ts` loads `backend/.env` with `process.loadEnvFile()`.
+- **Skill mastery levels** follow the wiki: Beginner → Elementary → Intermediate → Advanced → Expert (`Mastery`
+  enum, in this order). The initial names were renamed in place by the `rename_mastery_values` migration; see
+  [docs/data-model.md](docs/data-model.md#decisions).
 
 ### Authentication
 

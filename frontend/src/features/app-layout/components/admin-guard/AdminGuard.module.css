@@ -1,0 +1,29 @@
+/* Loading state while the role is checked: centred in the content area */
+.state {
+  display: flex;
+  min-height: 240px;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Same look as the Button spinner, a bit larger */
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--primary);
+  border-right-color: transparent;
+  border-radius: var(--radius-round);
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 2.4s;
+  }
+}

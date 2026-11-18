@@ -78,6 +78,30 @@
   }
 }
 
+.viewport[data-radix-select-viewport] {
+  scrollbar-width: auto;
+
+  &::-webkit-scrollbar {
+    display: block;
+    width: var(--scrollbar-size);
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  .viewport[data-radix-select-viewport] {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) transparent;
+  }
+}
+
 .item {
   padding: var(--input-padding);
   color: var(--text);

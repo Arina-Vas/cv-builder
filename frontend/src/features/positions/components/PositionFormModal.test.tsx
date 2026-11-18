@@ -1,4 +1,5 @@
 import { screen } from '@testing-library/react';
+import { GraphQLError } from 'graphql';
 import { describe, expect, it, vi } from 'vitest';
 import { renderWithProviders } from '@/test/render';
 import { CREATE_POSITION, UPDATE_POSITION } from '../api/positions.operations';
@@ -55,12 +56,36 @@ describe('PositionFormModal', () => {
     const input = screen.getByLabelText('Position');
     expect(screen.getByRole('dialog', { name: 'Edit position' })).toBeInTheDocument();
     expect(input).toHaveValue('Software Engineer');
-    expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Update' })).toBeDisabled();
 
     await user.clear(input);
     await user.type(input, 'Senior Engineer');
-    await user.click(screen.getByRole('button', { name: 'Save' }));
+    await user.click(screen.getByRole('button', { name: 'Update' }));
 
     await expect.poll(() => onOpenChange).toHaveBeenCalledWith(false);
+  });
+
+  it('shows the spec text for a duplicate name under the field and stays open', async () => {
+    const onOpenChange = vi.fn();
+    const { user } = renderWithProviders(<PositionFormModal open onOpenChange={onOpenChange} />, {
+      mocks: [
+        {
+          request: { query: CREATE_POSITION, variables: { input: { name: 'QA Engineer' } } },
+          result: {
+            errors: [
+              new GraphQLError('backend text', { extensions: { code: 'CONFLICT', field: 'name' } }),
+            ],
+          },
+        },
+      ],
+    });
+
+    await user.type(screen.getByLabelText('Position'), 'QA Engineer');
+    await user.click(screen.getByRole('button', { name: 'Create' }));
+
+    const name = screen.getByLabelText('Position');
+    await expect.poll(() => name).toHaveAttribute('aria-invalid', 'true');
+    expect(name).toHaveAccessibleDescription('Position already exists');
+    expect(onOpenChange).not.toHaveBeenCalled();
   });
 });

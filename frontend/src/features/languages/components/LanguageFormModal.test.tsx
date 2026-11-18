@@ -19,7 +19,7 @@ const createRequest = { query: CREATE_LANGUAGE, variables: { input: created } };
 async function fillCreateForm(user: ReturnType<typeof renderWithProviders>['user']) {
   await user.type(screen.getByLabelText('Name'), created.name);
   await user.type(screen.getByLabelText('ISO'), 'pt-br');
-  await user.type(screen.getByLabelText('Native name'), created.nativeName);
+  await user.type(screen.getByLabelText('Native Name'), created.nativeName);
   await user.click(screen.getByRole('button', { name: 'Create' }));
 }
 
@@ -50,7 +50,7 @@ describe('LanguageFormModal', () => {
           request: createRequest,
           result: {
             errors: [
-              new GraphQLError('ISO code already exists', {
+              new GraphQLError('backend text', {
                 extensions: { code: 'CONFLICT', field: 'iso' },
               }),
             ],
@@ -63,8 +63,34 @@ describe('LanguageFormModal', () => {
 
     const iso = screen.getByLabelText('ISO');
     await expect.poll(() => iso).toHaveAttribute('aria-invalid', 'true');
-    expect(iso).toHaveAccessibleDescription('This value is already taken');
+    expect(iso).toHaveAccessibleDescription('ISO code already exists');
     expect(screen.getByLabelText('Name')).not.toHaveAttribute('aria-invalid');
+    expect(onOpenChange).not.toHaveBeenCalled();
+  });
+
+  it('shows a duplicate name under the Name field, not under ISO', async () => {
+    const onOpenChange = vi.fn();
+    const { user } = renderWithProviders(<LanguageFormModal open onOpenChange={onOpenChange} />, {
+      mocks: [
+        {
+          request: createRequest,
+          result: {
+            errors: [
+              new GraphQLError('backend text', {
+                extensions: { code: 'CONFLICT', field: 'name' },
+              }),
+            ],
+          },
+        },
+      ],
+    });
+
+    await fillCreateForm(user);
+
+    const name = screen.getByLabelText('Name');
+    await expect.poll(() => name).toHaveAttribute('aria-invalid', 'true');
+    expect(name).toHaveAccessibleDescription('Language already exists');
+    expect(screen.getByLabelText('ISO')).not.toHaveAttribute('aria-invalid');
     expect(onOpenChange).not.toHaveBeenCalled();
   });
 
@@ -90,11 +116,11 @@ describe('LanguageFormModal', () => {
     expect(screen.getByRole('dialog', { name: 'Edit language' })).toBeInTheDocument();
     expect(screen.getByLabelText('Name')).toHaveValue('German');
     expect(screen.getByLabelText('ISO')).toHaveValue('DE');
-    expect(screen.getByLabelText('Native name')).toHaveValue('Deutsch');
-    expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
+    expect(screen.getByLabelText('Native Name')).toHaveValue('Deutsch');
+    expect(screen.getByRole('button', { name: 'Update' })).toBeDisabled();
 
-    await user.type(screen.getByLabelText('Native name'), ' (DE)');
-    await user.click(screen.getByRole('button', { name: 'Save' }));
+    await user.type(screen.getByLabelText('Native Name'), ' (DE)');
+    await user.click(screen.getByRole('button', { name: 'Update' }));
 
     await expect.poll(() => onOpenChange).toHaveBeenCalledWith(false);
   });

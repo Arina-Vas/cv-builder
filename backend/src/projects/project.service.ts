@@ -8,7 +8,7 @@ import { projectInclude, toProject } from '@/projects/project.mapper';
 import { CreateProjectInput } from '@/projects/dto/create-project.input';
 import { Project } from '@/projects/models/project.model';
 import { UpdateProjectInput } from '@/projects/dto/update-project.input';
-import { badUserInput } from '@/common/errors/app-errors';
+import { badUserInput, entityInUse } from '@/common/errors/app-errors';
 import { isPrismaError } from '@/prisma/prisma-errors';
 import { Skill } from '@/skills/models/skill.model';
 import { skillInclude, toSkill } from '@/skills/skill.mapper';
@@ -89,6 +89,11 @@ export class ProjectService {
   }
 
   async delete(id: string): Promise<string> {
+    const assigned = await this.prisma.cvProject.count({ where: { projectId: id } });
+    if (assigned > 0) {
+      throw entityInUse('Project cannot be deleted because it is currently in use');
+    }
+
     const row = await this.prisma.project.delete({ where: { id } });
 
     return row.id;

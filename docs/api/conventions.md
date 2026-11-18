@@ -208,10 +208,14 @@ Lists without pagination extend `ListArgs` instead of `PaginatedListArgs` and re
 | `userSkills`, CV skills                                                    | —                | category name, then skill name                    | —                            | no        |
 | `userLanguages`                                                            | —                | language name                                     | —                            | no        |
 | lookups for selects (`skillCategories`, `technologies`, `projectRoles`, …) | `name`           | —                                                 | —                            | no        |
+| `departmentOptions`, `positionOptions` (lookups for the user form selects) | `name`           | —                                                 | —                            | no        |
 | `availableUserSkills` (skills not yet assigned to the user)                | `name`           | —                                                 | —                            | no        |
 | `availableUserLanguages` (languages not yet assigned to the user)          | `name`           | —                                                 | —                            | no        |
 
 Lists without pagination return `{ items, total }` (`Listed`) or a plain list for lookups.
+A select needs every value, so it uses a lookup, not the paginated list (`pageSize` is at most 50):
+the user form loads `departmentOptions` and `positionOptions`, the admin pages page `departments` and
+`positions`.
 
 User skills are returned as one flat list, sorted so that the skills of a category come together; the frontend
 groups them by `skill.category` (the wiki shows a category only when it has skills). A nested group type is not
@@ -269,8 +273,11 @@ avoid a column-key → enum map in every table.
 - Bulk deletes take a list of ids and return the deleted ids:
   `deleteUserSkills(userId: ID!, ids: [ID!]!): [ID!]!` (same for `deleteUserLanguages`). The ids are the assignment
   ids (`UserSkill.id`, `UserLanguage.id`), not skill or language ids (wiki: the selection uses the ids of the
-  assignments). Ids that are already removed or belong to another user
-  are skipped, so the result can be shorter than the input; the frontend evicts the returned ids and refetches.
+  assignments).
+  - Ids that are already removed are skipped, so the result can be shorter than the input (deleting is
+    idempotent; wiki: "stale selections should be removed"). The frontend evicts the returned ids and refetches.
+  - An id of another user's assignment rejects the whole request with `FORBIDDEN` and nothing is removed: the UI
+    never sends one, so it means a tampered request (wiki: "Assignment belongs to the selected user").
 - Mutations take one argument named `input` of an `@InputType`, except deletes, which take ids directly.
 - `update*` inputs contain `id` and only the fields the user can change.
 - `update*` is a full update: `Update<Entity>Input extends Create<Entity>Input` and adds `id`, so the form sends
@@ -401,28 +408,46 @@ Rules for services:
 - **Several unique fields.** A `P2002` does not say which unique field was taken (with the driver adapter there is
   no `meta.target`), so when an entity has more than one (`Language`: `name`, `iso`) the service checks each field
   with `findUnique` before `create` / `update` and throws `conflict` for that field. The record being updated is
-  excluded by its `id` (wiki: "saving an unchanged language must not produce a duplicate error"). The service does
-  not catch `P2002`: it only happens when two requests write the same value at once, and the filter returns
-  `CONFLICT` without `field`.
+  excluded by its `id` (wiki: "saving an unchanged language must not produce a duplicate error"). A `P2002` still
+  happens when two requests write the same value at once: both pass the check before either one is saved. The
+  service catches it and runs the same check again; the other request's row is saved by then, so the check throws
+  `conflict` for the taken field. If it finds nothing, the `P2002` goes to the filter (`CONFLICT` without `field`).
 - **References.** Before `create` / `update`, a service checks that referenced records exist (`departmentId`,
   `categoryId`, `technologyIds`, …) and throws `badUserInput([{ field, message }])` otherwise (wiki: "Backend validates
   the selected department"). That is why a Prisma `P2003` reaching the filter means a blocked delete.
-- **Blocked delete.** Catalogs use `onDelete: Restrict` ([data model](../data-model.md#deletion-policy)), so the
-  database rejects deleting a referenced item and the filter returns `ENTITY_IN_USE`.
+- **Blocked delete.** Before `delete`, a catalog service counts the rows that reference the item (every relation
+  with `onDelete: Restrict`, see [data model](../data-model.md#deletion-policy)) and throws
+  `entityInUse('<Entity> cannot be deleted because it is currently in use')` when there are any (wiki: "Check
+  whether the department is referenced by other entities"). `Restrict` stays as the safety net: a reference added
+  between the check and the delete makes the database reject it, and the filter returns `ENTITY_IN_USE` with a
+  generic message. The frontend shows its own per-entity text either way, keyed by the page and the code.
 - **Rate limits.** A service that knows the cooldown throws `rateLimited(<seconds>, '<message>')`.
 
 Which Prisma errors a service catches (with `isPrismaError(error, code)`); everything else is rethrown for the
 global filter:
 
-| Code    | Where                                          | Service throws                               | If not caught                     |
-| ------- | ---------------------------------------------- | -------------------------------------------- | --------------------------------- |
-| `P2002` | `create` / `update` of one unique field        | `conflict('<input field>', '<message>')`     | `CONFLICT` without `field`        |
-| `P2003` | `create` / `update` whose input references ids | `badUserInput([{ field: '<id field>', … }])` | `ENTITY_IN_USE`, wrong for a form |
-| `P2025` | not caught                                     | —                                            | `NOT_FOUND` (filter)              |
-| `P2003` | `delete`: not caught                           | —                                            | `ENTITY_IN_USE` (filter)          |
+| Code    | Where                                          | Service throws                                | If not caught                     |
+| ------- | ---------------------------------------------- | --------------------------------------------- | --------------------------------- |
+| `P2002` | `create` / `update` of one unique field        | `conflict('<input field>', '<message>')`      | `CONFLICT` without `field`        |
+| `P2002` | `create` / `update` of several unique fields   | the check again → `conflict('<taken field>')` | `CONFLICT` without `field`        |
+| `P2003` | `create` / `update` whose input references ids | `badUserInput([{ field: '<id field>', … }])`  | `ENTITY_IN_USE`, wrong for a form |
+| `P2025` | not caught                                     | —                                             | `NOT_FOUND` (filter)              |
+| `P2003` | `delete`: not caught                           | —                                             | `ENTITY_IN_USE` (filter)          |
 
 `P2003` on `create` / `update` happens when a referenced record is deleted between the existence check and the
-write. `P2025` is caught only when the frontend needs a specific message (e.g. `notFound('CV not found')`).
+write; on `delete`, when a reference is added between the reference check and the delete. `P2025` is caught only
+when the frontend needs a specific message (e.g. `notFound('CV not found')`).
+
+```ts
+async delete(id: string): Promise<string> {
+  const assigned = await this.prisma.user.count({ where: { departmentId: id } });
+  if (assigned > 0) {
+    throw entityInUse('Department cannot be deleted because it is currently in use');
+  }
+
+  return (await this.prisma.department.delete({ where: { id } })).id;
+}
+```
 
 ```ts
 async update({ id, name }: UpdateDepartmentInput): Promise<Department> {
@@ -447,6 +472,18 @@ private async assertUnique({ name, iso }: CreateLanguageInput, id?: string): Pro
 
   if (byName && byName.id !== id) throw conflict('name', 'Language already exists');
   if (byIso && byIso.id !== id) throw conflict('iso', 'ISO code already exists');
+}
+
+async create(input: CreateLanguageInput): Promise<Language> {
+  await this.assertUnique(input);
+
+  try {
+    return toLanguage(await this.prisma.language.create({ data: input }));
+  } catch (error) {
+    // another request saved the same name / ISO after the check: check again to name the field
+    if (isPrismaError(error, 'P2002')) await this.assertUnique(input);
+    throw error;
+  }
 }
 ```
 

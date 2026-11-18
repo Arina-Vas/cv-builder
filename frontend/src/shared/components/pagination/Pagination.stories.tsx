@@ -2,11 +2,25 @@ import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { useState } from 'react';
 import { expect, fn, userEvent, within } from 'storybook/test';
 
+import { getPageCount } from './getPageItems';
 import { Pagination, type PaginationProps } from './Pagination';
+
+// pageCount follows total / pageSize (usePagination computes it the same way), so the stories
+// set only those and this wrapper passes the matching pageCount
+type Args = Omit<PaginationProps, 'pageCount'>;
+
+const withPageCount = (args: Args): PaginationProps => ({
+  ...args,
+  pageCount: getPageCount(args.total, args.pageSize),
+});
+
+function PaginationStory(args: Args) {
+  return <Pagination {...withPageCount(args)} />;
+}
 
 const meta = {
   title: 'Shared/Pagination',
-  component: Pagination,
+  component: PaginationStory,
   args: {
     page: 1,
     pageSize: 10,
@@ -14,7 +28,7 @@ const meta = {
     onPageChange: fn(),
     onPageSizeChange: fn(),
   },
-} satisfies Meta<typeof Pagination>;
+} satisfies Meta<typeof PaginationStory>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -25,7 +39,7 @@ export const Figma: Story = {
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
       {(['light', 'dark'] as const).map((theme) => (
         <div key={theme} data-theme={theme} style={{ padding: 24, background: 'var(--bg)' }}>
-          <Pagination {...args} label={`Pagination (${theme})`} />
+          <Pagination {...withPageCount(args)} label={`Pagination (${theme})`} />
         </div>
       ))}
     </div>
@@ -68,15 +82,13 @@ export const OnePageBigPageSize: Story = {
   args: { total: 30, pageSize: 50 },
 };
 
-function InteractivePagination(args: PaginationProps) {
+function InteractivePagination(args: Args) {
   const [page, setPage] = useState(args.page);
   const [pageSize, setPageSize] = useState(args.pageSize);
 
   return (
     <Pagination
-      {...args}
-      page={page}
-      pageSize={pageSize}
+      {...withPageCount({ ...args, page, pageSize })}
       onPageChange={(next) => {
         setPage(next);
         args.onPageChange(next);

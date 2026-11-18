@@ -4,7 +4,7 @@ import { useMutation, useQuery } from '@apollo/client/react';
 import { useTableParams } from '@/shared/hooks/useTableParams';
 import { type Column, DataTable, TableToolbar } from '@/shared/components/table';
 import type { LanguageFieldsFragment } from '@/gql/graphql';
-import { Pagination } from '@/shared/components/pagination';
+import { Pagination, usePagination } from '@/shared/components/pagination';
 import { useTranslations } from 'next-intl';
 import { parseError } from '@/shared/lib/apollo/graphql-errors';
 import { useErrorMessage } from '@/shared/lib/apollo/useErrorMessage';
@@ -28,12 +28,12 @@ export const Languages = () => {
 
   const [modal, setModal] = useState<ModalState | null>(null);
 
-  const { search, sort, page, pageSize, setSearch, setSort, setPage, setPageSize } = useTableParams(
-    {
-      sortFields: ['name', 'iso'],
-      defaultSort: { field: 'name', order: 'ASC' },
-    },
-  );
+  const tableParams = useTableParams({
+    sortFields: ['name', 'iso'],
+    defaultSort: { field: 'name', order: 'ASC' },
+  });
+
+  const { search, sort, page, pageSize, setSearch, setSort } = tableParams;
 
   const { data, previousData, loading, error, refetch } = useQuery(LANGUAGES, {
     variables: {
@@ -46,6 +46,11 @@ export const Languages = () => {
   });
 
   const shown = data ?? previousData;
+
+  const pagination = usePagination(tableParams, {
+    total: shown?.languages.total,
+    freshTotal: data?.languages.total,
+  });
 
   const languagesColumns: Column<LanguageFieldsFragment>[] = [
     {
@@ -74,7 +79,6 @@ export const Languages = () => {
   const handleDelete = async () => {
     if (!languageToDelete) return;
     await deleteLanguage({ variables: { id: languageToDelete.id } });
-    if (page > 1 && shown?.languages.items.length === 1) setPage(page - 1);
   };
 
   return (
@@ -111,13 +115,7 @@ export const Languages = () => {
           },
         ]}
       />
-      <Pagination
-        page={page}
-        pageSize={pageSize}
-        total={shown?.languages.total ?? 0}
-        onPageSizeChange={setPageSize}
-        onPageChange={setPage}
-      />
+      <Pagination {...pagination} />
       <LanguageFormModal
         open={modal?.type === 'create' || modal?.type === 'update'}
         onOpenChange={(open) => !open && setModal(null)}
@@ -132,6 +130,7 @@ export const Languages = () => {
           b: (chunks) => <strong>{chunks}</strong>,
         })}
         onConfirm={handleDelete}
+        errorMessages={{ ENTITY_IN_USE: t('delete.inUse') }}
       />
     </div>
   );

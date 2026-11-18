@@ -256,17 +256,18 @@ describe('UserSkillService', () => {
   });
 
   describe('delete', () => {
-    it('deletes the found assignments of the user and returns their ids', async () => {
+    it('deletes the assignments of the user and returns their ids', async () => {
       prisma.userSkill.findMany.mockResolvedValue([
-        { id: 'user-skill-React' },
-        { id: 'user-skill-Vue' },
+        { id: 'user-skill-React', userId: OWNER_ID },
+        { id: 'user-skill-Vue', userId: OWNER_ID },
       ]);
 
       const result = await service.delete(OWNER, DELETE_ARGS);
 
+      // Looked up without userId, so an id of another user's assignment is found, not skipped
       expect(prisma.userSkill.findMany).toHaveBeenCalledWith({
-        where: { userId: OWNER_ID, id: { in: DELETE_ARGS.ids } },
-        select: { id: true },
+        where: { id: { in: DELETE_ARGS.ids } },
+        select: { id: true, userId: true },
       });
       expect(prisma.userSkill.deleteMany).toHaveBeenCalledWith({
         where: { userId: OWNER_ID, id: { in: ['user-skill-React', 'user-skill-Vue'] } },
@@ -274,8 +275,8 @@ describe('UserSkillService', () => {
       expect(result).toEqual(['user-skill-React', 'user-skill-Vue']);
     });
 
-    it('skips ids that are already removed or belong to another user', async () => {
-      prisma.userSkill.findMany.mockResolvedValue([{ id: 'user-skill-React' }]);
+    it('skips ids that are already removed', async () => {
+      prisma.userSkill.findMany.mockResolvedValue([{ id: 'user-skill-React', userId: OWNER_ID }]);
 
       const result = await service.delete(OWNER, DELETE_ARGS);
 
@@ -285,8 +286,33 @@ describe('UserSkillService', () => {
       expect(result).toEqual(['user-skill-React']);
     });
 
+    it('returns an empty list when every id is already removed', async () => {
+      prisma.userSkill.findMany.mockResolvedValue([]);
+
+      await expect(service.delete(OWNER, DELETE_ARGS)).resolves.toEqual([]);
+    });
+
+    it.each([
+      ['the owner', OWNER],
+      ['an Admin', ADMIN],
+    ])(
+      "rejects an id of another user's assignment for %s with FORBIDDEN and deletes nothing",
+      async (_who, user) => {
+        prisma.userSkill.findMany.mockResolvedValue([
+          { id: 'user-skill-React', userId: OWNER_ID },
+          { id: 'user-skill-Vue', userId: 'user-2' },
+        ]);
+
+        await expect(service.delete(user, DELETE_ARGS)).rejects.toMatchObject({
+          message: 'Skill assignment belongs to another user',
+          extensions: { code: ErrorCode.FORBIDDEN },
+        });
+        expect(prisma.userSkill.deleteMany).not.toHaveBeenCalled();
+      },
+    );
+
     it("lets an Admin delete another user's assignments", async () => {
-      prisma.userSkill.findMany.mockResolvedValue([{ id: 'user-skill-React' }]);
+      prisma.userSkill.findMany.mockResolvedValue([{ id: 'user-skill-React', userId: OWNER_ID }]);
 
       await expect(service.delete(ADMIN, DELETE_ARGS)).resolves.toEqual(['user-skill-React']);
     });

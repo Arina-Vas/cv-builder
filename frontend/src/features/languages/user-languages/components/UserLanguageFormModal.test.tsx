@@ -14,6 +14,7 @@ const USER_ID = 'u1';
 
 const english = { __typename: 'Language' as const, id: 'l1', name: 'English' };
 const german = { __typename: 'Language' as const, id: 'l2', name: 'German' };
+const french = { __typename: 'Language' as const, id: 'l3', name: 'French' };
 
 const userLanguage = {
   __typename: 'UserLanguage' as const,
@@ -64,7 +65,7 @@ describe('UserLanguageFormModal', () => {
         .toEqual(['German']);
       await user.keyboard('{Escape}');
 
-      await user.click(screen.getByRole('combobox', { name: 'Proficiency' }));
+      await user.click(screen.getByRole('combobox', { name: 'Language Proficiency' }));
       expect(
         within(document.body)
           .getAllByRole('option')
@@ -102,13 +103,13 @@ describe('UserLanguageFormModal', () => {
       expect(add).toBeDisabled();
 
       await choose(user, 'Language', 'German');
-      await choose(user, 'Proficiency', 'Native');
+      await choose(user, 'Language Proficiency', 'Native');
       await user.click(add);
 
       await expect.poll(() => onOpenChange).toHaveBeenCalledWith(false);
     });
 
-    it('shows an already added language (CONFLICT) under Language', async () => {
+    it('shows an already added language (CONFLICT) under Language and reloads the options', async () => {
       const onOpenChange = vi.fn();
       const { user } = renderWithProviders(
         <UserLanguageFormModal open onOpenChange={onOpenChange} userId={USER_ID} />,
@@ -125,17 +126,28 @@ describe('UserLanguageFormModal', () => {
                 ],
               },
             },
+            // useRefetchOnError: German was added elsewhere, so it is no longer offered
+            { ...availableMock, result: { data: { availableUserLanguages: [french] } } },
           ],
         },
       );
 
       await choose(user, 'Language', 'German');
-      await choose(user, 'Proficiency', 'Native');
+      await choose(user, 'Language Proficiency', 'Native');
       await user.click(screen.getByRole('button', { name: 'Add' }));
 
       const language = screen.getByRole('combobox', { name: 'Language' });
-      await expect.poll(() => language).toHaveAccessibleDescription('This value is already taken');
+      await expect.poll(() => language).toHaveAccessibleDescription('Language already assigned');
       expect(onOpenChange).not.toHaveBeenCalled();
+
+      await user.click(language);
+      await expect
+        .poll(() =>
+          within(document.body)
+            .queryAllByRole('option')
+            .map((o) => o.textContent),
+        )
+        .toEqual(['French']);
     });
   });
 
@@ -166,11 +178,13 @@ describe('UserLanguageFormModal', () => {
       const language = screen.getByRole('combobox', { name: 'Language' });
       expect(language).toBeDisabled();
       expect(language).toHaveTextContent('English');
-      expect(screen.getByRole('combobox', { name: 'Proficiency' })).toHaveTextContent('B2');
-      expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
+      expect(screen.getByRole('combobox', { name: 'Language Proficiency' })).toHaveTextContent(
+        'B2',
+      );
+      expect(screen.getByRole('button', { name: 'Update' })).toBeDisabled();
 
-      await choose(user, 'Proficiency', 'C1');
-      await user.click(screen.getByRole('button', { name: 'Save' }));
+      await choose(user, 'Language Proficiency', 'C1');
+      await user.click(screen.getByRole('button', { name: 'Update' }));
 
       await expect.poll(() => onOpenChange).toHaveBeenCalledWith(false);
     });

@@ -61,6 +61,7 @@ export const DEPARTMENT_MUTATION_OPTIONS = {
   context: NO_ERROR_TOAST,
   update: (cache: ApolloCache) => {
     cache.evict({ id: 'ROOT_QUERY', fieldName: 'departments' });
+    cache.evict({ id: 'ROOT_QUERY', fieldName: 'departmentOptions' });
     cache.gc();
   },
   refetchQueries: [DEPARTMENTS],

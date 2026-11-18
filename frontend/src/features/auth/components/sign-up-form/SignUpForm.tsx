@@ -23,7 +23,7 @@ export function SignUpForm() {
   const toast = useToast();
   const [signUp, { loading }] = useMutation(SIGN_UP, { context: NO_ERROR_TOAST });
 
-  const { values, isValid, register, setServerErrors } = useFormFields(
+  const { values, isValid, validateAll, register, setServerErrors } = useFormFields(
     { email: '', password: '', confirmPassword: '' },
     ({ email, password, confirmPassword }, tValidation) => ({
       email: validateEmail(email, tValidation),
@@ -33,7 +33,7 @@ export function SignUpForm() {
   );
 
   const handleSubmit = async () => {
-    if (!isValid || loading) return;
+    if (loading || !validateAll()) return;
 
     try {
       await signUp({

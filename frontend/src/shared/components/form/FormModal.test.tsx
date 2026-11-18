@@ -99,7 +99,7 @@ describe('FormModal', () => {
       unmount();
 
       const second = renderModal({ mode: 'update' });
-      expect(screen.getByRole('button', { name: 'Save' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Update' })).toBeInTheDocument();
       second.unmount();
 
       renderModal({ submitLabel: 'Add' });
@@ -163,7 +163,7 @@ describe('FormModal', () => {
         requireDirty: true,
         values: { name: 'Engineering' },
       });
-      const save = screen.getByRole('button', { name: 'Save' });
+      const save = screen.getByRole('button', { name: 'Update' });
 
       await waitFor(() => expect(save).toBeDisabled());
 
@@ -348,6 +348,83 @@ describe('FormModal', () => {
       expect(getInput()).toHaveValue('Engineering');
       expect(getInput()).not.toHaveAttribute('aria-invalid', 'true');
       expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    });
+  });
+
+  // the page passes its own texts (spec wording) instead of the generic errors.<code>
+  describe('errorMessages', () => {
+    const NAME_TAKEN = 'Department already exists';
+    const LAST_ADMIN = 'The last admin cannot be demoted';
+
+    it('shows the text for the code and field under that field', async () => {
+      const { user } = renderModal({
+        onSubmit: () => Promise.reject(conflictError('name')),
+        values: { name: 'Engineering' },
+        errorMessages: { CONFLICT: { name: NAME_TAKEN } },
+      });
+
+      await user.click(screen.getByRole('button', { name: 'Create' }));
+
+      expect(await screen.findByRole('alert')).toHaveTextContent(NAME_TAKEN);
+      expect(getInput()).toHaveAccessibleDescription(NAME_TAKEN);
+      expect(screen.queryByText(CONFLICT_TEXT)).not.toBeInTheDocument();
+    });
+
+    it('shows a text given for the whole code above the buttons when the error has no field', async () => {
+      const { user } = renderModal({
+        onSubmit: () => Promise.reject(graphQLError('OPERATION_NOT_ALLOWED')),
+        values: { name: 'Engineering' },
+        errorMessages: { OPERATION_NOT_ALLOWED: LAST_ADMIN },
+      });
+
+      await user.click(screen.getByRole('button', { name: 'Create' }));
+
+      expect(await screen.findByRole('alert')).toHaveTextContent(LAST_ADMIN);
+      expect(getInput()).not.toHaveAttribute('aria-invalid', 'true');
+    });
+
+    it('shows a text given for the whole code under the field when the error has one', async () => {
+      const { user } = renderModal({
+        onSubmit: () => Promise.reject(conflictError('name')),
+        values: { name: 'Engineering' },
+        errorMessages: { CONFLICT: NAME_TAKEN },
+      });
+
+      await user.click(screen.getByRole('button', { name: 'Create' }));
+
+      expect(await screen.findByRole('alert')).toHaveTextContent(NAME_TAKEN);
+      expect(getInput()).toHaveAttribute('aria-invalid', 'true');
+    });
+
+    it('keeps the generic text for another code on the same field', async () => {
+      const { user } = renderModal({
+        onSubmit: () =>
+          Promise.reject(
+            graphQLError('BAD_USER_INPUT', {
+              fields: [{ field: 'name', message: 'backend text' }],
+            }),
+          ),
+        values: { name: 'Engineering' },
+        errorMessages: { CONFLICT: { name: NAME_TAKEN } },
+      });
+
+      await user.click(screen.getByRole('button', { name: 'Create' }));
+
+      expect(await screen.findByRole('alert')).toHaveTextContent('Check the entered data');
+      expect(screen.queryByText(NAME_TAKEN)).not.toBeInTheDocument();
+    });
+
+    it('keeps the generic text above the buttons for a CONFLICT without a field', async () => {
+      const { user } = renderModal({
+        onSubmit: () => Promise.reject(graphQLError('CONFLICT')),
+        values: { name: 'Engineering' },
+        errorMessages: { CONFLICT: { name: NAME_TAKEN } },
+      });
+
+      await user.click(screen.getByRole('button', { name: 'Create' }));
+
+      expect(await screen.findByRole('alert')).toHaveTextContent(CONFLICT_TEXT);
+      expect(getInput()).not.toHaveAttribute('aria-invalid', 'true');
     });
   });
 });

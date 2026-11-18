@@ -7,6 +7,8 @@ import {
   CREATE_USER_LANGUAGE,
   UPDATE_USER_LANGUAGE,
   USER_LANGUAGE_MUTATION_OPTIONS,
+  USER_LANGUAGE_REFETCH_ERROR_CODES,
+  USER_LANGUAGE_REFETCH_QUERIES,
 } from '@/features/languages/user-languages/api/userLanguages.operations';
 import { useTranslations } from 'next-intl';
 import { useErrorMessage } from '@/shared/lib/apollo/useErrorMessage';
@@ -18,21 +20,33 @@ import type { SelectOption } from '@/shared/components/select/Select.types';
 import { PROFICIENCIES } from '../lib/proficiency';
 import { parseError } from '@/shared/lib/apollo/graphql-errors';
 import type { UserLanguageFieldsFragment } from '@/gql/graphql';
+import { useRefetchOnError } from '@/shared/lib/apollo/useRefetchOnError';
 
 type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   userId: string;
   userLanguage?: UserLanguageFieldsFragment;
+  // the own Languages page says "Edit language", the profile tab "Update language"
+  updateTitle?: string;
 };
 
-export const UserLanguageFormModal = ({ open, onOpenChange, userId, userLanguage }: Props) => {
-  const t = useTranslations('userLanguage.form');
-  const tProficiency = useTranslations('userLanguage.proficiencyLevel');
+export const UserLanguageFormModal = ({
+  open,
+  onOpenChange,
+  userId,
+  userLanguage,
+  updateTitle,
+}: Props) => {
+  const t = useTranslations('userLanguage');
   const tValidation = useTranslations('validation');
   const tActions = useTranslations('common.actions');
 
   const errorMessage = useErrorMessage();
+  const withRefetch = useRefetchOnError(
+    USER_LANGUAGE_REFETCH_QUERIES,
+    USER_LANGUAGE_REFETCH_ERROR_CODES,
+  );
 
   const schema = useMemo(() => userLanguageSchema(tValidation), [tValidation]);
   const form = useAppForm({
@@ -57,18 +71,20 @@ export const UserLanguageFormModal = ({ open, onOpenChange, userId, userLanguage
 
   const proficiencyOptions: SelectOption[] = PROFICIENCIES.map((proficiency) => ({
     value: proficiency,
-    label: tProficiency(proficiency),
+    label: t(`proficiencyLevel.${proficiency}`),
   }));
 
   const [createUserLanguage] = useMutation(CREATE_USER_LANGUAGE, USER_LANGUAGE_MUTATION_OPTIONS);
   const [updateUserLanguage] = useMutation(UPDATE_USER_LANGUAGE, USER_LANGUAGE_MUTATION_OPTIONS);
 
-  const onSubmit = async (values: UserLanguageFormValues) => {
-    return userLanguage
-      ? await updateUserLanguage({
-          variables: { input: { id: userLanguage.id, userId, proficiency: values.proficiency } },
-        })
-      : await createUserLanguage({ variables: { input: { userId, ...values } } });
+  const onSubmit = (values: UserLanguageFormValues) => {
+    return withRefetch(() => {
+      return userLanguage
+        ? updateUserLanguage({
+            variables: { input: { id: userLanguage.id, userId, proficiency: values.proficiency } },
+          })
+        : createUserLanguage({ variables: { input: { userId, ...values } } });
+    });
   };
 
   return (
@@ -76,7 +92,7 @@ export const UserLanguageFormModal = ({ open, onOpenChange, userId, userLanguage
       open={open}
       onOpenChange={onOpenChange}
       onSubmit={onSubmit}
-      title={userLanguage ? t('updateTitle') : t('createTitle')}
+      title={userLanguage ? (updateTitle ?? t('form.updateTitle')) : t('form.createTitle')}
       form={form}
       mode={userLanguage ? 'update' : 'create'}
       values={{
@@ -85,6 +101,7 @@ export const UserLanguageFormModal = ({ open, onOpenChange, userId, userLanguage
       }}
       requireDirty={!!userLanguage}
       submitLabel={userLanguage ? undefined : tActions('add')}
+      errorMessages={{ CONFLICT: t('errors.languageAssigned') }}
     >
       <Controller
         control={form.control}
@@ -93,7 +110,7 @@ export const UserLanguageFormModal = ({ open, onOpenChange, userId, userLanguage
           <Select
             ref={field.ref}
             name={field.name}
-            label={t('fields.languageId')}
+            label={t('form.fields.languageId')}
             options={languageOptions}
             value={field.value}
             onValueChange={field.onChange}
@@ -113,7 +130,7 @@ export const UserLanguageFormModal = ({ open, onOpenChange, userId, userLanguage
           <Select
             ref={field.ref}
             name={field.name}
-            label={t('fields.proficiency')}
+            label={t('form.fields.proficiency')}
             options={proficiencyOptions}
             value={field.value}
             onValueChange={field.onChange}

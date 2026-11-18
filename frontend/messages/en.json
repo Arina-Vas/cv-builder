@@ -152,6 +152,12 @@
       "required": "Confirm Password is required",
       "mismatch": "Passwords do not match"
     },
+    "changePassword": {
+      "confirmRequired": "Confirm password is required",
+      "currentIncorrect": "Current password is incorrect",
+      "sameAsCurrent": "New password must be different from the current password",
+      "weakPassword": "Password does not meet the security requirements"
+    },
     "code": {
       "required": "Verification code is required",
       "invalid": "Please enter a valid 6-digit code"
@@ -183,6 +189,12 @@
     "navigation": "Main navigation",
     "breadcrumbs": "Breadcrumb",
     "notAuthorized": "You are not authorized to access this page",
+    "accessCheck": {
+      "loading": "Checking access",
+      "title": "Oops",
+      "message": "We couldn't check your access to this page. Please try again.",
+      "retry": "Retry"
+    },
     "profile": "Profile",
     "settings": "Settings",
     "logout": "Logout",
@@ -226,6 +238,7 @@
       "confirmPassword": "Confirm password",
       "submit": "Submit",
       "goToSignIn": "Go to sign in",
+      "requestNewLink": "Request a new link",
       "success": "Your password has been reset. Please sign in."
     },
     "verifyEmail": {
@@ -242,9 +255,12 @@
     "errors": {
       "invalidCredentials": "Invalid email or password",
       "emailTaken": "An account with this email already exists",
-      "codeInvalid": "The code is invalid or has expired. Request a new one",
+      "codeInvalid": "Invalid verification code",
+      "codeExpired": "Verification code has expired",
+      "codeUsed": "Verification code has already been used",
       "alreadyVerified": "Email is already verified",
-      "resetLinkInvalid": "This password reset link is invalid or has expired"
+      "resetLinkInvalid": "This password reset link is invalid",
+      "resetLinkExpired": "This password reset link has expired"
     }
   },
   "users": {
@@ -253,6 +269,7 @@
     "table": {
       "avatar": "Avatar",
       "firstName": "First Name",
+
       "lastName": "Last Name",
       "email": "Email",
       "department": "Department",
@@ -261,7 +278,7 @@
       "actions": { "view": "View", "update": "Update", "delete": "Delete" }
     },
     "profile": {
-      "memberSince": "A member since {date}",
+      "memberSince": "Member Since {date}",
       "loading": "Loading profile",
       "loadError": "Failed to load profile information",
       "retry": "Retry",
@@ -287,7 +304,8 @@
     "update": { "title": "Update user" },
     "delete": {
       "title": "Delete user",
-      "message": "Are you sure you want to delete user <b>{name}</b>?"
+      "message": "Are you sure you want to delete user <b>{name}</b>?",
+      "lastAdmin": "The last admin cannot be deleted. Assign the Admin role to another user first"
     },
     "tabs": {
       "label": "Employee sections",
@@ -295,6 +313,10 @@
       "skills": "Skills",
       "languages": "Languages",
       "cvs": "CVs"
+    },
+    "errors": {
+      "emailTaken": "An account with this email already exists",
+      "lastAdminDemote": "The last admin cannot be demoted. Assign the Admin role to another user first"
     }
   },
   "cvs": {
@@ -319,7 +341,11 @@
     "edit": { "title": "Edit department" },
     "delete": {
       "title": "Delete department",
-      "message": "Are you sure you want to delete department <b>{name}</b>?"
+      "message": "Are you sure you want to delete department <b>{name}</b>?",
+      "inUse": "Department cannot be deleted because it is currently in use"
+    },
+    "errors": {
+      "nameTaken": "Department already exists"
     }
   },
   "positions": {
@@ -335,7 +361,11 @@
     "edit": { "title": "Edit position" },
     "delete": {
       "title": "Delete position",
-      "message": "Are you sure you want to delete position <b>{name}</b>?"
+      "message": "Are you sure you want to delete position <b>{name}</b>?",
+      "inUse": "Position cannot be deleted because it is currently in use"
+    },
+    "errors": {
+      "nameTaken": "Position already exists"
     }
   },
   "languages": {
@@ -345,27 +375,33 @@
       "columns": {
         "name": "Name",
         "iso": "ISO",
-        "nativeName": "Native name"
+        "nativeName": "Native Name"
       },
       "empty": "No languages found",
       "actions": { "edit": "Edit", "delete": "Delete" }
     },
-    "fields": { "name": "Name", "iso": "ISO", "nativeName": "Native name" },
+    "fields": { "name": "Name", "iso": "ISO", "nativeName": "Native Name" },
     "create": { "title": "Create language" },
     "edit": { "title": "Edit language" },
     "delete": {
       "title": "Delete language",
-      "message": "Are you sure you want to delete language <b>{name}</b>?"
+      "message": "Are you sure you want to delete language <b>{name}</b>?",
+      "inUse": "Language cannot be deleted because it is currently in use"
+    },
+    "errors": {
+      "nameTaken": "Language already exists",
+      "isoTaken": "ISO code already exists"
     }
   },
   "userLanguage": {
-    "title": "Current languages",
+    "title": "Current Languages",
     "addButton": "Add language",
     "removeButton": "Remove languages",
-    "removeCount": "Remove ({count})",
+    "confirmRemove": "Remove",
     "remove": {
       "title": "Remove languages",
-      "message": "Are you sure you want to remove {count, plural, one {# language} other {# languages}}?"
+      "ownTitle": "Remove language",
+      "message": "Are you sure you want to remove <b>{count, plural, one {# language} other {# languages}}</b>?"
     },
     "empty": "No languages added",
     "emptyProfile": "No languages added yet",
@@ -374,9 +410,11 @@
     "retry": "Retry",
     "form": {
       "updateTitle": "Update language",
+      "editTitle": "Edit language",
       "createTitle": "Add language",
-      "fields": { "languageId": "Language", "proficiency": "Proficiency" }
+      "fields": { "languageId": "Language", "proficiency": "Language Proficiency" }
     },
+    "errors": { "languageAssigned": "Language already assigned" },
     "proficiencyLevel": {
       "A1": "A1",
       "A2": "A2",
@@ -399,21 +437,25 @@
       "empty": "No skills found",
       "actions": { "edit": "Edit", "delete": "Delete" }
     },
-    "fields": { "name": "Name", "category": "Category" },
+    "fields": { "name": "Skill name", "category": "Category" },
     "create": { "title": "Create skill" },
     "edit": { "title": "Edit skill" },
     "delete": {
       "title": "Delete skill",
-      "message": "Are you sure you want to delete skill <b>{name}</b>?"
+      "message": "Are you sure you want to delete skill <b>{name}</b>?",
+      "inUse": "Skill cannot be deleted because it is currently in use"
+    },
+    "errors": {
+      "nameTaken": "Skill already exists"
     }
   },
   "userSkill": {
     "addButton": "Add skill",
     "removeButton": "Remove skills",
-    "removeCount": "Remove ({count})",
+    "confirmRemove": "Remove",
     "remove": {
       "title": "Remove skills",
-      "message": "Are you sure you want to remove {count, plural, one {# skill} other {# skills}}?"
+      "message": "Are you sure you want to remove <b>{count, plural, one {# skill} other {# skills}}</b>?"
     },
     "empty": "No skills added",
     "emptyProfile": "No skills added yet",
@@ -425,6 +467,7 @@
       "updateTitle": "Update skill",
       "fields": { "skillId": "Skill", "mastery": "Skill mastery" }
     },
+    "errors": { "skillAssigned": "Skill already assigned" },
     "masteryLevel": {
       "BEGINNER": "Beginner",
       "ELEMENTARY": "Elementary",
@@ -455,10 +498,31 @@
       "environment": "Environment"
     },
     "create": { "title": "Create project" },
-    "edit": { "title": "Edit project" },
+    "update": { "title": "Update project" },
     "delete": {
       "title": "Delete project",
-      "message": "Are you sure you want to delete project <b>{name}</b>?"
+      "message": "Are you sure you want to delete project <b>{name}</b>?",
+      "inUse": "Project cannot be deleted because it is currently in use"
+    }
+  },
+  "settings": {
+    "preferences": "Preferences",
+    "theme": {
+      "label": "Theme",
+      "LIGHT": "Light",
+      "DARK": "Dark",
+      "SYSTEM": "Device settings"
+    },
+    "language": {
+      "label": "Language"
+    },
+    "changePassword": {
+      "title": "Change password",
+      "currentPassword": "Password",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm Password",
+      "submit": "Change",
+      "success": "Password has been changed"
     }
   }
 }

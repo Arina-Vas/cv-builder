@@ -100,7 +100,7 @@ export const Select = ({
             sideOffset={0}
             className={s.content}
           >
-            <RadixSelect.Viewport>
+            <RadixSelect.Viewport className={s.viewport}>
               {options.map((option: SelectOption) => (
                 <RadixSelect.Item
                   key={option.value}

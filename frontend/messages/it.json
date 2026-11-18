@@ -1,0 +1,533 @@
+{
+  "common": {
+    "errorPages": {
+      "notFound": {
+        "title": "Hmm...",
+        "message": "Sembra che questa non sia la pagina che stavi cercando. Torniamo sulla strada giusta.",
+        "goBack": "Torna indietro"
+      },
+      "noInternet": {
+        "title": "Ops",
+        "message": "Qualcosa è andato storto. Stiamo già lavorando per risolverlo. Riprova.",
+        "retry": "Riprova"
+      },
+      "deviceError": {
+        "title": "Ops",
+        "message": "Questa app non è supportata sui dispositivi mobili. Aprila su un computer o un tablet per continuare."
+      }
+    },
+    "pagination": {
+      "label": "Paginazione",
+      "previous": "Pagina precedente",
+      "next": "Pagina successiva",
+      "page": "Pagina {page}",
+      "rowsPerPage": "Righe per pagina"
+    },
+    "table": {
+      "actions": "Azioni",
+      "rowActions": "Azioni per {name}",
+      "openRow": "Apri {name}",
+      "row": "riga {id}",
+      "loadingRows": "Caricamento delle righe",
+      "retry": "Riprova"
+    },
+    "toast": {
+      "region": "Notifiche",
+      "viewport": "Notifiche ({hotkey})",
+      "close": "Chiudi",
+      "types": {
+        "success": "Successo",
+        "error": "Errore",
+        "warning": "Avviso",
+        "info": "Informazione"
+      }
+    },
+    "input": { "showPassword": "Mostra password", "hidePassword": "Nascondi password" },
+    "searchField": { "label": "Cerca", "clear": "Cancella ricerca" },
+    "datePicker": {
+      "placeholder": "Seleziona una data",
+      "previous": "Precedente",
+      "next": "Successivo"
+    },
+    "select": { "noOptions": "Nessuna opzione" },
+    "chip": { "remove": "Rimuovi {label}" },
+    "avatarUploader": {
+      "upload": "Carica avatar",
+      "hint": "png, jpg o gif non più di {maxSize}",
+      "remove": "Rimuovi avatar",
+      "uploading": "Caricamento dell'avatar",
+      "invalidType": "Sono consentiti solo png, jpg o gif",
+      "tooLarge": "La dimensione del file non deve superare {maxSize}"
+    },
+    "actions": {
+      "confirm": "Conferma",
+      "cancel": "Annulla",
+      "close": "Chiudi",
+      "create": "Crea",
+      "update": "Aggiorna",
+      "save": "Salva",
+      "add": "Aggiungi"
+    }
+  },
+  "errors": {
+    "UNAUTHENTICATED": "La tua sessione è scaduta. Accedi di nuovo",
+    "FORBIDDEN": "Non hai l'autorizzazione per farlo",
+    "EMAIL_NOT_VERIFIED": "Verifica la tua email per farlo",
+    "NOT_FOUND": "Questo elemento non esiste più",
+    "BAD_USER_INPUT": "Controlla i dati inseriti",
+    "CONFLICT": "Questo valore è già in uso",
+    "ENTITY_IN_USE": "Questo elemento è in uso e non può essere eliminato",
+    "OPERATION_NOT_ALLOWED": "Questa azione non è consentita",
+    "RATE_LIMITED": "{seconds, plural, =0 {Troppi tentativi. Riprova più tardi} one {Troppi tentativi. Riprova tra # secondo} other {Troppi tentativi. Riprova tra # secondi}}",
+    "INTERNAL_SERVER_ERROR": "Qualcosa è andato storto. Riprova più tardi"
+  },
+  "validation": {
+    "department": {
+      "required": "Il nome del reparto è obbligatorio",
+      "maxLength": "Il nome del reparto non deve superare {max} caratteri"
+    },
+    "position": {
+      "required": "Il nome della posizione è obbligatorio",
+      "maxLength": "Il nome della posizione non deve superare {max} caratteri"
+    },
+    "language": {
+      "name": {
+        "required": "Il nome è obbligatorio",
+        "maxLength": "Il nome non deve superare {max} caratteri"
+      },
+      "nativeName": {
+        "required": "Il nome nativo è obbligatorio",
+        "maxLength": "Il nome nativo non deve superare {max} caratteri"
+      },
+      "iso": {
+        "required": "Il codice ISO è obbligatorio",
+        "maxLength": "Il codice ISO non deve superare {max} caratteri",
+        "format": "Il codice ISO deve essere un codice di lingua, ad es. EN o PT-BR"
+      }
+    },
+    "userLanguage": {
+      "languageId": { "required": "La lingua è obbligatoria" },
+      "proficiency": { "required": "Il livello di conoscenza è obbligatorio" }
+    },
+    "skill": {
+      "name": {
+        "required": "La competenza è obbligatoria",
+        "maxLength": "Il nome della competenza non deve superare {max} caratteri"
+      },
+      "categoryId": {
+        "required": "La categoria è obbligatoria"
+      }
+    },
+    "userSkill": {
+      "skillId": { "required": "La competenza è obbligatoria" },
+      "mastery": { "required": "Il livello di padronanza è obbligatorio" }
+    },
+    "project": {
+      "name": {
+        "required": "Il nome del progetto è obbligatorio",
+        "maxLength": "Il nome del progetto non deve superare {max} caratteri"
+      },
+      "domain": {
+        "required": "Il dominio è obbligatorio",
+        "maxLength": "Il dominio non deve superare {max} caratteri"
+      },
+      "startDate": {
+        "required": "La data di inizio è obbligatoria"
+      },
+      "endDate": {
+        "required": "La data di fine è obbligatoria",
+        "beforeStart": "La data di fine deve essere successiva alla data di inizio"
+      },
+      "description": {
+        "required": "La descrizione è obbligatoria",
+        "maxLength": "La descrizione non deve superare {max} caratteri"
+      }
+    },
+    "email": {
+      "required": "L'email è obbligatoria",
+      "invalid": "Inserisci un indirizzo email valido"
+    },
+    "password": {
+      "required": "La password è obbligatoria",
+      "newRequired": "La nuova password è obbligatoria",
+      "minLength": "La password deve contenere almeno {min} caratteri",
+      "maxLength": "La password non deve superare {max} caratteri"
+    },
+    "confirmPassword": {
+      "required": "La conferma della password è obbligatoria",
+      "mismatch": "Le password non coincidono"
+    },
+    "changePassword": {
+      "confirmRequired": "La conferma della password è obbligatoria",
+      "currentIncorrect": "La password attuale non è corretta",
+      "sameAsCurrent": "La nuova password deve essere diversa da quella attuale",
+      "weakPassword": "La password non soddisfa i requisiti di sicurezza"
+    },
+    "code": {
+      "required": "Il codice di verifica è obbligatorio",
+      "invalid": "Inserisci un codice valido di 6 cifre"
+    },
+    "user": {
+      "email": { "required": "L'email è obbligatoria", "invalid": "Indirizzo email non valido" },
+      "password": {
+        "required": "La password è obbligatoria",
+        "minLength": "La password deve contenere almeno {min} caratteri",
+        "maxLength": "La password non deve superare {max} caratteri"
+      },
+      "firstName": {
+        "required": "Il nome è obbligatorio",
+        "maxLength": "Il nome non deve superare {max} caratteri"
+      },
+      "lastName": {
+        "required": "Il cognome è obbligatorio",
+        "maxLength": "Il cognome non deve superare {max} caratteri"
+      },
+      "department": { "required": "Il reparto è obbligatorio" },
+      "position": { "required": "La posizione è obbligatoria" },
+      "role": { "required": "Il ruolo è obbligatorio" }
+    }
+  },
+  "layout": {
+    "appName": "CV Builder",
+    "collapseSidebar": "Comprimi barra laterale",
+    "expandSidebar": "Espandi barra laterale",
+    "navigation": "Navigazione principale",
+    "breadcrumbs": "Percorso di navigazione",
+    "notAuthorized": "Non sei autorizzato ad accedere a questa pagina",
+    "accessCheck": {
+      "loading": "Verifica dell'accesso",
+      "title": "Ops",
+      "message": "Impossibile verificare l'accesso a questa pagina. Riprova.",
+      "retry": "Riprova"
+    },
+    "profile": "Profilo",
+    "settings": "Impostazioni",
+    "logout": "Esci",
+    "profileRetry": "Profilo non caricato. Riprova"
+  },
+  "nav": {
+    "employees": "Dipendenti",
+    "cvs": "CV",
+    "skills": "Competenze",
+    "languages": "Lingue",
+    "departments": "Reparti",
+    "positions": "Posizioni",
+    "projects": "Progetti"
+  },
+  "auth": {
+    "tabs": { "label": "Autenticazione", "signIn": "Accedi", "signUp": "Registrati" },
+    "fields": { "email": "Email", "password": "Password", "confirmPassword": "Conferma password" },
+    "signIn": {
+      "title": "Bentornato",
+      "subtitle": "Ciao di nuovo! Accedi per continuare",
+      "submit": "Accedi",
+      "forgotPassword": "Password dimenticata"
+    },
+    "signUp": {
+      "title": "Registrati ora",
+      "subtitle": "Benvenuto! Registrati per continuare",
+      "submit": "Crea account",
+      "haveAccount": "Ho già un account"
+    },
+    "forgotPassword": {
+      "title": "Password dimenticata",
+      "subtitle": "Ti invieremo un'email con ulteriori istruzioni",
+      "submit": "Reimposta password",
+      "cancel": "Annulla",
+      "sent": "Se esiste un account con questa email, riceverai le istruzioni per reimpostare la password."
+    },
+    "resetPassword": {
+      "title": "Reimposta password",
+      "subtitle": "Inserisci qui una nuova password e confermala",
+      "newPassword": "Nuova password",
+      "confirmPassword": "Conferma password",
+      "submit": "Invia",
+      "goToSignIn": "Vai all'accesso",
+      "requestNewLink": "Richiedi un nuovo link",
+      "success": "La tua password è stata reimpostata. Accedi."
+    },
+    "verifyEmail": {
+      "title": "Verifica email",
+      "subtitle": "Inserisci il codice di verifica che abbiamo inviato alla tua email.",
+      "codeLabel": "Codice di verifica",
+      "digit": "Cifra {index} di {length}",
+      "confirm": "Conferma",
+      "resend": "{seconds, plural, =0 {Invia di nuovo il codice} other {Invia di nuovo il codice (# s)}}",
+      "later": "Più tardi",
+      "verified": "Email verificata",
+      "codeSent": "Codice di verifica inviato"
+    },
+    "errors": {
+      "invalidCredentials": "Email o password non validi",
+      "emailTaken": "Esiste già un account con questa email",
+      "codeInvalid": "Codice di verifica non valido",
+      "codeExpired": "Il codice di verifica è scaduto",
+      "codeUsed": "Il codice di verifica è già stato utilizzato",
+      "alreadyVerified": "L'email è già verificata",
+      "resetLinkInvalid": "Questo link per reimpostare la password non è valido",
+      "resetLinkExpired": "Questo link per reimpostare la password è scaduto"
+    }
+  },
+  "users": {
+    "title": "Dipendenti",
+    "createButton": "Crea utente",
+    "table": {
+      "avatar": "Avatar",
+      "firstName": "Nome",
+
+      "lastName": "Cognome",
+      "email": "Email",
+      "department": "Reparto",
+      "position": "Posizione",
+      "empty": "Nessun utente trovato",
+      "actions": { "view": "Visualizza", "update": "Aggiorna", "delete": "Elimina" }
+    },
+    "profile": {
+      "memberSince": "Membro dal {date}",
+      "loading": "Caricamento del profilo",
+      "loadError": "Impossibile caricare le informazioni del profilo",
+      "retry": "Riprova",
+      "updated": "Il profilo è stato aggiornato",
+      "verifyEmail": "Verifica email",
+      "verificationSent": "L'email di verifica è stata inviata",
+      "verificationFailed": "Impossibile inviare l'email di verifica",
+      "avatarUpdated": "L'avatar è stato aggiornato",
+      "avatarRemoved": "L'avatar è stato rimosso",
+      "avatarFailed": "Impossibile aggiornare l'avatar"
+    },
+    "fields": {
+      "email": "Email",
+      "password": "Password",
+      "firstName": "Nome",
+      "lastName": "Cognome",
+      "department": "Reparto",
+      "position": "Posizione",
+      "role": "Ruolo"
+    },
+    "roles": { "ADMIN": "Amministratore", "EMPLOYEE": "Dipendente" },
+    "create": { "title": "Crea utente" },
+    "update": { "title": "Aggiorna utente" },
+    "delete": {
+      "title": "Elimina utente",
+      "message": "Vuoi davvero eliminare l'utente <b>{name}</b>?",
+      "lastAdmin": "L'ultimo amministratore non può essere eliminato. Assegna prima il ruolo di amministratore a un altro utente"
+    },
+    "tabs": {
+      "label": "Sezioni del dipendente",
+      "profile": "Profilo",
+      "skills": "Competenze",
+      "languages": "Lingue",
+      "cvs": "CV"
+    },
+    "errors": {
+      "emailTaken": "Esiste già un account con questa email",
+      "lastAdminDemote": "L'ultimo amministratore non può essere declassato. Assegna prima il ruolo di amministratore a un altro utente"
+    }
+  },
+  "cvs": {
+    "tabs": {
+      "label": "Sezioni del CV",
+      "details": "Dettagli",
+      "skills": "Competenze",
+      "projects": "Progetti",
+      "preview": "Anteprima"
+    }
+  },
+  "departments": {
+    "title": "Reparti",
+    "createButton": "Crea reparto",
+    "table": {
+      "name": "Nome",
+      "empty": "Nessun reparto trovato",
+      "actions": { "edit": "Modifica", "delete": "Elimina" }
+    },
+    "fields": { "name": "Reparto" },
+    "create": { "title": "Crea reparto" },
+    "edit": { "title": "Modifica reparto" },
+    "delete": {
+      "title": "Elimina reparto",
+      "message": "Vuoi davvero eliminare il reparto <b>{name}</b>?",
+      "inUse": "Il reparto non può essere eliminato perché è attualmente in uso"
+    },
+    "errors": {
+      "nameTaken": "Il reparto esiste già"
+    }
+  },
+  "positions": {
+    "title": "Posizioni",
+    "createButton": "Crea posizione",
+    "table": {
+      "name": "Nome",
+      "empty": "Nessuna posizione trovata",
+      "actions": { "edit": "Modifica", "delete": "Elimina" }
+    },
+    "fields": { "name": "Posizione" },
+    "create": { "title": "Crea posizione" },
+    "edit": { "title": "Modifica posizione" },
+    "delete": {
+      "title": "Elimina posizione",
+      "message": "Vuoi davvero eliminare la posizione <b>{name}</b>?",
+      "inUse": "La posizione non può essere eliminata perché è attualmente in uso"
+    },
+    "errors": {
+      "nameTaken": "La posizione esiste già"
+    }
+  },
+  "languages": {
+    "title": "Lingue",
+    "createButton": "Crea lingua",
+    "table": {
+      "columns": {
+        "name": "Nome",
+        "iso": "ISO",
+        "nativeName": "Nome nativo"
+      },
+      "empty": "Nessuna lingua trovata",
+      "actions": { "edit": "Modifica", "delete": "Elimina" }
+    },
+    "fields": { "name": "Nome", "iso": "ISO", "nativeName": "Nome nativo" },
+    "create": { "title": "Crea lingua" },
+    "edit": { "title": "Modifica lingua" },
+    "delete": {
+      "title": "Elimina lingua",
+      "message": "Vuoi davvero eliminare la lingua <b>{name}</b>?",
+      "inUse": "La lingua non può essere eliminata perché è attualmente in uso"
+    },
+    "errors": {
+      "nameTaken": "La lingua esiste già",
+      "isoTaken": "Il codice ISO esiste già"
+    }
+  },
+  "userLanguage": {
+    "title": "Lingue attuali",
+    "addButton": "Aggiungi lingua",
+    "removeButton": "Rimuovi lingue",
+    "confirmRemove": "Rimuovi",
+    "remove": {
+      "title": "Rimuovi lingue",
+      "ownTitle": "Rimuovi lingua",
+      "message": "Vuoi davvero rimuovere <b>{count, plural, one {# lingua} other {# lingue}}</b>?"
+    },
+    "empty": "Nessuna lingua aggiunta",
+    "emptyProfile": "Nessuna lingua ancora aggiunta",
+    "loading": "Caricamento delle lingue",
+    "loadError": "Impossibile caricare le lingue",
+    "retry": "Riprova",
+    "form": {
+      "updateTitle": "Aggiorna lingua",
+      "editTitle": "Modifica lingua",
+      "createTitle": "Aggiungi lingua",
+      "fields": { "languageId": "Lingua", "proficiency": "Livello della lingua" }
+    },
+    "errors": { "languageAssigned": "La lingua è già assegnata" },
+    "proficiencyLevel": {
+      "A1": "A1",
+      "A2": "A2",
+      "B1": "B1",
+      "B2": "B2",
+      "C1": "C1",
+      "C2": "C2",
+      "NATIVE": "Madrelingua"
+    }
+  },
+  "skills": {
+    "title": "Competenze",
+    "createButton": "Crea competenza",
+    "table": {
+      "columns": {
+        "name": "Nome",
+        "type": "Tipo",
+        "category": "Categoria"
+      },
+      "empty": "Nessuna competenza trovata",
+      "actions": { "edit": "Modifica", "delete": "Elimina" }
+    },
+    "fields": { "name": "Nome della competenza", "category": "Categoria" },
+    "create": { "title": "Crea competenza" },
+    "edit": { "title": "Modifica competenza" },
+    "delete": {
+      "title": "Elimina competenza",
+      "message": "Vuoi davvero eliminare la competenza <b>{name}</b>?",
+      "inUse": "La competenza non può essere eliminata perché è attualmente in uso"
+    },
+    "errors": {
+      "nameTaken": "La competenza esiste già"
+    }
+  },
+  "userSkill": {
+    "addButton": "Aggiungi competenza",
+    "removeButton": "Rimuovi competenze",
+    "confirmRemove": "Rimuovi",
+    "remove": {
+      "title": "Rimuovi competenze",
+      "message": "Vuoi davvero rimuovere <b>{count, plural, one {# competenza} other {# competenze}}</b>?"
+    },
+    "empty": "Nessuna competenza aggiunta",
+    "emptyProfile": "Nessuna competenza ancora aggiunta",
+    "loading": "Caricamento delle competenze",
+    "loadError": "Impossibile caricare le competenze",
+    "retry": "Riprova",
+    "form": {
+      "createTitle": "Aggiungi competenza",
+      "updateTitle": "Aggiorna competenza",
+      "fields": { "skillId": "Competenza", "mastery": "Livello di padronanza" }
+    },
+    "errors": { "skillAssigned": "La competenza è già assegnata" },
+    "masteryLevel": {
+      "BEGINNER": "Principiante",
+      "ELEMENTARY": "Elementare",
+      "INTERMEDIATE": "Intermedio",
+      "ADVANCED": "Avanzato",
+      "EXPERT": "Esperto"
+    }
+  },
+  "projects": {
+    "title": "Progetti",
+    "createButton": "Crea progetto",
+    "table": {
+      "columns": {
+        "name": "Nome",
+        "domain": "Dominio",
+        "startDate": "Data di inizio",
+        "endDate": "Data di fine"
+      },
+      "empty": "Nessun progetto trovato",
+      "actions": { "edit": "Modifica", "delete": "Elimina" }
+    },
+    "fields": {
+      "name": "Nome",
+      "domain": "Dominio",
+      "startDate": "Data di inizio",
+      "endDate": "Data di fine",
+      "description": "Descrizione",
+      "environment": "Ambiente"
+    },
+    "create": { "title": "Crea progetto" },
+    "update": { "title": "Aggiorna progetto" },
+    "delete": {
+      "title": "Elimina progetto",
+      "message": "Vuoi davvero eliminare il progetto <b>{name}</b>?",
+      "inUse": "Il progetto non può essere eliminato perché è attualmente in uso"
+    }
+  },
+  "settings": {
+    "preferences": "Preferenze",
+    "theme": {
+      "label": "Tema",
+      "LIGHT": "Chiaro",
+      "DARK": "Scuro",
+      "SYSTEM": "Impostazioni del dispositivo"
+    },
+    "language": {
+      "label": "Lingua"
+    },
+    "changePassword": {
+      "title": "Cambia password",
+      "currentPassword": "Password",
+      "newPassword": "Nuova password",
+      "confirmPassword": "Conferma password",
+      "submit": "Cambia",
+      "success": "La password è stata modificata"
+    }
+  }
+}

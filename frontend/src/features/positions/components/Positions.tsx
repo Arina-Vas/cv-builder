@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery } from '@apollo/client/react';
 import { useTableParams } from '@/shared/hooks/useTableParams';
-import { Pagination } from '@/shared/components/pagination';
+import { Pagination, usePagination } from '@/shared/components/pagination';
 import { useTranslations } from 'next-intl';
 import { parseError } from '@/shared/lib/apollo/graphql-errors';
 import { useErrorMessage } from '@/shared/lib/apollo/useErrorMessage';
@@ -28,12 +28,12 @@ export const Positions = () => {
 
   const [modal, setModal] = useState<ModalState | null>(null);
 
-  const { search, sort, page, pageSize, setSearch, setSort, setPage, setPageSize } = useTableParams(
-    {
-      sortFields: ['name'],
-      defaultSort: { field: 'name', order: 'ASC' },
-    },
-  );
+  const tableParams = useTableParams({
+    sortFields: ['name'],
+    defaultSort: { field: 'name', order: 'ASC' },
+  });
+
+  const { search, sort, page, pageSize, setSearch, setSort } = tableParams;
 
   const { data, previousData, loading, error, refetch } = useQuery(POSITIONS, {
     variables: {
@@ -46,6 +46,11 @@ export const Positions = () => {
   });
 
   const shown = data ?? previousData;
+
+  const pagination = usePagination(tableParams, {
+    total: shown?.positions.total,
+    freshTotal: data?.positions.total,
+  });
 
   const positionsColumns: Column<PositionFieldsFragment>[] = [
     {
@@ -63,7 +68,6 @@ export const Positions = () => {
   const handleDelete = async () => {
     if (!positionToDelete) return;
     await deletePosition({ variables: { id: positionToDelete.id } });
-    if (page > 1 && shown?.positions.items.length === 1) setPage(page - 1);
   };
 
   return (
@@ -97,13 +101,7 @@ export const Positions = () => {
           },
         ]}
       />
-      <Pagination
-        page={page}
-        pageSize={pageSize}
-        total={shown?.positions.total ?? 0}
-        onPageSizeChange={setPageSize}
-        onPageChange={setPage}
-      />
+      <Pagination {...pagination} />
       <PositionFormModal
         position={modal?.type === 'update' ? modal.position : undefined}
         onOpenChange={(open) => !open && setModal(null)}
@@ -118,6 +116,7 @@ export const Positions = () => {
           b: (chunks) => <strong>{chunks}</strong>,
         })}
         onConfirm={handleDelete}
+        errorMessages={{ ENTITY_IN_USE: t('delete.inUse') }}
       />
     </div>
   );

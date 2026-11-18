@@ -1,0 +1,540 @@
+{
+  "common": {
+    "errorPages": {
+      "notFound": {
+        "title": "Hmm...",
+        "message": "Ce n'est apparemment pas la page que vous cherchiez. Reprenons le bon chemin.",
+        "goBack": "Retour"
+      },
+      "noInternet": {
+        "title": "Oups",
+        "message": "Une erreur s'est produite. Nous travaillons déjà à la corriger. Veuillez réessayer.",
+        "retry": "Réessayer"
+      },
+      "deviceError": {
+        "title": "Oups",
+        "message": "Cette application n'est pas prise en charge sur les appareils mobiles. Ouvrez-la sur un ordinateur ou une tablette pour continuer."
+      }
+    },
+    "pagination": {
+      "label": "Pagination",
+      "previous": "Page précédente",
+      "next": "Page suivante",
+      "page": "Page {page}",
+      "rowsPerPage": "Lignes par page"
+    },
+    "table": {
+      "actions": "Actions",
+      "rowActions": "Actions pour {name}",
+      "openRow": "Ouvrir {name}",
+      "row": "ligne {id}",
+      "loadingRows": "Chargement des lignes",
+      "retry": "Réessayer"
+    },
+    "toast": {
+      "region": "Notifications",
+      "viewport": "Notifications ({hotkey})",
+      "close": "Fermer",
+      "types": {
+        "success": "Succès",
+        "error": "Erreur",
+        "warning": "Avertissement",
+        "info": "Information"
+      }
+    },
+    "input": {
+      "showPassword": "Afficher le mot de passe",
+      "hidePassword": "Masquer le mot de passe"
+    },
+    "searchField": { "label": "Rechercher", "clear": "Effacer la recherche" },
+    "datePicker": {
+      "placeholder": "Sélectionner une date",
+      "previous": "Précédent",
+      "next": "Suivant"
+    },
+    "select": { "noOptions": "Aucune option" },
+    "chip": { "remove": "Supprimer {label}" },
+    "avatarUploader": {
+      "upload": "Téléverser un avatar",
+      "hint": "png, jpg ou gif de {maxSize} maximum",
+      "remove": "Supprimer l'avatar",
+      "uploading": "Téléversement de l'avatar",
+      "invalidType": "Seuls les formats png, jpg ou gif sont autorisés",
+      "tooLarge": "La taille du fichier ne doit pas dépasser {maxSize}"
+    },
+    "actions": {
+      "confirm": "Confirmer",
+      "cancel": "Annuler",
+      "close": "Fermer",
+      "create": "Créer",
+      "update": "Mettre à jour",
+      "save": "Enregistrer",
+      "add": "Ajouter"
+    }
+  },
+  "errors": {
+    "UNAUTHENTICATED": "Votre session a expiré. Veuillez vous reconnecter",
+    "FORBIDDEN": "Vous n'avez pas l'autorisation d'effectuer cette action",
+    "EMAIL_NOT_VERIFIED": "Vérifiez votre e-mail pour effectuer cette action",
+    "NOT_FOUND": "Cet élément n'existe plus",
+    "BAD_USER_INPUT": "Vérifiez les données saisies",
+    "CONFLICT": "Cette valeur est déjà utilisée",
+    "ENTITY_IN_USE": "Cet élément est utilisé et ne peut pas être supprimé",
+    "OPERATION_NOT_ALLOWED": "Cette action n'est pas autorisée",
+    "RATE_LIMITED": "{seconds, plural, =0 {Trop de tentatives. Réessayez plus tard} one {Trop de tentatives. Réessayez dans # seconde} other {Trop de tentatives. Réessayez dans # secondes}}",
+    "INTERNAL_SERVER_ERROR": "Une erreur s'est produite. Veuillez réessayer plus tard"
+  },
+  "validation": {
+    "department": {
+      "required": "Le nom du département est requis",
+      "maxLength": "Le nom du département ne doit pas dépasser {max} caractères"
+    },
+    "position": {
+      "required": "Le nom du poste est requis",
+      "maxLength": "Le nom du poste ne doit pas dépasser {max} caractères"
+    },
+    "language": {
+      "name": {
+        "required": "Le nom est requis",
+        "maxLength": "Le nom ne doit pas dépasser {max} caractères"
+      },
+      "nativeName": {
+        "required": "Le nom natif est requis",
+        "maxLength": "Le nom natif ne doit pas dépasser {max} caractères"
+      },
+      "iso": {
+        "required": "Le code ISO est requis",
+        "maxLength": "Le code ISO ne doit pas dépasser {max} caractères",
+        "format": "Le code ISO doit être un code de langue, par ex. EN ou PT-BR"
+      }
+    },
+    "userLanguage": {
+      "languageId": { "required": "La langue est requise" },
+      "proficiency": { "required": "Le niveau de langue est requis" }
+    },
+    "skill": {
+      "name": {
+        "required": "La compétence est requise",
+        "maxLength": "Le nom de la compétence ne doit pas dépasser {max} caractères"
+      },
+      "categoryId": {
+        "required": "La catégorie est requise"
+      }
+    },
+    "userSkill": {
+      "skillId": { "required": "La compétence est requise" },
+      "mastery": { "required": "Le niveau de maîtrise est requis" }
+    },
+    "project": {
+      "name": {
+        "required": "Le nom du projet est requis",
+        "maxLength": "Le nom du projet ne doit pas dépasser {max} caractères"
+      },
+      "domain": {
+        "required": "Le domaine est requis",
+        "maxLength": "Le domaine ne doit pas dépasser {max} caractères"
+      },
+      "startDate": {
+        "required": "La date de début est requise"
+      },
+      "endDate": {
+        "required": "La date de fin est requise",
+        "beforeStart": "La date de fin doit être postérieure à la date de début"
+      },
+      "description": {
+        "required": "La description est requise",
+        "maxLength": "La description ne doit pas dépasser {max} caractères"
+      }
+    },
+    "email": {
+      "required": "L'e-mail est requis",
+      "invalid": "Veuillez saisir une adresse e-mail valide"
+    },
+    "password": {
+      "required": "Le mot de passe est requis",
+      "newRequired": "Le nouveau mot de passe est requis",
+      "minLength": "Le mot de passe doit contenir au moins {min} caractères",
+      "maxLength": "Le mot de passe ne doit pas dépasser {max} caractères"
+    },
+    "confirmPassword": {
+      "required": "La confirmation du mot de passe est requise",
+      "mismatch": "Les mots de passe ne correspondent pas"
+    },
+    "changePassword": {
+      "confirmRequired": "La confirmation du mot de passe est requise",
+      "currentIncorrect": "Le mot de passe actuel est incorrect",
+      "sameAsCurrent": "Le nouveau mot de passe doit être différent de l'actuel",
+      "weakPassword": "Le mot de passe ne respecte pas les exigences de sécurité"
+    },
+    "code": {
+      "required": "Le code de vérification est requis",
+      "invalid": "Veuillez saisir un code valide à 6 chiffres"
+    },
+    "user": {
+      "email": { "required": "L'e-mail est requis", "invalid": "Adresse e-mail invalide" },
+      "password": {
+        "required": "Le mot de passe est requis",
+        "minLength": "Le mot de passe doit contenir au moins {min} caractères",
+        "maxLength": "Le mot de passe ne doit pas dépasser {max} caractères"
+      },
+      "firstName": {
+        "required": "Le prénom est requis",
+        "maxLength": "Le prénom ne doit pas dépasser {max} caractères"
+      },
+      "lastName": {
+        "required": "Le nom est requis",
+        "maxLength": "Le nom ne doit pas dépasser {max} caractères"
+      },
+      "department": { "required": "Le département est requis" },
+      "position": { "required": "Le poste est requis" },
+      "role": { "required": "Le rôle est requis" }
+    }
+  },
+  "layout": {
+    "appName": "CV Builder",
+    "collapseSidebar": "Réduire la barre latérale",
+    "expandSidebar": "Développer la barre latérale",
+    "navigation": "Navigation principale",
+    "breadcrumbs": "Fil d'Ariane",
+    "notAuthorized": "Vous n'êtes pas autorisé à accéder à cette page",
+    "accessCheck": {
+      "loading": "Vérification de l'accès",
+      "title": "Oups",
+      "message": "Impossible de vérifier votre accès à cette page. Veuillez réessayer.",
+      "retry": "Réessayer"
+    },
+    "profile": "Profil",
+    "settings": "Paramètres",
+    "logout": "Déconnexion",
+    "profileRetry": "Profil non chargé. Réessayer"
+  },
+  "nav": {
+    "employees": "Employés",
+    "cvs": "CV",
+    "skills": "Compétences",
+    "languages": "Langues",
+    "departments": "Départements",
+    "positions": "Postes",
+    "projects": "Projets"
+  },
+  "auth": {
+    "tabs": { "label": "Authentification", "signIn": "Connexion", "signUp": "Inscription" },
+    "fields": {
+      "email": "E-mail",
+      "password": "Mot de passe",
+      "confirmPassword": "Confirmer le mot de passe"
+    },
+    "signIn": {
+      "title": "Bon retour",
+      "subtitle": "Re-bonjour ! Connectez-vous pour continuer",
+      "submit": "Se connecter",
+      "forgotPassword": "Mot de passe oublié"
+    },
+    "signUp": {
+      "title": "Inscrivez-vous",
+      "subtitle": "Bienvenue ! Inscrivez-vous pour continuer",
+      "submit": "Créer un compte",
+      "haveAccount": "J'ai déjà un compte"
+    },
+    "forgotPassword": {
+      "title": "Mot de passe oublié",
+      "subtitle": "Nous vous enverrons un e-mail avec la suite des instructions",
+      "submit": "Réinitialiser le mot de passe",
+      "cancel": "Annuler",
+      "sent": "Si un compte existe avec cet e-mail, vous recevrez les instructions de réinitialisation du mot de passe."
+    },
+    "resetPassword": {
+      "title": "Réinitialiser le mot de passe",
+      "subtitle": "Saisissez ici un nouveau mot de passe et confirmez-le",
+      "newPassword": "Nouveau mot de passe",
+      "confirmPassword": "Confirmer le mot de passe",
+      "submit": "Valider",
+      "goToSignIn": "Aller à la connexion",
+      "requestNewLink": "Demander un nouveau lien",
+      "success": "Votre mot de passe a été réinitialisé. Veuillez vous connecter."
+    },
+    "verifyEmail": {
+      "title": "Vérification de l'e-mail",
+      "subtitle": "Saisissez le code de vérification envoyé à votre adresse e-mail.",
+      "codeLabel": "Code de vérification",
+      "digit": "Chiffre {index} sur {length}",
+      "confirm": "Confirmer",
+      "resend": "{seconds, plural, =0 {Renvoyer le code} other {Renvoyer le code (# s)}}",
+      "later": "Plus tard",
+      "verified": "E-mail vérifié",
+      "codeSent": "Code de vérification envoyé"
+    },
+    "errors": {
+      "invalidCredentials": "E-mail ou mot de passe invalide",
+      "emailTaken": "Un compte avec cet e-mail existe déjà",
+      "codeInvalid": "Code de vérification invalide",
+      "codeExpired": "Le code de vérification a expiré",
+      "codeUsed": "Le code de vérification a déjà été utilisé",
+      "alreadyVerified": "L'e-mail est déjà vérifié",
+      "resetLinkInvalid": "Ce lien de réinitialisation du mot de passe est invalide",
+      "resetLinkExpired": "Ce lien de réinitialisation du mot de passe a expiré"
+    }
+  },
+  "users": {
+    "title": "Employés",
+    "createButton": "Créer un utilisateur",
+    "table": {
+      "avatar": "Avatar",
+      "firstName": "Prénom",
+
+      "lastName": "Nom",
+      "email": "E-mail",
+      "department": "Département",
+      "position": "Poste",
+      "empty": "Aucun utilisateur trouvé",
+      "actions": { "view": "Voir", "update": "Mettre à jour", "delete": "Supprimer" }
+    },
+    "profile": {
+      "memberSince": "Membre depuis le {date}",
+      "loading": "Chargement du profil",
+      "loadError": "Impossible de charger les informations du profil",
+      "retry": "Réessayer",
+      "updated": "Le profil a été mis à jour",
+      "verifyEmail": "Vérifier l'e-mail",
+      "verificationSent": "L'e-mail de vérification a été envoyé",
+      "verificationFailed": "Impossible d'envoyer l'e-mail de vérification",
+      "avatarUpdated": "L'avatar a été mis à jour",
+      "avatarRemoved": "L'avatar a été supprimé",
+      "avatarFailed": "Impossible de mettre à jour l'avatar"
+    },
+    "fields": {
+      "email": "E-mail",
+      "password": "Mot de passe",
+      "firstName": "Prénom",
+      "lastName": "Nom",
+      "department": "Département",
+      "position": "Poste",
+      "role": "Rôle"
+    },
+    "roles": { "ADMIN": "Administrateur", "EMPLOYEE": "Employé" },
+    "create": { "title": "Créer un utilisateur" },
+    "update": { "title": "Mettre à jour l'utilisateur" },
+    "delete": {
+      "title": "Supprimer l'utilisateur",
+      "message": "Voulez-vous vraiment supprimer l'utilisateur <b>{name}</b> ?",
+      "lastAdmin": "Le dernier administrateur ne peut pas être supprimé. Attribuez d'abord le rôle d'administrateur à un autre utilisateur"
+    },
+    "tabs": {
+      "label": "Sections de l'employé",
+      "profile": "Profil",
+      "skills": "Compétences",
+      "languages": "Langues",
+      "cvs": "CV"
+    },
+    "errors": {
+      "emailTaken": "Un compte avec cet e-mail existe déjà",
+      "lastAdminDemote": "Le dernier administrateur ne peut pas être rétrogradé. Attribuez d'abord le rôle d'administrateur à un autre utilisateur"
+    }
+  },
+  "cvs": {
+    "tabs": {
+      "label": "Sections du CV",
+      "details": "Détails",
+      "skills": "Compétences",
+      "projects": "Projets",
+      "preview": "Aperçu"
+    }
+  },
+  "departments": {
+    "title": "Départements",
+    "createButton": "Créer un département",
+    "table": {
+      "name": "Nom",
+      "empty": "Aucun département trouvé",
+      "actions": { "edit": "Modifier", "delete": "Supprimer" }
+    },
+    "fields": { "name": "Département" },
+    "create": { "title": "Créer un département" },
+    "edit": { "title": "Modifier le département" },
+    "delete": {
+      "title": "Supprimer le département",
+      "message": "Voulez-vous vraiment supprimer le département <b>{name}</b> ?",
+      "inUse": "Le département ne peut pas être supprimé car il est actuellement utilisé"
+    },
+    "errors": {
+      "nameTaken": "Ce département existe déjà"
+    }
+  },
+  "positions": {
+    "title": "Postes",
+    "createButton": "Créer un poste",
+    "table": {
+      "name": "Nom",
+      "empty": "Aucun poste trouvé",
+      "actions": { "edit": "Modifier", "delete": "Supprimer" }
+    },
+    "fields": { "name": "Poste" },
+    "create": { "title": "Créer un poste" },
+    "edit": { "title": "Modifier le poste" },
+    "delete": {
+      "title": "Supprimer le poste",
+      "message": "Voulez-vous vraiment supprimer le poste <b>{name}</b> ?",
+      "inUse": "Le poste ne peut pas être supprimé car il est actuellement utilisé"
+    },
+    "errors": {
+      "nameTaken": "Ce poste existe déjà"
+    }
+  },
+  "languages": {
+    "title": "Langues",
+    "createButton": "Créer une langue",
+    "table": {
+      "columns": {
+        "name": "Nom",
+        "iso": "ISO",
+        "nativeName": "Nom natif"
+      },
+      "empty": "Aucune langue trouvée",
+      "actions": { "edit": "Modifier", "delete": "Supprimer" }
+    },
+    "fields": { "name": "Nom", "iso": "ISO", "nativeName": "Nom natif" },
+    "create": { "title": "Créer une langue" },
+    "edit": { "title": "Modifier la langue" },
+    "delete": {
+      "title": "Supprimer la langue",
+      "message": "Voulez-vous vraiment supprimer la langue <b>{name}</b> ?",
+      "inUse": "La langue ne peut pas être supprimée car elle est actuellement utilisée"
+    },
+    "errors": {
+      "nameTaken": "Cette langue existe déjà",
+      "isoTaken": "Ce code ISO existe déjà"
+    }
+  },
+  "userLanguage": {
+    "title": "Langues actuelles",
+    "addButton": "Ajouter une langue",
+    "removeButton": "Retirer des langues",
+    "confirmRemove": "Retirer",
+    "remove": {
+      "title": "Retirer des langues",
+      "ownTitle": "Retirer la langue",
+      "message": "Voulez-vous vraiment retirer <b>{count, plural, one {# langue} other {# langues}}</b> ?"
+    },
+    "empty": "Aucune langue ajoutée",
+    "emptyProfile": "Aucune langue ajoutée pour le moment",
+    "loading": "Chargement des langues",
+    "loadError": "Impossible de charger les langues",
+    "retry": "Réessayer",
+    "form": {
+      "updateTitle": "Mettre à jour la langue",
+      "editTitle": "Modifier la langue",
+      "createTitle": "Ajouter une langue",
+      "fields": { "languageId": "Langue", "proficiency": "Niveau de langue" }
+    },
+    "errors": { "languageAssigned": "Cette langue est déjà attribuée" },
+    "proficiencyLevel": {
+      "A1": "A1",
+      "A2": "A2",
+      "B1": "B1",
+      "B2": "B2",
+      "C1": "C1",
+      "C2": "C2",
+      "NATIVE": "Langue maternelle"
+    }
+  },
+  "skills": {
+    "title": "Compétences",
+    "createButton": "Créer une compétence",
+    "table": {
+      "columns": {
+        "name": "Nom",
+        "type": "Type",
+        "category": "Catégorie"
+      },
+      "empty": "Aucune compétence trouvée",
+      "actions": { "edit": "Modifier", "delete": "Supprimer" }
+    },
+    "fields": { "name": "Nom de la compétence", "category": "Catégorie" },
+    "create": { "title": "Créer une compétence" },
+    "edit": { "title": "Modifier la compétence" },
+    "delete": {
+      "title": "Supprimer la compétence",
+      "message": "Voulez-vous vraiment supprimer la compétence <b>{name}</b> ?",
+      "inUse": "La compétence ne peut pas être supprimée car elle est actuellement utilisée"
+    },
+    "errors": {
+      "nameTaken": "Cette compétence existe déjà"
+    }
+  },
+  "userSkill": {
+    "addButton": "Ajouter une compétence",
+    "removeButton": "Retirer des compétences",
+    "confirmRemove": "Retirer",
+    "remove": {
+      "title": "Retirer des compétences",
+      "message": "Voulez-vous vraiment retirer <b>{count, plural, one {# compétence} other {# compétences}}</b> ?"
+    },
+    "empty": "Aucune compétence ajoutée",
+    "emptyProfile": "Aucune compétence ajoutée pour le moment",
+    "loading": "Chargement des compétences",
+    "loadError": "Impossible de charger les compétences",
+    "retry": "Réessayer",
+    "form": {
+      "createTitle": "Ajouter une compétence",
+      "updateTitle": "Mettre à jour la compétence",
+      "fields": { "skillId": "Compétence", "mastery": "Niveau de maîtrise" }
+    },
+    "errors": { "skillAssigned": "Cette compétence est déjà attribuée" },
+    "masteryLevel": {
+      "BEGINNER": "Débutant",
+      "ELEMENTARY": "Élémentaire",
+      "INTERMEDIATE": "Intermédiaire",
+      "ADVANCED": "Avancé",
+      "EXPERT": "Expert"
+    }
+  },
+  "projects": {
+    "title": "Projets",
+    "createButton": "Créer un projet",
+    "table": {
+      "columns": {
+        "name": "Nom",
+        "domain": "Domaine",
+        "startDate": "Date de début",
+        "endDate": "Date de fin"
+      },
+      "empty": "Aucun projet trouvé",
+      "actions": { "edit": "Modifier", "delete": "Supprimer" }
+    },
+    "fields": {
+      "name": "Nom",
+      "domain": "Domaine",
+      "startDate": "Date de début",
+      "endDate": "Date de fin",
+      "description": "Description",
+      "environment": "Environnement"
+    },
+    "create": { "title": "Créer un projet" },
+    "update": { "title": "Mettre à jour le projet" },
+    "delete": {
+      "title": "Supprimer le projet",
+      "message": "Voulez-vous vraiment supprimer le projet <b>{name}</b> ?",
+      "inUse": "Le projet ne peut pas être supprimé car il est actuellement utilisé"
+    }
+  },
+  "settings": {
+    "preferences": "Préférences",
+    "theme": {
+      "label": "Thème",
+      "LIGHT": "Clair",
+      "DARK": "Sombre",
+      "SYSTEM": "Paramètres de l'appareil"
+    },
+    "language": {
+      "label": "Langue"
+    },
+    "changePassword": {
+      "title": "Changer le mot de passe",
+      "currentPassword": "Mot de passe",
+      "newPassword": "Nouveau mot de passe",
+      "confirmPassword": "Confirmer le mot de passe",
+      "submit": "Changer",
+      "success": "Le mot de passe a été modifié"
+    }
+  }
+}
