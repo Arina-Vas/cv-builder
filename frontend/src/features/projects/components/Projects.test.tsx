@@ -104,7 +104,7 @@ describe('Projects', () => {
 
     await openRowAction(user, 'Edit');
 
-    const dialog = screen.getByRole('dialog', { name: 'Edit project' });
+    const dialog = screen.getByRole('dialog', { name: 'Update project' });
     expect(within(dialog).getByLabelText('Name')).toHaveValue('Blog');
   });
 

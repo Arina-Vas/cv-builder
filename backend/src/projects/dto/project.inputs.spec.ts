@@ -101,6 +101,14 @@ describe('CreateProjectInput', () => {
     expect(check(CreateProjectInput, plain).errors).toEqual(['endDate.isNotBeforeDate']);
   });
 
+  it('explains a too early end date with the text from the spec', () => {
+    const plain = { ...VALID_PROJECT, endDate: date('2025-02-28') };
+
+    const [error] = validateSync(plainToInstance(CreateProjectInput, plain));
+
+    expect(error?.constraints?.isNotBeforeDate).toBe('End date must be later than start date');
+  });
+
   it('defaults technologies to an empty list', () => {
     const { technologyIds: _omitted, ...withoutTechnologies } = VALID_PROJECT;
     const { dto, errors } = check(CreateProjectInput, withoutTechnologies);

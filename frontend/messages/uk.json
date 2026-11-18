@@ -395,6 +395,7 @@
     "confirmRemove": "Видалити",
     "remove": {
       "title": "Видалити мови",
+      "ownTitle": "Видалити мову",
       "message": "Ви впевнені, що хочете видалити <b>{count, plural, one {# мову} few {# мови} many {# мов} other {# мови}}</b>?"
     },
     "empty": "Мови не додано",
@@ -404,8 +405,9 @@
     "retry": "Повторити",
     "form": {
       "updateTitle": "Оновити мову",
+      "editTitle": "Редагувати мову",
       "createTitle": "Додати мову",
-      "fields": { "languageId": "Мова", "proficiency": "Рівень володіння" }
+      "fields": { "languageId": "Мова", "proficiency": "Рівень володіння мовою" }
     },
     "errors": { "languageAssigned": "Цю мову вже додано" },
     "proficiencyLevel": {
@@ -430,7 +432,7 @@
       "empty": "Навичок не знайдено",
       "actions": { "edit": "Редагувати", "delete": "Видалити" }
     },
-    "fields": { "name": "Назва", "category": "Категорія" },
+    "fields": { "name": "Назва навички", "category": "Категорія" },
     "create": { "title": "Створити навичку" },
     "edit": { "title": "Редагувати навичку" },
     "delete": {
@@ -491,7 +493,7 @@
       "environment": "Середовище"
     },
     "create": { "title": "Створити проєкт" },
-    "edit": { "title": "Редагувати проєкт" },
+    "update": { "title": "Оновити проєкт" },
     "delete": {
       "title": "Видалити проєкт",
       "message": "Ви впевнені, що хочете видалити проєкт <b>{name}</b>?",

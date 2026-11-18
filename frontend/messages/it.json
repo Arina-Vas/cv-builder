@@ -395,6 +395,7 @@
     "confirmRemove": "Rimuovi",
     "remove": {
       "title": "Rimuovi lingue",
+      "ownTitle": "Rimuovi lingua",
       "message": "Vuoi davvero rimuovere <b>{count, plural, one {# lingua} other {# lingue}}</b>?"
     },
     "empty": "Nessuna lingua aggiunta",
@@ -404,8 +405,9 @@
     "retry": "Riprova",
     "form": {
       "updateTitle": "Aggiorna lingua",
+      "editTitle": "Modifica lingua",
       "createTitle": "Aggiungi lingua",
-      "fields": { "languageId": "Lingua", "proficiency": "Livello" }
+      "fields": { "languageId": "Lingua", "proficiency": "Livello della lingua" }
     },
     "errors": { "languageAssigned": "La lingua è già assegnata" },
     "proficiencyLevel": {
@@ -430,7 +432,7 @@
       "empty": "Nessuna competenza trovata",
       "actions": { "edit": "Modifica", "delete": "Elimina" }
     },
-    "fields": { "name": "Nome", "category": "Categoria" },
+    "fields": { "name": "Nome della competenza", "category": "Categoria" },
     "create": { "title": "Crea competenza" },
     "edit": { "title": "Modifica competenza" },
     "delete": {
@@ -491,7 +493,7 @@
       "environment": "Ambiente"
     },
     "create": { "title": "Crea progetto" },
-    "edit": { "title": "Modifica progetto" },
+    "update": { "title": "Aggiorna progetto" },
     "delete": {
       "title": "Elimina progetto",
       "message": "Vuoi davvero eliminare il progetto <b>{name}</b>?",

@@ -17,6 +17,12 @@ export default function LanguagesPage() {
       <Languages />
     </Suspense>
   ) : (
-    <UserLanguages userId={user.id} canEdit emptyMessage={t('empty')} />
+    <UserLanguages
+      userId={user.id}
+      canEdit
+      emptyMessage={t('empty')}
+      updateTitle={t('form.editTitle')}
+      removeTitle={t('remove.ownTitle')}
+    />
   );
 }

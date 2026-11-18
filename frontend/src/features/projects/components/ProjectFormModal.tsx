@@ -69,7 +69,7 @@ export const ProjectFormModal = ({ open, onOpenChange, project }: Props) => {
       open={open}
       onOpenChange={onOpenChange}
       onSubmit={handleSubmit}
-      title={project ? t('edit.title') : t('create.title')}
+      title={project ? t('update.title') : t('create.title')}
       form={form}
       mode={project ? 'update' : 'create'}
       values={{

@@ -149,7 +149,7 @@ describe('Projects (integration)', () => {
 
       expect(error.extensions).toMatchObject({
         code: 'BAD_USER_INPUT',
-        fields: [{ field: 'endDate' }],
+        fields: [{ field: 'endDate', message: 'End date must be later than start date' }],
       });
     });
   });

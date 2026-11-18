@@ -55,7 +55,7 @@ describe('Languages', () => {
 
     expect(screen.getByRole('button', { name: 'Name' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'ISO' })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Native name' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Native Name' })).not.toBeInTheDocument();
   });
 
   it('opens the create modal', async () => {
@@ -75,7 +75,7 @@ describe('Languages', () => {
     const dialog = screen.getByRole('dialog', { name: 'Edit language' });
     expect(within(dialog).getByLabelText('Name')).toHaveValue('German');
     expect(within(dialog).getByLabelText('ISO')).toHaveValue('DE');
-    expect(within(dialog).getByLabelText('Native name')).toHaveValue('Deutsch');
+    expect(within(dialog).getByLabelText('Native Name')).toHaveValue('Deutsch');
   });
 
   describe('delete', () => {

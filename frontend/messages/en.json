@@ -268,7 +268,7 @@
       "actions": { "view": "View", "update": "Update", "delete": "Delete" }
     },
     "profile": {
-      "memberSince": "A member since {date}",
+      "memberSince": "Member Since {date}",
       "loading": "Loading profile",
       "loadError": "Failed to load profile information",
       "retry": "Retry",
@@ -365,12 +365,12 @@
       "columns": {
         "name": "Name",
         "iso": "ISO",
-        "nativeName": "Native name"
+        "nativeName": "Native Name"
       },
       "empty": "No languages found",
       "actions": { "edit": "Edit", "delete": "Delete" }
     },
-    "fields": { "name": "Name", "iso": "ISO", "nativeName": "Native name" },
+    "fields": { "name": "Name", "iso": "ISO", "nativeName": "Native Name" },
     "create": { "title": "Create language" },
     "edit": { "title": "Edit language" },
     "delete": {
@@ -384,12 +384,13 @@
     }
   },
   "userLanguage": {
-    "title": "Current languages",
+    "title": "Current Languages",
     "addButton": "Add language",
     "removeButton": "Remove languages",
     "confirmRemove": "Remove",
     "remove": {
       "title": "Remove languages",
+      "ownTitle": "Remove language",
       "message": "Are you sure you want to remove <b>{count, plural, one {# language} other {# languages}}</b>?"
     },
     "empty": "No languages added",
@@ -399,8 +400,9 @@
     "retry": "Retry",
     "form": {
       "updateTitle": "Update language",
+      "editTitle": "Edit language",
       "createTitle": "Add language",
-      "fields": { "languageId": "Language", "proficiency": "Proficiency" }
+      "fields": { "languageId": "Language", "proficiency": "Language Proficiency" }
     },
     "errors": { "languageAssigned": "Language already assigned" },
     "proficiencyLevel": {
@@ -425,7 +427,7 @@
       "empty": "No skills found",
       "actions": { "edit": "Edit", "delete": "Delete" }
     },
-    "fields": { "name": "Name", "category": "Category" },
+    "fields": { "name": "Skill name", "category": "Category" },
     "create": { "title": "Create skill" },
     "edit": { "title": "Edit skill" },
     "delete": {
@@ -486,7 +488,7 @@
       "environment": "Environment"
     },
     "create": { "title": "Create project" },
-    "edit": { "title": "Edit project" },
+    "update": { "title": "Update project" },
     "delete": {
       "title": "Delete project",
       "message": "Are you sure you want to delete project <b>{name}</b>?",

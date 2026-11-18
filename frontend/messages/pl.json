@@ -395,6 +395,7 @@
     "confirmRemove": "Usuń",
     "remove": {
       "title": "Usuń języki",
+      "ownTitle": "Usuń język",
       "message": "Czy na pewno chcesz usunąć <b>{count, plural, one {# język} few {# języki} many {# języków} other {# języka}}</b>?"
     },
     "empty": "Nie dodano języków",
@@ -404,8 +405,9 @@
     "retry": "Spróbuj ponownie",
     "form": {
       "updateTitle": "Aktualizuj język",
+      "editTitle": "Edytuj język",
       "createTitle": "Dodaj język",
-      "fields": { "languageId": "Język", "proficiency": "Poziom znajomości" }
+      "fields": { "languageId": "Język", "proficiency": "Poziom znajomości języka" }
     },
     "errors": { "languageAssigned": "Ten język jest już przypisany" },
     "proficiencyLevel": {
@@ -430,7 +432,7 @@
       "empty": "Nie znaleziono umiejętności",
       "actions": { "edit": "Edytuj", "delete": "Usuń" }
     },
-    "fields": { "name": "Nazwa", "category": "Kategoria" },
+    "fields": { "name": "Nazwa umiejętności", "category": "Kategoria" },
     "create": { "title": "Utwórz umiejętność" },
     "edit": { "title": "Edytuj umiejętność" },
     "delete": {
@@ -491,7 +493,7 @@
       "environment": "Środowisko"
     },
     "create": { "title": "Utwórz projekt" },
-    "edit": { "title": "Edytuj projekt" },
+    "update": { "title": "Aktualizuj projekt" },
     "delete": {
       "title": "Usuń projekt",
       "message": "Czy na pewno chcesz usunąć projekt <b>{name}</b>?",

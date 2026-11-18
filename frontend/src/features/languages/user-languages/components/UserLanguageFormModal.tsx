@@ -27,9 +27,17 @@ type Props = {
   onOpenChange: (open: boolean) => void;
   userId: string;
   userLanguage?: UserLanguageFieldsFragment;
+  // the own Languages page says "Edit language", the profile tab "Update language"
+  updateTitle?: string;
 };
 
-export const UserLanguageFormModal = ({ open, onOpenChange, userId, userLanguage }: Props) => {
+export const UserLanguageFormModal = ({
+  open,
+  onOpenChange,
+  userId,
+  userLanguage,
+  updateTitle,
+}: Props) => {
   const t = useTranslations('userLanguage');
   const tValidation = useTranslations('validation');
   const tActions = useTranslations('common.actions');
@@ -84,7 +92,7 @@ export const UserLanguageFormModal = ({ open, onOpenChange, userId, userLanguage
       open={open}
       onOpenChange={onOpenChange}
       onSubmit={onSubmit}
-      title={userLanguage ? t('form.updateTitle') : t('form.createTitle')}
+      title={userLanguage ? (updateTitle ?? t('form.updateTitle')) : t('form.createTitle')}
       form={form}
       mode={userLanguage ? 'update' : 'create'}
       values={{

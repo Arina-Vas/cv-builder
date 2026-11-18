@@ -79,7 +79,7 @@ describe('ProjectFormModal', () => {
       },
     );
 
-    expect(screen.getByRole('dialog', { name: 'Edit project' })).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: 'Update project' })).toBeInTheDocument();
     expect(screen.getByLabelText('Name')).toHaveValue('Blog');
     expect(screen.getByLabelText('Domain')).toHaveValue('Blogging');
     expect(screen.getByLabelText('Description')).toHaveValue('A blogging website');

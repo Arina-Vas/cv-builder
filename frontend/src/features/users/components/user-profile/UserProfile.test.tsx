@@ -156,7 +156,7 @@ describe('UserProfile', () => {
     ).toBeInTheDocument();
     expect(screen.getByText('R')).toBeInTheDocument();
     expect(screen.getByText('thorn_pear@icloud.com')).toBeInTheDocument();
-    expect(screen.getByText('A member since Sun Jan 14 2024')).toBeInTheDocument();
+    expect(screen.getByText('Member Since Sun Jan 14 2024')).toBeInTheDocument();
     expect(screen.queryByRole('region', { name: 'Loading profile' })).not.toBeInTheDocument();
   });
 

@@ -27,11 +27,20 @@ type Props = {
   userId: string;
   canEdit: boolean;
   emptyMessage: string;
+  // wording of the own Languages page; the profile tab uses the defaults
+  updateTitle?: string;
+  removeTitle?: string;
 };
 
 type ModalState = { type: 'create' } | { type: 'update'; language: UserLanguageFieldsFragment };
 
-export const UserLanguages = ({ userId, canEdit, emptyMessage }: Props) => {
+export const UserLanguages = ({
+  userId,
+  canEdit,
+  emptyMessage,
+  updateTitle,
+  removeTitle,
+}: Props) => {
   const t = useTranslations('userLanguage');
   const tProficiency = useTranslations('userLanguage.proficiencyLevel');
   const tActions = useTranslations('common.actions');
@@ -116,10 +125,11 @@ export const UserLanguages = ({ userId, canEdit, emptyMessage }: Props) => {
         onOpenChange={(open) => !open && setModal(null)}
         userId={userId}
         userLanguage={modal?.type === 'update' ? modal.language : undefined}
+        updateTitle={updateTitle}
       />
 
       <ConfirmDialog
-        title={t('remove.title')}
+        title={removeTitle ?? t('remove.title')}
         open={openConfirmDialog}
         onOpenChange={setOpenConfirmDialog}
         message={t.rich('remove.message', {

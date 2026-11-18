@@ -402,6 +402,7 @@
     "confirmRemove": "Retirer",
     "remove": {
       "title": "Retirer des langues",
+      "ownTitle": "Retirer la langue",
       "message": "Voulez-vous vraiment retirer <b>{count, plural, one {# langue} other {# langues}}</b> ?"
     },
     "empty": "Aucune langue ajoutée",
@@ -411,8 +412,9 @@
     "retry": "Réessayer",
     "form": {
       "updateTitle": "Mettre à jour la langue",
+      "editTitle": "Modifier la langue",
       "createTitle": "Ajouter une langue",
-      "fields": { "languageId": "Langue", "proficiency": "Niveau" }
+      "fields": { "languageId": "Langue", "proficiency": "Niveau de langue" }
     },
     "errors": { "languageAssigned": "Cette langue est déjà attribuée" },
     "proficiencyLevel": {
@@ -437,7 +439,7 @@
       "empty": "Aucune compétence trouvée",
       "actions": { "edit": "Modifier", "delete": "Supprimer" }
     },
-    "fields": { "name": "Nom", "category": "Catégorie" },
+    "fields": { "name": "Nom de la compétence", "category": "Catégorie" },
     "create": { "title": "Créer une compétence" },
     "edit": { "title": "Modifier la compétence" },
     "delete": {
@@ -498,7 +500,7 @@
       "environment": "Environnement"
     },
     "create": { "title": "Créer un projet" },
-    "edit": { "title": "Modifier le projet" },
+    "update": { "title": "Mettre à jour le projet" },
     "delete": {
       "title": "Supprimer le projet",
       "message": "Voulez-vous vraiment supprimer le projet <b>{name}</b> ?",
