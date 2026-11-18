@@ -19,7 +19,7 @@ export const LevelItem = ({ name, levelLabel, level, canEdit, onClick, selected 
 
   const content = (
     <>
-      <LevelBar level={level} label={levelLabel} aria-labelledby={nameId} />
+      <LevelBar level={level} label={levelLabel} muted={selected} aria-labelledby={nameId} />
       <span id={nameId}>{name}</span>
     </>
   );

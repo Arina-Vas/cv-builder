@@ -5,9 +5,10 @@ import type { ComponentProps } from 'react';
 type Props = {
   level: LevelType;
   label?: string;
+  muted?: boolean;
 } & ComponentProps<'div'>;
 
-export const LevelBar = ({ level, label, className, ...rest }: Props) => {
+export const LevelBar = ({ level, label, className, muted, ...rest }: Props) => {
   return (
     <div
       {...rest}
@@ -18,6 +19,7 @@ export const LevelBar = ({ level, label, className, ...rest }: Props) => {
       aria-valuemax={LEVEL_MAX}
       aria-valuenow={level}
       aria-valuetext={label}
+      data-muted={muted || undefined}
     >
       <div className={s.fill} style={{ width: `${(level / LEVEL_MAX) * 100}%` }} />
     </div>
