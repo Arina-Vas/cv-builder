@@ -66,6 +66,7 @@ export function EmailVerificationForm({ codeJustSent = false }: EmailVerificatio
   };
 
   const handleSubmit = async () => {
+    setTouched(true);
     if (!isValid || loading) return;
 
     try {
@@ -113,6 +114,7 @@ export function EmailVerificationForm({ codeJustSent = false }: EmailVerificatio
     <AuthForm
       title={t('verifyEmail.title')}
       subtitle={t('verifyEmail.subtitle')}
+      submitWidth="regular"
       onSubmit={handleSubmit}
       actions={
         <>

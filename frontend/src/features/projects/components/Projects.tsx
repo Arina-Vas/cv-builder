@@ -55,6 +55,7 @@ export const Projects = () => {
       key: 'domain',
       header: t('table.columns.domain'),
       render: (project) => project.domain,
+      hideOnTablet: true,
     },
     {
       key: 'startDate',

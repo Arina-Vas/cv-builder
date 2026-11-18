@@ -99,7 +99,7 @@ describe('FormModal', () => {
       unmount();
 
       const second = renderModal({ mode: 'update' });
-      expect(screen.getByRole('button', { name: 'Save' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Update' })).toBeInTheDocument();
       second.unmount();
 
       renderModal({ submitLabel: 'Add' });
@@ -163,7 +163,7 @@ describe('FormModal', () => {
         requireDirty: true,
         values: { name: 'Engineering' },
       });
-      const save = screen.getByRole('button', { name: 'Save' });
+      const save = screen.getByRole('button', { name: 'Update' });
 
       await waitFor(() => expect(save).toBeDisabled());
 

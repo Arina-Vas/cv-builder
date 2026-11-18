@@ -3,11 +3,11 @@
   align-items: center;
   gap: var(--space-4);
   width: 100%;
-  padding: var(--space-1) var(--space-2);
+  padding: var(--space-3) var(--space-4);
   border: 0;
   border-radius: var(--radius-sm);
   background: transparent;
-  color: var(--text);
+  color: var(--text-muted);
   font: inherit;
   text-align: left;
 }
@@ -31,4 +31,5 @@ button.item:focus-visible {
 
 button.item[aria-pressed='true'] {
   background: var(--table-row-selected);
+  color: var(--text);
 }

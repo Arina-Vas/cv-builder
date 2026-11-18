@@ -29,7 +29,7 @@
   --color-bg-light: #f5f5f7;
   --color-grey-100: #e2e2e4; /* [F] Dark Secondary border / hover fill */
   --color-grey-200: #c4c4c6; /* [F] Light input placeholder, disabled input fill */
-  --color-grey-600: #454545; /* [F] Dark Secondary fill, Level 0/1 track */
+  --color-grey-600: #454545; /* [F] Dark Secondary fill, dark Level 1 track */
   --color-bg-canvas: #454545;
   --color-grey-700: #353535; /* [A] dark background.default (app) */
   --color-bg-dark: #353535;
@@ -191,8 +191,12 @@
   --content-max-width: 1536px; /* [A] Container maxWidth "xl" */
   --content-padding-x: 24px; /* [M] Container gutters ≥600px */
   --settings-max-width: 720px; /* [A] */
-  --auth-form-max-width: 220px; /* [A] */
+  --auth-submit-width: 220px; /* [F] SIGN IN, CREATE ACCOUNT, … on the auth pages */
+  --auth-submit-width-regular: var(--button-min-width); /* [F] 160, Email Verification CONFIRM */
+  --auth-submit-width-narrow: 120px; /* [F] Reset Password SUBMIT */
   --auth-form-width: 560px; /* [F] auth pages "Form" frame */
+  --auth-title-gap: 20px; /* [F] title → subtitle */
+  --auth-subtitle-gap: 26px; /* [F] subtitle → first field (its label area included) */
   --auth-actions-offset: 44px; /* [F] last field → primary button */
   --otp-cell-size: 48px; /* [F] Email verification code cell */
   --modal-width-sm: 620px; /* [F] confirmations (Delete CV) */
@@ -254,7 +258,7 @@
   --sidebar-item-height: 56px; /* [A] (40px < 900px) */
   --sidebar-item-padding: 9px 16px; /* [A] */
   --sidebar-item-gap: 16px; /* [A] icon ↔ label */
-  --sidebar-item-spacing: 15px; /* [F] between nav items */
+  --sidebar-item-spacing: var(--space-3-5); /* [F] 14 between nav items */
   --sidebar-item-radius: 0 var(--radius-nav) var(--radius-nav) 0; /* [A] */
 
   --table-cell-padding: 16px; /* [M] TableCell normal */
@@ -284,8 +288,9 @@
   --modal-actions-padding: 8px; /* [M] DialogActions */
   --modal-actions-gap: 24px; /* [F] CANCEL ↔ primary button */
   --modal-section-gap: 26px; /* [F] title ↔ body ↔ buttons */
+  --modal-form-field-top: 67px; /* top of the dialog → border of the first field in form dialogs (Figma 62 + 5 for the label) */
   --menu-min-width: 200px; /* [A] user menu */
-  --menu-radius: var(--radius-sm); /* [M] */
+  --menu-radius: 8px; /* [F] RowActionsMenu (⋮) */
   --menu-item-padding: 6px 16px; /* [M] MenuItem */
   --menu-item-min-height: 48px; /* [M] (MUI switches to auto ≥600px) */
 
@@ -309,6 +314,7 @@
   --skill-bar-height: 4px; /* [F] Progressbar */
   --skill-bar-width: 80px; /* [F] Progressbar */
   --skill-bar-track-opacity: 0.9; /* [F] Progressbar opacity 90% */
+  --level-item-width: 284px; /* [F] User Skills / Languages `Button`, 284×48, items touch (no gap) */
 
   --form-row-gap: 21px; /* [F] Create project: between rows of fields, on top of Field's own 16px */
   --form-column-gap: 12px; /* [F] Create project: between the two columns */
@@ -334,12 +340,14 @@
   --border-strong: #626262; /* [F] */
 
   --primary: #c63031; /* [F] */
+  --primary-text: var(--color-grey-50); /* [F] #F5F5F7, both themes */
   --primary-hover-bg: transparent; /* [F] Primary Hover = outlined look */
   --primary-hover-border: #c63031; /* [F] */
   --primary-hover-text: #c63031; /* [F] */
   --primary-pressed-bg: #e9b0b0; /* [F] */
   --primary-pressed-border: #c63031; /* [F] */
   --primary-disabled-bg: #aeaeae; /* [F] */
+  --button-disabled-text: #e2e2e4; /* [F] text of every disabled button: primary, secondary, ghost */
   --primary-tint-hover: rgba(198, 48, 49, 0.04); /* [M] outlined/text button hover bg */
   --primary-tint-selected: rgba(198, 48, 49, 0.08); /* [M] */
 
@@ -353,7 +361,7 @@
   --info-strong: #145b7b; /* [F] */
 
   --focus-ring: #626262; /* [F] = focused input border. TODO: no dedicated ring in Figma */
-  --overlay: rgba(0, 0, 0, 0.5); /* [M] Backdrop */
+  --overlay: rgba(18, 18, 18, 0.6); /* [F] dialog backdrop #121212, 60% */
   --sidebar-backdrop: rgba(18, 18, 18, 0.6); /* [F] 768w "shadow" #121212, 60%; same in dark */
 
   --action-hover: rgba(0, 0, 0, 0.04); /* [M] */
@@ -372,13 +380,14 @@
   --button-secondary-text: #2e2e2e; /* TODO: text colour not measured */
   --button-secondary-hover-bg: #aeaeae; /* [F] */
   --button-secondary-hover-border: #626262; /* [F] */
-  --button-secondary-hover-text: #2e2e2e; /* TODO: visual only */
+  --button-secondary-hover-text: var(--color-grey-50); /* [F] #F5F5F7 on the grey hover fill */
   --button-secondary-pressed-bg: #626262; /* [F] */
   --button-secondary-pressed-border: #626262; /* [F] */
   --button-secondary-pressed-text: #ffffff; /* TODO: visual only */
   --button-secondary-disabled-bg: #aeaeae; /* [F] */
   /* Button — ghost (text) */
   --button-ghost-hover-border: #626262; /* TODO: visual only, not measured */
+  --button-ghost-text: #626262; /* [F] FORGOT PASSWORD */
   --button-ghost-pressed-bg: #aeaeae; /* [F] */
   --button-ghost-pressed-border: #626262; /* [F] */
   --button-ghost-pressed-text: #2e2e2e; /* TODO: visual only */
@@ -392,6 +401,7 @@
   --input-disabled-bg: #c4c4c6; /* [F] Disabled container fill */
   --input-disabled-text: #aeaeae;
   --input-label: #626262; /* [F] */
+  --input-toggle-icon: var(--input-label); /* [F] eye icon in the password field */
   --input-helper-error: #c63031; /* [F] */
 
   /* Table */
@@ -418,7 +428,7 @@
 
   /* Modal */
   --modal-bg: var(--bg); /* [A] MuiDialog paper = background.default */
-  --modal-shadow: var(--shadow-24); /* [M] */
+  --modal-shadow: none; /* [F] no shadow in Figma */
 
   /* Tabs */
   --tab-text: #2e2e2e; /* [A] */
@@ -460,20 +470,21 @@
   --toast-info-bg: #29b6f6;
   --toast-info-fg: #145b7b; /* [F] */
 
-  /* Skill mastery / language proficiency: fill + track  [F] Level 0–5,
-     mapping [A]: Beginner|A1|A2 → 1, Elementary|B1 → 2, Intermediate|B2 → 3,
-     Advanced|C1|C2 → 4, Expert|Native → 5; value = index × 20% */
-  --level-0-track: #454545;
+  /* Skill mastery / language proficiency: fill + track  [F] Level 1–5, light theme
+     (1440w light User Skills; dark values are overridden in [data-theme='dark']).
+     Mapping [A]: Beginner|A1|A2 → 1, Elementary|B1 → 2, Intermediate|B2 → 3,
+     Advanced|C1|C2 → 4, Expert|Native → 5; value = level × 20%.
+     Level 5 is 100% filled, so it has no track colour. */
+  --level-muted-track: #aeaeae; /* [F] REMOVE SKILLS / LANGUAGES light: selected item, no fill */
   --level-1-fill: #626262;
-  --level-1-track: #454545;
-  --level-2-fill: #29b6f6;
-  --level-2-track: #145b7b;
-  --level-3-fill: #66bb6a;
-  --level-3-track: #335d35;
+  --level-1-track: #aeaeae;
+  --level-2-fill: #0288d1;
+  --level-2-track: #9ed1ed;
+  --level-3-fill: #2e7d32;
+  --level-3-track: #afcdb1;
   --level-4-fill: #ffb800;
-  --level-4-track: #7f5c00;
+  --level-4-track: #ffe49e;
   --level-5-fill: #c63031;
-  --level-5-track: #631818;
 
   /* Checkbox (selection mode) — [M], not in Figma */
   --checkbox-checked: #c63031;
@@ -534,11 +545,12 @@
   --border-strong: #e2e2e4; /* [F] */
 
   --primary-disabled-bg: #626262; /* [F] */
+  --button-disabled-text: #aeaeae; /* [F] text of every disabled button: primary, secondary, ghost */
   --primary-tint-hover: rgba(198, 48, 49, 0.08); /* [M] */
   --primary-tint-selected: rgba(198, 48, 49, 0.16); /* [M] */
 
   --focus-ring: #e2e2e4; /* TODO: not in Figma; = dark strong border */
-  --overlay: rgba(0, 0, 0, 0.5); /* [M] */
+  --overlay: rgba(18, 18, 18, 0.6); /* [F] same as light */
 
   --action-hover: rgba(255, 255, 255, 0.08);
   --action-selected: rgba(255, 255, 255, 0.16);
@@ -547,8 +559,9 @@
   --action-disabled: rgba(255, 255, 255, 0.3);
   --action-disabled-bg: rgba(255, 255, 255, 0.12);
 
-  --sidebar-item-active-bg: var(--action-selected); /* TODO: dark value not measured in Figma */
-  --sidebar-divider: var(--border); /* TODO: dark value not measured in Figma */
+  --sidebar-item-active-bg: var(--color-grey-600); /* [F] #454545 */
+  --modal-bg: var(--color-grey-600); /* [F] #454545 dialog fill, lighter than the page */
+  --sidebar-divider: var(--color-secondary); /* [F] #626262 */
 
   --avatar-bg: #626262; /* [F] */
   --avatar-fallback-text: #2e2e2e; /* [F] */
@@ -557,7 +570,7 @@
 
   --button-secondary-bg: #454545; /* [F] */
   --button-secondary-border: #e2e2e4; /* [F] */
-  --button-secondary-text: #ffffff; /* TODO: visual only */
+  --button-secondary-text: #e2e2e4;
   --button-secondary-hover-bg: #e2e2e4; /* [F] */
   --button-secondary-hover-border: #e2e2e4; /* TODO: not measured */
   --button-secondary-hover-text: #2e2e2e; /* TODO: visual only (dark text on light fill) */
@@ -566,16 +579,18 @@
   --button-secondary-pressed-text: #ffffff; /* TODO */
   --button-secondary-disabled-bg: #626262; /* [F] */
   --button-ghost-hover-border: #e2e2e4; /* TODO: visual only */
+  --button-ghost-text: #c4c4c6; /* [F] FORGOT PASSWORD */
   --button-ghost-pressed-bg: #e2e2e4; /* [F] */
   --button-ghost-pressed-border: #454545; /* [F] */
   --button-ghost-pressed-text: #2e2e2e; /* TODO: visual only (dark text on light fill) */
 
   --input-border: #aeaeae; /* [F] Default (2 colours: #626262 placeholder + #AEAEAE) */
-  --input-border-hover: #626262; /* [F] Hover (only #626262 present) */
-  --input-border-focus: #626262; /* TODO: dark Active border not isolated */
+  --input-border-hover: var(--color-grey-50); /* [F] #F5F5F7 */
+  --input-border-focus: var(--color-grey-50); /* [F] #F5F5F7 */
   --input-border-error: #c63031; /* [F] */
   --input-disabled-bg: #626262; /* [F] */
-  --input-label: rgba(255, 255, 255, 0.7); /* TODO: [M] fallback */
+  --input-label: var(--color-disabled); /* [F] #AEAEAE */
+  --input-toggle-icon: var(--color-disabled); /* [F] #AEAEAE eye icon */
   --input-helper-error: #c63031; /* [F] */
 
   --table-row-selected: rgba(198, 48, 49, 0.16); /* [M] */
@@ -612,6 +627,16 @@
   --chip-border: #aeaeae;
   --chip-remove-hover: #f5f5f7;
 
-  /* Toasts and level colours: Figma has only one (light) frame —
+  /* Toast colours: Figma has only one (light) frame —
      values inherited from :root. TODO: confirm for dark. */
+
+  /* Levels [F] 1440w dark User Skills (= components page Progressbar);
+     fills of levels 1, 4, 5 are the same as light, inherited from :root */
+  --level-muted-track: #454545; /* [F] REMOVE SKILLS / LANGUAGES dark */
+  --level-1-track: #454545;
+  --level-2-fill: #29b6f6;
+  --level-2-track: #145b7b;
+  --level-3-fill: #66bb6a;
+  --level-3-track: #335d35;
+  --level-4-track: #7f5c00;
 }

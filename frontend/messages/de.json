@@ -401,10 +401,10 @@
     "title": "Aktuelle Sprachen",
     "addButton": "Sprache hinzufügen",
     "removeButton": "Sprachen entfernen",
-    "removeCount": "Entfernen ({count})",
+    "confirmRemove": "Entfernen",
     "remove": {
       "title": "Sprachen entfernen",
-      "message": "Möchten Sie wirklich {count, plural, one {# Sprache} other {# Sprachen}} entfernen?"
+      "message": "Möchten Sie wirklich <b>{count, plural, one {# Sprache} other {# Sprachen}}</b> entfernen?"
     },
     "empty": "Keine Sprachen hinzugefügt",
     "emptyProfile": "Noch keine Sprachen hinzugefügt",
@@ -454,10 +454,10 @@
   "userSkill": {
     "addButton": "Fähigkeit hinzufügen",
     "removeButton": "Fähigkeiten entfernen",
-    "removeCount": "Entfernen ({count})",
+    "confirmRemove": "Entfernen",
     "remove": {
       "title": "Fähigkeiten entfernen",
-      "message": "Möchten Sie wirklich {count, plural, one {# Fähigkeit} other {# Fähigkeiten}} entfernen?"
+      "message": "Möchten Sie wirklich <b>{count, plural, one {# Fähigkeit} other {# Fähigkeiten}}</b> entfernen?"
     },
     "empty": "Keine Fähigkeiten hinzugefügt",
     "emptyProfile": "Noch keine Fähigkeiten hinzugefügt",

@@ -25,12 +25,15 @@ export function ForgotPasswordForm() {
     context: NO_ERROR_TOAST,
   });
 
-  const { values, isValid, register } = useFormFields({ email: '' }, ({ email }, tValidation) => ({
-    email: validateEmail(email, tValidation),
-  }));
+  const { values, validateAll, register } = useFormFields(
+    { email: '' },
+    ({ email }, tValidation) => ({
+      email: validateEmail(email, tValidation),
+    }),
+  );
 
   const handleSubmit = async () => {
-    if (!isValid || loading) return;
+    if (loading || !validateAll()) return;
 
     try {
       await requestPasswordReset({ variables: { input: { email: values.email.trim() } } });
@@ -53,7 +56,7 @@ export function ForgotPasswordForm() {
       onSubmit={handleSubmit}
       actions={
         <>
-          <Button type="submit" disabled={!isValid} loading={loading}>
+          <Button type="submit" loading={loading}>
             {t('forgotPassword.submit')}
           </Button>
           <Button variant="ghost" onClick={() => router.push(AuthRoute.signIn)}>

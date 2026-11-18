@@ -409,10 +409,10 @@
     "title": "Idiomas actuales",
     "addButton": "Añadir idioma",
     "removeButton": "Quitar idiomas",
-    "removeCount": "Quitar ({count})",
+    "confirmRemove": "Quitar",
     "remove": {
       "title": "Quitar idiomas",
-      "message": "¿Seguro que quieres quitar {count, plural, one {# idioma} other {# idiomas}}?"
+      "message": "¿Seguro que quieres quitar <b>{count, plural, one {# idioma} other {# idiomas}}</b>?"
     },
     "empty": "No se han añadido idiomas",
     "emptyProfile": "Todavía no se han añadido idiomas",
@@ -462,10 +462,10 @@
   "userSkill": {
     "addButton": "Añadir habilidad",
     "removeButton": "Quitar habilidades",
-    "removeCount": "Quitar ({count})",
+    "confirmRemove": "Quitar",
     "remove": {
       "title": "Quitar habilidades",
-      "message": "¿Seguro que quieres quitar {count, plural, one {# habilidad} other {# habilidades}}?"
+      "message": "¿Seguro que quieres quitar <b>{count, plural, one {# habilidad} other {# habilidades}}</b>?"
     },
     "empty": "No se han añadido habilidades",
     "emptyProfile": "Todavía no se han añadido habilidades",

@@ -162,7 +162,7 @@ describe('UserFormModal', () => {
     expect(screen.getByLabelText('First Name')).toBeEnabled();
     expect(screen.getByLabelText('Last Name')).toBeEnabled();
 
-    const save = screen.getByRole('button', { name: 'Save' });
+    const save = screen.getByRole('button', { name: 'Update' });
     expect(save).toBeDisabled();
 
     await user.type(screen.getByLabelText('First Name'), 't ');
@@ -261,7 +261,7 @@ describe('UserFormModal', () => {
     );
 
     await choose(user, 'Role', 'Employee');
-    await user.click(screen.getByRole('button', { name: 'Save' }));
+    await user.click(screen.getByRole('button', { name: 'Update' }));
 
     const dialog = screen.getByRole('dialog', { name: 'Update user' });
     expect(await within(dialog).findByRole('alert')).toHaveTextContent(

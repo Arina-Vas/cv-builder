@@ -179,10 +179,10 @@ describe('UserLanguageFormModal', () => {
       expect(language).toBeDisabled();
       expect(language).toHaveTextContent('English');
       expect(screen.getByRole('combobox', { name: 'Proficiency' })).toHaveTextContent('B2');
-      expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
+      expect(screen.getByRole('button', { name: 'Update' })).toBeDisabled();
 
       await choose(user, 'Proficiency', 'C1');
-      await user.click(screen.getByRole('button', { name: 'Save' }));
+      await user.click(screen.getByRole('button', { name: 'Update' }));
 
       await expect.poll(() => onOpenChange).toHaveBeenCalledWith(false);
     });

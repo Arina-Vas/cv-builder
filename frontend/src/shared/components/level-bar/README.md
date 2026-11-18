@@ -1,7 +1,8 @@
 # LevelBar
 
-A thin bar that shows a level from 0 to 5: skill mastery or language proficiency
-(Figma "Design system (components)" → Notifications frame, layer `Progressbar`, Level 0 – Level 5 (Max)).
+A thin bar that shows a level from 1 to 5: skill mastery or language proficiency
+(Figma "1440px Desktop" → User Skills, light and dark frames, layer `Progressbar`; the dark palette is also
+on "Design system (components)" → Notifications frame).
 Live examples, Light and Dark: Storybook → **Shared/LevelBar**.
 
 ```tsx
@@ -15,14 +16,15 @@ import type { LevelType } from '@/shared/components/level-bar/LevelBar.types';
 <LevelBar level={3} label="Intermediate" />                         // skill
 <LevelBar level={3} label="B2" />                                   // language
 <LevelBar level={3} label="Intermediate" aria-labelledby={nameId} /> // named by a text next to it
-<LevelBar level={0} />                                              // empty track
+<LevelBar level={3} label="Intermediate" muted />                   // grey: item selected for removal
 ```
 
-| Prop        | Values                                    | Default  |
-| ----------- | ----------------------------------------- | -------- |
-| `level`     | `LevelType`: `0 \| 1 \| 2 \| 3 \| 4 \| 5` | required |
-| `label`     | `string`: text value for screen readers   | —        |
-| `className` | on the root, e.g. a different width       | —        |
+| Prop        | Values                                  | Default  |
+| ----------- | --------------------------------------- | -------- |
+| `level`     | `LevelType`: `1 \| 2 \| 3 \| 4 \| 5`    | required |
+| `label`     | `string`: text value for screen readers | —        |
+| `muted`     | `boolean`: grey track, no fill          | `false`  |
+| `className` | on the root, e.g. a different width     | —        |
 
 Plus every native `<div>` attribute (`aria-label`, `aria-labelledby`, `title`, `data-*`, `style`).
 
@@ -33,13 +35,16 @@ Plus every native `<div>` attribute (`aria-label`, `aria-labelledby`, `title`, `
 - The **name** of what is measured ("React", "English") is not part of the bar. Put it next to the bar
   and link it with `aria-labelledby`, or pass `aria-label`.
 - The bar has no text, no click and no focus. A clickable skill / language item wraps it.
+- `muted` is visual only: the bar turns into a plain grey track (`--level-muted-track`, no fill).
+  `LevelItem` sets it on items selected in the Remove skills / languages mode, as in Figma
+  (REMOVE SKILLS / REMOVE LANGUAGES). `aria-valuenow` keeps the real level; the selected state belongs
+  to the item (`aria-pressed`), not to the bar.
 - `LevelType`, `LEVEL_MIN` and `LEVEL_MAX` are exported from `LevelBar.types.ts`.
 
 ## Levels
 
 | Level | Fill | Skill mastery (Notion) | Language proficiency |
 | ----- | ---- | ---------------------- | -------------------- |
-| 0     | 0%   | —                      | —                    |
 | 1     | 20%  | Beginner               | A1, A2               |
 | 2     | 40%  | Elementary             | B1                   |
 | 3     | 60%  | Intermediate           | B2                   |
@@ -47,8 +52,9 @@ Plus every native `<div>` attribute (`aria-label`, `aria-labelledby`, `title`, `
 | 5     | 100% | Expert                 | Native               |
 
 The fill width is `level / LEVEL_MAX`. Each level has its own fill and track colour; the track is drawn
-by `::before` at 90% opacity, so the fill on top stays fully opaque. Level 0 is an empty track:
-neither the skill nor the language values in the spec map to it.
+by `::before` at 90% opacity, so the fill on top stays fully opaque. Level 5 is 100% filled, so its
+track is never visible and uses the fill colour. There is no level 0: no skill or language value maps
+to it.
 
 ## Next to a name
 
@@ -66,7 +72,7 @@ The screen reader reads "React, meter, Intermediate". Storybook → **In List** 
 
 ## Accessibility
 
-- `role="meter"` with `aria-valuemin` 0, `aria-valuemax` 5, `aria-valuenow` = `level`:
+- `role="meter"` with `aria-valuemin` 1, `aria-valuemax` 5, `aria-valuenow` = `level`:
   it is a measured value, not the progress of a task.
 - `aria-valuetext` = `label`.
 - The bar is not focusable. If the item around it is interactive (opens the Update modal),
@@ -76,13 +82,14 @@ The screen reader reads "React, meter, Intermediate". Storybook → **In List** 
 
 Styles use tokens from [`theme/tokens.css`](../../theme/tokens.css):
 
-| Token                                       | Value                                  |
-| ------------------------------------------- | -------------------------------------- |
-| `--skill-bar-width`                         | 80px (not measured in Figma)           |
-| `--skill-bar-height`                        | 4px                                    |
-| `--skill-bar-track-opacity`                 | 0.9                                    |
-| `--level-{0…5}-track`, `--level-{1…5}-fill` | colour of each level (see `TOKENS.md`) |
+| Token                                       | Value                                     |
+| ------------------------------------------- | ----------------------------------------- |
+| `--skill-bar-width`                         | 80px (not measured in Figma)              |
+| `--skill-bar-height`                        | 4px                                       |
+| `--skill-bar-track-opacity`                 | 0.9                                       |
+| `--level-{1…4}-track`, `--level-{1…5}-fill` | colour of each level (see `TOKENS.md`)    |
+| `--level-muted-track`                       | `muted` track: `#AEAEAE` / dark `#454545` |
 
 To change a size or a colour, change the token, not the component CSS.
-The levels exist only in a light Figma frame; the dark-theme values are an open question in
-[TOKENS.md](../../theme/TOKENS.md) (tracks of levels 0–1 are hard to see on the dark background).
+Light and dark themes use different palettes (light and dark User Skills frames in Figma); the dark
+values are overridden in `[data-theme='dark']`.

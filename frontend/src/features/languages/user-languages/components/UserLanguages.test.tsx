@@ -160,7 +160,7 @@ describe('UserLanguages', () => {
       const dialog = screen.getByRole('dialog', { name: 'Update language' });
       await user.click(within(dialog).getByRole('combobox', { name: 'Proficiency' }));
       await user.click(within(document.body).getByRole('option', { name: 'C1' }));
-      await user.click(within(dialog).getByRole('button', { name: 'Save' }));
+      await user.click(within(dialog).getByRole('button', { name: 'Update' }));
 
       // the list row (its meter) is gone; the open dialog hides the page from the a11y tree
       await waitFor(() =>
@@ -176,7 +176,7 @@ describe('UserLanguages', () => {
       const { user } = renderList();
 
       await user.click(await screen.findByRole('button', { name: 'Remove languages' }));
-      const remove = screen.getByRole('button', { name: 'Remove (0)' });
+      const remove = screen.getByRole('button', { name: 'Remove' });
       expect(remove).toBeDisabled();
 
       const english = screen.getByRole('button', { name: /English/ });
@@ -188,7 +188,7 @@ describe('UserLanguages', () => {
         'aria-pressed',
         'false',
       );
-      expect(screen.getByRole('button', { name: 'Remove (2)' })).toBeEnabled();
+      expect(screen.getByRole('button', { name: 'Remove 2' })).toBeEnabled();
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
 
@@ -223,7 +223,7 @@ describe('UserLanguages', () => {
       await user.click(await screen.findByRole('button', { name: 'Remove languages' }));
       await user.click(screen.getByRole('button', { name: /English/ }));
       await user.click(screen.getByRole('button', { name: /Russian/ }));
-      await user.click(screen.getByRole('button', { name: 'Remove (2)' }));
+      await user.click(screen.getByRole('button', { name: 'Remove 2' }));
 
       const dialog = screen.getByRole('dialog', { name: 'Remove languages' });
       expect(dialog).toHaveTextContent('Are you sure you want to remove 2 languages?');

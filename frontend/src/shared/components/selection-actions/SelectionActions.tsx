@@ -10,7 +10,7 @@ type Props = {
   canRemove: boolean;
   addLabel: string;
   removeLabel: string;
-  removeCountLabel: string;
+  confirmRemoveLabel: string;
   cancelLabel: string;
   onAdd: () => void;
   onStartRemove: () => void;
@@ -25,7 +25,7 @@ export const SelectionActions = ({
   canRemove,
   addLabel,
   removeLabel,
-  removeCountLabel,
+  confirmRemoveLabel,
   cancelLabel,
   onAdd,
   onStartRemove,
@@ -38,11 +38,11 @@ export const SelectionActions = ({
     <div className={s.actions}>
       {!selecting && (
         <>
-          <Button size={'sm'} gated onClick={onAdd} variant={'ghost'}>
+          <Button gated onClick={onAdd} variant={'ghost'}>
             <PlusIcon />
             {addLabel}
           </Button>
-          <Button variant={'text'} size={'sm'} gated disabled={!canRemove} onClick={onStartRemove}>
+          <Button variant={'text'} gated disabled={!canRemove} onClick={onStartRemove}>
             <TrashIcon />
             {removeLabel}
           </Button>
@@ -51,11 +51,19 @@ export const SelectionActions = ({
 
       {selecting && (
         <>
-          <Button size={'sm'} onClick={onCancel} variant={'secondary'}>
+          <Button onClick={onCancel} variant={'secondary'}>
             {cancelLabel}
           </Button>
-          <Button disabled={selectedCount === 0} size={'sm'} gated onClick={onRemove}>
-            {removeCountLabel}
+          {/* the count badge appears from the first selected item; the 12px gap comes from the flex
+              gap of Button's label (the space is not drawn there, it only keeps the name "Remove 2") */}
+          <Button disabled={selectedCount === 0} gated onClick={onRemove}>
+            {confirmRemoveLabel}
+            {selectedCount > 0 && (
+              <>
+                {' '}
+                <span className={s.badge}>{selectedCount}</span>
+              </>
+            )}
           </Button>
         </>
       )}

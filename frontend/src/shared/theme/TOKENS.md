@@ -64,7 +64,10 @@ How the values were obtained:
 | Toast                                          | 280×80, r 12, 1px border, title 16/16 500, text 12/20.02, padding 8/16                                     | —                       | [F] `Notifications › Frame › Success`                                                                    |
 | Toast colours `--toast-*`                      | bg / fg: Success, Warning, Info = the `--success`, `--warning`, `--info` pairs above; text = fg            | same (see 9)            | [F] `Notifications › Frame`                                                                              |
 | `--toast-error-*`                              | bg `#C63031`, border `#631818`, **text `#F5F5F7`** (light, unlike the other types)                         | same (see 9)            | [F] Error toast; text hex not measured, taken from dark `--text` ⚠                                       |
-| Level 0–5 fill / track                         | `—/#454545`, `#626262/#454545`, `#29B6F6/#145B7B`, `#66BB6A/#335D35`, `#FFB800/#7F5C00`, `#C63031/#631818` | —                       | [F] `Frame › Progressbar › Background`; track opacity 90%, height 4                                      |
+| Level 1–5 fill / track, light                  | `#626262/#AEAEAE`, `#0288D1/#9ED1ED`, `#2E7D32/#AFCDB1`, `#FFB800/#FFE49E`, `#C63031` (level 5: fill only) | —                       | [F] User Skills light; track opacity 90%, height 4; level 5 is 100%, no track                            |
+| Level 1–5 fill / track, dark                   | `#626262/#454545`, `#29B6F6/#145B7B`, `#66BB6A/#335D35`, `#FFB800/#7F5C00`, `#C63031` (level 5: fill only) | —                       | [F] User Skills dark = components page; Languages / tablet frames disagree (C6)                          |
+| `--level-muted-track`                          | `#AEAEAE` (selected for removal: grey track, no fill)                                                      | `#454545`               | [F] REMOVE SKILLS / REMOVE LANGUAGES light / dark `Progressbar`                                          |
+| `--level-item-width`                           | 284 (item 284×48, padding 12/16, no gap between items)                                                     | —                       | [F] User Skills / Languages `Button`; tablet is 310, not used yet                                        |
 | Button size                                    | h 48, r 40, border 1                                                                                       | —                       | [F] Button 160×48; [A] minWidth 220 ⚠                                                                    |
 | Input size                                     | h 48 (container 400×48), textarea 120                                                                      | —                       | [F]; [A] padding 12, radius 0, border 1px, `transition: border 200ms`                                    |
 | Type: button                                   | 14 / 24.5 / .4 / 500 / uppercase                                                                           | —                       | [F] `Button › Update`                                                                                    |
@@ -89,7 +92,7 @@ How the values were obtained:
    - Dark Secondary Active and Dark Ghost Hover
    - Dark input focused border and label color
 8. **Unverified Design-system frames.** These exist but were not inspected, so their values come from [A] / [M]: `Select & Multiselect`, `DatePicker`, `Avatar Uploader`, `Table`, `Table (pagination)`, `Table (empty)`, `Loader`.
-9. **Notifications and skill levels only exist in a light frame.** Are the dark-theme values the same?
+9. **Notifications only exist in a light frame.** Are the dark-theme values the same? (Levels: resolved, see the Level 1–5 rows.)
 10. **No Figma spec for:**
     - Checkbox / selection-mode controls (tokens use [M])
     - Project Environment chips (tokens use [M])

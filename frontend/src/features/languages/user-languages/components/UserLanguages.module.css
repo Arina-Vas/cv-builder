@@ -14,8 +14,7 @@
 
 .list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(max-content, 200px));
-  gap: var(--space-4) 48px;
+  grid-template-columns: repeat(auto-fill, var(--level-item-width));
   margin: 0;
   padding: 0;
   list-style: none;
