@@ -107,7 +107,7 @@ export function EmailVerificationForm({ codeJustSent = false }: EmailVerificatio
       onSubmit={handleSubmit}
       actions={
         <>
-          <Button type="submit" loading={loading}>
+          <Button type="submit" disabled={Boolean(codeError)} loading={loading}>
             {t('verifyEmail.confirm')}
           </Button>
           <Button variant="text" disabled={cooldown > 0} loading={resending} onClick={handleResend}>

@@ -27,6 +27,20 @@ describe('SignUpForm', () => {
     expect(screen.getByText('Welcome! Sign up to continue')).toBeInTheDocument();
   });
 
+  it('keeps Create account disabled until every field is valid', async () => {
+    const { user } = renderWithProviders(<SignUpForm />);
+    const submit = screen.getByRole('button', { name: 'Create account' });
+
+    expect(submit).toBeDisabled();
+
+    await user.type(screen.getByLabelText('Email'), EMAIL);
+    await user.type(screen.getByLabelText('Password'), PASSWORD);
+    expect(submit).toBeDisabled();
+
+    await user.type(screen.getByLabelText('Confirm Password'), PASSWORD);
+    expect(submit).toBeEnabled();
+  });
+
   it('requires matching passwords', async () => {
     const { user } = renderWithProviders(<SignUpForm />);
 
@@ -34,7 +48,7 @@ describe('SignUpForm', () => {
     await user.tab();
 
     expect(screen.getByText('Passwords do not match')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Create account' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Create account' })).toBeDisabled();
   });
 
   it('creates the account and goes to email verification', async () => {

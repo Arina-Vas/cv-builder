@@ -38,11 +38,11 @@ export const SelectionActions = ({
     <div className={s.actions}>
       {!selecting && (
         <>
-          <Button size={'sm'} gated onClick={onAdd} variant={'ghost'}>
+          <Button gated onClick={onAdd} variant={'ghost'}>
             <PlusIcon />
             {addLabel}
           </Button>
-          <Button variant={'text'} size={'sm'} gated disabled={!canRemove} onClick={onStartRemove}>
+          <Button variant={'text'} gated disabled={!canRemove} onClick={onStartRemove}>
             <TrashIcon />
             {removeLabel}
           </Button>

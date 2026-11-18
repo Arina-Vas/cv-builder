@@ -28,15 +28,29 @@ async function enterCodeAndConfirm(ui: ReturnType<typeof renderWithProviders>['u
 }
 
 describe('EmailVerificationForm', () => {
-  it('keeps Confirm enabled; a click without 6 digits shows the code error', async () => {
+  it('keeps Confirm disabled until all 6 digits are entered', async () => {
     const { user } = renderWithProviders(<EmailVerificationForm />);
     const confirm = screen.getByRole('button', { name: 'Confirm' });
 
+    expect(confirm).toBeDisabled();
+
+    await user.click(screen.getByLabelText('Digit 1 of 6'));
+    await user.paste('123');
+    expect(confirm).toBeDisabled();
+
+    await user.click(screen.getByLabelText('Digit 1 of 6'));
+    await user.paste(CODE);
     expect(confirm).toBeEnabled();
+  });
+
+  it('shows the code error when the form is submitted without 6 digits', async () => {
+    const { user } = renderWithProviders(<EmailVerificationForm />);
+    const form = screen.getByRole('button', { name: 'Confirm' }).closest('form')!;
+
     expect(screen.queryByText('Verification code is required')).not.toBeInTheDocument();
 
-    await user.click(confirm);
-    expect(screen.getByText('Verification code is required')).toBeInTheDocument();
+    fireEvent.submit(form);
+    expect(await screen.findByText('Verification code is required')).toBeInTheDocument();
 
     await user.click(screen.getByLabelText('Digit 1 of 6'));
     await user.paste('123');
