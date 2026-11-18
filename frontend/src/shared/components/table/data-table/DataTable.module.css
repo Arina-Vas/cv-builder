@@ -32,6 +32,7 @@
 .table td {
   font-weight: var(--type-body2-weight);
   line-height: var(--type-body2-lh);
+  overflow-wrap: anywhere;
 }
 
 .table tbody tr {

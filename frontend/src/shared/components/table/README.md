@@ -105,6 +105,14 @@ and the header would stop sticking to the page).
 - `display: none` also removes the column from the accessibility tree, so a screen reader on tablet
   hears the same columns the user sees.
 
+## Long values
+
+Cells have `overflow-wrap: anywhere`: a value without spaces (an email, a long name) breaks inside
+its cell instead of setting the table's minimum width. The row gets taller, the page does not
+scroll sideways. Without it a 38-character email kept the Users table at 859px, wider than the
+817px left at 1080px with the full 200px sidebar. The wiki has no truncation rule, so values are
+wrapped, not cut with `…`.
+
 ## Row actions
 
 The last column is one of:
