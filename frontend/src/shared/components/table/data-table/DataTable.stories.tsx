@@ -259,25 +259,6 @@ export const ScrollWithDetails: Story = {
   ),
 };
 
-// Minimum supported width (< 768px is the Device Error page): long emails may overflow
-export const ScrollTablet: Story = {
-  name: 'Scroll: 50 rows, tablet 768px',
-  parameters: { layout: 'fullscreen' },
-  render: () => (
-    <div
-      style={{
-        width: 768,
-        height: '100vh',
-        overflow: 'auto',
-        padding: '0 16px',
-        outline: '1px dashed var(--table-border)',
-      }}
-    >
-      {usersTable}
-    </div>
-  ),
-};
-
 /* ------------------------------------------------------------------ */
 /* Pagination: 195 users, every request takes 1.5s                     */
 /* ------------------------------------------------------------------ */

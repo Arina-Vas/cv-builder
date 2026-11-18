@@ -32,6 +32,7 @@
 .table td {
   font-weight: var(--type-body2-weight);
   line-height: var(--type-body2-lh);
+  overflow-wrap: anywhere;
 }
 
 .table tbody tr {
@@ -84,4 +85,10 @@
 .table .refreshing {
   opacity: var(--table-refreshing-opacity);
   transition: opacity var(--duration-shorter) var(--ease-in-out);
+}
+
+@media (max-width: 1023.98px) {
+  .hideOnTablet {
+    display: none;
+  }
 }

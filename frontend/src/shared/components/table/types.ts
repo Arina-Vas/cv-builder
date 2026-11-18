@@ -14,6 +14,7 @@ export interface Column<T> {
   render: (row: T) => ReactNode;
   sortable?: boolean;
   width?: string;
+  hideOnTablet?: boolean;
 }
 
 export interface RowAction<T> {

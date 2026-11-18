@@ -96,6 +96,38 @@ describe('DataTable', () => {
     expect(screen.getAllByRole('button', { name: /^Actions for/ })).toHaveLength(3);
   });
 
+  // jsdom does not evaluate media queries: only the class is checked, display: none is CSS
+  it('marks hideOnTablet columns in the header and every cell', () => {
+    renderTable({
+      onSortChange: vi.fn(),
+      columns: [
+        ...columns,
+        { key: 'code', header: 'Code', render: (row) => `D-${row.id}`, hideOnTablet: true },
+        {
+          key: 'sortCode',
+          header: 'Sort code',
+          render: (row) => `S-${row.id}`,
+          sortable: true,
+          hideOnTablet: true,
+        },
+      ],
+    });
+
+    expect(screen.getByRole('columnheader', { name: 'Code' })).toHaveClass(/hideOnTablet/);
+    expect(screen.getByRole('columnheader', { name: 'Sort code' })).toHaveClass(/hideOnTablet/);
+    for (const id of ['1', '2', '3']) {
+      expect(screen.getByRole('cell', { name: `D-${id}` })).toHaveClass(/hideOnTablet/);
+      expect(screen.getByRole('cell', { name: `S-${id}` })).toHaveClass(/hideOnTablet/);
+    }
+  });
+
+  it('leaves columns without hideOnTablet visible on tablet', () => {
+    renderTable({ onSortChange: vi.fn() });
+
+    expect(screen.getByRole('columnheader', { name: 'Name' })).not.toHaveClass(/hideOnTablet/);
+    expect(screen.getByRole('cell', { name: 'React' })).not.toHaveAttribute('class');
+  });
+
   it('renders row details only when there are some', () => {
     renderTable({ renderRowDetails: (row) => (row.id === '1' ? 'Main department' : null) });
 

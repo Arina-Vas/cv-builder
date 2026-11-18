@@ -79,9 +79,15 @@ export function DataTable<T>({
               width={column.width}
               sort={sort}
               onSortChange={onSortChange}
+              className={column.hideOnTablet ? styles.hideOnTablet : undefined}
             />
           ) : (
-            <th key={column.key} style={{ width: column.width }} scope="col">
+            <th
+              key={column.key}
+              className={column.hideOnTablet ? styles.hideOnTablet : undefined}
+              style={{ width: column.width }}
+              scope="col"
+            >
               {column.hideHeader ? (
                 <span className={styles.visuallyHidden}>{column.header}</span>
               ) : (
@@ -124,7 +130,12 @@ export function DataTable<T>({
             <Fragment key={getRowId(row)}>
               <tr>
                 {columns.map((column) => (
-                  <td key={column.key}>{column.render(row)}</td>
+                  <td
+                    key={column.key}
+                    className={column.hideOnTablet ? styles.hideOnTablet : undefined}
+                  >
+                    {column.render(row)}
+                  </td>
                 ))}
                 {hasActionsColumn && (
                   <td className={styles.actionsCell}>{renderActionsCell(row)}</td>
