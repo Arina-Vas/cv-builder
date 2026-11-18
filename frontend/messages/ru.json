@@ -395,6 +395,7 @@
     "confirmRemove": "Удалить",
     "remove": {
       "title": "Удалить языки",
+      "ownTitle": "Удалить язык",
       "message": "Вы уверены, что хотите удалить <b>{count, plural, one {# язык} few {# языка} many {# языков} other {# языка}}</b>?"
     },
     "empty": "Языки не добавлены",
@@ -404,8 +405,9 @@
     "retry": "Повторить",
     "form": {
       "updateTitle": "Обновить язык",
+      "editTitle": "Редактировать язык",
       "createTitle": "Добавить язык",
-      "fields": { "languageId": "Язык", "proficiency": "Уровень владения" }
+      "fields": { "languageId": "Язык", "proficiency": "Уровень владения языком" }
     },
     "errors": { "languageAssigned": "Этот язык уже добавлен" },
     "proficiencyLevel": {
@@ -430,7 +432,7 @@
       "empty": "Навыки не найдены",
       "actions": { "edit": "Редактировать", "delete": "Удалить" }
     },
-    "fields": { "name": "Название", "category": "Категория" },
+    "fields": { "name": "Название навыка", "category": "Категория" },
     "create": { "title": "Создать навык" },
     "edit": { "title": "Редактировать навык" },
     "delete": {
@@ -491,7 +493,7 @@
       "environment": "Окружение"
     },
     "create": { "title": "Создать проект" },
-    "edit": { "title": "Редактировать проект" },
+    "update": { "title": "Обновить проект" },
     "delete": {
       "title": "Удалить проект",
       "message": "Вы уверены, что хотите удалить проект <b>{name}</b>?",

@@ -48,7 +48,7 @@ export class CreateProjectInput {
 
   @Field(() => DateScalar)
   @IsDate()
-  @IsNotBeforeDate('startDate', { message: 'End date cannot be earlier than start date' })
+  @IsNotBeforeDate('startDate', { message: 'End date must be later than start date' })
   endDate!: Date;
 
   @Field(() => [ID], { defaultValue: [] })

@@ -71,7 +71,7 @@ describe('Skills', () => {
     await user.click(screen.getByRole('button', { name: 'Create skill' }));
 
     const dialog = screen.getByRole('dialog', { name: 'Create skill' });
-    expect(within(dialog).getByLabelText('Name')).toHaveValue('');
+    expect(within(dialog).getByLabelText('Skill name')).toHaveValue('');
   });
 
   it('opens the edit modal with the row data', async () => {
@@ -80,7 +80,7 @@ describe('Skills', () => {
     await openRowAction(user, 'Edit');
 
     const dialog = screen.getByRole('dialog', { name: 'Edit skill' });
-    expect(within(dialog).getByLabelText('Name')).toHaveValue('React');
+    expect(within(dialog).getByLabelText('Skill name')).toHaveValue('React');
   });
 
   describe('delete', () => {

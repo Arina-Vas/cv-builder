@@ -394,6 +394,7 @@
     "confirmRemove": "Entfernen",
     "remove": {
       "title": "Sprachen entfernen",
+      "ownTitle": "Sprache entfernen",
       "message": "Möchten Sie wirklich <b>{count, plural, one {# Sprache} other {# Sprachen}}</b> entfernen?"
     },
     "empty": "Keine Sprachen hinzugefügt",
@@ -403,6 +404,7 @@
     "retry": "Erneut versuchen",
     "form": {
       "updateTitle": "Sprache aktualisieren",
+      "editTitle": "Sprache bearbeiten",
       "createTitle": "Sprache hinzufügen",
       "fields": { "languageId": "Sprache", "proficiency": "Sprachniveau" }
     },
@@ -429,7 +431,7 @@
       "empty": "Keine Fähigkeiten gefunden",
       "actions": { "edit": "Bearbeiten", "delete": "Löschen" }
     },
-    "fields": { "name": "Name", "category": "Kategorie" },
+    "fields": { "name": "Name der Fähigkeit", "category": "Kategorie" },
     "create": { "title": "Fähigkeit erstellen" },
     "edit": { "title": "Fähigkeit bearbeiten" },
     "delete": {
@@ -490,7 +492,7 @@
       "environment": "Umgebung"
     },
     "create": { "title": "Projekt erstellen" },
-    "edit": { "title": "Projekt bearbeiten" },
+    "update": { "title": "Projekt aktualisieren" },
     "delete": {
       "title": "Projekt löschen",
       "message": "Möchten Sie das Projekt <b>{name}</b> wirklich löschen?",

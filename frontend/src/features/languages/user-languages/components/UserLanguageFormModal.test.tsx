@@ -65,7 +65,7 @@ describe('UserLanguageFormModal', () => {
         .toEqual(['German']);
       await user.keyboard('{Escape}');
 
-      await user.click(screen.getByRole('combobox', { name: 'Proficiency' }));
+      await user.click(screen.getByRole('combobox', { name: 'Language Proficiency' }));
       expect(
         within(document.body)
           .getAllByRole('option')
@@ -103,7 +103,7 @@ describe('UserLanguageFormModal', () => {
       expect(add).toBeDisabled();
 
       await choose(user, 'Language', 'German');
-      await choose(user, 'Proficiency', 'Native');
+      await choose(user, 'Language Proficiency', 'Native');
       await user.click(add);
 
       await expect.poll(() => onOpenChange).toHaveBeenCalledWith(false);
@@ -133,7 +133,7 @@ describe('UserLanguageFormModal', () => {
       );
 
       await choose(user, 'Language', 'German');
-      await choose(user, 'Proficiency', 'Native');
+      await choose(user, 'Language Proficiency', 'Native');
       await user.click(screen.getByRole('button', { name: 'Add' }));
 
       const language = screen.getByRole('combobox', { name: 'Language' });
@@ -178,10 +178,12 @@ describe('UserLanguageFormModal', () => {
       const language = screen.getByRole('combobox', { name: 'Language' });
       expect(language).toBeDisabled();
       expect(language).toHaveTextContent('English');
-      expect(screen.getByRole('combobox', { name: 'Proficiency' })).toHaveTextContent('B2');
+      expect(screen.getByRole('combobox', { name: 'Language Proficiency' })).toHaveTextContent(
+        'B2',
+      );
       expect(screen.getByRole('button', { name: 'Update' })).toBeDisabled();
 
-      await choose(user, 'Proficiency', 'C1');
+      await choose(user, 'Language Proficiency', 'C1');
       await user.click(screen.getByRole('button', { name: 'Update' }));
 
       await expect.poll(() => onOpenChange).toHaveBeenCalledWith(false);

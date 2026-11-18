@@ -158,7 +158,7 @@ describe('UserLanguages', () => {
 
       await user.click(await screen.findByRole('button', { name: /English/ }));
       const dialog = screen.getByRole('dialog', { name: 'Update language' });
-      await user.click(within(dialog).getByRole('combobox', { name: 'Proficiency' }));
+      await user.click(within(dialog).getByRole('combobox', { name: 'Language Proficiency' }));
       await user.click(within(document.body).getByRole('option', { name: 'C1' }));
       await user.click(within(dialog).getByRole('button', { name: 'Update' }));
 
@@ -234,6 +234,38 @@ describe('UserLanguages', () => {
       expect(screen.getByText('German')).toBeInTheDocument();
       // selection mode is over
       expect(screen.getByRole('button', { name: 'Remove languages' })).toBeInTheDocument();
+    });
+  });
+
+  describe('wording of the own Languages page', () => {
+    const renderOwnPage = () =>
+      renderWithProviders(
+        <UserLanguages
+          userId={USER_ID}
+          canEdit
+          emptyMessage={EMPTY}
+          updateTitle="Edit language"
+          removeTitle="Remove language"
+        />,
+        { mocks: [listMock()] },
+      );
+
+    it('titles the update modal Edit language', async () => {
+      const { user } = renderOwnPage();
+
+      await user.click(await screen.findByRole('button', { name: /English/ }));
+
+      expect(screen.getByRole('dialog', { name: 'Edit language' })).toBeInTheDocument();
+    });
+
+    it('titles the remove confirmation Remove language', async () => {
+      const { user } = renderOwnPage();
+
+      await user.click(await screen.findByRole('button', { name: 'Remove languages' }));
+      await user.click(screen.getByRole('button', { name: /English/ }));
+      await user.click(screen.getByRole('button', { name: 'Remove 1' }));
+
+      expect(screen.getByRole('dialog', { name: 'Remove language' })).toBeInTheDocument();
     });
   });
 
