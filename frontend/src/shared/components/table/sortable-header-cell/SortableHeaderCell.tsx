@@ -8,6 +8,7 @@ export interface SortableHeaderCellProps {
   sort?: SortState;
   width?: string;
   onSortChange: (sort: SortState) => void;
+  className?: string;
 }
 
 export function SortableHeaderCell({
@@ -16,6 +17,7 @@ export function SortableHeaderCell({
   sort,
   width,
   onSortChange,
+  className,
 }: SortableHeaderCellProps) {
   const isActive = sort?.field === field;
   const ariaSort = !isActive ? 'none' : sort.order === 'ASC' ? 'ascending' : 'descending';
@@ -34,7 +36,12 @@ export function SortableHeaderCell({
     .join(' ');
 
   return (
-    <th style={{ width }} aria-sort={ariaSort} scope="col" className={styles.cell}>
+    <th
+      style={{ width }}
+      aria-sort={ariaSort}
+      scope="col"
+      className={[styles.cell, className].filter(Boolean).join(' ')}
+    >
       <button className={styles.button} type="button" onClick={handleClick}>
         {header}
         <ArrowUpIcon className={iconClasses} />

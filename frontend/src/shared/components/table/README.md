@@ -79,6 +79,31 @@ const columns: Column<UserRow>[] = [
   without a visible title in Figma (Avatar). Don't pass `header: ''`: the column then has no name at all.
   Not for a `sortable` column, whose header is the sort button.
 - `width` goes to the `<th>` style. Leave it out and the browser shares the width.
+- `hideOnTablet` hides the column (header and cells) below 1024px, see [Tablet](#tablet).
+
+## Tablet
+
+Below 1024px (the same breakpoint as `SIDEBAR_OVERLAY_QUERY`) the table shows the columns of the
+Figma `768w` frames: a column with `hideOnTablet: true` gets the `hideOnTablet` class on its `<th>`
+and every `<td>`, and a media query in `DataTable.module.css` sets `display: none`. The table then
+fits the page, so there is no horizontal scroll: the wrapper keeps `overflow: visible` and the
+sticky header keeps working (`overflow-x: auto` on the wrapper would make it the scroll container
+and the header would stop sticking to the page).
+
+| Page     | Hidden on tablet |
+| -------- | ---------------- |
+| Users    | Email, Position  |
+| Projects | Domain           |
+
+- CSS only, no `useMediaQuery`: the server and the first client render are the same, the column
+  does not flash after hydration. `colSpan` of the skeleton, message and details rows still counts
+  the hidden columns, which the browser accepts.
+- The query is on the viewport, not on the table: a story shows it only with a narrow Storybook
+  viewport, not inside a 768px `div`.
+- A hidden sortable column cannot be sorted on tablet. If the current sort is on it, the order
+  stays and the sort arrow is just not visible.
+- `display: none` also removes the column from the accessibility tree, so a screen reader on tablet
+  hears the same columns the user sees.
 
 ## Row actions
 
@@ -152,12 +177,12 @@ Names below are the English texts; the keys are in `common.table`.
 
 ## Files
 
-| Folder                  | What it is                                           |
-| ----------------------- | ---------------------------------------------------- |
-| `data-table/`           | `DataTable`, its CSS, stories and Figma stories      |
-| `sortable-header-cell/` | header cell with the sort button and arrow           |
-| `row-actions-menu/`     | ⋮ button and menu                                    |
-| `table-skeleton/`       | skeleton rows                                        |
-| `table-message/`        | empty / error row with Retry                         |
-| `__fixtures__/`         | sample rows for the stories                          |
-| `types.ts`              | `Column`, `RowAction`, `SortState`, `DataTableProps` |
+| Folder                  | What it is                                                                            |
+| ----------------------- | ------------------------------------------------------------------------------------- |
+| `data-table/`           | `DataTable`, its CSS, stories and Figma stories                                       |
+| `sortable-header-cell/` | header cell with the sort button and arrow; takes a `className` (e.g. `hideOnTablet`) |
+| `row-actions-menu/`     | ⋮ button and menu                                                                     |
+| `table-skeleton/`       | skeleton rows                                                                         |
+| `table-message/`        | empty / error row with Retry                                                          |
+| `__fixtures__/`         | sample rows for the stories                                                           |
+| `types.ts`              | `Column`, `RowAction`, `SortState`, `DataTableProps`                                  |

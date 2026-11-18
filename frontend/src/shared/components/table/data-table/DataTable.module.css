@@ -85,3 +85,9 @@
   opacity: var(--table-refreshing-opacity);
   transition: opacity var(--duration-shorter) var(--ease-in-out);
 }
+
+@media (max-width: 1023.98px) {
+  .hideOnTablet {
+    display: none;
+  }
+}

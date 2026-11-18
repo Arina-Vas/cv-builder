@@ -102,6 +102,7 @@ export const Users = () => {
       key: 'email',
       header: t('table.email'),
       render: (user) => user.email,
+      hideOnTablet: true,
     },
     {
       key: 'department',
@@ -114,6 +115,7 @@ export const Users = () => {
       header: t('table.position'),
       render: (user) => user.position?.name,
       sortable: true,
+      hideOnTablet: true,
     },
   ];
 

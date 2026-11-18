@@ -19,6 +19,35 @@ function renderCell(sort?: SortState) {
 }
 
 describe('SortableHeaderCell', () => {
+  it('adds the given className next to its own class', () => {
+    renderWithProviders(
+      <table>
+        <thead>
+          <tr>
+            <SortableHeaderCell
+              field="name"
+              header="Name"
+              onSortChange={vi.fn()}
+              className="extra"
+            />
+          </tr>
+        </thead>
+      </table>,
+    );
+
+    const header = screen.getByRole('columnheader', { name: 'Name' });
+    expect(header).toHaveClass('extra');
+    expect(header).toHaveClass(/cell/);
+  });
+
+  it('has no stray class without className', () => {
+    renderCell();
+
+    expect(screen.getByRole('columnheader', { name: 'Name' }).className).not.toMatch(
+      /undefined|^\s|\s$/,
+    );
+  });
+
   it('is not sorted when another column is active', () => {
     renderCell({ field: 'email', order: 'ASC' });
 
