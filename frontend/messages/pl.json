@@ -339,12 +339,22 @@
     }
   },
   "cvs": {
+    "title": "CV",
     "tabs": {
       "label": "Sekcje CV",
       "details": "Szczegóły",
       "skills": "Umiejętności",
       "projects": "Projekty",
       "preview": "Podgląd"
+    },
+    "table": {
+      "columns": {
+        "name": "Nazwa",
+        "education": "Wykształcenie",
+        "employee": "Pracownik"
+      },
+      "empty": "Nie znaleziono CV",
+      "userEmpty": "Nie masz jeszcze żadnego CV"
     }
   },
   "departments": {

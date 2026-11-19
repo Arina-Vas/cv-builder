@@ -339,12 +339,22 @@
     }
   },
   "cvs": {
+    "title": "Резюме",
     "tabs": {
       "label": "Разделы резюме",
       "details": "Детали",
       "skills": "Навыки",
       "projects": "Проекты",
       "preview": "Предпросмотр"
+    },
+    "table": {
+      "columns": {
+        "name": "Название",
+        "education": "Образование",
+        "employee": "Сотрудник"
+      },
+      "empty": "Резюме не найдены",
+      "userEmpty": "У вас пока нет резюме"
     }
   },
   "departments": {

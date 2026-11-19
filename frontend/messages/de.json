@@ -338,12 +338,22 @@
     }
   },
   "cvs": {
+    "title": "Lebensläufe",
     "tabs": {
       "label": "Lebenslaufbereiche",
       "details": "Details",
       "skills": "Fähigkeiten",
       "projects": "Projekte",
       "preview": "Vorschau"
+    },
+    "table": {
+      "columns": {
+        "name": "Name",
+        "education": "Ausbildung",
+        "employee": "Mitarbeiter"
+      },
+      "empty": "Keine Lebensläufe gefunden",
+      "userEmpty": "Sie haben noch keine Lebensläufe"
     }
   },
   "departments": {

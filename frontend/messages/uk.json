@@ -339,12 +339,22 @@
     }
   },
   "cvs": {
+    "title": "Резюме",
     "tabs": {
       "label": "Розділи резюме",
       "details": "Деталі",
       "skills": "Навички",
       "projects": "Проєкти",
       "preview": "Попередній перегляд"
+    },
+    "table": {
+      "columns": {
+        "name": "Назва",
+        "education": "Освіта",
+        "employee": "Працівник"
+      },
+      "empty": "Резюме не знайдено",
+      "userEmpty": "У вас ще немає резюме"
     }
   },
   "departments": {

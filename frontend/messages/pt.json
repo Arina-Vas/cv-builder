@@ -339,12 +339,22 @@
     }
   },
   "cvs": {
+    "title": "Currículos",
     "tabs": {
       "label": "Seções do currículo",
       "details": "Detalhes",
       "skills": "Habilidades",
       "projects": "Projetos",
       "preview": "Pré-visualização"
+    },
+    "table": {
+      "columns": {
+        "name": "Nome",
+        "education": "Formação",
+        "employee": "Funcionário"
+      },
+      "empty": "Nenhum currículo encontrado",
+      "userEmpty": "Você ainda não tem currículos"
     }
   },
   "departments": {

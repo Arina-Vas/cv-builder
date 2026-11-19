@@ -334,13 +334,25 @@
     }
   },
   "cvs": {
+    "title": "CVs",
     "tabs": {
       "label": "CV sections",
       "details": "Details",
       "skills": "Skills",
       "projects": "Projects",
       "preview": "Preview"
-    }
+    },
+    "table": {
+      "columns": {
+        "name": "Name",
+        "education": "Education",
+        "employee": "Employee"
+      },
+      "empty": "No CVs found",
+      "userEmpty": "You have no CVs yet"
+    },
+    "fields": {},
+    "delete": {}
   },
   "departments": {
     "title": "Departments",
