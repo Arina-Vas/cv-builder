@@ -19,6 +19,32 @@ input CreateCvInput {
   userId: ID!
 }
 
+input CreateCvProjectInput {
+  """
+  CV the project is added to; checked against the current user. In updateCvProject it is the current CV and never changes
+  """
+  cvId: ID!
+
+  """
+  null means "Till now"; otherwise not before startDate and not after the project end
+  """
+  endDate: Date
+
+  """Project from the catalog; cannot be changed later"""
+  projectId: ID!
+
+  """
+  Free text, one responsibility per line (the UI shows each line as a chip)
+  """
+  responsibilities: String
+
+  """At least one project role; the set replaces the old one on update"""
+  roleIds: [ID!]!
+
+  """Must be within the project's start and end dates"""
+  startDate: Date!
+}
+
 input CreateDepartmentInput {
   name: String!
 }
@@ -86,6 +112,45 @@ type CvPage {
 
   """Items matching the search, not the page size"""
   total: Int!
+}
+
+"""
+A catalog project added to a CV, with CV-specific dates, roles and responsibilities
+"""
+type CvProject {
+  """
+  null means "Till now"
+  """
+  endDate: Date
+  id: ID!
+
+  """
+  Catalog project: name, domain, description, environment and the dates the CV dates must fit in
+  """
+  project: Project!
+
+  """Free text, one responsibility per line"""
+  responsibilities: String
+
+  """Sorted by name"""
+  roles: [ProjectRole!]!
+  startDate: Date!
+}
+
+type CvProjectList {
+  items: [CvProject!]!
+
+  """Items matching the search"""
+  total: Int!
+}
+
+"""
+`name` sorts by the project name; a missing end date ("Till now") counts as the latest
+"""
+enum CvProjectSortField {
+  endDate
+  name
+  startDate
 }
 
 enum CvSortField {
@@ -165,6 +230,11 @@ type Mutation {
   Creates a CV for `input.userId`: an Employee only for themselves, an Admin for any user. Fails with FORBIDDEN for another user and NOT_FOUND if the user does not exist
   """
   createCv(input: CreateCvInput!): Cv!
+
+  """
+  Adds a catalog project to the CV. Own CV or Admin. Fails with NOT_FOUND if the CV does not exist and FORBIDDEN for another user's CV. BAD_USER_INPUT for dates outside the project period or unknown project / roles, CONFLICT on projectId if the project is already in the CV
+  """
+  createCvProject(input: CreateCvProjectInput!): CvProject!
   createDepartment(input: CreateDepartmentInput!): Department!
   createLanguage(input: CreateLanguageInput!): Language!
   createPosition(input: CreatePositionInput!): Position!
@@ -190,6 +260,11 @@ type Mutation {
   Own CV or Admin; `userId` is the CV owner, used only to check access. Returns the deleted id; the CV's skills and projects are deleted with it. Fails with FORBIDDEN for another user, NOT_FOUND if the user does not exist or the CV does not belong to them
   """
   deleteCv(id: ID!, userId: ID!): ID!
+
+  """
+  Removes the project from the CV with its roles and returns the id; the catalog project and roles stay. Own CV or Admin. Fails with NOT_FOUND if the CV does not exist and FORBIDDEN for another user's CV. NOT_FOUND if the CV project is not in this CV
+  """
+  deleteCvProject(cvId: ID!, id: ID!): ID!
 
   """Fails with ENTITY_IN_USE if the department is assigned to users"""
   deleteDepartment(id: ID!): ID!
@@ -245,6 +320,11 @@ type Mutation {
   Own CV or Admin. Changes name, education and description; `input.userId` is the current owner, used only to check access, the owner never changes. Fails with FORBIDDEN for another user, NOT_FOUND if the user does not exist or the CV does not belong to them
   """
   updateCv(input: UpdateCvInput!): Cv!
+
+  """
+  Changes dates, roles and responsibilities; the project never changes. Own CV or Admin. Fails with NOT_FOUND if the CV does not exist and FORBIDDEN for another user's CV. NOT_FOUND if the CV project is not in this CV
+  """
+  updateCvProject(input: UpdateCvProjectInput!): CvProject!
   updateDepartment(input: UpdateDepartmentInput!): Department!
   updateLanguage(input: UpdateLanguageInput!): Language!
   updatePosition(input: UpdatePositionInput!): Position!
@@ -340,6 +420,11 @@ enum ProjectSortField {
 
 type Query {
   """
+  Catalog projects not yet added to the CV (Add project modal). Own CV or Admin. Fails with NOT_FOUND if the CV does not exist and FORBIDDEN for another user's CV
+  """
+  availableCvProjects(cvId: ID!): [Project!]!
+
+  """
   Languages not yet assigned to the user, for the Add Language modal; sorted by name. Fails with NOT_FOUND if the user does not exist
   """
   availableUserLanguages(userId: ID!): [Language!]!
@@ -353,6 +438,11 @@ type Query {
   Own CV or Admin. Fails with NOT_FOUND if the CV does not exist and FORBIDDEN for another user's CV
   """
   cv(id: ID!): Cv!
+
+  """
+  Projects of one CV. Search is case-insensitive, by project name or domain. Own CV or Admin. Fails with NOT_FOUND if the CV does not exist and FORBIDDEN for another user's CV
+  """
+  cvProjects(cvId: ID!, search: String, sortBy: CvProjectSortField! = name, sortOrder: SortOrder! = ASC): CvProjectList!
 
   """
   CVs page: own CVs for an Employee, all CVs for an Admin. Search is case-insensitive: by CV name, for an Admin also by the owner email
@@ -528,6 +618,30 @@ input UpdateCvInput {
   CV owner. An Employee may pass only their own id. In updateCv it is checked against the current owner and never changes it
   """
   userId: ID!
+}
+
+input UpdateCvProjectInput {
+  """
+  CV the project is added to; checked against the current user. In updateCvProject it is the current CV and never changes
+  """
+  cvId: ID!
+
+  """
+  null means "Till now"; otherwise not before startDate and not after the project end
+  """
+  endDate: Date
+  id: ID!
+
+  """
+  Free text, one responsibility per line (the UI shows each line as a chip)
+  """
+  responsibilities: String
+
+  """At least one project role; the set replaces the old one on update"""
+  roleIds: [ID!]!
+
+  """Must be within the project's start and end dates"""
+  startDate: Date!
 }
 
 input UpdateDepartmentInput {
