@@ -110,6 +110,11 @@ All tables have `id` (uuid), `created_at` and `updated_at`. Only the meaningful 
 - `cv_projects.end_date = null` means "Till now". In the `projects` catalog `end_date` is required.
 - Project name, domain, description and technologies shown on a CV come from the referenced `projects` row;
   only participation dates, responsibilities and roles are CV-specific.
+- `cv_projects.responsibilities` is one optional text, one responsibility per line (decided 2026-11-19). The wiki
+  edits it in a single textarea, Figma shows each responsibility as a chip, so the frontend splits the text by
+  line breaks. The input is trimmed; a blank value is saved as `null`.
+- Every project role counts as active: the wiki's Add project modal lists "active roles", but roles are a
+  seed-only catalog without an `is_active` flag, so `projectRoles` returns them all.
 
 ## Deletion policy
 

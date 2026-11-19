@@ -135,7 +135,7 @@ ownership of the CV using the authenticated user rather than trusting an employe
 - The CV list has two queries: `cvs` for the CVs page (own CVs for an Employee, all for an Admin) and
   `userCvs(userId)` for the User CVs tab. The tab is Admin-only in the UI; the API allows "own or Admin", like
   `userSkills`.
-- Operations that get only a CV id (`cv`, and later CV skills, CV projects, preview and PDF) check access with
+- Operations that get only a CV id (`cv`, CV projects, and later CV skills, preview and PDF) check access with
   `CvAccessService.getAccessibleCv(cvId, currentUser)` (`backend/src/cvs/cv-access.service.ts`): `NOT_FOUND` if
   the CV does not exist, `FORBIDDEN` if an Employee asks for another user's CV.
 
@@ -295,3 +295,34 @@ Errors thrown by the service:
 | `updateCv`, `deleteCv`                        | the CV does not exist or has another owner | `NOT_FOUND` | `Not found` (Prisma `P2025`, mapped by the filter) |
 
 Deleting a CV removes its skills and projects (DB cascade, see [data-model.md](../data-model.md)).
+
+### CV projects
+
+| Operation             | Access         |
+| --------------------- | -------------- |
+| `projectRoles`        | All            |
+| `cvProjects`          | Own or Admin † |
+| `availableCvProjects` | Own or Admin † |
+| `createCvProject`     | Own or Admin † |
+| `updateCvProject`     | Own or Admin † |
+| `deleteCvProject`     | Own or Admin † |
+
+† Every operation gets the CV id (`cvId` argument or input field) and checks it first with
+`CvAccessService.getAccessibleCv`, before any other lookup. The CV project id is then looked up only inside that
+CV, so a CV project of another CV is `NOT_FOUND`, even when both CVs belong to the same user.
+
+Errors thrown by the service:
+
+| Operation                            | Case                                              | Code             | Field / message                                           |
+| ------------------------------------ | ------------------------------------------------- | ---------------- | --------------------------------------------------------- |
+| all except `projectRoles`            | the CV does not exist                             | `NOT_FOUND`      | `CV not found`                                            |
+| all except `projectRoles`            | an Employee asks for another user's CV            | `FORBIDDEN`      | `You are not authorized to perform this action`           |
+| `createCvProject`                    | the project does not exist                        | `BAD_USER_INPUT` | `projectId`: `Project not found`                          |
+| `createCvProject`                    | the project is already in the CV                  | `CONFLICT`       | `projectId`: `Project is already added to the CV`         |
+| `createCvProject`, `updateCvProject` | start date outside the project's dates            | `BAD_USER_INPUT` | `startDate`: `Start date must be within project duration` |
+| `createCvProject`, `updateCvProject` | end date after the project's end                  | `BAD_USER_INPUT` | `endDate`: `End date must be within project duration`     |
+| `createCvProject`, `updateCvProject` | a role does not exist                             | `BAD_USER_INPUT` | `roleIds`: `Role not found`                               |
+| `updateCvProject`, `deleteCvProject` | the CV project does not exist or is in another CV | `NOT_FOUND`      | `CV project not found`                                    |
+
+Both date errors are returned together when both dates are wrong. Rules checked by the input DTO before the
+service runs: `End date cannot be earlier than start date`, `At least one role must be selected`.
