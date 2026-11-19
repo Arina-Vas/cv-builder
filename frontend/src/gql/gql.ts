@@ -24,6 +24,13 @@ type Documents = {
     "\n  query Me {\n    me {\n      ...AuthUserFields\n      firstName\n      lastName\n      avatarUrl\n    }\n  }\n": typeof types.MeDocument,
     "\n  mutation Logout {\n    logout\n  }\n": typeof types.LogoutDocument,
     "\n  query BreadcrumbUser($id: ID!) {\n    user(id: $id) {\n      id\n      email\n      firstName\n      lastName\n    }\n  }\n": typeof types.BreadcrumbUserDocument,
+    "\n  fragment CvProjectFields on CvProject {\n    id\n    startDate\n    endDate\n    responsibilities\n    roles {\n      id\n      name\n    }\n    project {\n      ...ProjectFields\n    }\n  }\n": typeof types.CvProjectFieldsFragmentDoc,
+    "\n  query CvProjects(\n    $cvId: ID!\n    $search: String\n    $sortBy: CvProjectSortField!\n    $sortOrder: SortOrder!\n  ) {\n    cvProjects(cvId: $cvId, search: $search, sortBy: $sortBy, sortOrder: $sortOrder) {\n      items {\n        ...CvProjectFields\n      }\n      total\n    }\n  }\n": typeof types.CvProjectsDocument,
+    "\n  query AvailableCvProjects($cvId: ID!) {\n    availableCvProjects(cvId: $cvId) {\n      ...ProjectFields\n    }\n  }\n": typeof types.AvailableCvProjectsDocument,
+    "\n  query ProjectRoles {\n    projectRoles {\n      id\n      name\n    }\n  }\n": typeof types.ProjectRolesDocument,
+    "\n  mutation CreateCvProject($input: CreateCvProjectInput!) {\n    createCvProject(input: $input) {\n      ...CvProjectFields\n    }\n  }\n": typeof types.CreateCvProjectDocument,
+    "\n  mutation UpdateCvProject($input: UpdateCvProjectInput!) {\n    updateCvProject(input: $input) {\n      ...CvProjectFields\n    }\n  }\n": typeof types.UpdateCvProjectDocument,
+    "\n  mutation DeleteCvProject($id: ID!, $cvId: ID!) {\n    deleteCvProject(id: $id, cvId: $cvId)\n  }\n": typeof types.DeleteCvProjectDocument,
     "\n  fragment DepartmentFields on Department {\n    id\n    name\n  }\n": typeof types.DepartmentFieldsFragmentDoc,
     "\n  query Departments(\n    $page: Int!\n    $pageSize: Int!\n    $search: String\n    $sortBy: DepartmentSortField!\n    $sortOrder: SortOrder!\n  ) {\n    departments(\n      page: $page\n      pageSize: $pageSize\n      sortBy: $sortBy\n      sortOrder: $sortOrder\n      search: $search\n    ) {\n      items {\n        ...DepartmentFields\n      }\n      page\n      pageSize\n      total\n    }\n  }\n": typeof types.DepartmentsDocument,
     "\n  mutation CreateDepartment($input: CreateDepartmentInput!) {\n    createDepartment(input: $input) {\n      ...DepartmentFields\n    }\n  }\n": typeof types.CreateDepartmentDocument,
@@ -86,6 +93,13 @@ const documents: Documents = {
     "\n  query Me {\n    me {\n      ...AuthUserFields\n      firstName\n      lastName\n      avatarUrl\n    }\n  }\n": types.MeDocument,
     "\n  mutation Logout {\n    logout\n  }\n": types.LogoutDocument,
     "\n  query BreadcrumbUser($id: ID!) {\n    user(id: $id) {\n      id\n      email\n      firstName\n      lastName\n    }\n  }\n": types.BreadcrumbUserDocument,
+    "\n  fragment CvProjectFields on CvProject {\n    id\n    startDate\n    endDate\n    responsibilities\n    roles {\n      id\n      name\n    }\n    project {\n      ...ProjectFields\n    }\n  }\n": types.CvProjectFieldsFragmentDoc,
+    "\n  query CvProjects(\n    $cvId: ID!\n    $search: String\n    $sortBy: CvProjectSortField!\n    $sortOrder: SortOrder!\n  ) {\n    cvProjects(cvId: $cvId, search: $search, sortBy: $sortBy, sortOrder: $sortOrder) {\n      items {\n        ...CvProjectFields\n      }\n      total\n    }\n  }\n": types.CvProjectsDocument,
+    "\n  query AvailableCvProjects($cvId: ID!) {\n    availableCvProjects(cvId: $cvId) {\n      ...ProjectFields\n    }\n  }\n": types.AvailableCvProjectsDocument,
+    "\n  query ProjectRoles {\n    projectRoles {\n      id\n      name\n    }\n  }\n": types.ProjectRolesDocument,
+    "\n  mutation CreateCvProject($input: CreateCvProjectInput!) {\n    createCvProject(input: $input) {\n      ...CvProjectFields\n    }\n  }\n": types.CreateCvProjectDocument,
+    "\n  mutation UpdateCvProject($input: UpdateCvProjectInput!) {\n    updateCvProject(input: $input) {\n      ...CvProjectFields\n    }\n  }\n": types.UpdateCvProjectDocument,
+    "\n  mutation DeleteCvProject($id: ID!, $cvId: ID!) {\n    deleteCvProject(id: $id, cvId: $cvId)\n  }\n": types.DeleteCvProjectDocument,
     "\n  fragment DepartmentFields on Department {\n    id\n    name\n  }\n": types.DepartmentFieldsFragmentDoc,
     "\n  query Departments(\n    $page: Int!\n    $pageSize: Int!\n    $search: String\n    $sortBy: DepartmentSortField!\n    $sortOrder: SortOrder!\n  ) {\n    departments(\n      page: $page\n      pageSize: $pageSize\n      sortBy: $sortBy\n      sortOrder: $sortOrder\n      search: $search\n    ) {\n      items {\n        ...DepartmentFields\n      }\n      page\n      pageSize\n      total\n    }\n  }\n": types.DepartmentsDocument,
     "\n  mutation CreateDepartment($input: CreateDepartmentInput!) {\n    createDepartment(input: $input) {\n      ...DepartmentFields\n    }\n  }\n": types.CreateDepartmentDocument,
@@ -192,6 +206,34 @@ export function graphql(source: "\n  mutation Logout {\n    logout\n  }\n"): (ty
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  query BreadcrumbUser($id: ID!) {\n    user(id: $id) {\n      id\n      email\n      firstName\n      lastName\n    }\n  }\n"): (typeof documents)["\n  query BreadcrumbUser($id: ID!) {\n    user(id: $id) {\n      id\n      email\n      firstName\n      lastName\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  fragment CvProjectFields on CvProject {\n    id\n    startDate\n    endDate\n    responsibilities\n    roles {\n      id\n      name\n    }\n    project {\n      ...ProjectFields\n    }\n  }\n"): (typeof documents)["\n  fragment CvProjectFields on CvProject {\n    id\n    startDate\n    endDate\n    responsibilities\n    roles {\n      id\n      name\n    }\n    project {\n      ...ProjectFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query CvProjects(\n    $cvId: ID!\n    $search: String\n    $sortBy: CvProjectSortField!\n    $sortOrder: SortOrder!\n  ) {\n    cvProjects(cvId: $cvId, search: $search, sortBy: $sortBy, sortOrder: $sortOrder) {\n      items {\n        ...CvProjectFields\n      }\n      total\n    }\n  }\n"): (typeof documents)["\n  query CvProjects(\n    $cvId: ID!\n    $search: String\n    $sortBy: CvProjectSortField!\n    $sortOrder: SortOrder!\n  ) {\n    cvProjects(cvId: $cvId, search: $search, sortBy: $sortBy, sortOrder: $sortOrder) {\n      items {\n        ...CvProjectFields\n      }\n      total\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query AvailableCvProjects($cvId: ID!) {\n    availableCvProjects(cvId: $cvId) {\n      ...ProjectFields\n    }\n  }\n"): (typeof documents)["\n  query AvailableCvProjects($cvId: ID!) {\n    availableCvProjects(cvId: $cvId) {\n      ...ProjectFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query ProjectRoles {\n    projectRoles {\n      id\n      name\n    }\n  }\n"): (typeof documents)["\n  query ProjectRoles {\n    projectRoles {\n      id\n      name\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation CreateCvProject($input: CreateCvProjectInput!) {\n    createCvProject(input: $input) {\n      ...CvProjectFields\n    }\n  }\n"): (typeof documents)["\n  mutation CreateCvProject($input: CreateCvProjectInput!) {\n    createCvProject(input: $input) {\n      ...CvProjectFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation UpdateCvProject($input: UpdateCvProjectInput!) {\n    updateCvProject(input: $input) {\n      ...CvProjectFields\n    }\n  }\n"): (typeof documents)["\n  mutation UpdateCvProject($input: UpdateCvProjectInput!) {\n    updateCvProject(input: $input) {\n      ...CvProjectFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation DeleteCvProject($id: ID!, $cvId: ID!) {\n    deleteCvProject(id: $id, cvId: $cvId)\n  }\n"): (typeof documents)["\n  mutation DeleteCvProject($id: ID!, $cvId: ID!) {\n    deleteCvProject(id: $id, cvId: $cvId)\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
