@@ -340,6 +340,7 @@
   },
   "cvs": {
     "title": "Currículos",
+    "createButton": "Criar currículo",
     "tabs": {
       "label": "Seções do currículo",
       "details": "Detalhes",
@@ -353,8 +354,38 @@
         "education": "Formação",
         "employee": "Funcionário"
       },
+      "actions": {
+        "edit": "Editar",
+        "delete": "Excluir",
+        "view": "Ver"
+      },
       "empty": "Nenhum currículo encontrado",
       "userEmpty": "Você ainda não tem currículos"
+    },
+    "fields": {
+      "name": "Nome",
+      "education": "Formação",
+      "description": "Descrição"
+    },
+    "create": {
+      "title": "Criar currículo"
+    },
+    "update": {
+      "title": "Atualizar currículo"
+    },
+    "delete": {
+      "title": "Excluir currículo",
+      "message": "Tem certeza de que deseja excluir o currículo <b>{name}</b>?"
+    },
+    "details": {
+      "loading": "Carregando currículo",
+      "loadError": "Não foi possível carregar os detalhes do currículo",
+      "retry": "Tentar novamente",
+      "updated": "O currículo foi atualizado",
+      "forbidden": {
+        "title": "Acesso negado",
+        "message": "Você não tem autorização para acessar este currículo"
+      }
     }
   },
   "departments": {

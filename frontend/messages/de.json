@@ -339,6 +339,7 @@
   },
   "cvs": {
     "title": "Lebensläufe",
+    "createButton": "Lebenslauf erstellen",
     "tabs": {
       "label": "Lebenslaufbereiche",
       "details": "Details",
@@ -352,8 +353,38 @@
         "education": "Ausbildung",
         "employee": "Mitarbeiter"
       },
+      "actions": {
+        "edit": "Bearbeiten",
+        "delete": "Löschen",
+        "view": "Ansehen"
+      },
       "empty": "Keine Lebensläufe gefunden",
       "userEmpty": "Sie haben noch keine Lebensläufe"
+    },
+    "fields": {
+      "name": "Name",
+      "education": "Ausbildung",
+      "description": "Beschreibung"
+    },
+    "create": {
+      "title": "Lebenslauf erstellen"
+    },
+    "update": {
+      "title": "Lebenslauf aktualisieren"
+    },
+    "delete": {
+      "title": "Lebenslauf löschen",
+      "message": "Möchten Sie den Lebenslauf <b>{name}</b> wirklich löschen?"
+    },
+    "details": {
+      "loading": "Lebenslauf wird geladen",
+      "loadError": "Lebenslaufdetails konnten nicht geladen werden",
+      "retry": "Erneut versuchen",
+      "updated": "Lebenslauf wurde aktualisiert",
+      "forbidden": {
+        "title": "Zugriff verweigert",
+        "message": "Sie sind nicht berechtigt, diesen Lebenslauf aufzurufen"
+      }
     }
   },
   "departments": {

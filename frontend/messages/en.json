@@ -335,6 +335,7 @@
   },
   "cvs": {
     "title": "CVs",
+    "createButton": "Create CV",
     "tabs": {
       "label": "CV sections",
       "details": "Details",
@@ -348,11 +349,31 @@
         "education": "Education",
         "employee": "Employee"
       },
+      "actions": { "edit": "Edit", "delete": "Delete", "view": "View" },
       "empty": "No CVs found",
       "userEmpty": "You have no CVs yet"
     },
-    "fields": {},
-    "delete": {}
+    "fields": {
+      "name": "Name",
+      "education": "Education",
+      "description": "Description"
+    },
+    "create": { "title": "Create CV" },
+    "update": { "title": "Update CV" },
+    "delete": {
+      "title": "Delete CV",
+      "message": "Are you sure you want to delete CV <b>{name}</b>?"
+    },
+    "details": {
+      "loading": "Loading CV",
+      "loadError": "Failed to load CV details",
+      "retry": "Retry",
+      "updated": "CV has been updated",
+      "forbidden": {
+        "title": "Access denied",
+        "message": "You are not authorized to access this CV"
+      }
+    }
   },
   "departments": {
     "title": "Departments",

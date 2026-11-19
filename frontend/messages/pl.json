@@ -340,6 +340,7 @@
   },
   "cvs": {
     "title": "CV",
+    "createButton": "Utwórz CV",
     "tabs": {
       "label": "Sekcje CV",
       "details": "Szczegóły",
@@ -353,8 +354,38 @@
         "education": "Wykształcenie",
         "employee": "Pracownik"
       },
+      "actions": {
+        "edit": "Edytuj",
+        "delete": "Usuń",
+        "view": "Wyświetl"
+      },
       "empty": "Nie znaleziono CV",
       "userEmpty": "Nie masz jeszcze żadnego CV"
+    },
+    "fields": {
+      "name": "Nazwa",
+      "education": "Wykształcenie",
+      "description": "Opis"
+    },
+    "create": {
+      "title": "Utwórz CV"
+    },
+    "update": {
+      "title": "Aktualizuj CV"
+    },
+    "delete": {
+      "title": "Usuń CV",
+      "message": "Czy na pewno chcesz usunąć CV <b>{name}</b>?"
+    },
+    "details": {
+      "loading": "Ładowanie CV",
+      "loadError": "Nie udało się załadować szczegółów CV",
+      "retry": "Spróbuj ponownie",
+      "updated": "CV zostało zaktualizowane",
+      "forbidden": {
+        "title": "Brak dostępu",
+        "message": "Nie masz dostępu do tego CV"
+      }
     }
   },
   "departments": {

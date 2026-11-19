@@ -347,6 +347,7 @@
   },
   "cvs": {
     "title": "CV",
+    "createButton": "Créer un CV",
     "tabs": {
       "label": "Sections du CV",
       "details": "Détails",
@@ -360,8 +361,38 @@
         "education": "Formation",
         "employee": "Employé"
       },
+      "actions": {
+        "edit": "Modifier",
+        "delete": "Supprimer",
+        "view": "Voir"
+      },
       "empty": "Aucun CV trouvé",
       "userEmpty": "Vous n'avez pas encore de CV"
+    },
+    "fields": {
+      "name": "Nom",
+      "education": "Formation",
+      "description": "Description"
+    },
+    "create": {
+      "title": "Créer un CV"
+    },
+    "update": {
+      "title": "Mettre à jour le CV"
+    },
+    "delete": {
+      "title": "Supprimer le CV",
+      "message": "Voulez-vous vraiment supprimer le CV <b>{name}</b> ?"
+    },
+    "details": {
+      "loading": "Chargement du CV",
+      "loadError": "Impossible de charger les détails du CV",
+      "retry": "Réessayer",
+      "updated": "Le CV a été mis à jour",
+      "forbidden": {
+        "title": "Accès refusé",
+        "message": "Vous n'êtes pas autorisé à accéder à ce CV"
+      }
     }
   },
   "departments": {
