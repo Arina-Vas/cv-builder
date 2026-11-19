@@ -212,6 +212,7 @@ Lists without pagination extend `ListArgs` instead of `PaginatedListArgs` and re
 | `departmentOptions`, `positionOptions` (lookups for the user form selects) | `name`           | —                                                 | —                            | no        |
 | `availableUserSkills` (skills not yet assigned to the user)                | `name`           | —                                                 | —                            | no        |
 | `availableUserLanguages` (languages not yet assigned to the user)          | `name`           | —                                                 | —                            | no        |
+| `availableCvProjects` (catalog projects not yet added to the CV)           | `name`           | —                                                 | —                            | no        |
 
 Lists without pagination return `{ items, total }` (`Listed`) or a plain list for lookups.
 A select needs every value, so it uses a lookup, not the paginated list (`pageSize` is at most 50):
@@ -281,7 +282,8 @@ avoid a column-key → enum map in every table.
     never sends one, so it means a tampered request (wiki: "Assignment belongs to the selected user").
 - Mutations take one argument named `input` of an `@InputType`, except deletes, which take ids directly.
   A delete of an owned entity also takes the owner id, which scopes it like `userId` in `deleteUserSkills`:
-  `deleteCv(id: ID!, userId: ID!): ID!`.
+  `deleteCv(id: ID!, userId: ID!): ID!`. A delete of something inside a CV takes the CV id the same way:
+  `deleteCvProject(id: ID!, cvId: ID!): ID!`.
 - Owned entities (`UserSkill`, `UserLanguage`, `Cv`) carry the owner's `userId` in every create / update input.
   In an update it is not a changeable field: it is the current owner, checked against the record, and the owner
   never changes (`UpdateCvInput extends CreateCvInput` keeps `userId` for that reason).
@@ -292,7 +294,8 @@ avoid a column-key → enum map in every table.
 - Exception: when a reference cannot be changed after creation (the skill of a `UserSkill`, the language of a
   `UserLanguage`; wiki: the field is disabled in the Update modal), the update input takes
   `PickType(Create<Entity>Input, [...])` without it and adds `id` (`UpdateUserSkillInput`: `id`, `userId`,
-  `mastery`; `UpdateUserLanguageInput`: `id`, `userId`, `proficiency`).
+  `mastery`; `UpdateUserLanguageInput`: `id`, `userId`, `proficiency`; `UpdateCvProjectInput`: `id`, `cvId`,
+  `startDate`, `endDate`, `roleIds`, `responsibilities`, without `projectId`).
 - Exception: `UpdateUserInput` (Admin, Update user modal) is `PickType(CreateUserInput, ['firstName', 'lastName',
 'departmentId', 'positionId', 'role'])` plus `id`: the wiki disables only email and password in that modal. The
   whole mutation is Admin-only, so it mixes no permissions; the Profile tab has its own mutation (own profile or
