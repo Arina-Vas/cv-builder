@@ -143,6 +143,21 @@
         "maxLength": "La descripción no debe superar los {max} caracteres"
       }
     },
+    "cvProject": {
+      "projectId": { "required": "El proyecto es obligatorio" },
+      "startDate": {
+        "required": "La fecha de inicio es obligatoria",
+        "outOfProject": "La fecha de inicio debe estar dentro de la duración del proyecto"
+      },
+      "endDate": {
+        "outOfProject": "La fecha de finalización debe estar dentro de la duración del proyecto",
+        "beforeStart": "La fecha de finalización no puede ser anterior a la fecha de inicio"
+      },
+      "roleIds": { "required": "Se debe seleccionar al menos un rol" },
+      "responsibilities": {
+        "maxLength": "Las responsabilidades no deben superar los {max} caracteres"
+      }
+    },
     "email": {
       "required": "El correo electrónico es obligatorio",
       "invalid": "Introduce una dirección de correo electrónico válida"

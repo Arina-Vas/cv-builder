@@ -138,6 +138,19 @@
         "maxLength": "Description must not exceed {max} characters"
       }
     },
+    "cvProject": {
+      "projectId": { "required": "Project is required" },
+      "startDate": {
+        "required": "Start date is required",
+        "outOfProject": "Start date must be within project duration"
+      },
+      "endDate": {
+        "outOfProject": "End date must be within project duration",
+        "beforeStart": "End date cannot be earlier than start date"
+      },
+      "roleIds": { "required": "At least one role must be selected" },
+      "responsibilities": { "maxLength": "Responsibilities must not exceed {max} characters" }
+    },
     "email": {
       "required": "Email is required",
       "invalid": "Please enter a valid email address"
