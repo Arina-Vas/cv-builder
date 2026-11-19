@@ -1,4 +1,3 @@
-import { Input, Textarea } from '@/shared/components/inputs';
 import { FormModal } from '@/shared/components/form';
 import { useTranslations } from 'next-intl';
 import { useMemo } from 'react';
@@ -14,6 +13,7 @@ import {
 } from '@/features/cvs/api/cvs.operations';
 import type { CvFieldsFragment } from '@/gql/graphql';
 import { useRefetchOnError } from '@/shared/lib/apollo/useRefetchOnError';
+import { CvFields } from '@/features/cvs/components/CvFields';
 
 type Props = {
   open: boolean;
@@ -63,21 +63,7 @@ export const CvFormModal = ({ open, onOpenChange, cv, userId }: Props) => {
       requireDirty={!!cv}
       size="sm"
     >
-      <Input
-        label={t('fields.name')}
-        {...form.register('name')}
-        error={form.formState.errors.name?.message}
-      />
-      <Input
-        label={t('fields.education')}
-        {...form.register('education')}
-        error={form.formState.errors.education?.message}
-      />
-      <Textarea
-        label={t('fields.description')}
-        {...form.register('description')}
-        error={form.formState.errors.description?.message}
-      />
+      <CvFields form={form} />
     </FormModal>
   );
 };

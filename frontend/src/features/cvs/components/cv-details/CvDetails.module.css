@@ -1,0 +1,35 @@
+.form {
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+  padding-block: var(--space-8);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-6);
+}
+
+.submitError {
+  margin: 0;
+  color: var(--error);
+  font-size: var(--type-body2-size);
+  font-weight: var(--font-weight-regular);
+}
+
+.skeletonInput {
+  height: var(--input-height);
+  margin-top: var(--space-4);
+}
+
+.skeletonTextarea {
+  height: var(--textarea-height);
+  margin-top: var(--space-4);
+}
+
+.skeletonButton {
+  width: var(--button-min-width);
+  height: var(--button-height);
+}
