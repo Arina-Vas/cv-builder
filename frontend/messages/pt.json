@@ -143,6 +143,20 @@
         "maxLength": "A descrição não deve exceder {max} caracteres"
       }
     },
+    "cv": {
+      "name": {
+        "required": "O nome é obrigatório",
+        "maxLength": "O nome não deve exceder {max} caracteres"
+      },
+      "education": {
+        "required": "A formação é obrigatória",
+        "maxLength": "A formação não deve exceder {max} caracteres"
+      },
+      "description": {
+        "required": "A descrição é obrigatória",
+        "maxLength": "A descrição não deve exceder {max} caracteres"
+      }
+    },
     "email": {
       "required": "O e-mail é obrigatório",
       "invalid": "Insira um endereço de e-mail válido"

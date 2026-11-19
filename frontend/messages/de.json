@@ -138,6 +138,20 @@
         "maxLength": "Die Beschreibung darf {max} Zeichen nicht überschreiten"
       }
     },
+    "cv": {
+      "name": {
+        "required": "Name ist erforderlich",
+        "maxLength": "Der Name darf {max} Zeichen nicht überschreiten"
+      },
+      "education": {
+        "required": "Ausbildung ist erforderlich",
+        "maxLength": "Die Ausbildung darf {max} Zeichen nicht überschreiten"
+      },
+      "description": {
+        "required": "Beschreibung ist erforderlich",
+        "maxLength": "Die Beschreibung darf {max} Zeichen nicht überschreiten"
+      }
+    },
     "email": {
       "required": "E-Mail ist erforderlich",
       "invalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein"
