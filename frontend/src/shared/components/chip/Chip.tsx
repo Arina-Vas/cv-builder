@@ -4,13 +4,23 @@ import { CloseIcon } from '@/shared/components/icons/CloseIcon';
 import { IconButton } from '@/shared/components/buttons';
 import { useTranslations } from 'next-intl';
 
+export type ChipVariant = 'outlined' | 'filled';
+
 export interface ChipProps extends Omit<ComponentProps<'span'>, 'children'> {
   label: string;
+  variant?: ChipVariant;
   onRemove?: () => void;
   disabled?: boolean;
 }
 
-export function Chip({ label, onRemove, disabled = false, className, ...rest }: ChipProps) {
+export function Chip({
+  label,
+  variant = 'outlined',
+  onRemove,
+  disabled = false,
+  className,
+  ...rest
+}: ChipProps) {
   const t = useTranslations('common.chip');
   const classes = [s.chip, className].filter(Boolean).join(' ');
 
@@ -19,6 +29,7 @@ export function Chip({ label, onRemove, disabled = false, className, ...rest }: 
       {...rest}
       className={classes}
       title={label}
+      data-variant={variant}
       data-disabled={disabled || undefined}
       data-removable={onRemove ? true : undefined}
     >
