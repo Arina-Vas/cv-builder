@@ -9,6 +9,7 @@ import { ParseUUIDPipe } from '@nestjs/common';
 import { UserRole } from '@/common/graphql/enums';
 import { Roles } from '@/common/auth/roles.decorator';
 import { Skill } from '@/skills/models/skill.model';
+import { ProjectRole } from '@/projects/models/project-role.model';
 
 @Resolver(() => Project)
 export class ProjectResolver {
@@ -22,6 +23,11 @@ export class ProjectResolver {
   @Query(() => [Skill], { description: 'Skills available as project technologies ("Environment")' })
   technologies(): Promise<Skill[]> {
     return this.projectService.findTechnologies();
+  }
+
+  @Query(() => [ProjectRole])
+  projectRoles(): Promise<ProjectRole[]> {
+    return this.projectService.findProjectRoles();
   }
 
   @Roles(UserRole.ADMIN)

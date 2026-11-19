@@ -327,6 +327,11 @@ type ProjectList {
   total: Int!
 }
 
+type ProjectRole {
+  id: ID!
+  name: String!
+}
+
 enum ProjectSortField {
   endDate
   name
@@ -400,6 +405,7 @@ type Query {
     sortBy: PositionSortField! = name
     sortOrder: SortOrder! = ASC
   ): PositionPage!
+  projectRoles: [ProjectRole!]!
   projects(search: String, sortBy: ProjectSortField! = name, sortOrder: SortOrder! = ASC): ProjectList!
   skillCategories: [SkillCategory!]!
   skills(
