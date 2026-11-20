@@ -1,8 +1,9 @@
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
+import { GraphQLError } from 'graphql';
 import { describe, expect, it } from 'vitest';
 import { usePathname } from '@/test/next-navigation';
 import { renderWithProviders } from '@/test/render';
-import { BREADCRUMB_USER } from '../../api/breadcrumbs.operations';
+import { BREADCRUMB_CV, BREADCRUMB_USER } from '../../api/breadcrumbs.operations';
 import { AppBreadcrumbs } from './AppBreadcrumbs';
 
 const userMock = (name: { firstName: string | null; lastName: string | null }) => ({
@@ -11,6 +12,21 @@ const userMock = (name: { firstName: string | null; lastName: string | null }) =
     data: { user: { __typename: 'User', id: '42', email: 'jane@cv-builder.local', ...name } },
   },
 });
+
+const cvRequest = { query: BREADCRUMB_CV, variables: { id: '7' } };
+
+const cvMock = (name = 'Frontend Developer') => ({
+  request: cvRequest,
+  result: { data: { cv: { __typename: 'Cv', id: '7', name } } },
+});
+
+const cvErrorMock = (code: string) => ({
+  request: cvRequest,
+  result: { errors: [new GraphQLError('backend text', { extensions: { code } })] },
+});
+
+// the CV crumb links to the first CV tab
+const cvCrumb = (container: HTMLElement) => container.querySelector('a[href="/cvs/7/details"]');
 
 describe('AppBreadcrumbs', () => {
   it('shows the section of a list page as the current page', () => {
@@ -33,7 +49,7 @@ describe('AppBreadcrumbs', () => {
 
   it('builds section > name > tab on a detail page', () => {
     usePathname.mockReturnValue('/cvs/7/projects');
-    renderWithProviders(<AppBreadcrumbs />);
+    renderWithProviders(<AppBreadcrumbs />, { mocks: [cvMock()] });
 
     expect(screen.getByRole('link', { name: 'CVs' })).toHaveAttribute('href', '/cvs');
     expect(screen.getAllByRole('listitem')).toHaveLength(3);
@@ -74,6 +90,46 @@ describe('AppBreadcrumbs', () => {
     });
 
     expect(await screen.findByRole('link', { name: 'jane@cv-builder.local' })).toBeInTheDocument();
+  });
+
+  describe('CV pages', () => {
+    it('shows a placeholder instead of the CV name while it loads', () => {
+      usePathname.mockReturnValue('/cvs/7/details');
+      const { container } = renderWithProviders(<AppBreadcrumbs />, { mocks: [cvMock()] });
+
+      expect(screen.getAllByRole('listitem')).toHaveLength(3);
+      expect(cvCrumb(container)).not.toBeInTheDocument();
+    });
+
+    it('shows the CV name loaded by id, linked to the Details tab', async () => {
+      usePathname.mockReturnValue('/cvs/7/skills');
+      renderWithProviders(<AppBreadcrumbs />, { mocks: [cvMock()] });
+
+      expect(await screen.findByRole('link', { name: 'Frontend Developer' })).toHaveAttribute(
+        'href',
+        '/cvs/7/details',
+      );
+      expect(screen.getByText('Skills').closest('[aria-current]')).toHaveAttribute(
+        'aria-current',
+        'page',
+      );
+    });
+
+    // wiki CV Details: the breadcrumb must not expose a CV the user may not access
+    it.each(['FORBIDDEN', 'NOT_FOUND'])(
+      'stops loading and shows no CV data on %s',
+      async (code) => {
+        usePathname.mockReturnValue('/cvs/7/details');
+        const { container } = renderWithProviders(<AppBreadcrumbs />, {
+          mocks: [cvErrorMock(code)],
+        });
+
+        await waitFor(() => expect(cvCrumb(container)).toBeInTheDocument());
+        expect(cvCrumb(container)).toHaveTextContent('');
+        expect(screen.queryByText('backend text')).not.toBeInTheDocument();
+        expect(screen.getByText('Details')).toBeInTheDocument();
+      },
+    );
   });
 
   it('renders nothing on a route without breadcrumbs', () => {

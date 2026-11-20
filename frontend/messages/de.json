@@ -138,6 +138,20 @@
         "maxLength": "Die Beschreibung darf {max} Zeichen nicht überschreiten"
       }
     },
+    "cv": {
+      "name": {
+        "required": "Name ist erforderlich",
+        "maxLength": "Der Name darf {max} Zeichen nicht überschreiten"
+      },
+      "education": {
+        "required": "Ausbildung ist erforderlich",
+        "maxLength": "Die Ausbildung darf {max} Zeichen nicht überschreiten"
+      },
+      "description": {
+        "required": "Beschreibung ist erforderlich",
+        "maxLength": "Die Beschreibung darf {max} Zeichen nicht überschreiten"
+      }
+    },
     "email": {
       "required": "E-Mail ist erforderlich",
       "invalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein"
@@ -324,12 +338,54 @@
     }
   },
   "cvs": {
+    "title": "Lebensläufe",
+    "createButton": "Lebenslauf erstellen",
     "tabs": {
       "label": "Lebenslaufbereiche",
       "details": "Details",
       "skills": "Fähigkeiten",
       "projects": "Projekte",
       "preview": "Vorschau"
+    },
+    "table": {
+      "columns": {
+        "name": "Name",
+        "education": "Ausbildung",
+        "employee": "Mitarbeiter"
+      },
+      "actions": {
+        "edit": "Bearbeiten",
+        "delete": "Löschen",
+        "view": "Ansehen"
+      },
+      "empty": "Keine Lebensläufe gefunden",
+      "userEmpty": "Sie haben noch keine Lebensläufe"
+    },
+    "fields": {
+      "name": "Name",
+      "education": "Ausbildung",
+      "description": "Beschreibung"
+    },
+    "create": {
+      "title": "Lebenslauf erstellen"
+    },
+    "update": {
+      "title": "Lebenslauf aktualisieren"
+    },
+    "delete": {
+      "title": "Lebenslauf löschen",
+      "message": "Möchten Sie den Lebenslauf <b>{name}</b> wirklich löschen?"
+    },
+    "details": {
+      "loading": "Lebenslauf wird geladen",
+      "loadError": "Lebenslaufdetails konnten nicht geladen werden",
+      "loadErrorTitle": "Hoppla",
+      "retry": "Erneut versuchen",
+      "updated": "Lebenslauf wurde aktualisiert",
+      "forbidden": {
+        "title": "Zugriff verweigert",
+        "message": "Sie sind nicht berechtigt, diesen Lebenslauf aufzurufen"
+      }
     }
   },
   "departments": {
