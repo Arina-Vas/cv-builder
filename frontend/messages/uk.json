@@ -387,6 +387,46 @@
         "title": "Немає доступу",
         "message": "У вас немає доступу до цього резюме"
       }
+    },
+    "preview": {
+      "loading": "Завантаження попереднього перегляду резюме",
+      "loadError": "Не вдалося завантажити попередній перегляд резюме",
+      "loadErrorTitle": "Ой",
+      "retry": "Повторити",
+      "empty": "Попередній перегляд резюме недоступний",
+      "forbidden": {
+        "title": "Немає доступу",
+        "message": "У вас немає доступу до цього резюме"
+      },
+      "exportPdf": "Експорт у PDF",
+      "exportingPdf": "Створення PDF",
+      "exportError": "Не вдалося створити PDF",
+      "document": {
+        "sections": {
+          "education": "Освіта",
+          "languages": "Володіння мовами",
+          "domains": "Домени",
+          "projects": "Проєкти",
+          "professionalSkills": "Професійні навички"
+        },
+        "languageLevel": "{language} — {level}",
+        "project": {
+          "roles": "Ролі в проєкті",
+          "period": "Період",
+          "responsibilities": "Обов'язки",
+          "environment": "Технології"
+        },
+        "period": "{start} – {end}",
+        "present": "дотепер",
+        "skillsTable": {
+          "category": "Категорія навичок",
+          "skill": "Навичка",
+          "experience": "Досвід (років)",
+          "lastUsed": "Останнє використання"
+        },
+        "noValue": "—",
+        "noValueLabel": "Не використовувалася в проєктах резюме"
+      }
     }
   },
   "departments": {
