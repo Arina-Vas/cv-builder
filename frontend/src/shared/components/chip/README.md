@@ -5,7 +5,7 @@ Shared chip: a short value in a pill, in two looks:
 - **outlined** (default): border, no fill, optionally with a ⊗ remove button
   (Figma "Design system (components)" → Select, Multiselect column). Used for the selected values in `MultiSelect`
   and for project environments.
-- **filled**: grey fill, no border, 24px high (Figma "1440px Desktop" →
+- **filled**: grey fill, no border, 24px high, smaller text (13px / 143%, letter-spacing 0.01em) (Figma "1440px Desktop" →
   [CV PROJECTS](https://www.figma.com/design/m3zxmLv79A6MsHCuAIQAoo/CV-Builder?node-id=21482-33925),
   the responsibilities under a project's description). For read-only lists of short values.
 

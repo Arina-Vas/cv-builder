@@ -310,6 +310,10 @@
   --chip-height: 32px; /* [M] */
   --chip-filled-height: 24px; /* [F] CV PROJECTS responsibilities */
   --chip-filled-radius: 16px; /* [F] CV PROJECTS responsibilities */
+  --chip-filled-font-size: 13px; /* [F] CV PROJECTS responsibilities */
+  --chip-filled-lh: 1.43; /* [F] 143% */
+  --chip-filled-ls: 0.01em; /* [F] */
+  --chip-filled-weight: 400; /* [F] */
   --chip-gap: 8px; /* [A] project environment chips */
   --chip-remove-size: 12px; /* [F]*/
 
