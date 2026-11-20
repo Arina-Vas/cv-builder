@@ -50,7 +50,8 @@
     "datePicker": {
       "placeholder": "Sélectionner une date",
       "previous": "Précédent",
-      "next": "Suivant"
+      "next": "Suivant",
+      "clear": "Effacer la date"
     },
     "select": { "noOptions": "Aucune option" },
     "chip": { "remove": "Supprimer {label}" },

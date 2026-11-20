@@ -4,9 +4,11 @@ import s from './DatePicker.module.css';
 import { format } from 'date-fns';
 import { DatePicker as ReactDatePicker } from 'react-datepicker';
 import type { Ref } from 'react';
-import { useId, useState } from 'react';
+import { useId, useRef, useState } from 'react';
 import { ChevronIcon } from '@/shared/components/icons/ChevronIcon';
 import { CalendarIcon } from '@/shared/components/icons/CalendarIcon';
+import { CrossIcon } from '@/shared/components/icons/CrossIcon';
+import { IconButton } from '@/shared/components/buttons';
 import { useTranslations } from 'next-intl';
 import { Field, getErrorId } from '@/shared/components/field/Field';
 import { formatDate } from '@/shared/lib/date/format-date';
@@ -25,6 +27,7 @@ type Props = {
   error?: string;
   ref?: Ref<HTMLButtonElement>;
   onOpenChange?: (open: boolean) => void;
+  clearable?: boolean;
 };
 
 type View = 'day' | 'month' | 'year';
@@ -42,6 +45,7 @@ export const DatePicker = ({
   label,
   error,
   onOpenChange,
+  clearable = false,
   ref,
 }: Props) => {
   const t = useTranslations('common.datePicker');
@@ -51,6 +55,21 @@ export const DatePicker = ({
 
   const autoId = useId();
   const triggerId = id ?? autoId;
+
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const setTriggerRef = (node: HTMLButtonElement | null) => {
+    triggerRef.current = node;
+    if (typeof ref === 'function') ref(node);
+    else if (ref) ref.current = node;
+  };
+
+  const showClear = clearable && value !== null && !disabled;
+
+  const handleClear = () => {
+    onChange(null);
+    onBlur?.();
+    triggerRef.current?.focus();
+  };
 
   const handleOpenChange = (next: boolean) => {
     setOpen(next);
@@ -93,11 +112,12 @@ export const DatePicker = ({
       <Popover.Root open={open} onOpenChange={handleOpenChange}>
         <Popover.Trigger asChild disabled={disabled}>
           <button
-            ref={ref}
+            ref={setTriggerRef}
             id={triggerId}
             type="button"
             className={s.trigger}
             data-invalid={error ? true : undefined}
+            data-clearable={showClear ? true : undefined}
             aria-describedby={error ? getErrorId(triggerId) : undefined}
           >
             <span>
@@ -106,6 +126,11 @@ export const DatePicker = ({
             <CalendarIcon className={s.icon} />
           </button>
         </Popover.Trigger>
+        {showClear && (
+          <IconButton aria-label={t('clear')} className={s.clear} onClick={handleClear}>
+            <CrossIcon />
+          </IconButton>
+        )}
         <Popover.Portal>
           <Popover.Content align="start" sideOffset={0} collisionPadding={16} className={s.content}>
             <ReactDatePicker

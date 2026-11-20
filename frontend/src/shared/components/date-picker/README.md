@@ -59,10 +59,15 @@ const [endDate, setEndDate] = useState<Date | null>(null);
 | `onBlur`       | `() => void`: called when the calendar closes           | —                                               |
 | `id`           | `string`: id of the trigger                             | `useId()`                                       |
 | `ref`          | `Ref<HTMLButtonElement>`: the trigger                   | —                                               |
+| `clearable`    | `boolean`: ✕ button that empties the date               | `false`                                         |
 
 - ⚠️ **Controlled only**: there is no `defaultValue`, the parent always owns the date. Empty is `null`, not `undefined`.
-- `onChange` is called only when a **day** is clicked; it gets a local `Date` at 00:00. The popover closes after it.
-  There is no "clear" button yet, so `onChange` is never called with `null` by the component itself.
+- `onChange` is called when a **day** is clicked; it gets a local `Date` at 00:00. The popover closes after it.
+- `clearable` is for **optional** dates only (e.g. the CV project End Date, empty = "Present"). The ✕ shows while a
+  date is set and the field is not disabled. Clicking it calls `onChange(null)` and `onBlur`, and moves focus back
+  to the trigger, because the ✕ disappears together with the value. The ✕ is a **sibling** of the trigger rather
+  than its child (a button inside a button is invalid HTML), so its click never opens the calendar and no
+  `stopPropagation` is needed. Its label is `common.datePicker.clear`.
 - The trigger shows the value as `MM/dd/yyyy` (Figma), via `formatDate` from `@/shared/lib/date/format-date`,
   the same helper the tables use, so a date looks the same everywhere in the app.
 - Disabled days (`minDate` / `maxDate` / `excludeDates`) are greyed out and struck through, they can't be clicked.

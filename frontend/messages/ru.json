@@ -47,7 +47,8 @@
     "datePicker": {
       "placeholder": "Выберите дату",
       "previous": "Предыдущий",
-      "next": "Следующий"
+      "next": "Следующий",
+      "clear": "Очистить дату"
     },
     "select": { "noOptions": "Нет вариантов" },
     "chip": { "remove": "Удалить {label}" },

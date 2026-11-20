@@ -42,7 +42,8 @@
     "datePicker": {
       "placeholder": "Select date",
       "previous": "Previous",
-      "next": "Next"
+      "next": "Next",
+      "clear": "Clear date"
     },
     "select": { "noOptions": "No options" },
     "chip": { "remove": "Remove {label}" },

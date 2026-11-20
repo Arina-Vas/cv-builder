@@ -47,7 +47,8 @@
     "datePicker": {
       "placeholder": "Оберіть дату",
       "previous": "Попередній",
-      "next": "Наступний"
+      "next": "Наступний",
+      "clear": "Очистити дату"
     },
     "select": { "noOptions": "Немає варіантів" },
     "chip": { "remove": "Видалити {label}" },
