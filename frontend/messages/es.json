@@ -143,6 +143,20 @@
         "maxLength": "La descripción no debe superar los {max} caracteres"
       }
     },
+    "cv": {
+      "name": {
+        "required": "El nombre es obligatorio",
+        "maxLength": "El nombre no debe exceder los {max} caracteres"
+      },
+      "education": {
+        "required": "La educación es obligatoria",
+        "maxLength": "La educación no debe exceder los {max} caracteres"
+      },
+      "description": {
+        "required": "La descripción es obligatoria",
+        "maxLength": "La descripción no debe exceder los {max} caracteres"
+      }
+    },
     "email": {
       "required": "El correo electrónico es obligatorio",
       "invalid": "Introduce una dirección de correo electrónico válida"
@@ -332,12 +346,54 @@
     }
   },
   "cvs": {
+    "title": "CV",
+    "createButton": "Crear CV",
     "tabs": {
       "label": "Secciones del CV",
       "details": "Detalles",
       "skills": "Habilidades",
       "projects": "Proyectos",
       "preview": "Vista previa"
+    },
+    "table": {
+      "columns": {
+        "name": "Nombre",
+        "education": "Formación",
+        "employee": "Empleado"
+      },
+      "actions": {
+        "edit": "Editar",
+        "delete": "Eliminar",
+        "view": "Ver"
+      },
+      "empty": "No se encontraron CV",
+      "userEmpty": "Aún no tienes CV"
+    },
+    "fields": {
+      "name": "Nombre",
+      "education": "Formación",
+      "description": "Descripción"
+    },
+    "create": {
+      "title": "Crear CV"
+    },
+    "update": {
+      "title": "Actualizar CV"
+    },
+    "delete": {
+      "title": "Eliminar CV",
+      "message": "¿Seguro que quieres eliminar el CV <b>{name}</b>?"
+    },
+    "details": {
+      "loading": "Cargando CV",
+      "loadError": "No se pudieron cargar los detalles del CV",
+      "loadErrorTitle": "Ups",
+      "retry": "Reintentar",
+      "updated": "El CV se ha actualizado",
+      "forbidden": {
+        "title": "Acceso denegado",
+        "message": "No tienes autorización para acceder a este CV"
+      }
     }
   },
   "departments": {

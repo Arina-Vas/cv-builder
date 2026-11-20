@@ -138,6 +138,20 @@
         "maxLength": "Description must not exceed {max} characters"
       }
     },
+    "cv": {
+      "name": {
+        "required": "Name is required",
+        "maxLength": "Name must not exceed {max} characters"
+      },
+      "education": {
+        "required": "Education is required",
+        "maxLength": "Education must not exceed {max} characters"
+      },
+      "description": {
+        "required": "Description is required",
+        "maxLength": "Description must not exceed {max} characters"
+      }
+    },
     "email": {
       "required": "Email is required",
       "invalid": "Please enter a valid email address"
@@ -320,12 +334,46 @@
     }
   },
   "cvs": {
+    "title": "CVs",
+    "createButton": "Create CV",
     "tabs": {
       "label": "CV sections",
       "details": "Details",
       "skills": "Skills",
       "projects": "Projects",
       "preview": "Preview"
+    },
+    "table": {
+      "columns": {
+        "name": "Name",
+        "education": "Education",
+        "employee": "Employee"
+      },
+      "actions": { "edit": "Edit", "delete": "Delete", "view": "View" },
+      "empty": "No CVs found",
+      "userEmpty": "You have no CVs yet"
+    },
+    "fields": {
+      "name": "Name",
+      "education": "Education",
+      "description": "Description"
+    },
+    "create": { "title": "Create CV" },
+    "update": { "title": "Update CV" },
+    "delete": {
+      "title": "Delete CV",
+      "message": "Are you sure you want to delete CV <b>{name}</b>?"
+    },
+    "details": {
+      "loading": "Loading CV",
+      "loadError": "Failed to load CV details",
+      "loadErrorTitle": "Oops",
+      "retry": "Retry",
+      "updated": "CV has been updated",
+      "forbidden": {
+        "title": "Access denied",
+        "message": "You are not authorized to access this CV"
+      }
     }
   },
   "departments": {
