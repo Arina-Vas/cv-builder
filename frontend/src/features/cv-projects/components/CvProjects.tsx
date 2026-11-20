@@ -20,6 +20,7 @@ import { useTableParams } from '@/shared/hooks/useTableParams';
 import { hasErrorCode } from '@/shared/lib/apollo/graphql-errors';
 import { useRefetchOnError } from '@/shared/lib/apollo/useRefetchOnError';
 import { formatDate } from '@/shared/lib/date/format-date';
+import s from './CvProjects.module.css';
 
 type ModalState =
   | { type: 'add' }
@@ -88,7 +89,7 @@ export const CvProjects = ({ cvId }: Props) => {
   ];
 
   return (
-    <div>
+    <div className={s.root}>
       <TableToolbar
         search={search}
         onSearch={setSearch}
