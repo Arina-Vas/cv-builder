@@ -47,7 +47,8 @@
     "datePicker": {
       "placeholder": "Selecciona una fecha",
       "previous": "Anterior",
-      "next": "Siguiente"
+      "next": "Siguiente",
+      "clear": "Borrar fecha"
     },
     "select": { "noOptions": "Sin opciones" },
     "chip": { "remove": "Quitar {label}" },
@@ -141,6 +142,21 @@
       "description": {
         "required": "La descripción es obligatoria",
         "maxLength": "La descripción no debe superar los {max} caracteres"
+      }
+    },
+    "cvProject": {
+      "projectId": { "required": "El proyecto es obligatorio" },
+      "startDate": {
+        "required": "La fecha de inicio es obligatoria",
+        "outOfProject": "La fecha de inicio debe estar dentro de la duración del proyecto"
+      },
+      "endDate": {
+        "outOfProject": "La fecha de finalización debe estar dentro de la duración del proyecto",
+        "beforeStart": "La fecha de finalización no puede ser anterior a la fecha de inicio"
+      },
+      "roleIds": { "required": "Se debe seleccionar al menos un rol" },
+      "responsibilities": {
+        "maxLength": "Las responsabilidades no deben superar los {max} caracteres"
       }
     },
     "cv": {
@@ -394,6 +410,44 @@
         "title": "Acceso denegado",
         "message": "No tienes autorización para acceder a este CV"
       }
+    }
+  },
+  "cvProjects": {
+    "form": {
+      "addTitle": "Añadir proyecto",
+      "updateTitle": "Actualizar proyecto",
+      "fields": {
+        "project": "Nombre",
+        "domain": "Dominio",
+        "startDate": "Fecha de inicio",
+        "endDate": "Fecha de finalización",
+        "description": "Descripción",
+        "environment": "Entorno",
+        "roles": "Roles",
+        "responsibilities": "Responsabilidades"
+      },
+      "responsibilitiesHint": "Separa las responsabilidades con una coma o un salto de línea",
+      "errors": { "alreadyAdded": "El proyecto ya está añadido al CV" }
+    },
+    "title": "Proyectos del CV",
+    "addButton": "Añadir proyecto",
+    "table": {
+      "columns": {
+        "name": "Nombre",
+        "domain": "Dominio",
+        "startDate": "Fecha de inicio",
+        "endDate": "Fecha de finalización"
+      },
+      "tillNow": "Hasta ahora",
+      "empty": "Aún no se han añadido proyectos",
+      "noResults": "No se encontraron proyectos",
+      "actions": { "update": "Actualizar", "delete": "Eliminar" }
+    },
+    "loadError": "No se pudieron cargar los proyectos",
+    "forbidden": "No tienes autorización para acceder a este CV",
+    "delete": {
+      "title": "Quitar proyecto",
+      "message": "¿Seguro que quieres eliminar el proyecto <b>{name}</b>?"
     }
   },
   "departments": {

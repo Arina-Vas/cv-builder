@@ -47,7 +47,8 @@
     "datePicker": {
       "placeholder": "Оберіть дату",
       "previous": "Попередній",
-      "next": "Наступний"
+      "next": "Наступний",
+      "clear": "Очистити дату"
     },
     "select": { "noOptions": "Немає варіантів" },
     "chip": { "remove": "Видалити {label}" },
@@ -142,6 +143,19 @@
         "required": "Опис обов'язковий",
         "maxLength": "Опис не повинен перевищувати {max} символів"
       }
+    },
+    "cvProject": {
+      "projectId": { "required": "Проєкт обов'язковий" },
+      "startDate": {
+        "required": "Дата початку обов'язкова",
+        "outOfProject": "Дата початку має бути в межах тривалості проєкту"
+      },
+      "endDate": {
+        "outOfProject": "Дата завершення має бути в межах тривалості проєкту",
+        "beforeStart": "Дата завершення не може бути раніше за дату початку"
+      },
+      "roleIds": { "required": "Потрібно вибрати щонайменше одну роль" },
+      "responsibilities": { "maxLength": "Обов'язки не повинні перевищувати {max} символів" }
     },
     "cv": {
       "name": {
@@ -387,6 +401,44 @@
         "title": "Немає доступу",
         "message": "У вас немає доступу до цього резюме"
       }
+    }
+  },
+  "cvProjects": {
+    "form": {
+      "addTitle": "Додати проєкт",
+      "updateTitle": "Оновити проєкт",
+      "fields": {
+        "project": "Назва",
+        "domain": "Домен",
+        "startDate": "Дата початку",
+        "endDate": "Дата завершення",
+        "description": "Опис",
+        "environment": "Середовище",
+        "roles": "Ролі",
+        "responsibilities": "Обов'язки"
+      },
+      "responsibilitiesHint": "Розділяйте обов'язки комою або новим рядком",
+      "errors": { "alreadyAdded": "Проєкт уже додано до CV" }
+    },
+    "title": "Проєкти CV",
+    "addButton": "Додати проєкт",
+    "table": {
+      "columns": {
+        "name": "Назва",
+        "domain": "Домен",
+        "startDate": "Дата початку",
+        "endDate": "Дата завершення"
+      },
+      "tillNow": "Дотепер",
+      "empty": "Проєктів ще не додано",
+      "noResults": "Проєктів не знайдено",
+      "actions": { "update": "Оновити", "delete": "Видалити" }
+    },
+    "loadError": "Не вдалося завантажити проєкти",
+    "forbidden": "У вас немає доступу до цього CV",
+    "delete": {
+      "title": "Видалити проєкт",
+      "message": "Ви впевнені, що хочете видалити проєкт <b>{name}</b>?"
     }
   },
   "departments": {
