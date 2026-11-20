@@ -367,6 +367,7 @@
     "details": {
       "loading": "Loading CV",
       "loadError": "Failed to load CV details",
+      "loadErrorTitle": "Oops",
       "retry": "Retry",
       "updated": "CV has been updated",
       "forbidden": {

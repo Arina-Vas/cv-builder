@@ -94,7 +94,8 @@ describe('CvDetails', () => {
         cvMock(),
       ]);
 
-      expect((await screen.findAllByText('Failed to load CV details')).length).toBeGreaterThan(0);
+      expect(await screen.findByRole('heading', { name: 'Oops' })).toBeInTheDocument();
+      expect(screen.getByText('Failed to load CV details')).toBeInTheDocument();
       await user.click(screen.getByRole('button', { name: 'Retry' }));
 
       expect(await screen.findByLabelText('Name')).toHaveValue('Frontend Developer');
@@ -156,6 +157,26 @@ describe('CvDetails', () => {
       expect(screen.getByLabelText('Name')).toHaveValue('Frontend Developer v2');
       expect(screen.queryByText('CV has been updated')).not.toBeInTheDocument();
       expect(screen.queryByText('backend text')).not.toBeInTheDocument();
+    });
+
+    // wiki: a CV deleted meanwhile must not stay on screen as current data
+    it('opens the 404 page when the CV was deleted before saving', async () => {
+      // React logs the error caught by the boundary; keep the test output clean
+      vi.spyOn(console, 'error').mockImplementation(() => {});
+      const gone = {
+        errors: [new GraphQLError('backend text', { extensions: { code: 'NOT_FOUND' } })],
+      };
+      const { user } = renderDetails([
+        cvMock(),
+        { request: updateRequest('Frontend Developer v2'), result: gone },
+        // useRefetchOnError: cv(id) again, now NOT_FOUND, so CvDetails opens Not Found
+        { request: cvRequest, result: gone },
+      ]);
+
+      await user.type(await screen.findByLabelText('Name'), ' v2');
+      await user.click(screen.getByRole('button', { name: 'Update' }));
+
+      await vi.waitFor(() => expect(notFound).toHaveBeenCalled());
     });
   });
 });

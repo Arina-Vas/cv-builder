@@ -379,6 +379,7 @@
     "details": {
       "loading": "Lebenslauf wird geladen",
       "loadError": "Lebenslaufdetails konnten nicht geladen werden",
+      "loadErrorTitle": "Hoppla",
       "retry": "Erneut versuchen",
       "updated": "Lebenslauf wurde aktualisiert",
       "forbidden": {

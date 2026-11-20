@@ -13,16 +13,17 @@ type Props = {
 export const CvDetails = ({ cvId }: Props) => {
   const t = useTranslations('cvs.details');
 
-  const { data, error, refetch } = useQuery(CV, { variables: { id: cvId } });
+  const { data, error, loading, refetch } = useQuery(CV, { variables: { id: cvId } });
 
   if (error) {
     if (hasErrorCode(error, 'NOT_FOUND')) notFound();
     if (hasErrorCode(error, 'FORBIDDEN'))
-      return <ErrorState title={t('forbidden.title')} message={t('forbidden.message')} />;
+      return <ErrorState inline title={t('forbidden.title')} message={t('forbidden.message')} />;
     return (
       <ErrorState
-        title={t('loadError')}
-        action={{ label: t('retry'), onClick: () => void refetch() }}
+        inline
+        title={t('loadErrorTitle')}
+        action={{ label: t('retry'), onClick: () => void refetch(), loading }}
         message={t('loadError')}
       />
     );

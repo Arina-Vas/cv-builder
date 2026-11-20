@@ -380,6 +380,7 @@
     "details": {
       "loading": "Загрузка резюме",
       "loadError": "Не удалось загрузить данные резюме",
+      "loadErrorTitle": "Упс",
       "retry": "Повторить",
       "updated": "Резюме обновлено",
       "forbidden": {

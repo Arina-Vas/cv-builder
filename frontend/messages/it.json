@@ -380,6 +380,7 @@
     "details": {
       "loading": "Caricamento del CV",
       "loadError": "Impossibile caricare i dettagli del CV",
+      "loadErrorTitle": "Ops",
       "retry": "Riprova",
       "updated": "Il CV è stato aggiornato",
       "forbidden": {

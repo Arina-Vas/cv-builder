@@ -7,13 +7,14 @@ import { useToast } from '@/shared/components/toast/ToastProvider';
 import { useErrorMessage } from '@/shared/lib/apollo/useErrorMessage';
 import { useMemo, useState } from 'react';
 import { useMutation } from '@apollo/client/react';
-import { CV_MUTATION_OPTIONS, UPDATE_CV } from '@/features/cvs/api/cvs.operations';
+import { CV, CV_MUTATION_OPTIONS, UPDATE_CV } from '@/features/cvs/api/cvs.operations';
 import { useAppForm } from '@/shared/lib/form';
 import { type CvFieldsFragment } from '@/gql/graphql';
 import { parseError } from '@/shared/lib/apollo/graphql-errors';
 import type { Path } from 'react-hook-form';
 import layout from '@/shared/components/form/FormLayout.module.css';
 import s from './CvDetails.module.css';
+import { useRefetchOnError } from '@/shared/lib/apollo/useRefetchOnError';
 
 type Props = {
   cv: CvFieldsFragment;
@@ -34,6 +35,7 @@ export const CvDetailsForm = ({ cv }: Props) => {
   const errorMessage = useErrorMessage();
   const [submitError, setSubmitError] = useState<string>();
 
+  const withRefetch = useRefetchOnError([CV], ['NOT_FOUND']);
   const [updateCv] = useMutation(UPDATE_CV, CV_MUTATION_OPTIONS);
 
   const schema = useMemo(() => cvSchema(tValidation), [tValidation]);
@@ -45,9 +47,9 @@ export const CvDetailsForm = ({ cv }: Props) => {
   const handleSubmit = form.handleSubmit(async (values) => {
     setSubmitError(undefined);
     try {
-      const { data } = await updateCv({
-        variables: { input: { ...values, id: cv.id, userId: cv.user.id } },
-      });
+      const { data } = await withRefetch(() =>
+        updateCv({ variables: { input: { ...values, id: cv.id, userId: cv.user.id } } }),
+      );
       form.reset(data ? toFormValues(data.updateCv) : values);
       toast.success(t('details.updated'));
     } catch (error) {

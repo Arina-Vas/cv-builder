@@ -380,6 +380,7 @@
     "details": {
       "loading": "Carregando currículo",
       "loadError": "Não foi possível carregar os detalhes do currículo",
+      "loadErrorTitle": "Ops",
       "retry": "Tentar novamente",
       "updated": "O currículo foi atualizado",
       "forbidden": {
