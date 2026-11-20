@@ -346,6 +346,44 @@
       "preview": "Предпросмотр"
     }
   },
+  "cvProjects": {
+    "form": {
+      "addTitle": "Добавить проект",
+      "updateTitle": "Обновить проект",
+      "fields": {
+        "project": "Название",
+        "domain": "Домен",
+        "startDate": "Дата начала",
+        "endDate": "Дата окончания",
+        "description": "Описание",
+        "environment": "Окружение",
+        "roles": "Роли",
+        "responsibilities": "Обязанности"
+      },
+      "responsibilitiesHint": "Разделяйте обязанности запятой или новой строкой",
+      "errors": { "alreadyAdded": "Проект уже добавлен в CV" }
+    },
+    "title": "Проекты CV",
+    "addButton": "Добавить проект",
+    "table": {
+      "columns": {
+        "name": "Название",
+        "domain": "Домен",
+        "startDate": "Дата начала",
+        "endDate": "Дата окончания"
+      },
+      "tillNow": "По настоящее время",
+      "empty": "Проекты ещё не добавлены",
+      "noResults": "Проекты не найдены",
+      "actions": { "update": "Обновить", "delete": "Удалить" }
+    },
+    "loadError": "Не удалось загрузить проекты",
+    "forbidden": "У вас нет доступа к этому CV",
+    "delete": {
+      "title": "Удалить проект",
+      "message": "Вы уверены, что хотите удалить проект <b>{name}</b>?"
+    }
+  },
   "departments": {
     "title": "Отделы",
     "createButton": "Создать отдел",

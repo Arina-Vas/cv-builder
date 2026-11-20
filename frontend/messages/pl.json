@@ -346,6 +346,44 @@
       "preview": "Podgląd"
     }
   },
+  "cvProjects": {
+    "form": {
+      "addTitle": "Dodaj projekt",
+      "updateTitle": "Aktualizuj projekt",
+      "fields": {
+        "project": "Nazwa",
+        "domain": "Domena",
+        "startDate": "Data rozpoczęcia",
+        "endDate": "Data zakończenia",
+        "description": "Opis",
+        "environment": "Środowisko",
+        "roles": "Role",
+        "responsibilities": "Obowiązki"
+      },
+      "responsibilitiesHint": "Oddzielaj obowiązki przecinkiem lub nową linią",
+      "errors": { "alreadyAdded": "Projekt został już dodany do CV" }
+    },
+    "title": "Projekty CV",
+    "addButton": "Dodaj projekt",
+    "table": {
+      "columns": {
+        "name": "Nazwa",
+        "domain": "Domena",
+        "startDate": "Data rozpoczęcia",
+        "endDate": "Data zakończenia"
+      },
+      "tillNow": "Do teraz",
+      "empty": "Nie dodano jeszcze projektów",
+      "noResults": "Nie znaleziono projektów",
+      "actions": { "update": "Aktualizuj", "delete": "Usuń" }
+    },
+    "loadError": "Nie udało się załadować projektów",
+    "forbidden": "Nie masz dostępu do tego CV",
+    "delete": {
+      "title": "Usuń projekt",
+      "message": "Czy na pewno chcesz usunąć projekt <b>{name}</b>?"
+    }
+  },
   "departments": {
     "title": "Działy",
     "createButton": "Utwórz dział",

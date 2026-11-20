@@ -346,6 +346,44 @@
       "preview": "Попередній перегляд"
     }
   },
+  "cvProjects": {
+    "form": {
+      "addTitle": "Додати проєкт",
+      "updateTitle": "Оновити проєкт",
+      "fields": {
+        "project": "Назва",
+        "domain": "Домен",
+        "startDate": "Дата початку",
+        "endDate": "Дата завершення",
+        "description": "Опис",
+        "environment": "Середовище",
+        "roles": "Ролі",
+        "responsibilities": "Обов'язки"
+      },
+      "responsibilitiesHint": "Розділяйте обов'язки комою або новим рядком",
+      "errors": { "alreadyAdded": "Проєкт уже додано до CV" }
+    },
+    "title": "Проєкти CV",
+    "addButton": "Додати проєкт",
+    "table": {
+      "columns": {
+        "name": "Назва",
+        "domain": "Домен",
+        "startDate": "Дата початку",
+        "endDate": "Дата завершення"
+      },
+      "tillNow": "Дотепер",
+      "empty": "Проєктів ще не додано",
+      "noResults": "Проєктів не знайдено",
+      "actions": { "update": "Оновити", "delete": "Видалити" }
+    },
+    "loadError": "Не вдалося завантажити проєкти",
+    "forbidden": "У вас немає доступу до цього CV",
+    "delete": {
+      "title": "Видалити проєкт",
+      "message": "Ви впевнені, що хочете видалити проєкт <b>{name}</b>?"
+    }
+  },
   "departments": {
     "title": "Відділи",
     "createButton": "Створити відділ",

@@ -1,6 +1,7 @@
 import { graphql } from '@/gql';
 import type { ApolloCache } from '@apollo/client';
 import { NO_ERROR_TOAST } from '@/shared/lib/apollo/error-toast-link';
+import type { ErrorCode } from '@/shared/lib/apollo/graphql-errors';
 
 graphql(`
   fragment CvProjectFields on CvProject {
@@ -83,3 +84,6 @@ export const CV_PROJECT_MUTATION_OPTIONS = {
   refetchQueries: [CV_PROJECTS],
   awaitRefetchQueries: true,
 };
+
+export const CV_PROJECT_REFETCH_QUERIES = [CV_PROJECTS, AVAILABLE_CV_PROJECTS];
+export const CV_PROJECT_REFETCH_ERROR_CODES: ErrorCode[] = ['CONFLICT', 'NOT_FOUND'];
