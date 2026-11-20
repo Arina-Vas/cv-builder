@@ -4,6 +4,11 @@
   box-sizing: border-box;
 }
 
+/* one Roboto from the two self-hosted subsets (layout.tsx); tokens.css reads --font-roboto */
+:root {
+  --font-roboto: var(--font-roboto-latin), var(--font-roboto-cyrillic);
+}
+
 html,
 body {
   margin: 0;
