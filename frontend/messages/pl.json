@@ -47,7 +47,8 @@
     "datePicker": {
       "placeholder": "Wybierz datę",
       "previous": "Poprzedni",
-      "next": "Następny"
+      "next": "Następny",
+      "clear": "Wyczyść datę"
     },
     "select": { "noOptions": "Brak opcji" },
     "chip": { "remove": "Usuń {label}" },
@@ -142,6 +143,19 @@
         "required": "Opis jest wymagany",
         "maxLength": "Opis nie może przekraczać {max} znaków"
       }
+    },
+    "cvProject": {
+      "projectId": { "required": "Projekt jest wymagany" },
+      "startDate": {
+        "required": "Data rozpoczęcia jest wymagana",
+        "outOfProject": "Data rozpoczęcia musi mieścić się w czasie trwania projektu"
+      },
+      "endDate": {
+        "outOfProject": "Data zakończenia musi mieścić się w czasie trwania projektu",
+        "beforeStart": "Data zakończenia nie może być wcześniejsza niż data rozpoczęcia"
+      },
+      "roleIds": { "required": "Należy wybrać co najmniej jedną rolę" },
+      "responsibilities": { "maxLength": "Obowiązki nie mogą przekraczać {max} znaków" }
     },
     "cv": {
       "name": {
@@ -427,6 +441,44 @@
         "noValue": "—",
         "noValueLabel": "Nieużywana w projektach CV"
       }
+    }
+  },
+  "cvProjects": {
+    "form": {
+      "addTitle": "Dodaj projekt",
+      "updateTitle": "Aktualizuj projekt",
+      "fields": {
+        "project": "Nazwa",
+        "domain": "Domena",
+        "startDate": "Data rozpoczęcia",
+        "endDate": "Data zakończenia",
+        "description": "Opis",
+        "environment": "Środowisko",
+        "roles": "Role",
+        "responsibilities": "Obowiązki"
+      },
+      "responsibilitiesHint": "Oddzielaj obowiązki przecinkiem lub nową linią",
+      "errors": { "alreadyAdded": "Projekt został już dodany do CV" }
+    },
+    "title": "Projekty CV",
+    "addButton": "Dodaj projekt",
+    "table": {
+      "columns": {
+        "name": "Nazwa",
+        "domain": "Domena",
+        "startDate": "Data rozpoczęcia",
+        "endDate": "Data zakończenia"
+      },
+      "tillNow": "Do teraz",
+      "empty": "Nie dodano jeszcze projektów",
+      "noResults": "Nie znaleziono projektów",
+      "actions": { "update": "Aktualizuj", "delete": "Usuń" }
+    },
+    "loadError": "Nie udało się załadować projektów",
+    "forbidden": "Nie masz dostępu do tego CV",
+    "delete": {
+      "title": "Usuń projekt",
+      "message": "Czy na pewno chcesz usunąć projekt <b>{name}</b>?"
     }
   },
   "departments": {

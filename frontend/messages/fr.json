@@ -50,7 +50,8 @@
     "datePicker": {
       "placeholder": "Sélectionner une date",
       "previous": "Précédent",
-      "next": "Suivant"
+      "next": "Suivant",
+      "clear": "Effacer la date"
     },
     "select": { "noOptions": "Aucune option" },
     "chip": { "remove": "Supprimer {label}" },
@@ -144,6 +145,21 @@
       "description": {
         "required": "La description est requise",
         "maxLength": "La description ne doit pas dépasser {max} caractères"
+      }
+    },
+    "cvProject": {
+      "projectId": { "required": "Le projet est requis" },
+      "startDate": {
+        "required": "La date de début est requise",
+        "outOfProject": "La date de début doit être comprise dans la durée du projet"
+      },
+      "endDate": {
+        "outOfProject": "La date de fin doit être comprise dans la durée du projet",
+        "beforeStart": "La date de fin ne peut pas être antérieure à la date de début"
+      },
+      "roleIds": { "required": "Au moins un rôle doit être sélectionné" },
+      "responsibilities": {
+        "maxLength": "Les responsabilités ne doivent pas dépasser {max} caractères"
       }
     },
     "cv": {
@@ -434,6 +450,44 @@
         "noValue": "—",
         "noValueLabel": "Non utilisée dans les projets du CV"
       }
+    }
+  },
+  "cvProjects": {
+    "form": {
+      "addTitle": "Ajouter un projet",
+      "updateTitle": "Mettre à jour le projet",
+      "fields": {
+        "project": "Nom",
+        "domain": "Domaine",
+        "startDate": "Date de début",
+        "endDate": "Date de fin",
+        "description": "Description",
+        "environment": "Environnement",
+        "roles": "Rôles",
+        "responsibilities": "Responsabilités"
+      },
+      "responsibilitiesHint": "Séparez les responsabilités par une virgule ou un retour à la ligne",
+      "errors": { "alreadyAdded": "Le projet est déjà ajouté au CV" }
+    },
+    "title": "Projets du CV",
+    "addButton": "Ajouter un projet",
+    "table": {
+      "columns": {
+        "name": "Nom",
+        "domain": "Domaine",
+        "startDate": "Date de début",
+        "endDate": "Date de fin"
+      },
+      "tillNow": "À ce jour",
+      "empty": "Aucun projet ajouté pour l'instant",
+      "noResults": "Aucun projet trouvé",
+      "actions": { "update": "Mettre à jour", "delete": "Supprimer" }
+    },
+    "loadError": "Impossible de charger les projets",
+    "forbidden": "Vous n'êtes pas autorisé à accéder à ce CV",
+    "delete": {
+      "title": "Retirer le projet",
+      "message": "Voulez-vous vraiment supprimer le projet <b>{name}</b> ?"
     }
   },
   "departments": {

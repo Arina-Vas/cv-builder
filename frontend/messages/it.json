@@ -47,7 +47,8 @@
     "datePicker": {
       "placeholder": "Seleziona una data",
       "previous": "Precedente",
-      "next": "Successivo"
+      "next": "Successivo",
+      "clear": "Cancella data"
     },
     "select": { "noOptions": "Nessuna opzione" },
     "chip": { "remove": "Rimuovi {label}" },
@@ -142,6 +143,19 @@
         "required": "La descrizione è obbligatoria",
         "maxLength": "La descrizione non deve superare {max} caratteri"
       }
+    },
+    "cvProject": {
+      "projectId": { "required": "Il progetto è obbligatorio" },
+      "startDate": {
+        "required": "La data di inizio è obbligatoria",
+        "outOfProject": "La data di inizio deve rientrare nella durata del progetto"
+      },
+      "endDate": {
+        "outOfProject": "La data di fine deve rientrare nella durata del progetto",
+        "beforeStart": "La data di fine non può essere precedente alla data di inizio"
+      },
+      "roleIds": { "required": "È necessario selezionare almeno un ruolo" },
+      "responsibilities": { "maxLength": "Le responsabilità non devono superare {max} caratteri" }
     },
     "cv": {
       "name": {
@@ -427,6 +441,44 @@
         "noValue": "—",
         "noValueLabel": "Non utilizzata nei progetti del CV"
       }
+    }
+  },
+  "cvProjects": {
+    "form": {
+      "addTitle": "Aggiungi progetto",
+      "updateTitle": "Aggiorna progetto",
+      "fields": {
+        "project": "Nome",
+        "domain": "Dominio",
+        "startDate": "Data di inizio",
+        "endDate": "Data di fine",
+        "description": "Descrizione",
+        "environment": "Ambiente",
+        "roles": "Ruoli",
+        "responsibilities": "Responsabilità"
+      },
+      "responsibilitiesHint": "Separa le responsabilità con una virgola o un a capo",
+      "errors": { "alreadyAdded": "Il progetto è già stato aggiunto al CV" }
+    },
+    "title": "Progetti del CV",
+    "addButton": "Aggiungi progetto",
+    "table": {
+      "columns": {
+        "name": "Nome",
+        "domain": "Dominio",
+        "startDate": "Data di inizio",
+        "endDate": "Data di fine"
+      },
+      "tillNow": "Ad oggi",
+      "empty": "Nessun progetto ancora aggiunto",
+      "noResults": "Nessun progetto trovato",
+      "actions": { "update": "Aggiorna", "delete": "Elimina" }
+    },
+    "loadError": "Impossibile caricare i progetti",
+    "forbidden": "Non sei autorizzato ad accedere a questo CV",
+    "delete": {
+      "title": "Rimuovi progetto",
+      "message": "Vuoi davvero eliminare il progetto <b>{name}</b>?"
     }
   },
   "departments": {

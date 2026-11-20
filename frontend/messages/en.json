@@ -42,7 +42,8 @@
     "datePicker": {
       "placeholder": "Select date",
       "previous": "Previous",
-      "next": "Next"
+      "next": "Next",
+      "clear": "Clear date"
     },
     "select": { "noOptions": "No options" },
     "chip": { "remove": "Remove {label}" },
@@ -137,6 +138,19 @@
         "required": "Description is required",
         "maxLength": "Description must not exceed {max} characters"
       }
+    },
+    "cvProject": {
+      "projectId": { "required": "Project is required" },
+      "startDate": {
+        "required": "Start date is required",
+        "outOfProject": "Start date must be within project duration"
+      },
+      "endDate": {
+        "outOfProject": "End date must be within project duration",
+        "beforeStart": "End date cannot be earlier than start date"
+      },
+      "roleIds": { "required": "At least one role must be selected" },
+      "responsibilities": { "maxLength": "Responsibilities must not exceed {max} characters" }
     },
     "cv": {
       "name": {
@@ -414,6 +428,44 @@
         "noValue": "—",
         "noValueLabel": "Not used in CV projects"
       }
+    }
+  },
+  "cvProjects": {
+    "form": {
+      "addTitle": "Add project",
+      "updateTitle": "Update project",
+      "fields": {
+        "project": "Name",
+        "domain": "Domain",
+        "startDate": "Start Date",
+        "endDate": "End Date",
+        "description": "Description",
+        "environment": "Environment",
+        "roles": "Roles",
+        "responsibilities": "Responsibilities"
+      },
+      "responsibilitiesHint": "Separate responsibilities with a comma or a new line",
+      "errors": { "alreadyAdded": "Project is already added to the CV" }
+    },
+    "title": "CV projects",
+    "addButton": "Add project",
+    "table": {
+      "columns": {
+        "name": "Name",
+        "domain": "Domain",
+        "startDate": "Start Date",
+        "endDate": "End Date"
+      },
+      "tillNow": "Till now",
+      "empty": "No projects added yet",
+      "noResults": "No projects found",
+      "actions": { "update": "Update", "delete": "Delete" }
+    },
+    "loadError": "Failed to load projects",
+    "forbidden": "You are not authorized to access this CV",
+    "delete": {
+      "title": "Remove project",
+      "message": "Are you sure you want to remove project <b>{name}</b>?"
     }
   },
   "departments": {

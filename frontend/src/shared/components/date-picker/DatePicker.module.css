@@ -34,6 +34,26 @@
   color: var(--action-active);
 }
 
+.trigger[data-clearable] > span {
+  padding-right: var(--icon-button-size);
+}
+
+.clear {
+  position: absolute;
+  top: 50%;
+  right: calc(var(--input-padding) + var(--icon-size-sm) + var(--space-1));
+  transform: translateY(-50%) scale(0.8);
+}
+
+.clear:not(:disabled) {
+  border: 0;
+  color: var(--input-label);
+}
+
+.clear:hover:not(:disabled) {
+  color: var(--text);
+}
+
 .content {
   z-index: 50;
   width: var(--radix-popover-trigger-width);

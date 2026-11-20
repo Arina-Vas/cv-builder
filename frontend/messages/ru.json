@@ -47,7 +47,8 @@
     "datePicker": {
       "placeholder": "Выберите дату",
       "previous": "Предыдущий",
-      "next": "Следующий"
+      "next": "Следующий",
+      "clear": "Очистить дату"
     },
     "select": { "noOptions": "Нет вариантов" },
     "chip": { "remove": "Удалить {label}" },
@@ -142,6 +143,19 @@
         "required": "Описание обязательно",
         "maxLength": "Описание не должно превышать {max} символов"
       }
+    },
+    "cvProject": {
+      "projectId": { "required": "Проект обязателен" },
+      "startDate": {
+        "required": "Дата начала обязательна",
+        "outOfProject": "Дата начала должна быть в пределах длительности проекта"
+      },
+      "endDate": {
+        "outOfProject": "Дата окончания должна быть в пределах длительности проекта",
+        "beforeStart": "Дата окончания не может быть раньше даты начала"
+      },
+      "roleIds": { "required": "Необходимо выбрать хотя бы одну роль" },
+      "responsibilities": { "maxLength": "Обязанности не должны превышать {max} символов" }
     },
     "cv": {
       "name": {
@@ -427,6 +441,44 @@
         "noValue": "—",
         "noValueLabel": "Не использовался в проектах резюме"
       }
+    }
+  },
+  "cvProjects": {
+    "form": {
+      "addTitle": "Добавить проект",
+      "updateTitle": "Обновить проект",
+      "fields": {
+        "project": "Название",
+        "domain": "Домен",
+        "startDate": "Дата начала",
+        "endDate": "Дата окончания",
+        "description": "Описание",
+        "environment": "Окружение",
+        "roles": "Роли",
+        "responsibilities": "Обязанности"
+      },
+      "responsibilitiesHint": "Разделяйте обязанности запятой или новой строкой",
+      "errors": { "alreadyAdded": "Проект уже добавлен в CV" }
+    },
+    "title": "Проекты CV",
+    "addButton": "Добавить проект",
+    "table": {
+      "columns": {
+        "name": "Название",
+        "domain": "Домен",
+        "startDate": "Дата начала",
+        "endDate": "Дата окончания"
+      },
+      "tillNow": "По настоящее время",
+      "empty": "Проекты ещё не добавлены",
+      "noResults": "Проекты не найдены",
+      "actions": { "update": "Обновить", "delete": "Удалить" }
+    },
+    "loadError": "Не удалось загрузить проекты",
+    "forbidden": "У вас нет доступа к этому CV",
+    "delete": {
+      "title": "Удалить проект",
+      "message": "Вы уверены, что хотите удалить проект <b>{name}</b>?"
     }
   },
   "departments": {
