@@ -254,7 +254,7 @@ describe('CvProjectFormModal', () => {
       };
     };
 
-    it('prefills every field; the project cannot be changed and Save waits for a change', async () => {
+    it('prefills every field; the project cannot be changed and Update waits for a change', async () => {
       renderUpdate();
 
       expect(screen.getByRole('dialog', { name: 'Update project' })).toBeInTheDocument();
@@ -266,7 +266,7 @@ describe('CvProjectFormModal', () => {
       expect(screen.getByLabelText('Responsibilities')).toHaveValue('Code review');
       // the role chip appears once the roles are loaded
       expect(await screen.findByText('Developer')).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
+      expect(screen.getByRole('button', { name: 'Update' })).toBeDisabled();
     });
 
     it('clears the end date with ✕ and saves it as null ("Present")', async () => {
@@ -295,9 +295,9 @@ describe('CvProjectFormModal', () => {
       await user.click(screen.getByRole('button', { name: 'Clear date' }));
 
       expect(screen.getByRole('button', { name: 'End Date' })).not.toHaveTextContent('06/30/2024');
-      expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled();
+      expect(screen.getByRole('button', { name: 'Update' })).toBeEnabled();
 
-      await user.click(screen.getByRole('button', { name: 'Save' }));
+      await user.click(screen.getByRole('button', { name: 'Update' }));
 
       await expect.poll(() => onOpenChange).toHaveBeenCalledWith(false);
     });
