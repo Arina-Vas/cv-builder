@@ -298,21 +298,6 @@ export const ProjectsAdmin: Story = {
   ),
 };
 
-// TODO: Figma uses grey filled chips for responsibilities; the shared Chip is outlined only
-const FilledChipPlaceholder = ({ label }: { label: string }) => (
-  <span
-    style={{
-      padding: '0 var(--space-2)',
-      borderRadius: 'var(--radius-chip)',
-      background: 'var(--chip-bg)',
-      color: 'var(--chip-text)',
-      fontSize: 'var(--type-body2-size)',
-    }}
-  >
-    {label}
-  </span>
-);
-
 export const CvProjects: Story = {
   name: 'CV PROJECTS',
   parameters: figma('CV PROJECTS', '21482-33925'),
@@ -351,7 +336,7 @@ export const CvProjects: Story = {
           <p style={{ margin: 0 }}>{project.description}</p>
           <div style={{ ...chipListStyle, marginTop: 'var(--space-2)' }}>
             {project.responsibilities.map((responsibility) => (
-              <FilledChipPlaceholder key={responsibility} label={responsibility} />
+              <Chip key={responsibility} label={responsibility} variant="filled" />
             ))}
           </div>
         </>

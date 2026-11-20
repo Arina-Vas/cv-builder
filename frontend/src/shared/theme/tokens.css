@@ -308,6 +308,12 @@
   --radix-toast-swipe-end-x: 0px;
 
   --chip-height: 32px; /* [M] */
+  --chip-filled-height: 24px; /* [F] CV PROJECTS responsibilities */
+  --chip-filled-radius: 16px; /* [F] CV PROJECTS responsibilities */
+  --chip-filled-font-size: 13px; /* [F] CV PROJECTS responsibilities */
+  --chip-filled-lh: 1.43; /* [F] 143% */
+  --chip-filled-ls: 0.01em; /* [F] */
+  --chip-filled-weight: 400; /* [F] */
   --chip-gap: 8px; /* [A] project environment chips */
   --chip-remove-size: 12px; /* [F]*/
 
@@ -451,8 +457,8 @@
 
   /* Chips, avatars, toasts, skill levels */
   --chip-border: #2e2e2e;
-  --chip-bg: var(--action-selected); /* [M] Chip filled default */
-  --chip-text: var(--text); /* [M] */
+  --chip-bg: var(--color-grey-100); /* [F] #E2E2E4, CV PROJECTS responsibilities */
+  --chip-text: var(--color-grey-800); /* [F] #2E2E2E */
   --avatar-placeholder-bg: #c63031; /* [A] */
   --avatar-placeholder-text: #ffffff; /* [M] */
   --avatar-bg: #aeaeae; /* [F] */
@@ -626,6 +632,8 @@
 
   --chip-border: #aeaeae;
   --chip-remove-hover: #f5f5f7;
+  --chip-bg: var(--color-secondary); /* [F] #626262 */
+  --chip-text: var(--color-grey-50); /* [F] #F5F5F7 */
 
   /* Toast colours: Figma has only one (light) frame —
      values inherited from :root. TODO: confirm for dark. */
