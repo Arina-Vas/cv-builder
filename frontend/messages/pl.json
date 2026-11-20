@@ -157,6 +157,20 @@
       "roleIds": { "required": "Należy wybrać co najmniej jedną rolę" },
       "responsibilities": { "maxLength": "Obowiązki nie mogą przekraczać {max} znaków" }
     },
+    "cv": {
+      "name": {
+        "required": "Imię jest wymagane",
+        "maxLength": "Imię nie może przekraczać {max} znaków"
+      },
+      "education": {
+        "required": "Wykształcenie jest wymagane",
+        "maxLength": "Wykształcenie nie może przekraczać {max} znaków"
+      },
+      "description": {
+        "required": "Opis jest wymagany",
+        "maxLength": "Opis nie może przekraczać {max} znaków"
+      }
+    },
     "email": {
       "required": "E-mail jest wymagany",
       "invalid": "Wprowadź prawidłowy adres e-mail"
@@ -339,12 +353,54 @@
     }
   },
   "cvs": {
+    "title": "CV",
+    "createButton": "Utwórz CV",
     "tabs": {
       "label": "Sekcje CV",
       "details": "Szczegóły",
       "skills": "Umiejętności",
       "projects": "Projekty",
       "preview": "Podgląd"
+    },
+    "table": {
+      "columns": {
+        "name": "Nazwa",
+        "education": "Wykształcenie",
+        "employee": "Pracownik"
+      },
+      "actions": {
+        "edit": "Edytuj",
+        "delete": "Usuń",
+        "view": "Wyświetl"
+      },
+      "empty": "Nie znaleziono CV",
+      "userEmpty": "Nie masz jeszcze żadnego CV"
+    },
+    "fields": {
+      "name": "Nazwa",
+      "education": "Wykształcenie",
+      "description": "Opis"
+    },
+    "create": {
+      "title": "Utwórz CV"
+    },
+    "update": {
+      "title": "Aktualizuj CV"
+    },
+    "delete": {
+      "title": "Usuń CV",
+      "message": "Czy na pewno chcesz usunąć CV <b>{name}</b>?"
+    },
+    "details": {
+      "loading": "Ładowanie CV",
+      "loadError": "Nie udało się załadować szczegółów CV",
+      "loadErrorTitle": "Ups",
+      "retry": "Spróbuj ponownie",
+      "updated": "CV zostało zaktualizowane",
+      "forbidden": {
+        "title": "Brak dostępu",
+        "message": "Nie masz dostępu do tego CV"
+      }
     }
   },
   "cvProjects": {

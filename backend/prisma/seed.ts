@@ -226,11 +226,127 @@ async function seedDemoUsers(): Promise<void> {
   await prisma.user.createMany({ data: users, skipDuplicates: true });
 }
 
+type SeedCv = { name: string; education: string; description: string };
+
+const CV_TEMPLATES: SeedCv[] = [
+  {
+    name: 'Software Engineer with 5+ years of experience',
+    education: 'Computer Systems Design',
+    description:
+      'Highly motivated and experienced Software Engineer with 5+ years of proven success in leading ' +
+      'and developing robust and scalable applications. Adept at leveraging React, Node.js and ' +
+      'TypeScript to create innovative and visually appealing user interfaces.',
+  },
+  {
+    name: 'Frontend Developer',
+    education: 'Applied Mathematics',
+    description:
+      'Frontend developer focused on accessible, responsive interfaces built with React and TypeScript.',
+  },
+  {
+    name: 'Full Stack Developer',
+    education: 'Software Engineering',
+    description:
+      'Full stack developer building GraphQL APIs with NestJS and PostgreSQL and the React clients ' +
+      'that consume them.',
+  },
+  {
+    name: 'Backend Developer',
+    education: 'Information Systems and Technologies',
+    description:
+      'Backend developer experienced in Node.js services, relational databases and cloud deployment.',
+  },
+  {
+    name: 'Angular Developer',
+    education: 'Computer Science',
+    description: 'Angular developer working on enterprise dashboards and complex reactive forms.',
+  },
+  {
+    name: 'QA Automation Engineer',
+    education: 'Radio Engineering',
+    description: 'QA engineer who writes end-to-end and API tests and keeps CI pipelines green.',
+  },
+  {
+    name: 'DevOps Engineer',
+    education: 'Computer Networks',
+    description: 'DevOps engineer working with Docker, Kubernetes and AWS infrastructure as code.',
+  },
+  {
+    name: 'Team Lead',
+    education: 'Computer Systems Design',
+    description:
+      'Team lead who mentors junior developers, plans releases and keeps the codebase healthy.',
+  },
+  {
+    name: 'React Native Developer',
+    education: 'Applied Informatics',
+    description: 'Mobile developer shipping cross-platform apps with React Native and TypeScript.',
+  },
+  {
+    name: 'Node.js Developer',
+    education: 'Software Engineering',
+    description: 'Node.js developer building REST and GraphQL services with Express and NestJS.',
+  },
+  {
+    name: 'Junior Frontend Developer',
+    education: 'Computer Science',
+    description: 'Junior developer with a solid HTML, CSS and JavaScript base, learning React.',
+  },
+  {
+    name: 'Project Manager',
+    education: 'Economics and Management',
+    description: 'Project manager running agile teams and communicating with stakeholders.',
+  },
+];
+
+/** Demo employees that get one CV each, so the Admin CVs list has owners to search by email. */
+const CV_DEMO_OWNERS = 8;
+
+/**
+ * CVs without skills or projects (those belong to the CV Skills / CV Projects tasks).
+ * The seeded employee gets every template: 12 CVs, a second page at pageSize 10. The admin gets one,
+ * and the first CV_DEMO_OWNERS demo employees get one each, so an Admin sees 21 CVs of 10 owners.
+ * Cv.name is not unique, so a CV is skipped when its owner already has one with that name.
+ */
+async function seedCvs(): Promise<void> {
+  const employee = await prisma.user.findUniqueOrThrow({
+    where: { email: requireEnv('SEED_EMPLOYEE_EMAIL') },
+  });
+  const admin = await prisma.user.findUniqueOrThrow({
+    where: { email: requireEnv('SEED_ADMIN_EMAIL') },
+  });
+  const demoOwners = await prisma.user.findMany({
+    where: { email: { endsWith: '@example.com' } },
+    orderBy: { email: 'asc' },
+    take: CV_DEMO_OWNERS,
+  });
+
+  const cvs = [
+    ...CV_TEMPLATES.map((cv) => ({ ...cv, userId: employee.id })),
+    { ...CV_TEMPLATES[0]!, userId: admin.id },
+    ...demoOwners.map((user, i) => ({
+      ...CV_TEMPLATES[(i + 1) % CV_TEMPLATES.length]!,
+      userId: user.id,
+    })),
+  ];
+
+  const existing = await prisma.cv.findMany({
+    where: { userId: { in: [...new Set(cvs.map((cv) => cv.userId))] } },
+    select: { userId: true, name: true },
+  });
+  const existingKeys = new Set(existing.map((cv) => `${cv.userId}:${cv.name}`));
+
+  await prisma.cv.createMany({
+    data: cvs.filter((cv) => !existingKeys.has(`${cv.userId}:${cv.name}`)),
+  });
+}
+
 async function main(): Promise<void> {
   await seedCatalogs();
   await seedProjects();
   await seedUsers();
   await seedDemoUsers();
+  await seedCvs();
 }
 
 main()

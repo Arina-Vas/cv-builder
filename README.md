@@ -215,6 +215,13 @@ The database and storage credentials in `docker-compose.yml` are for local devel
 - **Skill mastery levels** follow the wiki: Beginner → Elementary → Intermediate → Advanced → Expert (`Mastery`
   enum, in this order). The initial names were renamed in place by the `rename_mastery_values` migration; see
   [docs/data-model.md](docs/data-model.md#decisions).
+- **Roboto is self-hosted** (`frontend/src/app/fonts`, loaded with `next/font/local`). `next/font/google` broke in
+  November 2026: Google started serving font files at `fonts.gstatic.com/l/font?kit=…&skey=…`, and Turbopack in
+  Next 16.4 fails to resolve such URLs (`next/font/google queries have exactly one entry`). Self-hosting also
+  removes the network request to Google from every build. The two files are Google's variable fonts (weights
+  300–600) for the latin and cyrillic subsets; to update them, download the woff2 URLs from
+  `https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600` (with a browser User-Agent) and copy the
+  `unicode-range` values into `layout.tsx`.
 
 ### Authentication
 

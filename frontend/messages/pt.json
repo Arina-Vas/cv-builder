@@ -157,6 +157,20 @@
       "roleIds": { "required": "É necessário selecionar pelo menos uma função" },
       "responsibilities": { "maxLength": "As responsabilidades não devem exceder {max} caracteres" }
     },
+    "cv": {
+      "name": {
+        "required": "O nome é obrigatório",
+        "maxLength": "O nome não deve exceder {max} caracteres"
+      },
+      "education": {
+        "required": "A formação é obrigatória",
+        "maxLength": "A formação não deve exceder {max} caracteres"
+      },
+      "description": {
+        "required": "A descrição é obrigatória",
+        "maxLength": "A descrição não deve exceder {max} caracteres"
+      }
+    },
     "email": {
       "required": "O e-mail é obrigatório",
       "invalid": "Insira um endereço de e-mail válido"
@@ -339,12 +353,54 @@
     }
   },
   "cvs": {
+    "title": "Currículos",
+    "createButton": "Criar currículo",
     "tabs": {
       "label": "Seções do currículo",
       "details": "Detalhes",
       "skills": "Habilidades",
       "projects": "Projetos",
       "preview": "Pré-visualização"
+    },
+    "table": {
+      "columns": {
+        "name": "Nome",
+        "education": "Formação",
+        "employee": "Funcionário"
+      },
+      "actions": {
+        "edit": "Editar",
+        "delete": "Excluir",
+        "view": "Ver"
+      },
+      "empty": "Nenhum currículo encontrado",
+      "userEmpty": "Você ainda não tem currículos"
+    },
+    "fields": {
+      "name": "Nome",
+      "education": "Formação",
+      "description": "Descrição"
+    },
+    "create": {
+      "title": "Criar currículo"
+    },
+    "update": {
+      "title": "Atualizar currículo"
+    },
+    "delete": {
+      "title": "Excluir currículo",
+      "message": "Tem certeza de que deseja excluir o currículo <b>{name}</b>?"
+    },
+    "details": {
+      "loading": "Carregando currículo",
+      "loadError": "Não foi possível carregar os detalhes do currículo",
+      "loadErrorTitle": "Ops",
+      "retry": "Tentar novamente",
+      "updated": "O currículo foi atualizado",
+      "forbidden": {
+        "title": "Acesso negado",
+        "message": "Você não tem autorização para acessar este currículo"
+      }
     }
   },
   "cvProjects": {

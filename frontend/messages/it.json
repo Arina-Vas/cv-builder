@@ -157,6 +157,20 @@
       "roleIds": { "required": "È necessario selezionare almeno un ruolo" },
       "responsibilities": { "maxLength": "Le responsabilità non devono superare {max} caratteri" }
     },
+    "cv": {
+      "name": {
+        "required": "Il nome è obbligatorio",
+        "maxLength": "Il nome non deve superare i {max} caratteri"
+      },
+      "education": {
+        "required": "L'istruzione è obbligatoria",
+        "maxLength": "L'istruzione non deve superare i {max} caratteri"
+      },
+      "description": {
+        "required": "La descrizione è obbligatoria",
+        "maxLength": "La descrizione non deve superare i {max} caratteri"
+      }
+    },
     "email": {
       "required": "L'email è obbligatoria",
       "invalid": "Inserisci un indirizzo email valido"
@@ -339,12 +353,54 @@
     }
   },
   "cvs": {
+    "title": "CV",
+    "createButton": "Crea CV",
     "tabs": {
       "label": "Sezioni del CV",
       "details": "Dettagli",
       "skills": "Competenze",
       "projects": "Progetti",
       "preview": "Anteprima"
+    },
+    "table": {
+      "columns": {
+        "name": "Nome",
+        "education": "Istruzione",
+        "employee": "Dipendente"
+      },
+      "actions": {
+        "edit": "Modifica",
+        "delete": "Elimina",
+        "view": "Visualizza"
+      },
+      "empty": "Nessun CV trovato",
+      "userEmpty": "Non hai ancora nessun CV"
+    },
+    "fields": {
+      "name": "Nome",
+      "education": "Istruzione",
+      "description": "Descrizione"
+    },
+    "create": {
+      "title": "Crea CV"
+    },
+    "update": {
+      "title": "Aggiorna CV"
+    },
+    "delete": {
+      "title": "Elimina CV",
+      "message": "Vuoi davvero eliminare il CV <b>{name}</b>?"
+    },
+    "details": {
+      "loading": "Caricamento del CV",
+      "loadError": "Impossibile caricare i dettagli del CV",
+      "loadErrorTitle": "Ops",
+      "retry": "Riprova",
+      "updated": "Il CV è stato aggiornato",
+      "forbidden": {
+        "title": "Accesso negato",
+        "message": "Non sei autorizzato ad accedere a questo CV"
+      }
     }
   },
   "cvProjects": {

@@ -5,7 +5,8 @@ import { type ErrorCode, hasErrorCode } from '@/shared/lib/apollo/graphql-errors
 export const useRefetchOnError = (queries: DocumentNode[], codes: ErrorCode[]) => {
   const client = useApolloClient();
 
-  return async (mutate: () => Promise<unknown>): Promise<unknown> => {
+  // R, not Promise<T>: `edit ? update() : create()` gives a union of promises, kept as is
+  return async <R extends Promise<unknown>>(mutate: () => R): Promise<Awaited<R>> => {
     try {
       return await mutate();
     } catch (error) {
