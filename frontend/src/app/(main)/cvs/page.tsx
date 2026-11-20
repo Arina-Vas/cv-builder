@@ -1,5 +1,3 @@
-'use client';
-
 import { Cvs } from '@/features/cvs/components/Cvs';
 import { Suspense } from 'react';
 
