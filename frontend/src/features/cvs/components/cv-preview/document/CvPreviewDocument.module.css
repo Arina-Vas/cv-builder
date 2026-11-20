@@ -1,0 +1,120 @@
+.document {
+  --cv-text: var(--text);
+  --cv-muted: var(--text-muted);
+  --cv-accent: var(--primary);
+  --cv-divider: var(--border);
+
+  container-type: inline-size;
+  color: var(--cv-text);
+  font-family: var(--font-family);
+}
+
+/* --- shared ----------------------------------------------------------------------------------- */
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.sectionTitle {
+  margin: 0 0 var(--space-4);
+  font-size: var(--type-h6-size);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--type-h6-lh);
+  letter-spacing: var(--type-h6-ls);
+}
+
+
+.skillsTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--type-body2-size);
+  line-height: var(--type-body2-lh);
+  letter-spacing: var(--type-body2-ls);
+}
+
+.skillsTable th,
+.skillsTable td {
+  padding: var(--space-2) var(--space-4);
+  text-align: start;
+  vertical-align: top;
+}
+
+.skillsTable thead th {
+  padding-block: var(--space-2);
+  border-block-end: 1px solid var(--cv-accent);
+  color: var(--cv-muted);
+  font-size: var(--type-caption-size);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--type-overline-ls);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Separates categories; the first group sits right under the header line */
+.skillsTable tbody + tbody {
+  border-block-start: 1px solid var(--cv-divider);
+}
+
+.skillsTable tbody tr:first-child > * {
+  padding-block-start: var(--space-4);
+}
+
+.skillsTable tbody tr:last-child > * {
+  padding-block-end: var(--space-4);
+}
+
+.skillCategory {
+  width: 30%;
+  padding-inline-start: 0;
+  color: var(--cv-accent);
+  font-weight: var(--font-weight-medium);
+  overflow-wrap: anywhere;
+}
+
+.skillsTable thead th:first-child {
+  padding-inline-start: 0;
+}
+
+.skillName {
+  overflow-wrap: anywhere;
+}
+
+.skillValue {
+  width: 1%;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.skillsTable thead th.skillValue {
+  text-align: center;
+}
+
+@container (max-width: 560px) {
+  .skillsTable th,
+  .skillsTable td {
+    padding-inline: var(--space-2);
+  }
+
+  .skillCategory {
+    width: auto;
+  }
+}
+
+@media print {
+  .skillsTable thead {
+    display: table-header-group;
+  }
+
+  .skillsTable tbody {
+    break-inside: avoid;
+  }
+
+  .sectionTitle {
+    break-after: avoid;
+  }
+}

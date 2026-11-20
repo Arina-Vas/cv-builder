@@ -27,7 +27,7 @@ export type CvPreviewProject = {
   startDate: DateString;
   /** null means "Till now" */
   endDate: DateString | null;
-  /** Free text, one responsibility per line */
+  /** Free text; items are separated by a new line or a comma (see `splitResponsibilities`) */
   responsibilities: string | null;
   roles: { id: string; name: string }[];
   project: {

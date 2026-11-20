@@ -86,7 +86,7 @@ const shopWave: CvPreviewProject = {
   endDate: '2024-12-31',
   responsibilities: [
     'Built the product catalog and checkout flow with server-side rendering',
-    'Implemented the seller admin panel: orders, refunds and inventory reports',
+    'Implemented the seller admin panel for orders and inventory reports',
     'Set up component library and visual regression tests',
   ].join('\n'),
   roles: [ROLES.frontend, ROLES.fullStack],
@@ -111,7 +111,8 @@ const mediTrack: CvPreviewProject = {
   startDate: '2023-06-01',
   endDate: '2026-06-30',
   responsibilities: [
-    'Led a team of four developers, planned sprints and reviewed code',
+    'Led a team of four developers',
+    'Planned sprints and reviewed code',
     'Designed the GraphQL API for appointments and medical records',
     'Containerized services and prepared the staging environment',
   ].join('\n'),
@@ -300,12 +301,13 @@ export const cvPreviewEdgeCasesFixture: CvPreviewData = {
       },
     },
     {
-      // Messy responsibilities: blank lines, surrounding spaces, Windows line endings
+      // Messy responsibilities: blank lines, surrounding spaces, Windows line endings, commas
+      // (splitResponsibilities splits by a new line and by a comma, as the CV project form hints)
       id: 'cv-project-edge-2',
       startDate: '2025-02-01',
       endDate: '2025-02-28',
       responsibilities:
-        '\n  Migrated legacy reports  \r\n\r\n\n   \nWrote integration tests\n' +
+        '\n  Migrated legacy reports  \r\n\r\n\n   \nWrote integration tests, fixed flaky specs ,\n' +
         `A single very long responsibility line that must wrap nicely inside the column ${longWord}\n`,
       roles: [ROLES.backend],
       project: {
@@ -317,11 +319,11 @@ export const cvPreviewEdgeCasesFixture: CvPreviewData = {
       },
     },
     {
-      // Only whitespace in responsibilities → treat as empty
+      // Only whitespace and separators in responsibilities → treat as empty
       id: 'cv-project-edge-3',
       startDate: '2024-05-01',
       endDate: '2024-09-30',
-      responsibilities: ' \n \n',
+      responsibilities: ' \n , \n',
       roles: [ROLES.frontend, ROLES.backend, ROLES.fullStack, ROLES.teamLead],
       project: {
         id: 'project-edge-3',
