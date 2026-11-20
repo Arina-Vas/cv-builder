@@ -1,3 +1,5 @@
+'use client';
+
 import { type Column, DataTable, TableToolbar } from '@/shared/components/table';
 import type { CvFieldsFragment } from '@/gql/graphql';
 import { useTranslations } from 'next-intl';
