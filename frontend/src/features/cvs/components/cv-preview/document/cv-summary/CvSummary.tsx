@@ -4,6 +4,7 @@ import type {
   CvPreviewData,
   CvPreviewSkillGroup,
 } from '@/features/cvs/lib/preview/cv-preview.types';
+import s from './CvSummary.module.css';
 
 type Props = {
   education: string;
@@ -27,12 +28,12 @@ export const CvSummary = ({
   const titleId = useId();
 
   return (
-    <section aria-labelledby={titleId}>
-      <dl>
-        <dt>{t('sections.education')}</dt>
-        <dd>{education}</dd>
-        <dt>{t('sections.languages')}</dt>
-        <dd>
+    <section aria-labelledby={titleId} className={s.wrapper}>
+      <dl className={s.details}>
+        <dt className={s.title}>{t('sections.education')}</dt>
+        <dd className={s.value}>{education}</dd>
+        <dt className={s.title}>{t('sections.languages')}</dt>
+        <dd className={s.value}>
           {languages
             .map((l) =>
               t('languageLevel', {
@@ -40,19 +41,21 @@ export const CvSummary = ({
                 level: tProficiency(l.proficiency),
               }),
             )
-            .join(',')}
+            .join(', ')}
         </dd>
-        <dt>{t('sections.domains')}</dt>
-        <dd>{domains.join(',')}</dd>
+        <dt className={s.title}>{t('sections.domains')}</dt>
+        <dd className={s.value}>{domains.join(', ')}</dd>
       </dl>
-      <div>
-        <h2 id={titleId}>{name}</h2>
-        <p>{description}</p>
-        <dl>
+      <div className={s.description}>
+        <h2 id={titleId} className={s.title}>
+          {name}
+        </h2>
+        <p className={s.text}>{description}</p>
+        <dl className={s.categories}>
           {skillGroups.map((group) => (
-            <div key={group.category.id}>
-              <dt>{group.category.name}</dt>
-              <dd>{group.skills.map((item) => item.skill.name).join(',')}</dd>
+            <div key={group.category.id} className={s.group}>
+              <dt className={s.title}>{group.category.name}</dt>
+              <dd className={s.value}>{group.skills.map((item) => item.skill.name).join(', ')}</dd>
             </div>
           ))}
         </dl>

@@ -433,6 +433,7 @@
         "period": "{start} – {end}",
         "present": "по настоящее время",
         "skillsTable": {
+          "skills": "Навыки",
           "category": "Категория навыков",
           "skill": "Навык",
           "experience": "Опыт (лет)",

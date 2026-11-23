@@ -434,6 +434,7 @@
         "period": "{start} – {end}",
         "present": "heute",
         "skillsTable": {
+          "skills": "Kompetenzen",
           "category": "Kompetenzkategorie",
           "skill": "Kompetenz",
           "experience": "Erfahrung in Jahren",

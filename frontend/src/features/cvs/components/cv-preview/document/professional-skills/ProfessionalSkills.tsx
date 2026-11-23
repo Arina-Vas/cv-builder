@@ -1,7 +1,8 @@
 import { useId } from 'react';
 import { useTranslations } from 'next-intl';
 import { type CvPreviewSkillGroup } from '@/features/cvs/lib/preview/cv-preview.types';
-import s from './CvPreviewDocument.module.css';
+import doc from '../CvPreviewDocument.module.css';
+import s from './ProfessionalSkills.module.css';
 
 type Props = {
   skillGroups: CvPreviewSkillGroup[];
@@ -15,18 +16,25 @@ export const ProfessionalSkills = ({ skillGroups }: Props) => {
 
   return (
     <section aria-labelledby={titleId}>
-      <h2 id={titleId} className={s.sectionTitle}>
+      <h2 id={titleId} className={doc.sectionTitle}>
         {t('sections.professionalSkills')}
       </h2>
-      <table className={s.skillsTable}>
+      <table className={s.table}>
         <thead>
           <tr>
-            <th scope="col">{t('skillsTable.category')}</th>
-            <th scope="col">{t('skillsTable.skill')}</th>
-            <th scope="col" className={s.skillValue}>
+            {/* Figma shows one "SKILLS" title over category and skill; screen readers still get a
+                name for each column */}
+            <th scope="col" className={s.headCell}>
+              <span aria-hidden="true">{t('skillsTable.skills')}</span>
+              <span className={doc.visuallyHidden}>{t('skillsTable.category')}</span>
+            </th>
+            <th scope="col" className={s.headCell}>
+              <span className={doc.visuallyHidden}>{t('skillsTable.skill')}</span>
+            </th>
+            <th scope="col" className={s.value}>
               {t('skillsTable.experience')}
             </th>
-            <th scope="col" className={s.skillValue}>
+            <th scope="col" className={s.value}>
               {t('skillsTable.lastUsed')}
             </th>
           </tr>
@@ -36,13 +44,13 @@ export const ProfessionalSkills = ({ skillGroups }: Props) => {
             {group.skills.map((item, index) => (
               <tr key={item.skill.id}>
                 {index === 0 && (
-                  <th scope="rowgroup" rowSpan={group.skills.length} className={s.skillCategory}>
+                  <th scope="rowgroup" rowSpan={group.skills.length} className={s.category}>
                     {group.category.name}
                   </th>
                 )}
-                <td className={s.skillName}>{item.skill.name}</td>
-                <td className={s.skillValue}>{item.experienceYears}</td>
-                <td className={s.skillValue}>{item.lastUsedYear}</td>
+                <td className={s.skill}>{item.skill.name}</td>
+                <td className={s.value}>{item.experienceYears}</td>
+                <td className={s.value}>{item.lastUsedYear}</td>
               </tr>
             ))}
           </tbody>

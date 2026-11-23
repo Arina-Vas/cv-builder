@@ -1,15 +1,83 @@
+/*
+ * CV document. Sections use only the --cv-* variables declared here, so the same CSS can be reused
+ * for the PDF (A6) and switched to a print palette by overriding them.
+ * Sizes are from the Figma CV PREVIEW frame (1440 light / dark).
+ */
 .document {
   --cv-text: var(--text);
   --cv-muted: var(--text-muted);
   --cv-accent: var(--primary);
-  --cv-divider: var(--border);
+  --cv-divider: var(--cv-preview-divider);
+  /* Two-column blocks (summary, projects): aside 260px | red line | main */
+  --cv-aside-width: 260px;
+  --cv-column-gap: 24px;
+  /* The red line starts this far above the first line of text */
+  --cv-column-offset: var(--space-4);
 
-  container-type: inline-size;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-6);
   color: var(--cv-text);
   font-family: var(--font-family);
+  font-size: var(--type-body1-size);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--type-body1-lh);
+  letter-spacing: var(--type-body1-ls);
 }
 
-/* --- shared ----------------------------------------------------------------------------------- */
+/* The document sets its own spacing; zero specificity so section classes always win */
+:where(.document) :where(h1, h2, h3, p, ul, dl, dd) {
+  margin: 0;
+}
+
+/* Name and position on the left, page actions (Export PDF) on the right */
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-6);
+  margin-bottom: var(--space-8);
+}
+
+.actions {
+  flex-shrink: 0;
+}
+
+.title {
+  font-size: var(--type-h4-size);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--type-h4-lh);
+  letter-spacing: var(--type-h4-ls);
+}
+
+.subTitle {
+  font-size: var(--type-body1-size);
+  line-height: var(--type-body1-lh);
+  letter-spacing: var(--type-body1-ls);
+  text-transform: uppercase;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+
+/* "Projects", "Professional skills": same size as the name in Figma */
+.sectionTitle {
+  margin-bottom: var(--space-8);
+  font-size: var(--type-h4-size);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--type-h4-lh);
+  letter-spacing: var(--type-h4-ls);
+}
+
+.projects {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+}
 
 .visuallyHidden {
   position: absolute;
@@ -20,101 +88,22 @@
   white-space: nowrap;
 }
 
-.sectionTitle {
-  margin: 0 0 var(--space-4);
-  font-size: var(--type-h6-size);
-  font-weight: var(--font-weight-medium);
-  line-height: var(--type-h6-lh);
-  letter-spacing: var(--type-h6-ls);
-}
-
-
-.skillsTable {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: var(--type-body2-size);
-  line-height: var(--type-body2-lh);
-  letter-spacing: var(--type-body2-ls);
-}
-
-.skillsTable th,
-.skillsTable td {
-  padding: var(--space-2) var(--space-4);
-  text-align: start;
-  vertical-align: top;
-}
-
-.skillsTable thead th {
-  padding-block: var(--space-2);
-  border-block-end: 1px solid var(--cv-accent);
-  color: var(--cv-muted);
-  font-size: var(--type-caption-size);
-  font-weight: var(--font-weight-medium);
-  letter-spacing: var(--type-overline-ls);
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-/* Separates categories; the first group sits right under the header line */
-.skillsTable tbody + tbody {
-  border-block-start: 1px solid var(--cv-divider);
-}
-
-.skillsTable tbody tr:first-child > * {
-  padding-block-start: var(--space-4);
-}
-
-.skillsTable tbody tr:last-child > * {
-  padding-block-end: var(--space-4);
-}
-
-.skillCategory {
-  width: 30%;
-  padding-inline-start: 0;
-  color: var(--cv-accent);
-  font-weight: var(--font-weight-medium);
-  overflow-wrap: anywhere;
-}
-
-.skillsTable thead th:first-child {
-  padding-inline-start: 0;
-}
-
-.skillName {
-  overflow-wrap: anywhere;
-}
-
-.skillValue {
-  width: 1%;
-  text-align: center;
-  white-space: nowrap;
-}
-
-.skillsTable thead th.skillValue {
-  text-align: center;
-}
-
-@container (max-width: 560px) {
-  .skillsTable th,
-  .skillsTable td {
-    padding-inline: var(--space-2);
-  }
-
-  .skillCategory {
-    width: auto;
-  }
-}
-
 @media print {
-  .skillsTable thead {
-    display: table-header-group;
-  }
+  .document {
+    --cv-text: #2e2e2e;
+    --cv-muted: #626262;
+    --cv-accent: #c63031;
+    --cv-divider: #aeaeae;
 
-  .skillsTable tbody {
-    break-inside: avoid;
+    max-width: none;
+    padding: 0;
   }
 
   .sectionTitle {
     break-after: avoid;
+  }
+
+  .actions {
+    display: none;
   }
 }

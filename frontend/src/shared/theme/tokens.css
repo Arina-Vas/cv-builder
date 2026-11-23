@@ -416,6 +416,9 @@
   --table-row-selected: rgba(198, 48, 49, 0.08); /* [M] alpha(primary, .08) */
   --table-border: rgba(224, 224, 224, 1); /* [M] TableCell border (lighten(divider)) */
 
+  /* CV preview document — [F] CV PREVIEW, same in both themes */
+  --cv-preview-divider: var(--color-disabled); /* [F] #AEAEAE skills table rows */
+
   /* Pagination — [F] Pagination component (Table (pagination) frame) */
   --pagination-border: #aeaeae; /* [F] page circle + select stroke */
   --pagination-text: var(--text); /* [F] #2E2E2E */

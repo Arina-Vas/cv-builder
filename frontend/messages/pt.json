@@ -433,6 +433,7 @@
         "period": "{start} – {end}",
         "present": "atual",
         "skillsTable": {
+          "skills": "Competências",
           "category": "Categoria de competências",
           "skill": "Competência",
           "experience": "Experiência (anos)",

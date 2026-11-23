@@ -433,6 +433,7 @@
         "period": "{start} – {end}",
         "present": "дотепер",
         "skillsTable": {
+          "skills": "Навички",
           "category": "Категорія навичок",
           "skill": "Навичка",
           "experience": "Досвід (років)",

@@ -420,6 +420,7 @@
         "period": "{start} – {end}",
         "present": "Present",
         "skillsTable": {
+          "skills": "Skills",
           "category": "Skill category",
           "skill": "Skill",
           "experience": "Experience in years",
