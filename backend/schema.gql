@@ -45,6 +45,14 @@ input CreateCvProjectInput {
   startDate: Date!
 }
 
+input CreateCvSkillInput {
+  """
+  CV the skill is added to; checked against the current user. The skill must be one of the CV owner's skills
+  """
+  cvId: ID!
+  skillId: ID!
+}
+
 input CreateDepartmentInput {
   name: String!
 }
@@ -153,6 +161,13 @@ enum CvProjectSortField {
   startDate
 }
 
+"""Skill added to a CV; mastery is the CV owner's level of that skill"""
+type CvSkill {
+  id: ID!
+  mastery: Mastery!
+  skill: Skill!
+}
+
 enum CvSortField {
   name
 }
@@ -235,6 +250,11 @@ type Mutation {
   Adds a catalog project to the CV. Own CV or Admin. Fails with NOT_FOUND if the CV does not exist and FORBIDDEN for another user's CV. BAD_USER_INPUT for dates outside the project period or unknown project / roles, CONFLICT on projectId if the project is already in the CV
   """
   createCvProject(input: CreateCvProjectInput!): CvProject!
+
+  """
+  Adds one of the CV owner's skills to the CV. Own CV or Admin. Fails with NOT_FOUND if the CV does not exist and FORBIDDEN for another user's CV. Fails with BAD_USER_INPUT (skillId) if the CV owner does not have the skill and with CONFLICT (skillId) if it is already in the CV
+  """
+  createCvSkill(input: CreateCvSkillInput!): CvSkill!
   createDepartment(input: CreateDepartmentInput!): Department!
   createLanguage(input: CreateLanguageInput!): Language!
   createPosition(input: CreatePositionInput!): Position!
@@ -266,6 +286,11 @@ type Mutation {
   """
   deleteCvProject(cvId: ID!, id: ID!): ID!
 
+  """
+  Removes the given CvSkill ids from the CV and returns the removed ids; the catalog skill and the owner's skills stay. Own CV or Admin. Fails with NOT_FOUND if the CV does not exist and FORBIDDEN for another user's CV. Ids already removed are skipped. Fails with FORBIDDEN and removes nothing if an id belongs to another CV
+  """
+  deleteCvSkills(cvId: ID!, ids: [ID!]!): [ID!]!
+
   """Fails with ENTITY_IN_USE if the department is assigned to users"""
   deleteDepartment(id: ID!): ID!
 
@@ -294,7 +319,7 @@ type Mutation {
   deleteUserLanguages(ids: [ID!]!, userId: ID!): [ID!]!
 
   """
-  Own profile or Admin. Removes the given UserSkill ids of the user; returns the removed ids. Ids already removed are skipped. Fails with FORBIDDEN and removes nothing if an id belongs to another user's assignment
+  Own profile or Admin. Removes the given UserSkill ids of the user; returns the removed ids. The skills are also removed from the user's CVs. Ids already removed are skipped. Fails with FORBIDDEN and removes nothing if an id belongs to another user's assignment
   """
   deleteUserSkills(ids: [ID!]!, userId: ID!): [ID!]!
   logout: Boolean!
@@ -425,6 +450,11 @@ type Query {
   availableCvProjects(cvId: ID!): [Project!]!
 
   """
+  Skills of the CV owner not yet added to the CV, for the Add skill modal; sorted by name. Own CV or Admin. Fails with NOT_FOUND if the CV does not exist and FORBIDDEN for another user's CV
+  """
+  availableCvSkills(cvId: ID!): [Skill!]!
+
+  """
   Languages not yet assigned to the user, for the Add Language modal; sorted by name. Fails with NOT_FOUND if the user does not exist
   """
   availableUserLanguages(userId: ID!): [Language!]!
@@ -443,6 +473,11 @@ type Query {
   Projects of one CV. Search is case-insensitive, by project name or domain. Own CV or Admin. Fails with NOT_FOUND if the CV does not exist and FORBIDDEN for another user's CV
   """
   cvProjects(cvId: ID!, search: String, sortBy: CvProjectSortField! = name, sortOrder: SortOrder! = ASC): CvProjectList!
+
+  """
+  Skills of one CV with the CV owner's mastery; sorted by category name, then skill name. Own CV or Admin. Fails with NOT_FOUND if the CV does not exist and FORBIDDEN for another user's CV
+  """
+  cvSkills(cvId: ID!): [CvSkill!]!
 
   """
   CVs page: own CVs for an Employee, all CVs for an Admin. Search is case-insensitive: by CV name, for an Admin also by the owner email
