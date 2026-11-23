@@ -88,7 +88,7 @@ export class UserSkillService {
 
     const rows = await this.prisma.userSkill.findMany({
       where: { id: { in: ids } },
-      select: { id: true, userId: true },
+      select: { id: true, userId: true, skillId: true },
     });
 
     if (rows.some((row) => row.userId !== userId)) {
@@ -96,10 +96,16 @@ export class UserSkillService {
     }
 
     const found = rows.map((row) => row.id);
+    const skillIds = rows.map((row) => row.skillId);
 
-    await this.prisma.userSkill.deleteMany({
-      where: { userId, id: { in: found } },
-    });
+    await this.prisma.$transaction([
+      this.prisma.cvSkill.deleteMany({
+        where: { skillId: { in: skillIds }, cv: { userId } },
+      }),
+      this.prisma.userSkill.deleteMany({
+        where: { userId, id: { in: found } },
+      }),
+    ]);
 
     return found;
   }

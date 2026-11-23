@@ -78,6 +78,9 @@ describe('UserSkillService', () => {
       update: jest.fn(),
       deleteMany: jest.fn(),
     },
+    cvSkill: { deleteMany: jest.fn() },
+    // The array form: the operations are already started, the transaction only awaits them
+    $transaction: jest.fn((operations: Promise<unknown>[]) => Promise.all(operations)),
   };
   const service = new UserSkillService(prisma as unknown as PrismaService);
 
@@ -85,6 +88,8 @@ describe('UserSkillService', () => {
     jest.clearAllMocks();
     // By default the target user and the selected skill exist
     prisma.user.findUnique.mockResolvedValue({ id: OWNER_ID });
+    prisma.userSkill.deleteMany.mockResolvedValue({ count: 0 });
+    prisma.cvSkill.deleteMany.mockResolvedValue({ count: 0 });
     prisma.skill.findUnique.mockResolvedValue({ id: 'skill-React' });
   });
 
@@ -256,18 +261,28 @@ describe('UserSkillService', () => {
   });
 
   describe('delete', () => {
+    // An assignment as the lookup in delete selects it
+    const assignment = (name: string, userId = OWNER_ID) => ({
+      id: `user-skill-${name}`,
+      userId,
+      skillId: `skill-${name}`,
+    });
+
+    const expectNothingDeleted = () => {
+      expect(prisma.$transaction).not.toHaveBeenCalled();
+      expect(prisma.userSkill.deleteMany).not.toHaveBeenCalled();
+      expect(prisma.cvSkill.deleteMany).not.toHaveBeenCalled();
+    };
+
     it('deletes the assignments of the user and returns their ids', async () => {
-      prisma.userSkill.findMany.mockResolvedValue([
-        { id: 'user-skill-React', userId: OWNER_ID },
-        { id: 'user-skill-Vue', userId: OWNER_ID },
-      ]);
+      prisma.userSkill.findMany.mockResolvedValue([assignment('React'), assignment('Vue')]);
 
       const result = await service.delete(OWNER, DELETE_ARGS);
 
       // Looked up without userId, so an id of another user's assignment is found, not skipped
       expect(prisma.userSkill.findMany).toHaveBeenCalledWith({
         where: { id: { in: DELETE_ARGS.ids } },
-        select: { id: true, userId: true },
+        select: { id: true, userId: true, skillId: true },
       });
       expect(prisma.userSkill.deleteMany).toHaveBeenCalledWith({
         where: { userId: OWNER_ID, id: { in: ['user-skill-React', 'user-skill-Vue'] } },
@@ -275,13 +290,30 @@ describe('UserSkillService', () => {
       expect(result).toEqual(['user-skill-React', 'user-skill-Vue']);
     });
 
+    it("removes the skills from the user's CVs in the same transaction", async () => {
+      prisma.userSkill.findMany.mockResolvedValue([assignment('React'), assignment('Vue')]);
+
+      await service.delete(OWNER, DELETE_ARGS);
+
+      // Only CVs of this user, so another user's CV with the same skill keeps it
+      expect(prisma.cvSkill.deleteMany).toHaveBeenCalledWith({
+        where: { skillId: { in: ['skill-React', 'skill-Vue'] }, cv: { userId: OWNER_ID } },
+      });
+      expect(prisma.$transaction).toHaveBeenCalledTimes(1);
+      const [operations] = prisma.$transaction.mock.calls[0] as [Promise<unknown>[]];
+      expect(operations).toHaveLength(2);
+    });
+
     it('skips ids that are already removed', async () => {
-      prisma.userSkill.findMany.mockResolvedValue([{ id: 'user-skill-React', userId: OWNER_ID }]);
+      prisma.userSkill.findMany.mockResolvedValue([assignment('React')]);
 
       const result = await service.delete(OWNER, DELETE_ARGS);
 
       expect(prisma.userSkill.deleteMany).toHaveBeenCalledWith({
         where: { userId: OWNER_ID, id: { in: ['user-skill-React'] } },
+      });
+      expect(prisma.cvSkill.deleteMany).toHaveBeenCalledWith({
+        where: { skillId: { in: ['skill-React'] }, cv: { userId: OWNER_ID } },
       });
       expect(result).toEqual(['user-skill-React']);
     });
@@ -292,6 +324,14 @@ describe('UserSkillService', () => {
       await expect(service.delete(OWNER, DELETE_ARGS)).resolves.toEqual([]);
     });
 
+    it('fails when the transaction fails', async () => {
+      prisma.userSkill.findMany.mockResolvedValue([assignment('React')]);
+      const error = new Error('connection lost');
+      prisma.$transaction.mockRejectedValueOnce(error);
+
+      await expect(service.delete(OWNER, DELETE_ARGS)).rejects.toBe(error);
+    });
+
     it.each([
       ['the owner', OWNER],
       ['an Admin', ADMIN],
@@ -299,22 +339,25 @@ describe('UserSkillService', () => {
       "rejects an id of another user's assignment for %s with FORBIDDEN and deletes nothing",
       async (_who, user) => {
         prisma.userSkill.findMany.mockResolvedValue([
-          { id: 'user-skill-React', userId: OWNER_ID },
-          { id: 'user-skill-Vue', userId: 'user-2' },
+          assignment('React'),
+          assignment('Vue', 'user-2'),
         ]);
 
         await expect(service.delete(user, DELETE_ARGS)).rejects.toMatchObject({
           message: 'Skill assignment belongs to another user',
           extensions: { code: ErrorCode.FORBIDDEN },
         });
-        expect(prisma.userSkill.deleteMany).not.toHaveBeenCalled();
+        expectNothingDeleted();
       },
     );
 
     it("lets an Admin delete another user's assignments", async () => {
-      prisma.userSkill.findMany.mockResolvedValue([{ id: 'user-skill-React', userId: OWNER_ID }]);
+      prisma.userSkill.findMany.mockResolvedValue([assignment('React')]);
 
       await expect(service.delete(ADMIN, DELETE_ARGS)).resolves.toEqual(['user-skill-React']);
+      expect(prisma.cvSkill.deleteMany).toHaveBeenCalledWith({
+        where: { skillId: { in: ['skill-React'] }, cv: { userId: OWNER_ID } },
+      });
     });
 
     it("rejects another user's profile for an Employee with FORBIDDEN", async () => {
@@ -322,7 +365,7 @@ describe('UserSkillService', () => {
         extensions: { code: ErrorCode.FORBIDDEN },
       });
       expect(prisma.userSkill.findMany).not.toHaveBeenCalled();
-      expect(prisma.userSkill.deleteMany).not.toHaveBeenCalled();
+      expectNothingDeleted();
     });
 
     it('rejects a missing user with NOT_FOUND', async () => {
@@ -331,7 +374,7 @@ describe('UserSkillService', () => {
       await expect(service.delete(ADMIN, DELETE_ARGS)).rejects.toMatchObject({
         extensions: { code: ErrorCode.NOT_FOUND },
       });
-      expect(prisma.userSkill.deleteMany).not.toHaveBeenCalled();
+      expectNothingDeleted();
     });
   });
 });
