@@ -1,6 +1,6 @@
 import { Mastery } from '@/common/graphql/enums';
 import { skillInclude } from '@/skills/skill.mapper';
-import { cvSkillInclude, toCvSkill, type CvSkillWithSkill } from './cv-skill.mapper';
+import { cvSkillInclude, ownerHasSkill, toCvSkill, type CvSkillWithSkill } from './cv-skill.mapper';
 
 const createdAt = new Date('2026-01-01T00:00:00.000Z');
 
@@ -36,6 +36,14 @@ describe('cvSkillInclude', () => {
           users: { where: { userId: 'owner-1' }, select: { mastery: true } },
         },
       },
+    });
+  });
+});
+
+describe('ownerHasSkill', () => {
+  it('keeps only CV skills the owner still has', () => {
+    expect(ownerHasSkill('owner-1')).toEqual({
+      skill: { users: { some: { userId: 'owner-1' } } },
     });
   });
 });

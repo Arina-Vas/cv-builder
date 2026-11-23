@@ -12,6 +12,9 @@ export const cvSkillInclude = (ownerId: string) =>
     },
   }) satisfies Prisma.CvSkillInclude;
 
+export const ownerHasSkill = (ownerId: string) =>
+  ({ skill: { users: { some: { userId: ownerId } } } }) satisfies Prisma.CvSkillWhereInput;
+
 export type CvSkillWithSkill = Prisma.CvSkillGetPayload<{
   include: ReturnType<typeof cvSkillInclude>;
 }>;

@@ -130,9 +130,10 @@ describe('CvSkillService', () => {
 
       const result = await service.findByCv(ADMIN, CV_ID);
 
-      // The mastery comes from the CV owner, not from the Admin who opens the CV
+      // The mastery comes from the CV owner, not from the Admin who opens the CV; skills the owner
+      // no longer has are left out
       expect(prisma.cvSkill.findMany).toHaveBeenCalledWith({
-        where: { cvId: CV_ID },
+        where: { cvId: CV_ID, skill: { users: { some: { userId: OWNER_ID } } } },
         include: cvSkillInclude(OWNER_ID),
         orderBy: [
           { skill: { category: { name: 'asc' } } },

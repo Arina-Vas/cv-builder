@@ -163,6 +163,19 @@ describe('CV skills (integration)', () => {
       ]);
     });
 
+    it('leaves out a CV skill the owner no longer has instead of failing the list', async () => {
+      const { browser, user } = await signedIn();
+      const cvId = await insertCv(user.id);
+      await assign(user.id, react);
+      await insertCvSkill(cvId, react);
+      // No UserSkill behind it: the state a create racing with a removal from the profile leaves
+      await insertCvSkill(cvId, vue);
+
+      const result = await list(browser, cvId);
+
+      expect(result.map((item) => item.skill.name)).toEqual(['React']);
+    });
+
     it('returns an empty list for a CV without skills', async () => {
       const { browser, user } = await signedIn();
       const cvId = await insertCv(user.id);

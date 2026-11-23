@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { CvAccessService } from '@/cvs/cv-access.service';
-import { cvSkillInclude, toCvSkill } from './cv-skill.mapper';
+import { cvSkillInclude, ownerHasSkill, toCvSkill } from './cv-skill.mapper';
 import { skillInclude, toSkill } from '@/skills/skill.mapper';
 import type { User } from '@/users/models/user.model';
 import type { CvSkill } from './models/cv-skill.model';
@@ -22,7 +22,7 @@ export class CvSkillService {
     const cv = await this.cvAccess.getAccessibleCv(cvId, currentUser);
 
     const rows = await this.prisma.cvSkill.findMany({
-      where: { cvId },
+      where: { cvId, ...ownerHasSkill(cv.userId) },
       include: cvSkillInclude(cv.userId),
       orderBy: [
         { skill: { category: { name: 'asc' } } },
