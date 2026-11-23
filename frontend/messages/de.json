@@ -439,9 +439,7 @@
           "skill": "Kompetenz",
           "experience": "Erfahrung in Jahren",
           "lastUsed": "Zuletzt verwendet"
-        },
-        "noValue": "—",
-        "noValueLabel": "In keinem Projekt des Lebenslaufs verwendet"
+        }
       }
     }
   },

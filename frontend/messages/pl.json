@@ -438,9 +438,7 @@
           "skill": "Umiejętność",
           "experience": "Doświadczenie (lata)",
           "lastUsed": "Ostatnio używane"
-        },
-        "noValue": "—",
-        "noValueLabel": "Nieużywana w projektach CV"
+        }
       }
     }
   },

@@ -447,9 +447,7 @@
           "skill": "Habilidad",
           "experience": "Experiencia (años)",
           "lastUsed": "Último uso"
-        },
-        "noValue": "—",
-        "noValueLabel": "No utilizada en los proyectos del CV"
+        }
       }
     }
   },

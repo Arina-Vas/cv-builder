@@ -438,9 +438,7 @@
           "skill": "Competenza",
           "experience": "Esperienza (anni)",
           "lastUsed": "Ultimo utilizzo"
-        },
-        "noValue": "—",
-        "noValueLabel": "Non utilizzata nei progetti del CV"
+        }
       }
     }
   },

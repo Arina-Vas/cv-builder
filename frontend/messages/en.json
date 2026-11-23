@@ -425,9 +425,7 @@
           "skill": "Skill",
           "experience": "Experience in years",
           "lastUsed": "Last used"
-        },
-        "noValue": "—",
-        "noValueLabel": "Not used in CV projects"
+        }
       }
     }
   },
