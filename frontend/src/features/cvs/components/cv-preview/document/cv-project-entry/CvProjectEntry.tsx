@@ -23,8 +23,8 @@ export const CvProjectEntry = ({ project }: Props) => {
         <dt className={s.label}>{t('project.period')}</dt>
         <dd className={s.value}>
           {t('period', {
-            start: formatDate(project.startDate),
-            end: project.endDate ? formatDate(project.endDate) : t('present'),
+            start: formatDate(project.startDate, 'MM.yyyy'),
+            end: project.endDate ? formatDate(project.endDate, 'MM.yyyy') : t('present'),
           })}
         </dd>
         <dt className={s.label}>{t('project.responsibilities')}</dt>
