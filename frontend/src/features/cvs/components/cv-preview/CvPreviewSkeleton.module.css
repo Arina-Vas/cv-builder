@@ -1,0 +1,99 @@
+/*
+ * Mirrors the document: --cv-* sizes come from .document (CvPreviewDocument.module.css).
+ * A text line is 24px (body1); its block is 16px high with 4px above and below.
+ */
+.line {
+  height: 16px;
+  margin-block: var(--space-1);
+}
+
+/* Header: name (h4, 42px line) and position (24px line), Export PDF button */
+.name {
+  width: 280px;
+  max-width: 100%;
+  height: 34px;
+  margin-block: var(--space-1);
+}
+
+.position {
+  width: 180px;
+  height: 16px;
+  margin-block: var(--space-1);
+}
+
+.button {
+  flex-shrink: 0;
+  width: var(--button-min-width);
+  height: var(--button-height-sm);
+  border-radius: var(--radius-pill);
+}
+
+/* Aside | red line | main, the same split as the summary and a project */
+.columns {
+  display: flex;
+}
+
+.aside,
+.main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding-top: var(--cv-column-offset);
+}
+
+.aside {
+  flex: 0 0 var(--cv-aside-width);
+  padding-right: var(--cv-column-gap);
+}
+
+.main {
+  flex: 1;
+  padding-left: var(--cv-column-gap);
+  border-left: 1px solid var(--cv-accent);
+}
+
+/* Label → value 8px, field → field 16px, as in the document (blocks keep their 4px line margins) */
+.field {
+  display: flex;
+  flex-direction: column;
+}
+
+.field .line + .line {
+  margin-top: calc(var(--space-2) + var(--space-1));
+}
+
+.field + .field,
+.paragraph + .field {
+  margin-top: var(--space-4);
+}
+
+.title + .paragraph {
+  margin-top: var(--space-2);
+}
+
+.label {
+  width: 40%;
+}
+
+.title {
+  width: 55%;
+}
+
+.valueWide {
+  width: 85%;
+}
+
+.valueMedium {
+  width: 65%;
+}
+
+.valueShort {
+  width: 45%;
+}
+
+/* "Projects": h4 line (42px) + 32px below, as .sectionTitle */
+.sectionTitle {
+  width: 160px;
+  height: 34px;
+  margin-block: var(--space-1) calc(var(--space-8) + var(--space-1));
+}

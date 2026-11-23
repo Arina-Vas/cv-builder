@@ -410,6 +410,45 @@
         "title": "Acceso denegado",
         "message": "No tienes autorización para acceder a este CV"
       }
+    },
+    "preview": {
+      "loading": "Cargando vista previa del CV",
+      "loadError": "No se pudo cargar la vista previa del CV",
+      "loadErrorTitle": "Ups",
+      "retry": "Reintentar",
+      "empty": "La vista previa del CV no está disponible",
+      "forbidden": {
+        "title": "Acceso denegado",
+        "message": "No tienes autorización para acceder a este CV"
+      },
+      "exportPdf": "Exportar PDF",
+      "exportingPdf": "Generando PDF",
+      "exportError": "No se pudo generar el PDF",
+      "document": {
+        "sections": {
+          "education": "Formación",
+          "languages": "Idiomas",
+          "domains": "Dominios",
+          "projects": "Proyectos",
+          "professionalSkills": "Habilidades profesionales"
+        },
+        "languageLevel": "{language} — {level}",
+        "project": {
+          "roles": "Roles en el proyecto",
+          "period": "Período",
+          "responsibilities": "Responsabilidades",
+          "environment": "Entorno"
+        },
+        "period": "{start} – {end}",
+        "present": "actualidad",
+        "skillsTable": {
+          "skills": "Habilidades",
+          "category": "Categoría de habilidades",
+          "skill": "Habilidad",
+          "experience": "Experiencia (años)",
+          "lastUsed": "Último uso"
+        }
+      }
     }
   },
   "cvProjects": {

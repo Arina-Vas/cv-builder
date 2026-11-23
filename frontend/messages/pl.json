@@ -401,6 +401,45 @@
         "title": "Brak dostępu",
         "message": "Nie masz dostępu do tego CV"
       }
+    },
+    "preview": {
+      "loading": "Ładowanie podglądu CV",
+      "loadError": "Nie udało się załadować podglądu CV",
+      "loadErrorTitle": "Ups",
+      "retry": "Spróbuj ponownie",
+      "empty": "Podgląd CV jest niedostępny",
+      "forbidden": {
+        "title": "Brak dostępu",
+        "message": "Nie masz dostępu do tego CV"
+      },
+      "exportPdf": "Eksportuj do PDF",
+      "exportingPdf": "Generowanie PDF",
+      "exportError": "Nie udało się wygenerować PDF",
+      "document": {
+        "sections": {
+          "education": "Wykształcenie",
+          "languages": "Znajomość języków",
+          "domains": "Domeny",
+          "projects": "Projekty",
+          "professionalSkills": "Umiejętności zawodowe"
+        },
+        "languageLevel": "{language} — {level}",
+        "project": {
+          "roles": "Role w projekcie",
+          "period": "Okres",
+          "responsibilities": "Obowiązki",
+          "environment": "Technologie"
+        },
+        "period": "{start} – {end}",
+        "present": "obecnie",
+        "skillsTable": {
+          "skills": "Umiejętności",
+          "category": "Kategoria umiejętności",
+          "skill": "Umiejętność",
+          "experience": "Doświadczenie (lata)",
+          "lastUsed": "Ostatnio używane"
+        }
+      }
     }
   },
   "cvProjects": {

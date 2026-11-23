@@ -402,6 +402,45 @@
         "title": "Zugriff verweigert",
         "message": "Sie sind nicht berechtigt, diesen Lebenslauf aufzurufen"
       }
+    },
+    "preview": {
+      "loading": "Lebenslaufvorschau wird geladen",
+      "loadError": "Lebenslaufvorschau konnte nicht geladen werden",
+      "loadErrorTitle": "Hoppla",
+      "retry": "Erneut versuchen",
+      "empty": "Lebenslaufvorschau ist nicht verfügbar",
+      "forbidden": {
+        "title": "Zugriff verweigert",
+        "message": "Sie sind nicht berechtigt, diesen Lebenslauf aufzurufen"
+      },
+      "exportPdf": "PDF exportieren",
+      "exportingPdf": "PDF wird erstellt",
+      "exportError": "PDF konnte nicht erstellt werden",
+      "document": {
+        "sections": {
+          "education": "Ausbildung",
+          "languages": "Sprachkenntnisse",
+          "domains": "Domänen",
+          "projects": "Projekte",
+          "professionalSkills": "Fachliche Kompetenzen"
+        },
+        "languageLevel": "{language} — {level}",
+        "project": {
+          "roles": "Projektrollen",
+          "period": "Zeitraum",
+          "responsibilities": "Aufgaben",
+          "environment": "Technologien"
+        },
+        "period": "{start} – {end}",
+        "present": "heute",
+        "skillsTable": {
+          "skills": "Kompetenzen",
+          "category": "Kompetenzkategorie",
+          "skill": "Kompetenz",
+          "experience": "Erfahrung in Jahren",
+          "lastUsed": "Zuletzt verwendet"
+        }
+      }
     }
   },
   "cvProjects": {
