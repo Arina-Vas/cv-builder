@@ -32,6 +32,11 @@ type Documents = {
     "\n  mutation CreateCvProject($input: CreateCvProjectInput!) {\n    createCvProject(input: $input) {\n      ...CvProjectFields\n    }\n  }\n": typeof types.CreateCvProjectDocument,
     "\n  mutation UpdateCvProject($input: UpdateCvProjectInput!) {\n    updateCvProject(input: $input) {\n      ...CvProjectFields\n    }\n  }\n": typeof types.UpdateCvProjectDocument,
     "\n  mutation DeleteCvProject($id: ID!, $cvId: ID!) {\n    deleteCvProject(id: $id, cvId: $cvId)\n  }\n": typeof types.DeleteCvProjectDocument,
+    "\n  fragment CvSkillFields on CvSkill {\n    id\n    skill {\n      id\n      name\n      category {\n        id\n        name\n      }\n    }\n    mastery\n  }\n": typeof types.CvSkillFieldsFragmentDoc,
+    "\n  query CvSkills($cvId: ID!) {\n    cvSkills(cvId: $cvId) {\n      ...CvSkillFields\n    }\n  }\n": typeof types.CvSkillsDocument,
+    "\n  query AvailableCvSkills($cvId: ID!) {\n    availableCvSkills(cvId: $cvId) {\n      id\n      name\n    }\n  }\n": typeof types.AvailableCvSkillsDocument,
+    "\n  mutation CreateCvSkill($input: CreateCvSkillInput!) {\n    createCvSkill(input: $input) {\n      ...CvSkillFields\n    }\n  }\n": typeof types.CreateCvSkillDocument,
+    "\n  mutation DeleteCvSkills($cvId: ID!, $ids: [ID!]!) {\n    deleteCvSkills(cvId: $cvId, ids: $ids)\n  }\n": typeof types.DeleteCvSkillsDocument,
     "\n  fragment CvFields on Cv {\n    id\n    name\n    description\n    education\n    user {\n      id\n      email\n    }\n  }\n": typeof types.CvFieldsFragmentDoc,
     "\n  query Cvs(\n    $page: Int!\n    $pageSize: Int!\n    $search: String\n    $sortBy: CvSortField!\n    $sortOrder: SortOrder!\n  ) {\n    cvs(page: $page, pageSize: $pageSize, search: $search, sortBy: $sortBy, sortOrder: $sortOrder) {\n      items {\n        ...CvFields\n      }\n      page\n      pageSize\n      total\n    }\n  }\n": typeof types.CvsDocument,
     "\n  query UserCvs(\n    $page: Int!\n    $pageSize: Int!\n    $search: String\n    $sortBy: CvSortField!\n    $sortOrder: SortOrder!\n    $userId: ID!\n  ) {\n    userCvs(\n      page: $page\n      pageSize: $pageSize\n      search: $search\n      sortBy: $sortBy\n      sortOrder: $sortOrder\n      userId: $userId\n    ) {\n      items {\n        ...CvFields\n      }\n      page\n      pageSize\n      total\n    }\n  }\n": typeof types.UserCvsDocument,
@@ -109,6 +114,11 @@ const documents: Documents = {
     "\n  mutation CreateCvProject($input: CreateCvProjectInput!) {\n    createCvProject(input: $input) {\n      ...CvProjectFields\n    }\n  }\n": types.CreateCvProjectDocument,
     "\n  mutation UpdateCvProject($input: UpdateCvProjectInput!) {\n    updateCvProject(input: $input) {\n      ...CvProjectFields\n    }\n  }\n": types.UpdateCvProjectDocument,
     "\n  mutation DeleteCvProject($id: ID!, $cvId: ID!) {\n    deleteCvProject(id: $id, cvId: $cvId)\n  }\n": types.DeleteCvProjectDocument,
+    "\n  fragment CvSkillFields on CvSkill {\n    id\n    skill {\n      id\n      name\n      category {\n        id\n        name\n      }\n    }\n    mastery\n  }\n": types.CvSkillFieldsFragmentDoc,
+    "\n  query CvSkills($cvId: ID!) {\n    cvSkills(cvId: $cvId) {\n      ...CvSkillFields\n    }\n  }\n": types.CvSkillsDocument,
+    "\n  query AvailableCvSkills($cvId: ID!) {\n    availableCvSkills(cvId: $cvId) {\n      id\n      name\n    }\n  }\n": types.AvailableCvSkillsDocument,
+    "\n  mutation CreateCvSkill($input: CreateCvSkillInput!) {\n    createCvSkill(input: $input) {\n      ...CvSkillFields\n    }\n  }\n": types.CreateCvSkillDocument,
+    "\n  mutation DeleteCvSkills($cvId: ID!, $ids: [ID!]!) {\n    deleteCvSkills(cvId: $cvId, ids: $ids)\n  }\n": types.DeleteCvSkillsDocument,
     "\n  fragment CvFields on Cv {\n    id\n    name\n    description\n    education\n    user {\n      id\n      email\n    }\n  }\n": types.CvFieldsFragmentDoc,
     "\n  query Cvs(\n    $page: Int!\n    $pageSize: Int!\n    $search: String\n    $sortBy: CvSortField!\n    $sortOrder: SortOrder!\n  ) {\n    cvs(page: $page, pageSize: $pageSize, search: $search, sortBy: $sortBy, sortOrder: $sortOrder) {\n      items {\n        ...CvFields\n      }\n      page\n      pageSize\n      total\n    }\n  }\n": types.CvsDocument,
     "\n  query UserCvs(\n    $page: Int!\n    $pageSize: Int!\n    $search: String\n    $sortBy: CvSortField!\n    $sortOrder: SortOrder!\n    $userId: ID!\n  ) {\n    userCvs(\n      page: $page\n      pageSize: $pageSize\n      search: $search\n      sortBy: $sortBy\n      sortOrder: $sortOrder\n      userId: $userId\n    ) {\n      items {\n        ...CvFields\n      }\n      page\n      pageSize\n      total\n    }\n  }\n": types.UserCvsDocument,
@@ -254,6 +264,26 @@ export function graphql(source: "\n  mutation UpdateCvProject($input: UpdateCvPr
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation DeleteCvProject($id: ID!, $cvId: ID!) {\n    deleteCvProject(id: $id, cvId: $cvId)\n  }\n"): (typeof documents)["\n  mutation DeleteCvProject($id: ID!, $cvId: ID!) {\n    deleteCvProject(id: $id, cvId: $cvId)\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  fragment CvSkillFields on CvSkill {\n    id\n    skill {\n      id\n      name\n      category {\n        id\n        name\n      }\n    }\n    mastery\n  }\n"): (typeof documents)["\n  fragment CvSkillFields on CvSkill {\n    id\n    skill {\n      id\n      name\n      category {\n        id\n        name\n      }\n    }\n    mastery\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query CvSkills($cvId: ID!) {\n    cvSkills(cvId: $cvId) {\n      ...CvSkillFields\n    }\n  }\n"): (typeof documents)["\n  query CvSkills($cvId: ID!) {\n    cvSkills(cvId: $cvId) {\n      ...CvSkillFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query AvailableCvSkills($cvId: ID!) {\n    availableCvSkills(cvId: $cvId) {\n      id\n      name\n    }\n  }\n"): (typeof documents)["\n  query AvailableCvSkills($cvId: ID!) {\n    availableCvSkills(cvId: $cvId) {\n      id\n      name\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation CreateCvSkill($input: CreateCvSkillInput!) {\n    createCvSkill(input: $input) {\n      ...CvSkillFields\n    }\n  }\n"): (typeof documents)["\n  mutation CreateCvSkill($input: CreateCvSkillInput!) {\n    createCvSkill(input: $input) {\n      ...CvSkillFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation DeleteCvSkills($cvId: ID!, $ids: [ID!]!) {\n    deleteCvSkills(cvId: $cvId, ids: $ids)\n  }\n"): (typeof documents)["\n  mutation DeleteCvSkills($cvId: ID!, $ids: [ID!]!) {\n    deleteCvSkills(cvId: $cvId, ids: $ids)\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

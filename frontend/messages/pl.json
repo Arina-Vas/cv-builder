@@ -157,6 +157,9 @@
       "roleIds": { "required": "Należy wybrać co najmniej jedną rolę" },
       "responsibilities": { "maxLength": "Obowiązki nie mogą przekraczać {max} znaków" }
     },
+    "cvSkill": {
+      "skillId": { "required": "Umiejętność jest wymagana" }
+    },
     "cv": {
       "name": {
         "required": "Imię jest wymagane",
@@ -439,6 +442,28 @@
     "delete": {
       "title": "Usuń projekt",
       "message": "Czy na pewno chcesz usunąć projekt <b>{name}</b>?"
+    }
+  },
+  "cvSkills": {
+    "addButton": "Dodaj umiejętność",
+    "removeButton": "Usuń umiejętności",
+    "confirmRemove": "Usuń",
+    "remove": {
+      "title": "Usuń umiejętności",
+      "message": "Czy na pewno chcesz usunąć <b>{count, plural, one {# umiejętność} few {# umiejętności} many {# umiejętności} other {# umiejętności}}</b>?"
+    },
+    "empty": "Nie dodano jeszcze umiejętności",
+    "loading": "Ładowanie umiejętności",
+    "loadError": "Nie udało się załadować umiejętności",
+    "retry": "Spróbuj ponownie",
+    "forbidden": "Nie masz dostępu do tego CV",
+    "form": {
+      "createTitle": "Dodaj umiejętność",
+      "fields": { "skillId": "Umiejętność" }
+    },
+    "errors": {
+      "alreadyAdded": "Umiejętność jest już dodana do CV",
+      "notOwnerSkill": "Właściciel CV nie ma już tej umiejętności"
     }
   },
   "departments": {

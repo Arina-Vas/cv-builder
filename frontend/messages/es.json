@@ -159,6 +159,9 @@
         "maxLength": "Las responsabilidades no deben superar los {max} caracteres"
       }
     },
+    "cvSkill": {
+      "skillId": { "required": "La habilidad es obligatoria" }
+    },
     "cv": {
       "name": {
         "required": "El nombre es obligatorio",
@@ -448,6 +451,28 @@
     "delete": {
       "title": "Quitar proyecto",
       "message": "¿Seguro que quieres eliminar el proyecto <b>{name}</b>?"
+    }
+  },
+  "cvSkills": {
+    "addButton": "Añadir habilidad",
+    "removeButton": "Quitar habilidades",
+    "confirmRemove": "Quitar",
+    "remove": {
+      "title": "Quitar habilidades",
+      "message": "¿Seguro que quieres quitar <b>{count, plural, one {# habilidad} other {# habilidades}}</b>?"
+    },
+    "empty": "Todavía no se han añadido habilidades",
+    "loading": "Cargando habilidades",
+    "loadError": "No se pudieron cargar las habilidades",
+    "retry": "Reintentar",
+    "forbidden": "No tienes autorización para acceder a este CV",
+    "form": {
+      "createTitle": "Añadir habilidad",
+      "fields": { "skillId": "Habilidad" }
+    },
+    "errors": {
+      "alreadyAdded": "La habilidad ya está añadida al CV",
+      "notOwnerSkill": "El propietario del CV ya no tiene esta habilidad"
     }
   },
   "departments": {
