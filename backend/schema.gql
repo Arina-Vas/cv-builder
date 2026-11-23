@@ -122,6 +122,12 @@ type CvPage {
   total: Int!
 }
 
+type CvPdf {
+  """PDF file encoded as base64"""
+  content: String!
+  fileName: String!
+}
+
 """
 A catalog project added to a CV, with CV-specific dates, roles and responsibilities
 """
@@ -322,6 +328,11 @@ type Mutation {
   Own profile or Admin. Removes the given UserSkill ids of the user; returns the removed ids. The skills are also removed from the user's CVs. Ids already removed are skipped. Fails with FORBIDDEN and removes nothing if an id belongs to another user's assignment
   """
   deleteUserSkills(ids: [ID!]!, userId: ID!): [ID!]!
+
+  """
+  Own CV or Admin. Builds a PDF of the CV preview and returns it as base64. Fails with NOT_FOUND, FORBIDDEN for another user, BAD_USER_INPUT when preview data is incomplete
+  """
+  generateCvPdf(cvId: ID!): CvPdf!
   logout: Boolean!
   refresh: Boolean!
 
