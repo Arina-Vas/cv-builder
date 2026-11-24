@@ -162,6 +162,10 @@
         "maxLength": "Les responsabilités ne doivent pas dépasser {max} caractères"
       }
     },
+    "cvSkill": {
+      "skillId": { "required": "La compétence est requise" },
+      "mastery": { "required": "Le niveau de maîtrise est requis" }
+    },
     "cv": {
       "name": {
         "required": "Le nom est obligatoire",
@@ -487,6 +491,29 @@
     "delete": {
       "title": "Retirer le projet",
       "message": "Voulez-vous vraiment supprimer le projet <b>{name}</b> ?"
+    }
+  },
+  "cvSkills": {
+    "addButton": "Ajouter une compétence",
+    "removeButton": "Retirer des compétences",
+    "confirmRemove": "Retirer",
+    "remove": {
+      "title": "Retirer des compétences",
+      "message": "Voulez-vous vraiment retirer <b>{count, plural, one {# compétence} other {# compétences}}</b> ?"
+    },
+    "empty": "Aucune compétence ajoutée pour le moment",
+    "loading": "Chargement des compétences",
+    "loadError": "Impossible de charger les compétences",
+    "retry": "Réessayer",
+    "forbidden": "Vous n'êtes pas autorisé à accéder à ce CV",
+    "form": {
+      "createTitle": "Ajouter une compétence",
+      "updateTitle": "Mettre à jour la compétence",
+      "fields": { "skillId": "Compétence", "mastery": "Niveau de maîtrise" }
+    },
+    "errors": {
+      "alreadyAdded": "La compétence est déjà ajoutée au CV",
+      "notOwnerSkill": "Le propriétaire du CV n'a plus cette compétence"
     }
   },
   "departments": {

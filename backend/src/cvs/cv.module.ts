@@ -8,6 +8,8 @@ import { CvSkillResolver } from './cv-skills/cv-skill.resolver';
 import { CvSkillService } from './cv-skills/cv-skill.service';
 import { CvPdfResolver } from '@/cvs/cv-pdf/cv-pdf.resolver';
 import { CvPdfService } from '@/cvs/cv-pdf/cv-pdf.service';
+import { CvPreviewResolver } from './cv-preview/cv-preview.resolver';
+import { CvPreviewService } from './cv-preview/cv-preview.service';
 
 @Module({
   providers: [
@@ -20,7 +22,9 @@ import { CvPdfService } from '@/cvs/cv-pdf/cv-pdf.service';
     CvSkillService,
     CvPdfResolver,
     CvPdfService,
+    CvPreviewResolver,
+    CvPreviewService,
   ],
-  exports: [CvAccessService],
+  exports: [CvAccessService, CvPreviewService],
 })
 export class CvModule {}

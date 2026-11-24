@@ -9,7 +9,8 @@ type Props<T> = {
   items: T[] | undefined;
   error: unknown;
   loading: boolean;
-  onRetry: () => void;
+  /** omitted: the error is final (e.g. FORBIDDEN), no Retry button */
+  onRetry?: () => void;
   loadErrorMessage: string;
   retryLabel: string;
   loadingLabel: string;
@@ -32,9 +33,11 @@ export const AsyncList = <T,>({
     return (
       <div className={s.error} role="alert">
         <p className={s.errorText}>{loadErrorMessage}</p>
-        <Button variant="secondary" size="sm" loading={loading} onClick={onRetry}>
-          {retryLabel}
-        </Button>
+        {onRetry && (
+          <Button variant="secondary" size="sm" loading={loading} onClick={onRetry}>
+            {retryLabel}
+          </Button>
+        )}
       </div>
     );
   }

@@ -1,0 +1,14 @@
+.title {
+  margin: 0 0 var(--space-4);
+  font-size: var(--type-subtitle1-size);
+  line-height: var(--type-subtitle1-lh);
+  font-weight: var(--font-weight-regular);
+}
+
+.list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, var(--level-item-width));
+  margin: 0 0 var(--space-8) 0;
+  padding: 0;
+  list-style: none;
+}

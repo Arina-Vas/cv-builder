@@ -6,14 +6,12 @@ import {
   USER_SKILL_REFETCH_QUERIES,
   USER_SKILLS,
 } from '@/features/skills/user-skills/api/userSkills.operations';
-import { groupByCategory } from '@/features/skills/user-skills/lib/groupByCategory';
-import { LevelItem } from '@/shared/components/level-item/LevelItem';
-import { MASTERY_LEVEL } from '@/features/skills/user-skills/lib/mastery';
 import { useTranslations } from 'next-intl';
 import { useSelection } from '@/shared/hooks/useSelection';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import type { UserSkillFieldsFragment } from '@/gql/graphql';
 import { UserSkillFormModal } from '@/features/skills/user-skills/components/UserSkillFormModal';
+import { SkillGroups } from '@/features/skills/user-skills/components/SkillGroups';
 import s from './UserSkills.module.css';
 import { ConfirmDialog } from '@/shared/components/dialog';
 import { AsyncList } from '@/shared/components/async-list/AsyncList';
@@ -53,8 +51,6 @@ export const UserSkills = ({ userId, canEdit, emptyMessage }: Props) => {
     exit();
   };
 
-  const groupedSkills = useMemo(() => groupByCategory(data?.userSkills ?? []), [data?.userSkills]);
-
   if (hasErrorCode(error, 'NOT_FOUND')) notFound();
 
   return (
@@ -69,33 +65,15 @@ export const UserSkills = ({ userId, canEdit, emptyMessage }: Props) => {
         loadingLabel={t('loading')}
         emptyMessage={emptyMessage}
       >
-        {groupedSkills.map((group) => {
-          const headingId = `skill-category-${group.category.id}`;
-
-          return (
-            <section key={group.category.id} aria-labelledby={headingId}>
-              <h2 id={headingId} className={s.title}>
-                {group.category.name}
-              </h2>
-              <ul className={s.list}>
-                {group.skills.map((skill) => (
-                  <li key={skill.id}>
-                    <LevelItem
-                      name={skill.skill.name}
-                      level={MASTERY_LEVEL[skill.mastery]}
-                      levelLabel={t(`masteryLevel.${skill.mastery}`)}
-                      canEdit={canEdit}
-                      onClick={() =>
-                        selectingMode ? toggle(skill.id) : setModal({ type: 'update', skill })
-                      }
-                      selected={selectingMode ? selectedIds.has(skill.id) : undefined}
-                    />
-                  </li>
-                ))}
-              </ul>
-            </section>
-          );
-        })}
+        <SkillGroups
+          skills={data?.userSkills ?? []}
+          idPrefix="skill-category"
+          canEdit={canEdit}
+          selectedIds={selectingMode ? selectedIds : undefined}
+          onItemClick={(skill) =>
+            selectingMode ? toggle(skill.id) : setModal({ type: 'update', skill })
+          }
+        />
       </AsyncList>
 
       {data && (

@@ -63,7 +63,7 @@ describe('Skills (integration)', () => {
             education: 'BSU',
             description: 'React developer',
             userId: (await createUser(t.prisma)).id,
-            skills: { create: [{ skillId }] },
+            skills: { create: [{ skillId, mastery: Mastery.ADVANCED }] },
           },
         }),
     ],
