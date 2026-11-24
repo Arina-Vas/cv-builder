@@ -1,18 +1,18 @@
 import { useId } from 'react';
 import { useTranslations } from 'next-intl';
-import type {
-  CvPreviewData,
-  CvPreviewSkillGroup,
-} from '@/features/cvs/lib/preview/cv-preview.types';
 import s from './CvSummary.module.css';
+import {
+  type CvPreviewFieldsFragment,
+  type CvPreviewSkillGroupFieldsFragment,
+} from '@/gql/graphql';
 
 type Props = {
   education: string;
-  languages: CvPreviewData['languages'];
+  languages: CvPreviewFieldsFragment['languages'];
   domains: string[];
   name: string;
   description: string;
-  skillGroups: CvPreviewSkillGroup[];
+  skillGroups: CvPreviewSkillGroupFieldsFragment[];
 };
 
 export const CvSummary = ({

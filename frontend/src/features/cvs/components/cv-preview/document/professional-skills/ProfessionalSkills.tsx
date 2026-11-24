@@ -1,11 +1,11 @@
 import { useId } from 'react';
 import { useTranslations } from 'next-intl';
-import { type CvPreviewSkillGroup } from '@/features/cvs/lib/preview/cv-preview.types';
 import doc from '../CvPreviewDocument.module.css';
 import s from './ProfessionalSkills.module.css';
+import { type CvPreviewSkillGroupFieldsFragment } from '@/gql/graphql';
 
 type Props = {
-  skillGroups: CvPreviewSkillGroup[];
+  skillGroups: CvPreviewSkillGroupFieldsFragment[];
 };
 export const ProfessionalSkills = ({ skillGroups }: Props) => {
   const t = useTranslations('cvs.preview.document');
