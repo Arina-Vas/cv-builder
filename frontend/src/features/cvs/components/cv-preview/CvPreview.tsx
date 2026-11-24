@@ -2,13 +2,14 @@
 
 import { useTranslations } from 'next-intl';
 import { Button } from '@/shared/components/buttons';
-import { cvPreviewFixture } from '@/features/cvs/lib/preview/cv-preview.fixtures';
 import { CvPreviewDocument } from './document/CvPreviewDocument';
 import { ErrorState } from '@/shared/components/error-state/ErrorState';
 import { hasErrorCode } from '@/shared/lib/apollo/graphql-errors';
 import { notFound } from 'next/navigation';
 import { CvPreviewSkeleton } from './CvPreviewSkeleton';
 import { useExportCvPdf } from '@/features/cv-pdf/lib/hooks/useExportCvPdf';
+import { CV_PREVIEW } from '@/features/cvs/api/cvs.operations';
+import { useQuery } from '@apollo/client/react';
 
 type Props = {
   cvId: string;
@@ -17,12 +18,10 @@ type Props = {
 export const CvPreview = ({ cvId }: Props) => {
   const t = useTranslations('cvs.preview');
 
-  const { data, error, loading, refetch } = {
-    data: { cvPreview: { ...cvPreviewFixture, id: cvId } },
-    error: undefined as unknown,
-    loading: false,
-    refetch: async () => {},
-  };
+  const { data, error, loading, refetch } = useQuery(CV_PREVIEW, {
+    variables: { id: cvId },
+    fetchPolicy: 'cache-and-network',
+  });
 
   const { loading: downloading, exportPdf } = useExportCvPdf(cvId);
 
@@ -41,9 +40,6 @@ export const CvPreview = ({ cvId }: Props) => {
   }
 
   if (!data) return <CvPreviewSkeleton />;
-
-  // TODO(B7): empty state
-  // if (isPreviewEmpty(data.cvPreview)) return <CvPreviewEmpty />;
 
   return (
     <CvPreviewDocument
