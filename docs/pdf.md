@@ -27,9 +27,11 @@ generateCvPdf(input: { cvId, locale }) → CvAccessService (NOT_FOUND / FORBIDDE
 4. **Styles.** `cv-pdf.styles.ts` is a port of the Preview CSS modules with design tokens replaced by their values
    and the print palette. It adds the print rules: `@page { size: A4; margin: 16mm 14mm }`, a project and a skill
    category are never split between pages, the head of the skills table repeats on every page.
-5. **Fonts.** Roboto (latin and cyrillic, the same files and unicode ranges as `frontend/src/app/layout.tsx`) is
-   embedded into the page as base64 `@font-face` rules (`cv-pdf.fonts.ts`). The page loads nothing from the
-   network, and a server without system fonts still renders the text.
+5. **Fonts.** Roboto is embedded into the page as base64 `@font-face` rules (`cv-pdf.fonts.ts`): latin and
+   cyrillic (the same files and unicode ranges as `frontend/src/app/layout.tsx`) and latin-ext for Polish
+   `ą ę ł ń ś ź ż`. Variable fonts from Google Fonts, one file per subset with Google's `unicode-range`. The page
+   loads nothing from the network, and a server without system fonts still renders the text of every UI
+   language.
 6. **PDF.** `page.setContent(html)` and `page.pdf({ format: 'A4', printBackground: true })` in Chromium.
 7. **Response.** `{ fileName, content }`: `content` is the PDF in base64, `fileName` is the CV name in kebab-case
    with `.pdf` (`toPdfFileName`, see [File name](#file-name)). The frontend turns `content` into a Blob and
@@ -149,6 +151,7 @@ namespaces), so `backend-integration` sets `PUPPETEER_NO_SANDBOX: true`.
 
 ## Tests
 
+- `cv-pdf.fonts.spec.ts`: three woff2 files (latin, latin-ext, cyrillic) with their unicode ranges.
 - `cv-pdf.labels.spec.ts`: the dictionary equals the frontend messages for every locale.
 - `cv-pdf.template.spec.ts`: HTML of the document (escaping, hidden empty sections, period, punctuation, skills
   table, labels and `lang` of the locale), `splitResponsibilities`.
@@ -192,5 +195,3 @@ else {
 
 - **Data and incomplete-data rule** come with B7 (`CvPreviewService`): replace `cv-pdf.mapper.ts` and
   `cv-preview.types.ts`, add the `BAD_USER_INPUT` check and its test.
-- **Polish letters.** The embedded Roboto has the latin and cyrillic subsets only; `ą ę ł ń ś ź ż` (Latin
-  Extended-A) fall back to another font. Add the latin-ext subset to `fonts/` and `cv-pdf.fonts.ts`.
