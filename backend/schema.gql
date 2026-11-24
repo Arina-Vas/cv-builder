@@ -206,6 +206,11 @@ enum DepartmentSortField {
   name
 }
 
+input GenerateCvPdfInput {
+  cvId: ID!
+  locale: Locale! = en
+}
+
 type Health {
   status: String!
 }
@@ -231,6 +236,18 @@ type LanguagePage {
 enum LanguageSortField {
   iso
   name
+}
+
+enum Locale {
+  de
+  en
+  es
+  fr
+  it
+  pl
+  pt
+  ru
+  uk
 }
 
 enum Mastery {
@@ -332,7 +349,7 @@ type Mutation {
   """
   Own CV or Admin. Builds a PDF of the CV preview and returns it as base64. Fails with NOT_FOUND, FORBIDDEN for another user, BAD_USER_INPUT when preview data is incomplete
   """
-  generateCvPdf(cvId: ID!): CvPdf!
+  generateCvPdf(input: GenerateCvPdfInput!): CvPdf!
   logout: Boolean!
   refresh: Boolean!
 

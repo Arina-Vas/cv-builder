@@ -7,9 +7,9 @@ contract is `generateCvPdf` in [api/permissions.md](api/permissions.md#cv-pdf).
 ## How it works
 
 ```
-generateCvPdf(cvId) → CvAccessService (NOT_FOUND / FORBIDDEN)
-                    → CV data → HTML template → headless Chromium (Puppeteer) → PDF
-                    → { fileName, content: base64 }
+generateCvPdf(input: { cvId, locale }) → CvAccessService (NOT_FOUND / FORBIDDEN)
+                                       → CV data → HTML template (labels of locale) → headless Chromium → PDF
+                                       → { fileName, content: base64 }
 ```
 
 1. **Access.** `CvPdfService.generate` gets the CV through `CvAccessService.getAccessibleCv`, like `cv(id)`:
@@ -21,8 +21,9 @@ generateCvPdf(cvId) → CvAccessService (NOT_FOUND / FORBIDDEN)
    before rendering (wiki: the application must not generate an incomplete PDF).
 3. **HTML.** `cv-pdf.template.ts` renders a full HTML page as a string. It is a port of the CV Preview components
    (`frontend/src/features/cvs/components/cv-preview/document/`): the same sections, the same rules for hiding
-   empty values, the period as `MM.yyyy – Present`, the same list punctuation. Labels are English constants.
-   Every value from the data goes through `escapeHtml` (`src/common/html/escape-html.ts`).
+   empty values, the period as `MM.yyyy – Present`, the same list punctuation. Labels come from the requested
+   locale, see [Language](#language). Every value from the data and every label goes through `escapeHtml`
+   (`src/common/html/escape-html.ts`).
 4. **Styles.** `cv-pdf.styles.ts` is a port of the Preview CSS modules with design tokens replaced by their values
    and the print palette. It adds the print rules: `@page { size: A4; margin: 16mm 14mm }`, a project and a skill
    category are never split between pages, the head of the skills table repeats on every page.
@@ -34,12 +35,31 @@ generateCvPdf(cvId) → CvAccessService (NOT_FOUND / FORBIDDEN)
    with `.pdf` (`toPdfFileName`, see [File name](#file-name)). The frontend turns `content` into a Blob and
    downloads it with `fileName`. The file is not stored anywhere.
 
+### Language
+
+The PDF is in the language the user sees the Preview in. The frontend sends its UI locale
+(`generateCvPdf(input: { cvId, locale: useLocale() })`); without `locale` the PDF is in English.
+
+- `Locale` (`src/common/graphql/locale.enum.ts`) is the GraphQL enum of the nine UI languages, the same codes as
+  `LOCALES` in `frontend/src/i18n/config.ts` (`en`, `fr`, `de`, …). Another value is rejected by GraphQL with
+  `BAD_USER_INPUT`.
+- `CV_PDF_LABELS` (`cv-pdf.labels.ts`) holds the texts for every locale: `cvs.preview.document` and
+  `userLanguage.proficiencyLevel` copied from `frontend/messages/<locale>.json`. `languageLevel`
+  (`{language} — {level}`) and `period` (`{start} – {end}`) are templates, as in the frontend.
+- `cv-pdf.labels.spec.ts` reads the frontend messages and fails when the dictionary differs: a changed text, a
+  missing or extra key, a locale added on one side only. A key missing in a translation is compared with the
+  English text, as `mergeMessages` falls back on the frontend.
+- `renderCvPdfHtml(data, locale)` takes the labels of the locale and sets `<html lang>`; Chromium writes it into
+  the PDF as the document language (`/Lang`).
+- Only the labels are translated. The CV data (names, descriptions, skills) is printed as the user entered it.
+
 ### Keeping the PDF in sync with the Preview
 
 The template and the styles are copies of the Preview markup and CSS. A change to
-`frontend/src/features/cvs/components/cv-preview/document/**` (markup, CSS modules, labels in
-`messages/en.json` → `cvs.preview.document`) needs the same change in `backend/src/cvs/cv-pdf/cv-pdf.template.ts`
-or `cv-pdf.styles.ts`. Class names in the PDF have a block prefix (`summary__title`, `project__name`), because
+`frontend/src/features/cvs/components/cv-preview/document/**` (markup, CSS modules) needs the same change in
+`backend/src/cvs/cv-pdf/cv-pdf.template.ts` or `cv-pdf.styles.ts`. A change to the texts in
+`messages/*.json` → `cvs.preview.document` or `userLanguage.proficiencyLevel` needs the same change in
+`cv-pdf.labels.ts` (the labels test points to it). Class names in the PDF have a block prefix (`summary__title`, `project__name`), because
 the CSS modules reuse names like `.title` and `.value`.
 
 ### Browser lifecycle
@@ -54,17 +74,20 @@ the CSS modules reuse names like `.title` and `.value`.
 
 ## Files
 
-| File                                       | What it does                                                 |
-| ------------------------------------------ | ------------------------------------------------------------ |
-| `src/cvs/cv-pdf/cv-pdf.resolver.ts`        | `generateCvPdf(cvId)`, `@AllowUnverified()`, `ParseUUIDPipe` |
-| `src/cvs/cv-pdf/cv-pdf.service.ts`         | access → data → HTML → PDF → base64; owns the browser        |
-| `src/cvs/cv-pdf/cv-pdf.template.ts`        | HTML of the document; `splitResponsibilities`                |
-| `src/cvs/cv-pdf/cv-pdf.styles.ts`          | CSS of the document                                          |
-| `src/cvs/cv-pdf/cv-pdf.fonts.ts`, `fonts/` | Roboto `@font-face` rules and the woff2 files                |
-| `src/cvs/cv-pdf/cv-pdf-file-name.ts`       | `toPdfFileName`                                              |
-| `src/cvs/cv-pdf/cv-pdf.mapper.ts`          | **temporary** (until B7): CV → template data                 |
-| `src/cvs/cv-pdf/cv-preview.types.ts`       | **temporary** (until B7): shape of the template data         |
-| `src/common/html/escape-html.ts`           | HTML escaping, shared with the email templates               |
+| File                                          | What it does                                                 |
+| --------------------------------------------- | ------------------------------------------------------------ |
+| `src/cvs/cv-pdf/cv-pdf.resolver.ts`           | `generateCvPdf(input)`, `@AllowUnverified()`                 |
+| `src/cvs/cv-pdf/dto/generate-cv-pdf.input.ts` | `GenerateCvPdfInput`: `cvId` (UUID), `locale` (default `en`) |
+| `src/cvs/cv-pdf/cv-pdf.service.ts`            | access → data → HTML → PDF → base64; owns the browser        |
+| `src/cvs/cv-pdf/cv-pdf.template.ts`           | HTML of the document; `splitResponsibilities`                |
+| `src/cvs/cv-pdf/cv-pdf.labels.ts`             | `CV_PDF_LABELS`: texts of the document for every locale      |
+| `src/common/graphql/locale.enum.ts`           | `Locale` GraphQL enum                                        |
+| `src/cvs/cv-pdf/cv-pdf.styles.ts`             | CSS of the document                                          |
+| `src/cvs/cv-pdf/cv-pdf.fonts.ts`, `fonts/`    | Roboto `@font-face` rules and the woff2 files                |
+| `src/cvs/cv-pdf/cv-pdf-file-name.ts`          | `toPdfFileName`                                              |
+| `src/cvs/cv-pdf/cv-pdf.mapper.ts`             | **temporary** (until B7): CV → template data                 |
+| `src/cvs/cv-pdf/cv-preview.types.ts`          | **temporary** (until B7): shape of the template data         |
+| `src/common/html/escape-html.ts`              | HTML escaping, shared with the email templates               |
 
 The resolver and the service are registered in `CvModule`, next to `CvAccessService`.
 
@@ -126,13 +149,16 @@ namespaces), so `backend-integration` sets `PUPPETEER_NO_SANDBOX: true`.
 
 ## Tests
 
+- `cv-pdf.labels.spec.ts`: the dictionary equals the frontend messages for every locale.
 - `cv-pdf.template.spec.ts`: HTML of the document (escaping, hidden empty sections, period, punctuation, skills
-  table), `splitResponsibilities`.
+  table, labels and `lang` of the locale), `splitResponsibilities`.
 - `cv-pdf-file-name.spec.ts`: `toPdfFileName`.
 - `cv-pdf.service.spec.ts`: puppeteer is mocked. Access is checked before Chromium starts, one browser for
-  sequential and parallel requests, the page is closed after an error, the sandbox flag, `onModuleDestroy`.
-- `test/cv-pdf.int-spec.ts`: real Chromium and the test database. Own CV → `%PDF-`, another user's CV →
-  `FORBIDDEN` (wiki AC-31, AC-49), Admin, unverified user, `NOT_FOUND`, `BAD_USER_INPUT` for a non-UUID id,
+  sequential and parallel requests, the page is closed after an error, the locale reaches the HTML, the sandbox
+  flag, `onModuleDestroy`.
+- `test/cv-pdf.int-spec.ts`: real Chromium and the test database. Own CV → `%PDF-`, the PDF language (`/Lang`)
+  for `ru` and for a request without `locale`, another user's CV → `FORBIDDEN` (wiki AC-31, AC-49), Admin,
+  unverified user, `NOT_FOUND`, `BAD_USER_INPUT` for a non-UUID id and for an unknown locale,
   `UNAUTHENTICATED`.
 
 ## Checking by hand
@@ -146,8 +172,9 @@ const res = await fetch('http://localhost:4000/graphql', {
   credentials: 'include',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
-    query: 'mutation ($cvId: ID!) { generateCvPdf(cvId: $cvId) { fileName content } }',
-    variables: { cvId: '<id of your CV>' },
+    query:
+      'mutation ($input: GenerateCvPdfInput!) { generateCvPdf(input: $input) { fileName content } }',
+    variables: { input: { cvId: '<id of your CV>', locale: 'ru' } },
   }),
 });
 const { data, errors } = await res.json();
@@ -165,4 +192,5 @@ else {
 
 - **Data and incomplete-data rule** come with B7 (`CvPreviewService`): replace `cv-pdf.mapper.ts` and
   `cv-preview.types.ts`, add the `BAD_USER_INPUT` check and its test.
-- **Language.** The PDF is always in English, while the Preview follows the UI language.
+- **Polish letters.** The embedded Roboto has the latin and cyrillic subsets only; `ą ę ł ń ś ź ż` (Latin
+  Extended-A) fall back to another font. Add the latin-ext subset to `fonts/` and `cv-pdf.fonts.ts`.

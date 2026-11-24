@@ -342,7 +342,8 @@ Errors:
 
 | Case                                   | Code                    | Message                                         |
 | -------------------------------------- | ----------------------- | ----------------------------------------------- |
-| `cvId` is not a UUID                   | `BAD_USER_INPUT`        | from `ParseUUIDPipe`                            |
+| `cvId` is not a UUID                   | `BAD_USER_INPUT`        | `fields: [{ field: 'cvId' }]`                   |
+| `locale` is not a `Locale` value       | `BAD_USER_INPUT`        | GraphQL variable error, no `fields`             |
 | the CV does not exist                  | `NOT_FOUND`             | `CV not found`                                  |
 | an Employee asks for another user's CV | `FORBIDDEN`             | `You are not authorized to perform this action` |
 | Chromium failed or timed out           | `INTERNAL_SERVER_ERROR` | generic message, the error is logged            |

@@ -2,6 +2,7 @@ import type { ConfigService } from '@nestjs/config';
 import type { EnvironmentVariables } from '@/config/env.validation';
 import { forbidden, notFound } from '@/common/errors/app-errors';
 import { UserRole } from '@/common/graphql/enums';
+import { Locale } from '@/common/graphql/locale.enum';
 import type { CvAccessService } from '@/cvs/cv-access.service';
 import type { CvWithUser } from '@/cvs/cv.mapper';
 import { CvPdfService } from '@/cvs/cv-pdf/cv-pdf.service';
@@ -20,6 +21,7 @@ jest.mock('puppeteer', () => ({
 
 const PDF_BYTES = new TextEncoder().encode('%PDF-test');
 const CV_ID = 'cv-1';
+const INPUT = { cvId: CV_ID, locale: Locale.en };
 const TIMESTAMP = new Date('2026-01-01T00:00:00.000Z');
 
 const OWNER: User = {
@@ -91,7 +93,7 @@ describe('CvPdfService', () => {
 
   describe('generate', () => {
     it('renders the accessible CV to an A4 PDF and returns it as base64 with the file name', async () => {
-      const result = await service.generate(CV_ID, OWNER);
+      const result = await service.generate(INPUT, OWNER);
 
       expect(cvAccess.getAccessibleCv).toHaveBeenCalledWith(CV_ID, OWNER);
       expect(page.setContent).toHaveBeenCalledWith(expect.stringContaining('Frontend Developer'), {
@@ -105,8 +107,17 @@ describe('CvPdfService', () => {
       expect(Buffer.from(result.content, 'base64').toString()).toBe('%PDF-test');
     });
 
+    it('renders the document in the requested locale', async () => {
+      await service.generate({ cvId: CV_ID, locale: Locale.ru }, OWNER);
+
+      const [html] = page.setContent.mock.calls[0] as [string];
+      expect(html).toContain('<html lang="ru">');
+      expect(html).toContain('Образование');
+      expect(html).not.toContain('Education');
+    });
+
     it('closes the page after the PDF is built', async () => {
-      await service.generate(CV_ID, OWNER);
+      await service.generate(INPUT, OWNER);
 
       expect(page.close).toHaveBeenCalledTimes(1);
     });
@@ -117,7 +128,7 @@ describe('CvPdfService', () => {
     ])('fails with %s before starting Chromium', async (_, error) => {
       cvAccess.getAccessibleCv.mockRejectedValue(error);
 
-      await expect(service.generate(CV_ID, OWNER)).rejects.toBe(error);
+      await expect(service.generate(INPUT, OWNER)).rejects.toBe(error);
       expect(mockLaunch).not.toHaveBeenCalled();
     });
 
@@ -125,7 +136,7 @@ describe('CvPdfService', () => {
       const error = new Error('Navigation timeout');
       page.pdf.mockRejectedValue(error);
 
-      await expect(service.generate(CV_ID, OWNER)).rejects.toBe(error);
+      await expect(service.generate(INPUT, OWNER)).rejects.toBe(error);
       expect(page.close).toHaveBeenCalledTimes(1);
     });
 
@@ -134,21 +145,21 @@ describe('CvPdfService', () => {
 
   describe('browser', () => {
     it('starts Chromium once and opens a new page for every PDF', async () => {
-      await service.generate(CV_ID, OWNER);
-      await service.generate(CV_ID, OWNER);
+      await service.generate(INPUT, OWNER);
+      await service.generate(INPUT, OWNER);
 
       expect(mockLaunch).toHaveBeenCalledTimes(1);
       expect(browser.newPage).toHaveBeenCalledTimes(2);
     });
 
     it('starts Chromium once for parallel requests', async () => {
-      await Promise.all([service.generate(CV_ID, OWNER), service.generate(CV_ID, OWNER)]);
+      await Promise.all([service.generate(INPUT, OWNER), service.generate(INPUT, OWNER)]);
 
       expect(mockLaunch).toHaveBeenCalledTimes(1);
     });
 
     it('starts the headless shell with the sandbox by default', async () => {
-      await service.generate(CV_ID, OWNER);
+      await service.generate(INPUT, OWNER);
 
       expect(config.get).toHaveBeenCalledWith('PUPPETEER_NO_SANDBOX', { infer: true });
       expect(mockLaunch).toHaveBeenCalledWith({ headless: 'shell', args: [] });
@@ -157,7 +168,7 @@ describe('CvPdfService', () => {
     it('turns the sandbox off when PUPPETEER_NO_SANDBOX is set', async () => {
       config.get.mockReturnValue(true);
 
-      await service.generate(CV_ID, OWNER);
+      await service.generate(INPUT, OWNER);
 
       expect(mockLaunch).toHaveBeenCalledWith({ headless: 'shell', args: ['--no-sandbox'] });
     });
@@ -165,7 +176,7 @@ describe('CvPdfService', () => {
 
   describe('onModuleDestroy', () => {
     it('closes the started browser', async () => {
-      await service.generate(CV_ID, OWNER);
+      await service.generate(INPUT, OWNER);
 
       await service.onModuleDestroy();
 

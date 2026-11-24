@@ -8,7 +8,7 @@ import { User } from '@/users/models/user.model';
 import { renderCvPdfHtml } from '@/cvs/cv-pdf/cv-pdf.template';
 import { toPdfFileName } from '@/cvs/cv-pdf/cv-pdf-file-name';
 import { toCvPdfData } from '@/cvs/cv-pdf/cv-pdf.mapper';
-import { Locale } from '@/common/graphql/locale.enum';
+import { GenerateCvPdfInput } from '@/cvs/cv-pdf/dto/generate-cv-pdf.input';
 
 @Injectable()
 export class CvPdfService implements OnModuleDestroy {
@@ -19,13 +19,13 @@ export class CvPdfService implements OnModuleDestroy {
     private readonly config: ConfigService<EnvironmentVariables, true>,
   ) {}
 
-  async generate(cvId: string, currentUser: User): Promise<CvPdf> {
-    const cv = await this.cvAccess.getAccessibleCv(cvId, currentUser);
+  async generate(input: GenerateCvPdfInput, currentUser: User): Promise<CvPdf> {
+    const cv = await this.cvAccess.getAccessibleCv(input.cvId, currentUser);
     const data = toCvPdfData(cv); // TODO(B7)
 
     const page = await (this.browser ??= this.launch()).then((browser) => browser.newPage());
     try {
-      await page.setContent(renderCvPdfHtml(data, Locale.en), { waitUntil: 'load' });
+      await page.setContent(renderCvPdfHtml(data, input.locale), { waitUntil: 'load' });
       const pdf = await page.pdf({ format: 'A4', printBackground: true });
       return { fileName: toPdfFileName(data.name), content: Buffer.from(pdf).toString('base64') };
     } finally {

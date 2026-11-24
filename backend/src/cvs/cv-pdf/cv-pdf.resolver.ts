@@ -1,10 +1,10 @@
-import { Args, ID, Mutation, Resolver } from '@nestjs/graphql';
+import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { AllowUnverified } from '@/common/auth/allow-unverified.decorator';
 import { CvPdf } from '@/cvs/cv-pdf/models/cv-pdf.model';
 import { CvPdfService } from '@/cvs/cv-pdf/cv-pdf.service';
 import { User } from '@/users/models/user.model';
 import { CurrentUser } from '@/common/auth/current-user.decorator';
-import { ParseUUIDPipe } from '@nestjs/common';
+import { GenerateCvPdfInput } from '@/cvs/cv-pdf/dto/generate-cv-pdf.input';
 
 @Resolver()
 export class CvPdfResolver {
@@ -17,8 +17,8 @@ export class CvPdfResolver {
   })
   generateCvPdf(
     @CurrentUser() user: User,
-    @Args('cvId', { type: () => ID }, ParseUUIDPipe) cvId: string,
+    @Args('input') input: GenerateCvPdfInput,
   ): Promise<CvPdf> {
-    return this.cvPdfService.generate(cvId, user);
+    return this.cvPdfService.generate(input, user);
   }
 }

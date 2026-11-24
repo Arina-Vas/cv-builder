@@ -284,10 +284,9 @@ avoid a column-key → enum map in every table.
   A delete of an owned entity also takes the owner id, which scopes it like `userId` in `deleteUserSkills`:
   `deleteCv(id: ID!, userId: ID!): ID!`. A delete of something inside a CV takes the CV id the same way:
   `deleteCvProject(id: ID!, cvId: ID!): ID!`.
-- Exception: an action on a whole CV that has nothing to send but the CV id takes it directly, like a delete:
-  `generateCvPdf(cvId: ID!): CvPdf!` returns `{ fileName, content }` with the PDF in base64
-  (see [pdf.md](../pdf.md)). It is a mutation, not a query, so Apollo does not keep the large base64 string in
-  the cache, and every click builds a new file.
+- `generateCvPdf(input: GenerateCvPdfInput!): CvPdf!` (`{ cvId, locale = en }`) returns `{ fileName, content }`
+  with the PDF in base64 (see [pdf.md](../pdf.md)). It changes nothing but is a mutation, not a query, so Apollo
+  does not keep the large base64 string in the cache, and every click builds a new file.
 - Owned entities (`UserSkill`, `UserLanguage`, `Cv`) carry the owner's `userId` in every create / update input.
   In an update it is not a changeable field: it is the current owner, checked against the record, and the owner
   never changes (`UpdateCvInput extends CreateCvInput` keeps `userId` for that reason).
