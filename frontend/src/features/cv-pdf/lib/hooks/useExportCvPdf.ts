@@ -11,7 +11,9 @@ import { useRef } from 'react';
 export const useExportCvPdf = (cvId: string) => {
   const locale = useLocale();
   const t = useTranslations('cvs.preview');
-  const [generatePdf, { loading }] = useMutation(GENERATE_CV_PDF, { context: NO_ERROR_TOAST });
+  const [generatePdf, { loading }] = useMutation(GENERATE_CV_PDF, {
+    context: NO_ERROR_TOAST,
+  });
   const errorMessage = useErrorMessage();
   const toast = useToast();
 
