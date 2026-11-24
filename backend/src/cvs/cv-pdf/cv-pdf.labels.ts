@@ -1,6 +1,11 @@
 import { Proficiency } from '@/common/graphql/enums';
 import { Locale } from '@/common/graphql/locale.enum';
 
+/**
+ * Texts of the CV PDF: `cvs.preview.document` and `userLanguage.proficiencyLevel` from
+ * `frontend/messages/<locale>.json`, so the PDF reads like the CV Preview in the same UI language.
+ * `cv-pdf.labels.spec.ts` keeps them equal to the frontend messages.
+ */
 export interface CvPdfLabels {
   sections: {
     education: string;
@@ -9,8 +14,10 @@ export interface CvPdfLabels {
     projects: string;
     professionalSkills: string;
   };
+  /** Template with `{language}` and `{level}` */
   languageLevel: string;
   project: { roles: string; period: string; responsibilities: string; environment: string };
+  /** Template with `{start}` and `{end}` */
   period: string;
   present: string;
   skillsTable: {

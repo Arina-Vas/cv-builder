@@ -1,4 +1,5 @@
 import { Proficiency } from '@/common/graphql/enums';
+import { Locale } from '@/common/graphql/locale.enum';
 import { renderCvPdfHtml, splitResponsibilities } from './cv-pdf.template';
 import type { CvPdfData, CvPdfProject } from './cv-preview.types';
 
@@ -56,8 +57,8 @@ const cv = (overrides: Partial<CvPdfData> = {}): CvPdfData => ({
 });
 
 /** The document without <head>: styles and fonts would match any text search */
-const renderBody = (data: CvPdfData): string => {
-  const html = renderCvPdfHtml(data);
+const renderBody = (data: CvPdfData, locale: Locale = Locale.en): string => {
+  const html = renderCvPdfHtml(data, locale);
   return html.slice(html.indexOf('<body>'));
 };
 
@@ -96,13 +97,18 @@ describe('splitResponsibilities', () => {
 describe('renderCvPdfHtml', () => {
   describe('document', () => {
     it('is a full UTF-8 HTML page with the styles and Roboto embedded', () => {
-      const html = renderCvPdfHtml(cv());
+      const html = renderCvPdfHtml(cv(), Locale.en);
 
       expect(html.startsWith('<!doctype html>')).toBe(true);
       expect(html).toContain('<meta charset="utf-8" />');
       expect(html).toContain("font-family: 'Roboto'");
       expect(html).toContain('src: url(data:font/woff2;base64,');
       expect(html).toContain('.document {');
+    });
+
+    it('sets the page language to the locale', () => {
+      expect(renderCvPdfHtml(cv(), Locale.en)).toContain('<html lang="en">');
+      expect(renderCvPdfHtml(cv(), Locale.ru)).toContain('<html lang="ru">');
     });
 
     it('shows the owner name and position in the header', () => {
@@ -169,6 +175,26 @@ describe('renderCvPdfHtml', () => {
 
       expect(body).not.toContain('<script>');
       expect(body).toContain('&lt;script&gt;alert(1)&lt;/script&gt;');
+    });
+  });
+
+  describe('locale', () => {
+    it('renders the labels of the requested locale', () => {
+      const text = textOf(renderBody(cv({ projects: [project({ endDate: null })] }), Locale.ru));
+
+      expect(text).toContain('Образование BSUIR, Software Engineering');
+      expect(text).toContain('Владение языками Russian — Родной, English — B2');
+      expect(text).toContain('Роли в проекте Frontend Developer, Team Lead');
+      expect(text).toContain('Период 03.2022 – по настоящее время');
+      expect(text).toContain('Профессиональные навыки');
+      expect(text).toContain('Последнее использование');
+      expect(text).not.toContain('Education');
+    });
+
+    it('escapes an apostrophe in a translation', () => {
+      const body = renderBody(cv({ projects: [project({ endDate: null })] }), Locale.fr);
+
+      expect(body).toContain('03.2022 – aujourd&#39;hui');
     });
   });
 

@@ -8,6 +8,7 @@ import { User } from '@/users/models/user.model';
 import { renderCvPdfHtml } from '@/cvs/cv-pdf/cv-pdf.template';
 import { toPdfFileName } from '@/cvs/cv-pdf/cv-pdf-file-name';
 import { toCvPdfData } from '@/cvs/cv-pdf/cv-pdf.mapper';
+import { Locale } from '@/common/graphql/locale.enum';
 
 @Injectable()
 export class CvPdfService implements OnModuleDestroy {
@@ -24,7 +25,7 @@ export class CvPdfService implements OnModuleDestroy {
 
     const page = await (this.browser ??= this.launch()).then((browser) => browser.newPage());
     try {
-      await page.setContent(renderCvPdfHtml(data), { waitUntil: 'load' });
+      await page.setContent(renderCvPdfHtml(data, Locale.en), { waitUntil: 'load' });
       const pdf = await page.pdf({ format: 'A4', printBackground: true });
       return { fileName: toPdfFileName(data.name), content: Buffer.from(pdf).toString('base64') };
     } finally {

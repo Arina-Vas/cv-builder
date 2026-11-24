@@ -1,6 +1,7 @@
-import { Proficiency } from '@/common/graphql/enums';
+import { Locale } from '@/common/graphql/locale.enum';
 import { escapeHtml } from '@/common/html/escape-html';
 import { getCvPdfFontFaces } from '@/cvs/cv-pdf/cv-pdf.fonts';
+import { CV_PDF_LABELS, type CvPdfLabels } from '@/cvs/cv-pdf/cv-pdf.labels';
 import { CV_PDF_STYLES } from '@/cvs/cv-pdf/cv-pdf.styles';
 import type { CvPdfData, CvPdfProject, CvPdfSkillGroup } from '@/cvs/cv-pdf/cv-preview.types';
 
@@ -9,43 +10,9 @@ import type { CvPdfData, CvPdfProject, CvPdfSkillGroup } from '@/cvs/cv-pdf/cv-p
  * (`frontend/src/features/cvs/components/cv-preview/document/**`): the same sections, the same rules
  * for hiding empty values and the same punctuation. Keep both in sync.
  *
- * Every value from the data goes through `escapeHtml`; labels are constants.
+ * Labels are the CV Preview texts of the requested locale (`CV_PDF_LABELS`). Every value from the data
+ * and every label goes through `escapeHtml`.
  */
-
-/** English texts of `cvs.preview.document` and `userLanguage.proficiencyLevel` in `frontend/messages/en.json` */
-const LABELS = {
-  sections: {
-    education: 'Education',
-    languages: 'Language proficiency',
-    domains: 'Domains',
-    projects: 'Projects',
-    professionalSkills: 'Professional skills',
-  },
-  project: {
-    roles: 'Project roles',
-    period: 'Period',
-    responsibilities: 'Responsibilities',
-    environment: 'Environment',
-  },
-  present: 'Present',
-  skillsTable: {
-    skills: 'Skills',
-    category: 'Skill category',
-    skill: 'Skill',
-    experience: 'Experience in years',
-    lastUsed: 'Last used',
-  },
-} as const;
-
-const PROFICIENCY_LABELS: Record<Proficiency, string> = {
-  [Proficiency.A1]: 'A1',
-  [Proficiency.A2]: 'A2',
-  [Proficiency.B1]: 'B1',
-  [Proficiency.B2]: 'B2',
-  [Proficiency.C1]: 'C1',
-  [Proficiency.C2]: 'C2',
-  [Proficiency.NATIVE]: 'Native',
-};
 
 /** Mirrors `frontend/src/features/cv-projects/lib/split-responsibilities.ts` */
 const RESPONSIBILITY_SEPARATOR = /[,\n]/;
@@ -63,6 +30,10 @@ const TRAILING_PUNCTUATION = /[.;,]+$/;
 const formatMonth = (date: Date): string =>
   `${String(date.getUTCMonth() + 1).padStart(2, '0')}.${date.getUTCFullYear()}`;
 
+/** Replaces `{key}` placeholders, like the ICU arguments of next-intl (`languageLevel`, `period`) */
+const format = (template: string, values: Record<string, string>): string =>
+  template.replace(/\{(\w+)\}/g, (match, key: string) => values[key] ?? match);
+
 /** "First Last", or the email when the user has no name yet (as `getFullName` on the frontend) */
 const getFullName = (user: CvPdfData['user']): string =>
   [user.firstName, user.lastName].filter(Boolean).join(' ') || user.email;
@@ -74,12 +45,17 @@ const joinNames = (items: { name: string }[]): string =>
   escapeHtml(items.map((item) => item.name).join(', '));
 
 // CvSummary
-const renderSummary = (data: CvPdfData): string => {
+const renderSummary = (data: CvPdfData, labels: CvPdfLabels): string => {
   const education = data.education.trim();
   const description = data.description.trim();
   const groups = data.skillGroups.filter((group) => group.skills.length > 0);
   const languages = data.languages
-    .map((item) => `${item.language.name} — ${PROFICIENCY_LABELS[item.proficiency]}`)
+    .map((item) =>
+      format(labels.languageLevel, {
+        language: item.language.name,
+        level: labels.proficiency[item.proficiency],
+      }),
+    )
     .join(', ');
 
   return `
@@ -88,19 +64,19 @@ const renderSummary = (data: CvPdfData): string => {
     ${when(
       education,
       () => `
-    <dt class="summary__title">${LABELS.sections.education}</dt>
+    <dt class="summary__title">${escapeHtml(labels.sections.education)}</dt>
     <dd class="summary__value">${escapeHtml(education)}</dd>`,
     )}
     ${when(
       data.languages.length > 0,
       () => `
-    <dt class="summary__title">${LABELS.sections.languages}</dt>
+    <dt class="summary__title">${escapeHtml(labels.sections.languages)}</dt>
     <dd class="summary__value">${escapeHtml(languages)}</dd>`,
     )}
     ${when(
       data.domains.length > 0,
       () => `
-    <dt class="summary__title">${LABELS.sections.domains}</dt>
+    <dt class="summary__title">${escapeHtml(labels.sections.domains)}</dt>
     <dd class="summary__value">${escapeHtml(data.domains.join(', '))}</dd>`,
     )}
   </dl>
@@ -137,11 +113,12 @@ const renderResponsibilities = (items: string[]): string =>
     )
     .join('');
 
-const renderProject = (entry: CvPdfProject): string => {
+const renderProject = (entry: CvPdfProject, labels: CvPdfLabels): string => {
   const responsibilities = splitResponsibilities(entry.responsibilities);
   const description = entry.project.description.trim();
   const { technologies } = entry.project;
-  const end = entry.endDate ? formatMonth(entry.endDate) : LABELS.present;
+  const end = entry.endDate ? formatMonth(entry.endDate) : labels.present;
+  const period = format(labels.period, { start: formatMonth(entry.startDate), end });
 
   return `
 <article class="project">
@@ -153,15 +130,15 @@ const renderProject = (entry: CvPdfProject): string => {
     ${when(
       entry.roles.length > 0,
       () => `
-    <dt class="project__label">${LABELS.project.roles}</dt>
+    <dt class="project__label">${escapeHtml(labels.project.roles)}</dt>
     <dd class="project__value">${joinNames(entry.roles)}</dd>`,
     )}
-    <dt class="project__label">${LABELS.project.period}</dt>
-    <dd class="project__value">${formatMonth(entry.startDate)} – ${end}</dd>
+    <dt class="project__label">${escapeHtml(labels.project.period)}</dt>
+    <dd class="project__value">${escapeHtml(period)}</dd>
     ${when(
       responsibilities.length > 0,
       () => `
-    <dt class="project__label">${LABELS.project.responsibilities}</dt>
+    <dt class="project__label">${escapeHtml(labels.project.responsibilities)}</dt>
     <dd class="project__value">
       <ul class="project__list">${renderResponsibilities(responsibilities)}</ul>
     </dd>`,
@@ -169,7 +146,7 @@ const renderProject = (entry: CvPdfProject): string => {
     ${when(
       technologies.length > 0,
       () => `
-    <dt class="project__label">${LABELS.project.environment}</dt>
+    <dt class="project__label">${escapeHtml(labels.project.environment)}</dt>
     <dd class="project__value">${joinNames(technologies)}.</dd>`,
     )}
   </dl>
@@ -196,25 +173,25 @@ const renderSkillGroup = (group: CvPdfSkillGroup): string => `
         .join('')}
     </tbody>`;
 
-const renderSkills = (skillGroups: CvPdfSkillGroup[]): string => {
+const renderSkills = (skillGroups: CvPdfSkillGroup[], labels: CvPdfLabels): string => {
   const groups = skillGroups.filter((group) => group.skills.length > 0);
   if (groups.length === 0) return '';
 
   return `
 <section>
-  <h2 class="document__section-title">${LABELS.sections.professionalSkills}</h2>
+  <h2 class="document__section-title">${escapeHtml(labels.sections.professionalSkills)}</h2>
   <table class="skills">
     <thead>
       <tr>
         <th scope="col" class="skills__head-cell">
-          <span aria-hidden="true">${LABELS.skillsTable.skills}</span>
-          <span class="visually-hidden">${LABELS.skillsTable.category}</span>
+          <span aria-hidden="true">${escapeHtml(labels.skillsTable.skills)}</span>
+          <span class="visually-hidden">${escapeHtml(labels.skillsTable.category)}</span>
         </th>
         <th scope="col" class="skills__head-cell">
-          <span class="visually-hidden">${LABELS.skillsTable.skill}</span>
+          <span class="visually-hidden">${escapeHtml(labels.skillsTable.skill)}</span>
         </th>
-        <th scope="col" class="skills__value">${LABELS.skillsTable.experience}</th>
-        <th scope="col" class="skills__value">${LABELS.skillsTable.lastUsed}</th>
+        <th scope="col" class="skills__value">${escapeHtml(labels.skillsTable.experience)}</th>
+        <th scope="col" class="skills__value">${escapeHtml(labels.skillsTable.lastUsed)}</th>
       </tr>
     </thead>
     ${groups.map(renderSkillGroup).join('')}
@@ -223,8 +200,11 @@ const renderSkills = (skillGroups: CvPdfSkillGroup[]): string => {
 };
 
 // CvPreviewDocument
-export const renderCvPdfHtml = (data: CvPdfData): string => `<!doctype html>
-<html lang="en">
+export const renderCvPdfHtml = (data: CvPdfData, locale: Locale = Locale.en): string => {
+  const labels = CV_PDF_LABELS[locale];
+
+  return `<!doctype html>
+<html lang="${locale}">
 <head>
   <meta charset="utf-8" />
   <title>${escapeHtml(data.name)}</title>
@@ -240,17 +220,20 @@ export const renderCvPdfHtml = (data: CvPdfData): string => `<!doctype html>
       )}
     </header>
     <div class="document__body">
-      ${renderSummary(data)}
+      ${renderSummary(data, labels)}
       ${when(
         data.projects.length > 0,
         () => `
       <section>
-        <h2 class="document__section-title">${LABELS.sections.projects}</h2>
-        <div class="document__projects">${data.projects.map(renderProject).join('')}</div>
+        <h2 class="document__section-title">${escapeHtml(labels.sections.projects)}</h2>
+        <div class="document__projects">${data.projects
+          .map((project) => renderProject(project, labels))
+          .join('')}</div>
       </section>`,
       )}
-      ${renderSkills(data.skillGroups)}
+      ${renderSkills(data.skillGroups, labels)}
     </div>
   </article>
 </body>
 </html>`;
+};
