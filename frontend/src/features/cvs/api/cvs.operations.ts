@@ -34,6 +34,53 @@ export const CVS = graphql(`
   }
 `);
 
+export const CV_PREVIEW = graphql(`
+  query CvPreview($id: ID!) {
+    cvPreview(id: $id) {
+      id
+      name
+      education
+      description
+      domains
+      user {
+        id
+        email
+        firstName
+        lastName
+        position {
+          id
+          name
+        }
+      }
+      languages {
+        id
+        proficiency
+        language {
+          id
+          name
+        }
+      }
+      skillGroups {
+        category {
+          id
+          name
+        }
+        skills {
+          experienceYears
+          lastUsedYear
+          skill {
+            id
+            name
+          }
+        }
+      }
+      projects {
+        ...CvProjectFields
+      }
+    }
+  }
+`);
+
 export const USER_CVS = graphql(`
   query UserCvs(
     $page: Int!
