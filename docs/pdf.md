@@ -30,7 +30,7 @@ generateCvPdf(cvId) → CvAccessService (NOT_FOUND / FORBIDDEN)
    embedded into the page as base64 `@font-face` rules (`cv-pdf.fonts.ts`). The page loads nothing from the
    network, and a server without system fonts still renders the text.
 6. **PDF.** `page.setContent(html)` and `page.pdf({ format: 'A4', printBackground: true })` in Chromium.
-7. **Response.** `{ fileName, content }`: `content` is the PDF in base64, `fileName` is the CV name in camelCase
+7. **Response.** `{ fileName, content }`: `content` is the PDF in base64, `fileName` is the CV name in kebab-case
    with `.pdf` (`toPdfFileName`, see [File name](#file-name)). The frontend turns `content` into a Blob and
    downloads it with `fileName`. The file is not stored anywhere.
 
@@ -70,18 +70,20 @@ The resolver and the service are registered in `CvModule`, next to `CvAccessServ
 
 ## File name
 
-`toPdfFileName(name)` turns the CV name into camelCase and adds `.pdf`:
+`toPdfFileName(name)` turns the CV name into kebab-case and adds `.pdf`, as in the wiki example
+(`software-engineer-with-5-years-of-experience.pdf`):
 
-| CV name                                        | File name                                    |
-| ---------------------------------------------- | -------------------------------------------- |
-| `Software Engineer with 5 years of experience` | `softwareEngineerWith5YearsOfExperience.pdf` |
-| `Senior (5+ years), React!`                    | `senior5YearsReact.pdf`                      |
-| `Разработчик Ивана`                            | `разработчикИвана.pdf`                       |
-| empty, only symbols or emoji                   | `cv.pdf`                                     |
+| CV name                                        | File name                                          |
+| ---------------------------------------------- | -------------------------------------------------- |
+| `Software Engineer with 5 years of experience` | `software-engineer-with-5-years-of-experience.pdf` |
+| `Senior (5+ years), React!`                    | `senior-5-years-react.pdf`                         |
+| `Разработчик Ивана`                            | `разработчик-ивана.pdf`                            |
+| empty, only symbols or emoji                   | `cv.pdf`                                           |
 
-Anything that is not a letter or a digit only separates words, so characters not allowed in file names
-(`/\:*?"<>|`) never reach the name. Letters of any alphabet stay as they are (no transliteration). The name is
-cut to 100 characters before `.pdf`.
+Anything that is not a letter or a digit becomes one hyphen, so characters not allowed in file names
+(`/\:*?"<>|`) never reach the name; there are no repeated hyphens and none at the start or the end. Letters of
+any alphabet stay as they are, lowercased (no transliteration). The name is cut to 100 characters before
+`.pdf`.
 
 ## Settings and requirements
 

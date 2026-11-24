@@ -4,12 +4,14 @@ const FALLBACK = 'cv';
 /** Anything that is not a letter (any alphabet) or a digit separates words */
 const SEPARATORS = /[^\p{L}\p{N}]+/u;
 
-const capitalize = (word: string): string => word.charAt(0).toUpperCase() + word.slice(1);
-
+/**
+ * File name of the CV PDF: the CV name in kebab-case with ".pdf", as in the wiki example
+ * "Software Engineer with 5 years of experience" → "software-engineer-with-5-years-of-experience.pdf".
+ */
 export const toPdfFileName = (name: string): string => {
   const words = name.normalize('NFC').toLowerCase().split(SEPARATORS).filter(Boolean);
 
-  const camelCase = words.map((word, index) => (index === 0 ? word : capitalize(word))).join('');
+  const kebabCase = words.join('-').slice(0, MAX_LENGTH).replace(/-+$/, '');
 
-  return `${camelCase.slice(0, MAX_LENGTH) || FALLBACK}.pdf`;
+  return `${kebabCase || FALLBACK}.pdf`;
 };

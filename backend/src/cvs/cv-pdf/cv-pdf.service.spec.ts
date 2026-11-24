@@ -99,7 +99,7 @@ describe('CvPdfService', () => {
       });
       expect(page.pdf).toHaveBeenCalledWith({ format: 'A4', printBackground: true });
       expect(result).toEqual({
-        fileName: 'frontendDeveloper.pdf',
+        fileName: 'frontend-developer.pdf',
         content: Buffer.from(PDF_BYTES).toString('base64'),
       });
       expect(Buffer.from(result.content, 'base64').toString()).toBe('%PDF-test');

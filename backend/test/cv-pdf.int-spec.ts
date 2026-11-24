@@ -68,7 +68,7 @@ describe('CV PDF (integration)', () => {
 
     const { generateCvPdf } = await generate(browser, cvId);
 
-    expect(generateCvPdf.fileName).toBe('softwareEngineerWith5YearsOfExperience.pdf');
+    expect(generateCvPdf.fileName).toBe('software-engineer-with-5-years-of-experience.pdf');
     expect(pdfHeader(generateCvPdf.content)).toBe('%PDF-');
   });
 
@@ -90,7 +90,7 @@ describe('CV PDF (integration)', () => {
 
     const { generateCvPdf } = await generate(browser, cvId);
 
-    expect(generateCvPdf.fileName).toBe('frontendDeveloper.pdf');
+    expect(generateCvPdf.fileName).toBe('frontend-developer.pdf');
     expect(pdfHeader(generateCvPdf.content)).toBe('%PDF-');
   });
 
