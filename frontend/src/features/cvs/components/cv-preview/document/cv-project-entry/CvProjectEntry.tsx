@@ -1,14 +1,14 @@
 import { useTranslations } from 'next-intl';
-import { type CvPreviewProject } from '@/features/cvs/lib/preview/cv-preview.types';
 import { splitResponsibilities } from '@/features/cv-projects/lib/split-responsibilities';
 import { formatDate } from '@/shared/lib/date/format-date';
 import s from './CvProjectEntry.module.css';
+import { type CvProjectFieldsFragment } from '@/gql/graphql';
 
 /** The item's own ".", ";" or "," at the end, replaced by the list punctuation */
 const TRAILING_PUNCTUATION = /[.;,]+$/;
 
 type Props = {
-  project: CvPreviewProject;
+  project: CvProjectFieldsFragment;
 };
 export const CvProjectEntry = ({ project }: Props) => {
   const t = useTranslations('cvs.preview.document');
