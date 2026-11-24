@@ -1,12 +1,10 @@
 import type { ConfigService } from '@nestjs/config';
 import type { EnvironmentVariables } from '@/config/env.validation';
 import { forbidden, notFound } from '@/common/errors/app-errors';
-import { UserRole } from '@/common/graphql/enums';
 import { Locale } from '@/common/graphql/locale.enum';
-import type { CvAccessService } from '@/cvs/cv-access.service';
-import type { CvWithUser } from '@/cvs/cv.mapper';
 import { CvPdfService } from '@/cvs/cv-pdf/cv-pdf.service';
-import type { User } from '@/users/models/user.model';
+import type { CvPreviewService } from '@/cvs/cv-preview/cv-preview.service';
+import { cvPreviewFixture, userFixture } from './cv-pdf.fixtures';
 
 // The real PrismaService and @nestjs/config are ESM-only for Jest; the test passes its own mocks
 jest.mock('@/prisma/prisma.service', () => ({ PrismaService: class {} }));
@@ -22,47 +20,10 @@ jest.mock('puppeteer', () => ({
 const PDF_BYTES = new TextEncoder().encode('%PDF-test');
 const CV_ID = 'cv-1';
 const INPUT = { cvId: CV_ID, locale: Locale.en };
-const TIMESTAMP = new Date('2026-01-01T00:00:00.000Z');
+const OWNER = userFixture();
 
-const OWNER: User = {
-  id: 'user-1',
-  email: 'user-1@example.com',
-  firstName: 'Anna',
-  lastName: 'Smith',
-  avatarKey: null,
-  role: UserRole.EMPLOYEE,
-  position: null,
-  department: null,
-  emailVerifiedAt: TIMESTAMP,
-  createdAt: TIMESTAMP,
-};
-
-// A CV row as CvAccessService returns it
-const cvRow: CvWithUser = {
-  id: CV_ID,
-  name: 'Frontend Developer',
-  education: 'BSUIR',
-  description: 'Five years of web development',
-  userId: OWNER.id,
-  user: {
-    id: OWNER.id,
-    email: OWNER.email,
-    emailVerifiedAt: TIMESTAMP,
-    passwordHash: 'secret-hash',
-    firstName: 'Anna',
-    lastName: 'Smith',
-    role: UserRole.EMPLOYEE,
-    avatarKey: null,
-    departmentId: null,
-    department: null,
-    positionId: null,
-    position: null,
-    createdAt: TIMESTAMP,
-    updatedAt: TIMESTAMP,
-  },
-  createdAt: TIMESTAMP,
-  updatedAt: TIMESTAMP,
-};
+// What CvPreviewService returns for the CV: owner, languages, skills and a project
+const preview = cvPreviewFixture({ id: CV_ID, name: 'Frontend Developer' });
 
 const createPage = () => ({
   setContent: jest.fn().mockResolvedValue(undefined),
@@ -73,7 +34,7 @@ const createPage = () => ({
 describe('CvPdfService', () => {
   let page: ReturnType<typeof createPage>;
   let browser: { newPage: jest.Mock; close: jest.Mock };
-  let cvAccess: { getAccessibleCv: jest.Mock };
+  let cvPreview: { getPreview: jest.Mock };
   let config: { get: jest.Mock };
   let service: CvPdfService;
 
@@ -82,20 +43,20 @@ describe('CvPdfService', () => {
     page = createPage();
     browser = { newPage: jest.fn().mockResolvedValue(page), close: jest.fn() };
     mockLaunch.mockResolvedValue(browser);
-    cvAccess = { getAccessibleCv: jest.fn().mockResolvedValue(cvRow) };
+    cvPreview = { getPreview: jest.fn().mockResolvedValue(preview) };
     config = { get: jest.fn().mockReturnValue(false) };
     // A new service per test, so the cached browser never leaks between tests
     service = new CvPdfService(
-      cvAccess as unknown as CvAccessService,
+      cvPreview as unknown as CvPreviewService,
       config as unknown as ConfigService<EnvironmentVariables, true>,
     );
   });
 
   describe('generate', () => {
-    it('renders the accessible CV to an A4 PDF and returns it as base64 with the file name', async () => {
+    it('renders the CV preview to an A4 PDF and returns it as base64 with the file name', async () => {
       const result = await service.generate(INPUT, OWNER);
 
-      expect(cvAccess.getAccessibleCv).toHaveBeenCalledWith(CV_ID, OWNER);
+      expect(cvPreview.getPreview).toHaveBeenCalledWith(OWNER, CV_ID);
       expect(page.setContent).toHaveBeenCalledWith(expect.stringContaining('Frontend Developer'), {
         waitUntil: 'load',
       });
@@ -105,6 +66,15 @@ describe('CvPdfService', () => {
         content: Buffer.from(PDF_BYTES).toString('base64'),
       });
       expect(Buffer.from(result.content, 'base64').toString()).toBe('%PDF-test');
+    });
+
+    it('puts the preview data into the document: languages, skills and projects', async () => {
+      await service.generate(INPUT, OWNER);
+
+      const [html] = page.setContent.mock.calls[0] as [string];
+      expect(html).toContain('Russian — Native');
+      expect(html).toContain('<td class="skills__skill">React</td>');
+      expect(html).toContain('ShopWave');
     });
 
     it('renders the document in the requested locale', async () => {
@@ -126,7 +96,7 @@ describe('CvPdfService', () => {
       ['FORBIDDEN', forbidden()],
       ['NOT_FOUND', notFound('CV not found')],
     ])('fails with %s before starting Chromium', async (_, error) => {
-      cvAccess.getAccessibleCv.mockRejectedValue(error);
+      cvPreview.getPreview.mockRejectedValue(error);
 
       await expect(service.generate(INPUT, OWNER)).rejects.toBe(error);
       expect(mockLaunch).not.toHaveBeenCalled();
