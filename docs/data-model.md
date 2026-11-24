@@ -103,7 +103,7 @@ All tables have `id` (uuid), `created_at` and `updated_at`. Only the meaningful 
 | `user_languages`   | `user_id`, `language_id`, `proficiency` (`A1` … `C2`, `NATIVE`)                 |
 | `project_skills`   | `project_id`, `skill_id` (project technologies)                                 |
 | `cvs`              | `user_id`, `name` varchar(255), `education` varchar(255), `description`         |
-| `cv_skills`        | `cv_id`, `skill_id`                                                             |
+| `cv_skills`        | `cv_id`, `skill_id`, `mastery` (`BEGINNER` … `EXPERT`)                          |
 | `cv_projects`      | `cv_id`, `project_id`, `start_date` date, `end_date?` date, `responsibilities?` |
 | `cv_project_roles` | `cv_project_id`, `role_id`                                                      |
 
@@ -288,7 +288,11 @@ pnpm db:migrate
 - **Skill mastery values follow the wiki**: `BEGINNER`, `ELEMENTARY`, `INTERMEDIATE`, `ADVANCED`, `EXPERT`
   (Add / Update Skill modals). The initial schema used other names; they were renamed in place
   (`ALTER TYPE … RENAME VALUE`), so the order of the levels is kept.
+- **A CV keeps its own mastery per skill** (`cv_skills.mastery`, confirmed by the mentor on 2026-11-24). Adding a
+  skill to a CV copies the owner's current level; after that `updateCvSkill` changes it in this CV only, and changing
+  the level in the profile does not touch CVs. The migration filled existing rows from `user_skills` and dropped CV
+  skills whose owner no longer had the skill (they were never listed).
 - **CV preview has no mastery.** The wiki's Professional skills table shows category, skill, experience and last
-  used year only; mastery stays on the Skills and CV Skills tabs (the CV owner's level, decided 2026-11-20).
+  used year only; mastery is edited on the CV Skills tab (`cv_skills.mastery`, see above).
 - **CV preview values are calculated on request**, not stored, so they never go stale after a CV project or a
   project's technologies change. Preview and PDF call the same service, so they always match.

@@ -4,10 +4,11 @@ import { cvSkillInclude, ownerHasSkill, toCvSkill, type CvSkillWithSkill } from 
 
 const createdAt = new Date('2026-01-01T00:00:00.000Z');
 
-const row = (users: CvSkillWithSkill['skill']['users']): CvSkillWithSkill => ({
+const row: CvSkillWithSkill = {
   id: 'cv-skill-1',
   cvId: 'cv-1',
   skillId: 'skill-1',
+  mastery: Mastery.ADVANCED,
   skill: {
     id: 'skill-1',
     name: 'TypeScript',
@@ -19,24 +20,16 @@ const row = (users: CvSkillWithSkill['skill']['users']): CvSkillWithSkill => ({
       createdAt,
       updatedAt: createdAt,
     },
-    users,
     createdAt,
     updatedAt: createdAt,
   },
   createdAt,
   updatedAt: createdAt,
-});
+};
 
 describe('cvSkillInclude', () => {
-  it("loads the skill with its category and only the CV owner's mastery", () => {
-    expect(cvSkillInclude('owner-1')).toEqual({
-      skill: {
-        include: {
-          ...skillInclude,
-          users: { where: { userId: 'owner-1' }, select: { mastery: true } },
-        },
-      },
-    });
+  it('loads the skill with its category', () => {
+    expect(cvSkillInclude).toEqual({ skill: { include: skillInclude } });
   });
 });
 
@@ -49,8 +42,8 @@ describe('ownerHasSkill', () => {
 });
 
 describe('toCvSkill', () => {
-  it("maps the CV skill with the owner's mastery and drops service fields", () => {
-    expect(toCvSkill(row([{ mastery: Mastery.ADVANCED }]))).toEqual({
+  it('maps the CV skill with its own mastery and drops service fields', () => {
+    expect(toCvSkill(row)).toEqual({
       id: 'cv-skill-1',
       mastery: Mastery.ADVANCED,
       skill: {
@@ -59,11 +52,5 @@ describe('toCvSkill', () => {
         category: { id: 'category-1', name: 'Programming languages', type: 'Backend' },
       },
     });
-  });
-
-  it('fails instead of inventing a mastery when the owner no longer has the skill', () => {
-    expect(() => toCvSkill(row([]))).toThrow(
-      'CvSkill cv-skill-1: CV owner has no UserSkill for skill skill-1',
-    );
   });
 });

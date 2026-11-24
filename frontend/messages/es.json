@@ -160,7 +160,8 @@
       }
     },
     "cvSkill": {
-      "skillId": { "required": "La habilidad es obligatoria" }
+      "skillId": { "required": "La habilidad es obligatoria" },
+      "mastery": { "required": "El nivel de dominio es obligatorio" }
     },
     "cv": {
       "name": {
@@ -468,7 +469,8 @@
     "forbidden": "No tienes autorización para acceder a este CV",
     "form": {
       "createTitle": "Añadir habilidad",
-      "fields": { "skillId": "Habilidad" }
+      "updateTitle": "Actualizar habilidad",
+      "fields": { "skillId": "Habilidad", "mastery": "Nivel de dominio" }
     },
     "errors": {
       "alreadyAdded": "La habilidad ya está añadida al CV",

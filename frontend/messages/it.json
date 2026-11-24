@@ -158,7 +158,8 @@
       "responsibilities": { "maxLength": "Le responsabilità non devono superare {max} caratteri" }
     },
     "cvSkill": {
-      "skillId": { "required": "La competenza è obbligatoria" }
+      "skillId": { "required": "La competenza è obbligatoria" },
+      "mastery": { "required": "Il livello di padronanza è obbligatorio" }
     },
     "cv": {
       "name": {
@@ -459,7 +460,8 @@
     "forbidden": "Non sei autorizzato ad accedere a questo CV",
     "form": {
       "createTitle": "Aggiungi competenza",
-      "fields": { "skillId": "Competenza" }
+      "updateTitle": "Aggiorna competenza",
+      "fields": { "skillId": "Competenza", "mastery": "Livello di padronanza" }
     },
     "errors": {
       "alreadyAdded": "La competenza è già aggiunta al CV",

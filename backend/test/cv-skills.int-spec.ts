@@ -8,6 +8,9 @@ const FIELDS = 'id mastery skill { id name category { name } }';
 const CV_SKILLS = `query ($cvId: ID!) { cvSkills(cvId: $cvId) { ${FIELDS} } }`;
 const AVAILABLE = 'query ($cvId: ID!) { availableCvSkills(cvId: $cvId) { id name } }';
 const CREATE = `mutation ($input: CreateCvSkillInput!) { createCvSkill(input: $input) { ${FIELDS} } }`;
+const UPDATE = `mutation ($input: UpdateCvSkillInput!) { updateCvSkill(input: $input) { ${FIELDS} } }`;
+const UPDATE_USER_SKILL =
+  'mutation ($input: UpdateUserSkillInput!) { updateUserSkill(input: $input) { id mastery } }';
 const DELETE = 'mutation ($cvId: ID!, $ids: [ID!]!) { deleteCvSkills(cvId: $cvId, ids: $ids) }';
 const DELETE_USER_SKILLS =
   'mutation ($userId: ID!, $ids: [ID!]!) { deleteUserSkills(userId: $userId, ids: $ids) }';
@@ -49,8 +52,15 @@ describe('CV skills (integration)', () => {
       .id;
 
   /** Adds a skill to a CV straight in the database; returns the CvSkill id. */
-  const insertCvSkill = async (cvId: string, skillId: string) =>
-    (await t.prisma.cvSkill.create({ data: { cvId, skillId }, select: { id: true } })).id;
+  const insertCvSkill = async (
+    cvId: string,
+    skillId: string,
+    mastery: Mastery = Mastery.ADVANCED,
+  ) =>
+    (await t.prisma.cvSkill.create({ data: { cvId, skillId, mastery }, select: { id: true } })).id;
+
+  const storedMastery = async (cvSkillId: string) =>
+    (await t.prisma.cvSkill.findUniqueOrThrow({ where: { id: cvSkillId } })).mastery;
 
   const list = (browser: GqlClient, cvId: string) =>
     browser.data<{ cvSkills: GqlCvSkill[] }>(CV_SKILLS, { cvId }).then((data) => data.cvSkills);
@@ -105,11 +115,13 @@ describe('CV skills (integration)', () => {
         browser.error(CV_SKILLS, { cvId }),
         browser.error(AVAILABLE, { cvId }),
         browser.error(CREATE, { input: { cvId, skillId: vue } }),
+        browser.error(UPDATE, { input: { id: cvSkillId, mastery: Mastery.EXPERT } }),
         browser.error(DELETE, { cvId, ids: [cvSkillId] }),
       ]);
 
-      expect(errors.map((error) => error.extensions.code)).toEqual(Array(4).fill('FORBIDDEN'));
+      expect(errors.map((error) => error.extensions.code)).toEqual(Array(5).fill('FORBIDDEN'));
       expect(await storedSkillIds(cvId)).toEqual([react]);
+      expect(await storedMastery(cvSkillId)).toBe(Mastery.ADVANCED);
     });
 
     it("lets an Admin manage another user's CV skills with the owner's mastery", async () => {
@@ -133,23 +145,24 @@ describe('CV skills (integration)', () => {
         browser.error(CV_SKILLS, { cvId: MISSING_ID }),
         browser.error(AVAILABLE, { cvId: MISSING_ID }),
         browser.error(CREATE, { input: { cvId: MISSING_ID, skillId: react } }),
+        browser.error(UPDATE, { input: { id: MISSING_ID, mastery: Mastery.EXPERT } }),
         browser.error(DELETE, { cvId: MISSING_ID, ids: [MISSING_ID] }),
       ]);
 
-      expect(errors.map((error) => error.extensions.code)).toEqual(Array(4).fill('NOT_FOUND'));
+      expect(errors.map((error) => error.extensions.code)).toEqual(Array(5).fill('NOT_FOUND'));
     });
   });
 
   describe('cvSkills', () => {
-    it("lists only this CV's skills with the owner's mastery, grouped by category", async () => {
+    it("lists only this CV's skills with their CV mastery, grouped by category", async () => {
       const { browser, user } = await signedIn();
       const cvId = await insertCv(user.id);
       const otherCvId = await insertCv(user.id);
-      await assign(user.id, react, Mastery.EXPERT);
+      await assign(user.id, react);
       await assign(user.id, vue);
-      await assign(user.id, postgres, Mastery.BEGINNER);
-      await insertCvSkill(cvId, react);
-      await insertCvSkill(cvId, postgres);
+      await assign(user.id, postgres);
+      await insertCvSkill(cvId, react, Mastery.EXPERT);
+      await insertCvSkill(cvId, postgres, Mastery.BEGINNER);
       await insertCvSkill(otherCvId, vue);
 
       const result = await list(browser, cvId);
@@ -251,6 +264,67 @@ describe('CV skills (integration)', () => {
       const error = await browser.error(CREATE, { input: { cvId, skillId: 'react' } });
 
       expect(error.extensions.code).toBe('BAD_USER_INPUT');
+    });
+  });
+
+  describe('updateCvSkill', () => {
+    it('changes the mastery in this CV only and keeps the profile and other CVs', async () => {
+      const { browser, user } = await signedIn();
+      const cvId = await insertCv(user.id);
+      const otherCvId = await insertCv(user.id);
+      await assign(user.id, react, Mastery.INTERMEDIATE);
+      const id = await insertCvSkill(cvId, react, Mastery.INTERMEDIATE);
+      const otherId = await insertCvSkill(otherCvId, react, Mastery.INTERMEDIATE);
+
+      const { updateCvSkill } = await browser.data<{ updateCvSkill: GqlCvSkill }>(UPDATE, {
+        input: { id, mastery: Mastery.EXPERT },
+      });
+
+      expect(updateCvSkill).toMatchObject({ id, mastery: Mastery.EXPERT, skill: { id: react } });
+      expect(await storedMastery(id)).toBe(Mastery.EXPERT);
+      expect(await storedMastery(otherId)).toBe(Mastery.INTERMEDIATE);
+      const profile = await t.prisma.userSkill.findFirstOrThrow({ where: { userId: user.id } });
+      expect(profile.mastery).toBe(Mastery.INTERMEDIATE);
+    });
+
+    it("lets an Admin change the mastery in another user's CV", async () => {
+      const { browser } = await signedIn(UserRole.ADMIN);
+      const owner = await createUser(t.prisma);
+      const cvId = await insertCv(owner.id);
+      await assign(owner.id, react);
+      const id = await insertCvSkill(cvId, react);
+
+      await browser.data(UPDATE, { input: { id, mastery: Mastery.BEGINNER } });
+
+      expect(await storedMastery(id)).toBe(Mastery.BEGINNER);
+    });
+
+    it('rejects an unknown mastery with BAD_USER_INPUT', async () => {
+      const { browser, user } = await signedIn();
+      const cvId = await insertCv(user.id);
+      await assign(user.id, react);
+      const id = await insertCvSkill(cvId, react);
+
+      const error = await browser.error(UPDATE, { input: { id, mastery: 'GURU' } });
+
+      expect(error.extensions.code).toBe('BAD_USER_INPUT');
+      expect(await storedMastery(id)).toBe(Mastery.ADVANCED);
+    });
+  });
+
+  describe('changing the mastery in the profile', () => {
+    it('keeps the mastery already stored in the CV', async () => {
+      const { browser, user } = await signedIn();
+      const cvId = await insertCv(user.id);
+      const userReact = await assign(user.id, react, Mastery.INTERMEDIATE);
+      await browser.data(CREATE, { input: { cvId, skillId: react } });
+
+      await browser.data(UPDATE_USER_SKILL, {
+        input: { id: userReact, userId: user.id, mastery: Mastery.EXPERT },
+      });
+
+      const result = await list(browser, cvId);
+      expect(result.map((item) => item.mastery)).toEqual([Mastery.INTERMEDIATE]);
     });
   });
 

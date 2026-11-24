@@ -208,7 +208,9 @@ enum CvProjectSortField {
   startDate
 }
 
-"""Skill added to a CV; mastery is the CV owner's level of that skill"""
+"""
+Skill added to a CV; mastery belongs to this CV and starts from the owner's level
+"""
 type CvSkill {
   id: ID!
   mastery: Mastery!
@@ -299,7 +301,7 @@ type Mutation {
   createCvProject(input: CreateCvProjectInput!): CvProject!
 
   """
-  Adds one of the CV owner's skills to the CV. Own CV or Admin. Fails with NOT_FOUND if the CV does not exist and FORBIDDEN for another user's CV. Fails with BAD_USER_INPUT (skillId) if the CV owner does not have the skill and with CONFLICT (skillId) if it is already in the CV
+  Adds one of the CV owner's skills to the CV with the owner's current mastery. Own CV or Admin. Fails with NOT_FOUND if the CV does not exist and FORBIDDEN for another user's CV. Fails with BAD_USER_INPUT (skillId) if the CV owner does not have the skill and with CONFLICT (skillId) if it is already in the CV
   """
   createCvSkill(input: CreateCvSkillInput!): CvSkill!
   createDepartment(input: CreateDepartmentInput!): Department!
@@ -397,6 +399,11 @@ type Mutation {
   Changes dates, roles and responsibilities; the project never changes. Own CV or Admin. Fails with NOT_FOUND if the CV does not exist and FORBIDDEN for another user's CV. NOT_FOUND if the CV project is not in this CV
   """
   updateCvProject(input: UpdateCvProjectInput!): CvProject!
+
+  """
+  Changes the mastery of a skill in this CV only; the owner's profile skill stays. Own CV or Admin. Fails with NOT_FOUND if the CV skill does not exist and FORBIDDEN for another user's CV
+  """
+  updateCvSkill(input: UpdateCvSkillInput!): CvSkill!
   updateDepartment(input: UpdateDepartmentInput!): Department!
   updateLanguage(input: UpdateLanguageInput!): Language!
   updatePosition(input: UpdatePositionInput!): Position!
@@ -527,7 +534,7 @@ type Query {
   cvProjects(cvId: ID!, search: String, sortBy: CvProjectSortField! = name, sortOrder: SortOrder! = ASC): CvProjectList!
 
   """
-  Skills of one CV with the CV owner's mastery; sorted by category name, then skill name. Own CV or Admin. Fails with NOT_FOUND if the CV does not exist and FORBIDDEN for another user's CV
+  Skills of one CV with their CV mastery; sorted by category name, then skill name. Own CV or Admin. Fails with NOT_FOUND if the CV does not exist and FORBIDDEN for another user's CV
   """
   cvSkills(cvId: ID!): [CvSkill!]!
 
@@ -729,6 +736,12 @@ input UpdateCvProjectInput {
 
   """Must be within the project's start and end dates"""
   startDate: Date!
+}
+
+input UpdateCvSkillInput {
+  """CvSkill id; its CV is checked against the current user"""
+  id: ID!
+  mastery: Mastery!
 }
 
 input UpdateDepartmentInput {
