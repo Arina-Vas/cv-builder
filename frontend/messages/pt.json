@@ -157,6 +157,10 @@
       "roleIds": { "required": "É necessário selecionar pelo menos uma função" },
       "responsibilities": { "maxLength": "As responsabilidades não devem exceder {max} caracteres" }
     },
+    "cvSkill": {
+      "skillId": { "required": "A habilidade é obrigatória" },
+      "mastery": { "required": "O nível de domínio é obrigatório" }
+    },
     "cv": {
       "name": {
         "required": "O nome é obrigatório",
@@ -478,6 +482,29 @@
     "delete": {
       "title": "Remover projeto",
       "message": "Tem certeza de que deseja excluir o projeto <b>{name}</b>?"
+    }
+  },
+  "cvSkills": {
+    "addButton": "Adicionar habilidade",
+    "removeButton": "Remover habilidades",
+    "confirmRemove": "Remover",
+    "remove": {
+      "title": "Remover habilidades",
+      "message": "Tem certeza de que deseja remover <b>{count, plural, one {# habilidade} other {# habilidades}}</b>?"
+    },
+    "empty": "Nenhuma habilidade adicionada ainda",
+    "loading": "Carregando habilidades",
+    "loadError": "Não foi possível carregar as habilidades",
+    "retry": "Tentar novamente",
+    "forbidden": "Você não tem autorização para acessar este CV",
+    "form": {
+      "createTitle": "Adicionar habilidade",
+      "updateTitle": "Atualizar habilidade",
+      "fields": { "skillId": "Habilidade", "mastery": "Nível de domínio" }
+    },
+    "errors": {
+      "alreadyAdded": "A competência já foi adicionada ao CV",
+      "notOwnerSkill": "O proprietário do CV já não tem esta competência"
     }
   },
   "departments": {

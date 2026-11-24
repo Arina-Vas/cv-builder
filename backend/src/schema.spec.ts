@@ -19,6 +19,8 @@ import { UserLanguageResolver } from '@/languages/user-languages/user-language.r
 import { UsersResolver } from '@/users/users.resolver';
 import { CvResolver } from '@/cvs/cv.resolver';
 import { CvProjectResolver } from '@/cvs/cv-projects/cv-project.resolver';
+import { CvSkillResolver } from '@/cvs/cv-skills/cv-skill.resolver';
+import { CvPreviewResolver } from '@/cvs/cv-preview/cv-preview.resolver';
 
 jest.mock('@/prisma/prisma.service', () => ({ PrismaService: class PrismaService {} }));
 jest.mock('@nestjs/config', () => ({ ConfigService: class ConfigService {} }));
@@ -41,6 +43,8 @@ const RESOLVERS = [
   UserLanguageResolver,
   CvResolver,
   CvProjectResolver,
+  CvSkillResolver,
+  CvPreviewResolver,
 ];
 
 const print = (schema: GraphQLSchema): string => printSchema(lexicographicSortSchema(schema));

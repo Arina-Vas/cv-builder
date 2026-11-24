@@ -154,6 +154,10 @@
         "maxLength": "Die Verantwortlichkeiten dürfen {max} Zeichen nicht überschreiten"
       }
     },
+    "cvSkill": {
+      "skillId": { "required": "Fähigkeit ist erforderlich" },
+      "mastery": { "required": "Kenntnisstand ist erforderlich" }
+    },
     "cv": {
       "name": {
         "required": "Name ist erforderlich",
@@ -479,6 +483,29 @@
     "delete": {
       "title": "Projekt entfernen",
       "message": "Möchten Sie das Projekt <b>{name}</b> wirklich löschen?"
+    }
+  },
+  "cvSkills": {
+    "addButton": "Fähigkeit hinzufügen",
+    "removeButton": "Fähigkeiten entfernen",
+    "confirmRemove": "Entfernen",
+    "remove": {
+      "title": "Fähigkeiten entfernen",
+      "message": "Möchten Sie wirklich <b>{count, plural, one {# Fähigkeit} other {# Fähigkeiten}}</b> entfernen?"
+    },
+    "empty": "Noch keine Fähigkeiten hinzugefügt",
+    "loading": "Fähigkeiten werden geladen",
+    "loadError": "Fähigkeiten konnten nicht geladen werden",
+    "retry": "Erneut versuchen",
+    "forbidden": "Sie sind nicht berechtigt, auf diesen CV zuzugreifen",
+    "form": {
+      "createTitle": "Fähigkeit hinzufügen",
+      "updateTitle": "Fähigkeit aktualisieren",
+      "fields": { "skillId": "Fähigkeit", "mastery": "Kenntnisstand" }
+    },
+    "errors": {
+      "alreadyAdded": "Der Skill ist bereits im Lebenslauf",
+      "notOwnerSkill": "Der Inhaber des Lebenslaufs hat diesen Skill nicht mehr"
     }
   },
   "departments": {
