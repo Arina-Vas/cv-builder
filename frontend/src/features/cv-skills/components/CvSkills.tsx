@@ -4,6 +4,7 @@ import { useMutation, useQuery } from '@apollo/client/react';
 import { useTranslations } from 'next-intl';
 import { notFound } from 'next/navigation';
 import { useState } from 'react';
+import type { CvSkillFieldsFragment } from '@/gql/graphql';
 import {
   CV_SKILL_MUTATION_OPTIONS,
   CV_SKILL_REFETCH_ERROR_CODES,
@@ -12,6 +13,7 @@ import {
   DELETE_CV_SKILLS,
 } from '@/features/cv-skills/api/cvSkills.operations';
 import { CvSkillFormModal } from '@/features/cv-skills/components/CvSkillFormModal';
+import { CvSkillUpdateModal } from '@/features/cv-skills/components/CvSkillUpdateModal';
 import { SkillGroups } from '@/features/skills/user-skills/components/SkillGroups';
 import { AsyncList } from '@/shared/components/async-list/AsyncList';
 import { ConfirmDialog } from '@/shared/components/dialog';
@@ -32,6 +34,7 @@ export const CvSkills = ({ cvId }: Props) => {
   const { selectingMode, selectedIds, toggle, start, exit } = useSelection();
 
   const [addOpen, setAddOpen] = useState(false);
+  const [editing, setEditing] = useState<CvSkillFieldsFragment | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   const { data, loading, error, refetch } = useQuery(CV_SKILLS, {
@@ -66,9 +69,9 @@ export const CvSkills = ({ cvId }: Props) => {
         <SkillGroups
           skills={data?.cvSkills ?? []}
           idPrefix="cv-skill-category"
-          canEdit={selectingMode}
+          canEdit
           selectedIds={selectingMode ? selectedIds : undefined}
-          onItemClick={(cvSkill) => toggle(cvSkill.id)}
+          onItemClick={(cvSkill) => (selectingMode ? toggle(cvSkill.id) : setEditing(cvSkill))}
         />
       </AsyncList>
 
@@ -90,6 +93,8 @@ export const CvSkills = ({ cvId }: Props) => {
       )}
 
       <CvSkillFormModal open={addOpen} onOpenChange={setAddOpen} cvId={cvId} />
+
+      <CvSkillUpdateModal cvSkill={editing} onOpenChange={(open) => !open && setEditing(null)} />
 
       <ConfirmDialog
         title={t('remove.title')}

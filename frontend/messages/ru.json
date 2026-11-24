@@ -158,7 +158,8 @@
       "responsibilities": { "maxLength": "Обязанности не должны превышать {max} символов" }
     },
     "cvSkill": {
-      "skillId": { "required": "Навык обязателен" }
+      "skillId": { "required": "Навык обязателен" },
+      "mastery": { "required": "Уровень владения навыком обязателен" }
     },
     "cv": {
       "name": {
@@ -459,7 +460,8 @@
     "forbidden": "У вас нет доступа к этому CV",
     "form": {
       "createTitle": "Добавить навык",
-      "fields": { "skillId": "Навык" }
+      "updateTitle": "Обновить навык",
+      "fields": { "skillId": "Навык", "mastery": "Уровень владения" }
     },
     "errors": {
       "alreadyAdded": "Навык уже добавлен в резюме",

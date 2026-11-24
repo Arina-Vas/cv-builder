@@ -158,7 +158,8 @@
       "responsibilities": { "maxLength": "As responsabilidades não devem exceder {max} caracteres" }
     },
     "cvSkill": {
-      "skillId": { "required": "A habilidade é obrigatória" }
+      "skillId": { "required": "A habilidade é obrigatória" },
+      "mastery": { "required": "O nível de domínio é obrigatório" }
     },
     "cv": {
       "name": {
@@ -459,7 +460,8 @@
     "forbidden": "Você não tem autorização para acessar este CV",
     "form": {
       "createTitle": "Adicionar habilidade",
-      "fields": { "skillId": "Habilidade" }
+      "updateTitle": "Atualizar habilidade",
+      "fields": { "skillId": "Habilidade", "mastery": "Nível de domínio" }
     },
     "errors": {
       "alreadyAdded": "A competência já foi adicionada ao CV",

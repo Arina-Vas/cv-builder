@@ -158,7 +158,8 @@
       "responsibilities": { "maxLength": "Обов'язки не повинні перевищувати {max} символів" }
     },
     "cvSkill": {
-      "skillId": { "required": "Навичка обов'язкова" }
+      "skillId": { "required": "Навичка обов'язкова" },
+      "mastery": { "required": "Рівень володіння навичкою обов'язковий" }
     },
     "cv": {
       "name": {
@@ -459,7 +460,8 @@
     "forbidden": "У вас немає доступу до цього CV",
     "form": {
       "createTitle": "Додати навичку",
-      "fields": { "skillId": "Навичка" }
+      "updateTitle": "Оновити навичку",
+      "fields": { "skillId": "Навичка", "mastery": "Рівень володіння" }
     },
     "errors": {
       "alreadyAdded": "Навичку вже додано до резюме",

@@ -163,7 +163,8 @@
       }
     },
     "cvSkill": {
-      "skillId": { "required": "La compétence est requise" }
+      "skillId": { "required": "La compétence est requise" },
+      "mastery": { "required": "Le niveau de maîtrise est requis" }
     },
     "cv": {
       "name": {
@@ -468,7 +469,8 @@
     "forbidden": "Vous n'êtes pas autorisé à accéder à ce CV",
     "form": {
       "createTitle": "Ajouter une compétence",
-      "fields": { "skillId": "Compétence" }
+      "updateTitle": "Mettre à jour la compétence",
+      "fields": { "skillId": "Compétence", "mastery": "Niveau de maîtrise" }
     },
     "errors": {
       "alreadyAdded": "La compétence est déjà ajoutée au CV",
