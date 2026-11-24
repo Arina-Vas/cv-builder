@@ -155,7 +155,8 @@
       }
     },
     "cvSkill": {
-      "skillId": { "required": "Fähigkeit ist erforderlich" }
+      "skillId": { "required": "Fähigkeit ist erforderlich" },
+      "mastery": { "required": "Kenntnisstand ist erforderlich" }
     },
     "cv": {
       "name": {
@@ -460,7 +461,8 @@
     "forbidden": "Sie sind nicht berechtigt, auf diesen CV zuzugreifen",
     "form": {
       "createTitle": "Fähigkeit hinzufügen",
-      "fields": { "skillId": "Fähigkeit" }
+      "updateTitle": "Fähigkeit aktualisieren",
+      "fields": { "skillId": "Fähigkeit", "mastery": "Kenntnisstand" }
     },
     "errors": {
       "alreadyAdded": "Der Skill ist bereits im Lebenslauf",

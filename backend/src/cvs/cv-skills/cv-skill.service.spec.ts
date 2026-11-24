@@ -44,12 +44,13 @@ const skillRow = (name: string) => ({
   ...TIMESTAMPS,
 });
 
-// A row as Prisma returns it with `include: cvSkillInclude(ownerId)`
+// A row as Prisma returns it with `include: cvSkillInclude`
 const cvSkillRow = (name: string, mastery: Mastery = Mastery.ADVANCED) => ({
   id: `cv-skill-${name}`,
   cvId: CV_ID,
   skillId: `skill-${name}`,
-  skill: { ...skillRow(name), users: [{ mastery }] },
+  mastery,
+  skill: skillRow(name),
   ...TIMESTAMPS,
 });
 
@@ -60,6 +61,7 @@ const REACT = {
 };
 
 const CREATE_INPUT = { cvId: CV_ID, skillId: 'skill-React' };
+const UPDATE_INPUT = { id: 'cv-skill-React', mastery: Mastery.EXPERT };
 const DELETE_ARGS = { cvId: CV_ID, ids: ['cv-skill-React', 'cv-skill-Vue'] };
 
 const prismaError = (code: string): Prisma.PrismaClientKnownRequestError =>
@@ -69,7 +71,9 @@ describe('CvSkillService', () => {
   const prisma = {
     cvSkill: {
       findMany: jest.fn(),
+      findUnique: jest.fn(),
       create: jest.fn(),
+      update: jest.fn(),
       deleteMany: jest.fn(),
     },
     skill: { findMany: jest.fn() },
@@ -83,6 +87,7 @@ describe('CvSkillService', () => {
 
   const expectNothingWritten = () => {
     expect(prisma.cvSkill.create).not.toHaveBeenCalled();
+    expect(prisma.cvSkill.update).not.toHaveBeenCalled();
     expect(prisma.cvSkill.deleteMany).not.toHaveBeenCalled();
   };
 
@@ -90,8 +95,10 @@ describe('CvSkillService', () => {
     jest.clearAllMocks();
     // By default the Admin may open the CV of OWNER_ID, and the owner has the selected skill
     cvAccess.getAccessibleCv.mockResolvedValue({ id: CV_ID, userId: OWNER_ID });
-    prisma.userSkill.findUnique.mockResolvedValue({ id: 'user-skill-React' });
+    prisma.userSkill.findUnique.mockResolvedValue({ mastery: Mastery.ADVANCED });
+    prisma.cvSkill.findUnique.mockResolvedValue({ cvId: CV_ID });
     prisma.cvSkill.create.mockResolvedValue(cvSkillRow('React'));
+    prisma.cvSkill.update.mockResolvedValue(cvSkillRow('React', Mastery.EXPERT));
     prisma.cvSkill.deleteMany.mockResolvedValue({ count: 0 });
   });
 
@@ -99,6 +106,7 @@ describe('CvSkillService', () => {
     ['findByCv', () => service.findByCv(ADMIN, CV_ID)],
     ['findAvailable', () => service.findAvailable(ADMIN, CV_ID)],
     ['create', () => service.create(ADMIN, CREATE_INPUT)],
+    ['update', () => service.update(ADMIN, UPDATE_INPUT)],
     ['delete', () => service.delete(ADMIN, DELETE_ARGS)],
   ])('%s access', (_method, call) => {
     it('checks the CV against the current user', async () => {
@@ -125,16 +133,15 @@ describe('CvSkillService', () => {
   });
 
   describe('findByCv', () => {
-    it("loads the CV skills with the owner's mastery, grouped by category", async () => {
+    it('loads the CV skills with their CV mastery, grouped by category', async () => {
       prisma.cvSkill.findMany.mockResolvedValue([cvSkillRow('React', Mastery.EXPERT)]);
 
       const result = await service.findByCv(ADMIN, CV_ID);
 
-      // The mastery comes from the CV owner, not from the Admin who opens the CV; skills the owner
-      // no longer has are left out
+      // Skills the owner no longer has are left out
       expect(prisma.cvSkill.findMany).toHaveBeenCalledWith({
         where: { cvId: CV_ID, skill: { users: { some: { userId: OWNER_ID } } } },
-        include: cvSkillInclude(OWNER_ID),
+        include: cvSkillInclude,
         orderBy: [
           { skill: { category: { name: 'asc' } } },
           { skill: { name: 'asc' } },
@@ -167,16 +174,16 @@ describe('CvSkillService', () => {
   });
 
   describe('create', () => {
-    it("adds one of the owner's skills to the CV", async () => {
+    it("adds one of the owner's skills to the CV with the owner's mastery", async () => {
       const result = await service.create(ADMIN, CREATE_INPUT);
 
       expect(prisma.userSkill.findUnique).toHaveBeenCalledWith({
         where: { userId_skillId: { userId: OWNER_ID, skillId: 'skill-React' } },
-        select: { id: true },
+        select: { mastery: true },
       });
       expect(prisma.cvSkill.create).toHaveBeenCalledWith({
-        data: { cvId: CV_ID, skillId: 'skill-React' },
-        include: cvSkillInclude(OWNER_ID),
+        data: { cvId: CV_ID, skillId: 'skill-React', mastery: Mastery.ADVANCED },
+        include: cvSkillInclude,
       });
       expect(result).toEqual({ id: 'cv-skill-React', mastery: Mastery.ADVANCED, skill: REACT });
     });
@@ -206,6 +213,51 @@ describe('CvSkillService', () => {
       prisma.cvSkill.create.mockRejectedValue(error);
 
       await expect(service.create(ADMIN, CREATE_INPUT)).rejects.toBe(error);
+    });
+  });
+
+  describe('update', () => {
+    it('changes the mastery of the CV skill only', async () => {
+      const result = await service.update(ADMIN, UPDATE_INPUT);
+
+      expect(prisma.cvSkill.findUnique).toHaveBeenCalledWith({
+        where: { id: 'cv-skill-React' },
+        select: { cvId: true },
+      });
+      expect(prisma.cvSkill.update).toHaveBeenCalledWith({
+        where: { id: 'cv-skill-React' },
+        data: { mastery: Mastery.EXPERT },
+        include: cvSkillInclude,
+      });
+      expect(prisma.userSkill.findUnique).not.toHaveBeenCalled();
+      expect(result).toEqual({ id: 'cv-skill-React', mastery: Mastery.EXPERT, skill: REACT });
+    });
+
+    it('fails with NOT_FOUND for a missing CV skill before checking any CV', async () => {
+      prisma.cvSkill.findUnique.mockResolvedValue(null);
+
+      await expect(service.update(ADMIN, UPDATE_INPUT)).rejects.toMatchObject({
+        message: 'CV skill not found',
+        extensions: { code: ErrorCode.NOT_FOUND },
+      });
+      expect(cvAccess.getAccessibleCv).not.toHaveBeenCalled();
+      expectNothingWritten();
+    });
+
+    it('maps a CV skill removed meanwhile (P2025) to NOT_FOUND', async () => {
+      prisma.cvSkill.update.mockRejectedValue(prismaError('P2025'));
+
+      await expect(service.update(ADMIN, UPDATE_INPUT)).rejects.toMatchObject({
+        message: 'CV skill not found',
+        extensions: { code: ErrorCode.NOT_FOUND },
+      });
+    });
+
+    it('leaves other database errors to the global filter', async () => {
+      const error = prismaError('P2003');
+      prisma.cvSkill.update.mockRejectedValue(error);
+
+      await expect(service.update(ADMIN, UPDATE_INPUT)).rejects.toBe(error);
     });
   });
 

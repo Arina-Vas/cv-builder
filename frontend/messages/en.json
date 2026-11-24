@@ -153,7 +153,8 @@
       "responsibilities": { "maxLength": "Responsibilities must not exceed {max} characters" }
     },
     "cvSkill": {
-      "skillId": { "required": "Skill is required" }
+      "skillId": { "required": "Skill is required" },
+      "mastery": { "required": "Skill mastery is required" }
     },
     "cv": {
       "name": {
@@ -446,7 +447,8 @@
     "forbidden": "You are not authorized to access this CV",
     "form": {
       "createTitle": "Add skill",
-      "fields": { "skillId": "Skill" }
+      "updateTitle": "Update skill",
+      "fields": { "skillId": "Skill", "mastery": "Skill mastery" }
     },
     "errors": {
       "alreadyAdded": "Skill is already added to the CV",

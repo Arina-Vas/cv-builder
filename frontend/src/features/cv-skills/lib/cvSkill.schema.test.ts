@@ -1,7 +1,7 @@
 import { createTranslator } from 'next-intl';
 import { describe, expect, it } from 'vitest';
 import messages from '../../../../messages/en.json';
-import { cvSkillSchema } from '@/features/cv-skills/lib/cvSkill.schema';
+import { cvSkillSchema, cvSkillUpdateSchema } from '@/features/cv-skills/lib/cvSkill.schema';
 
 const t = createTranslator({ locale: 'en', messages, namespace: 'validation' });
 const schema = cvSkillSchema(t);
@@ -14,5 +14,23 @@ describe('cvSkillSchema', () => {
   // the select keeps '' while nothing is chosen
   it('requires a skill', () => {
     expect(schema.safeParse({ skillId: '' }).error?.issues[0]?.message).toBe('Skill is required');
+  });
+});
+
+describe('cvSkillUpdateSchema', () => {
+  const update = cvSkillUpdateSchema(t);
+
+  it('accepts a mastery level', () => {
+    expect(update.parse({ mastery: 'EXPERT' })).toEqual({ mastery: 'EXPERT' });
+  });
+
+  it('requires a mastery level', () => {
+    expect(update.safeParse({ mastery: '' }).error?.issues[0]?.message).toBe(
+      'Skill mastery is required',
+    );
+  });
+
+  it('rejects an unknown level', () => {
+    expect(update.safeParse({ mastery: 'GURU' }).success).toBe(false);
   });
 });

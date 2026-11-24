@@ -3,8 +3,10 @@ import { Skill } from '@/skills/models/skill.model';
 import { Mastery } from '@/common/graphql/enums';
 import type { CvSkill as CvSkillEntity } from '@/generated/prisma/client';
 
-@ObjectType({ description: "Skill added to a CV; mastery is the CV owner's level of that skill" })
-export class CvSkill implements Pick<CvSkillEntity, 'id'> {
+@ObjectType({
+  description: "Skill added to a CV; mastery belongs to this CV and starts from the owner's level",
+})
+export class CvSkill implements Pick<CvSkillEntity, 'id' | 'mastery'> {
   @Field(() => ID)
   id!: string;
 
