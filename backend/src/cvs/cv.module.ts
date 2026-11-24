@@ -7,6 +7,7 @@ import { CvProjectService } from '@/cvs/cv-projects/cv-project.service';
 import { CvSkillResolver } from './cv-skills/cv-skill.resolver';
 import { CvSkillService } from './cv-skills/cv-skill.service';
 import { CvPreviewResolver } from './cv-preview/cv-preview.resolver';
+import { CvPreviewService } from './cv-preview/cv-preview.service';
 
 @Module({
   providers: [
@@ -18,7 +19,8 @@ import { CvPreviewResolver } from './cv-preview/cv-preview.resolver';
     CvProjectService,
     CvSkillService,
     CvPreviewResolver,
+    CvPreviewService,
   ],
-  exports: [CvAccessService],
+  exports: [CvAccessService, CvPreviewService],
 })
 export class CvModule {}

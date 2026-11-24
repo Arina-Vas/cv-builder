@@ -1,6 +1,7 @@
 import { Args, ID, Query, Resolver } from '@nestjs/graphql';
-import { NotImplementedException, ParseUUIDPipe } from '@nestjs/common';
+import { ParseUUIDPipe } from '@nestjs/common';
 import { CvPreview } from './models/cv-preview.model';
+import { CvPreviewService } from './cv-preview.service';
 import { User } from '@/users/models/user.model';
 import { CurrentUser } from '@/common/auth/current-user.decorator';
 
@@ -10,13 +11,15 @@ const ACCESS =
 
 @Resolver(() => CvPreview)
 export class CvPreviewResolver {
+  constructor(private readonly cvPreviewService: CvPreviewService) {}
+
   @Query(() => CvPreview, {
     description: 'Read-only data of one CV for the Preview tab and the PDF export. ' + ACCESS,
   })
   cvPreview(
-    @CurrentUser() _currentUser: User,
-    @Args('id', { type: () => ID }, ParseUUIDPipe) _id: string,
+    @CurrentUser() currentUser: User,
+    @Args('id', { type: () => ID }, ParseUUIDPipe) id: string,
   ): Promise<CvPreview> {
-    throw new NotImplementedException();
+    return this.cvPreviewService.getPreview(currentUser, id);
   }
 }
