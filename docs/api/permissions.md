@@ -349,4 +349,5 @@ Errors:
 | an Employee asks for another user's CV | `FORBIDDEN`             | `You are not authorized to perform this action` |
 | Chromium failed or timed out           | `INTERNAL_SERVER_ERROR` | generic message, the error is logged            |
 
-Incomplete CV data is not rejected yet: the required data is not defined in the wiki (see [pdf.md](../pdf.md#open)).
+There is no incomplete-data error: the required CV data (name, education, description) is validated on create
+and update, so every accessible CV can be exported (see [pdf.md](../pdf.md#incomplete-cv-data)).

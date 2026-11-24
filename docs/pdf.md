@@ -55,6 +55,15 @@ The PDF is in the language the user sees the Preview in. The frontend sends its 
   the PDF as the document language (`/Lang`).
 - Only the labels are translated. The CV data (names, descriptions, skills) is printed as the user entered it.
 
+### Incomplete CV data
+
+The wiki (CV Preview → Empty State) forbids an incomplete PDF but does not list the required data. The mentor
+confirmed (24.11.2026): the required data are the three fields of the CV Details form, **name, education and
+description**. `CreateCvInput` and `UpdateCvInput` trim them and reject empty values, and the columns are
+`NOT NULL`, so every CV saved through the API can be exported. There is no incomplete-data check or error:
+empty skills, languages, projects, roles or responsibilities are a normal state, and their sections are hidden
+in the Preview and the PDF alike.
+
 ### Keeping the PDF in sync with the Preview
 
 The template and the styles are copies of the Preview markup and CSS. A change to
@@ -193,9 +202,3 @@ else {
   link.click();
 }
 ```
-
-## Open
-
-- **Incomplete-data rule.** The wiki (CV Preview → Empty State) says the application must not generate an
-  incomplete PDF, but does not name the required data; asked the mentor. Planned: `cvPreview.missingFields`
-  in B7, and `generateCvPdf` fails with `BAD_USER_INPUT` (`fields` = the missing data) before Chromium.

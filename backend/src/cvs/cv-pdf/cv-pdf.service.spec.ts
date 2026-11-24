@@ -109,8 +109,6 @@ describe('CvPdfService', () => {
       await expect(service.generate(INPUT, OWNER)).rejects.toBe(error);
       expect(page.close).toHaveBeenCalledTimes(1);
     });
-
-    it.todo('rejects incomplete preview data with BAD_USER_INPUT before rendering (B7)');
   });
 
   describe('browser', () => {
