@@ -116,6 +116,55 @@ All tables have `id` (uuid), `created_at` and `updated_at`. Only the meaningful 
 - Every project role counts as active: the wiki's Add project modal lists "active roles", but roles are a
   seed-only catalog without an `is_active` flag, so `projectRoles` returns them all.
 
+## CV preview
+
+The Preview tab and the PDF export show the same data: both read it from `CvPreviewService` (query
+`cvPreview(id)`). Nothing is stored for the preview: every value below is derived from the tables above
+when the CV is requested.
+
+### Where each part comes from
+
+| Part                   | Source                                                                           |
+| ---------------------- | -------------------------------------------------------------------------------- |
+| Name, position         | the CV owner (`users`, `positions`); the position can be missing                 |
+| Education, name, desc. | `cvs`                                                                            |
+| Language proficiency   | all `user_languages` of the CV owner; a CV has no languages of its own           |
+| Domains                | distinct `projects.domain` of the CV projects                                    |
+| Skills                 | `cv_skills`, grouped by skill category; categories without CV skills are omitted |
+| Projects               | `cv_projects` with their catalog `projects` row, roles and technologies          |
+| Experience, last used  | calculated per CV skill, see below                                               |
+
+### Experience and last used year
+
+Both values are calculated for every CV skill from **the projects of this CV only**, using the **CV-specific
+dates** (`cv_projects.start_date` / `end_date`), not the dates of the catalog project. A project counts for a
+skill when the skill is one of its technologies (`project_skills`, "Environment" in the UI); the match is by
+skill id.
+
+- **Experience in years** = full years from the start date of the earliest matching project until today
+  (rounded down, month and day included: 01.06.2023 → 24.11.2026 is 3 years).
+  - Less than a year gives `0`.
+  - Periods are not summed: overlapping or parallel projects do not add up, only the earliest start counts.
+- **Last used year** = the end year of the latest matching project. A project without an end date ("Till now")
+  counts as the current year, so it wins over any finished one.
+- A CV skill that is in no CV project gets `null` for both values (an empty cell in the table).
+
+Example (today: 2026-11-24):
+
+| CV project | Start      | End        | Technologies      |
+| ---------- | ---------- | ---------- | ----------------- |
+| P1         | 2022-03-01 | 2023-12-31 | React, JavaScript |
+| P2         | 2023-06-01 | —          | TypeScript, React |
+
+| CV skill   | Experience | Last used | Why                                 |
+| ---------- | ---------- | --------- | ----------------------------------- |
+| React      | 4          | 2026      | earliest start P1; P2 is "Till now" |
+| JavaScript | 4          | 2023      | only P1                             |
+| TypeScript | 3          | 2026      | only P2, "Till now"                 |
+| Angular    | `null`     | `null`    | in no CV project                    |
+
+The calculation takes "today" as a parameter, so the unit tests use a fixed date.
+
 ## Deletion policy
 
 The spec asks each catalog to define its deletion policy explicitly. One rule is used everywhere:
@@ -243,3 +292,7 @@ pnpm db:migrate
   skill to a CV copies the owner's current level; after that `updateCvSkill` changes it in this CV only, and changing
   the level in the profile does not touch CVs. The migration filled existing rows from `user_skills` and dropped CV
   skills whose owner no longer had the skill (they were never listed).
+- **CV preview has no mastery.** The wiki's Professional skills table shows category, skill, experience and last
+  used year only; mastery is edited on the CV Skills tab (`cv_skills.mastery`, see above).
+- **CV preview values are calculated on request**, not stored, so they never go stale after a CV project or a
+  project's technologies change. Preview and PDF call the same service, so they always match.
