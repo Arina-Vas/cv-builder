@@ -1,4 +1,4 @@
-import { UserRole } from '@/common/graphql/enums';
+import { Mastery, UserRole } from '@/common/graphql/enums';
 import { createUser, signIn, uniqueEmail } from './utils/fixtures';
 import { GqlClient } from './utils/graphql-client';
 import { createTestApp, resetDatabase, type TestApp } from './utils/test-app';
@@ -404,7 +404,9 @@ describe('CVs (integration)', () => {
           endDate: new Date('2025-12-31'),
         },
       });
-      await t.prisma.cvSkill.create({ data: { cvId, skillId: skill.id } });
+      await t.prisma.cvSkill.create({
+        data: { cvId, skillId: skill.id, mastery: Mastery.ADVANCED },
+      });
       await t.prisma.cvProject.create({
         data: { cvId, projectId: project.id, startDate: new Date('2025-02-01') },
       });

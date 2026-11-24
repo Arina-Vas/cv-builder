@@ -56,9 +56,10 @@ model CvProjectRole {
 model CvSkill {
   id      String @id @default(uuid()) @db.Uuid
   cvId    String @map("cv_id") @db.Uuid
-  skillId String @map("skill_id") @db.Uuid
-  cv      Cv     @relation(fields: [cvId], references: [id], onDelete: Cascade)
-  skill   Skill  @relation(fields: [skillId], references: [id], onDelete: Restrict)
+  skillId String  @map("skill_id") @db.Uuid
+  mastery Mastery
+  cv      Cv      @relation(fields: [cvId], references: [id], onDelete: Cascade)
+  skill   Skill   @relation(fields: [skillId], references: [id], onDelete: Restrict)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")

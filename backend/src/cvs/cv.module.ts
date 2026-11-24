@@ -6,6 +6,8 @@ import { CvProjectResolver } from '@/cvs/cv-projects/cv-project.resolver';
 import { CvProjectService } from '@/cvs/cv-projects/cv-project.service';
 import { CvSkillResolver } from './cv-skills/cv-skill.resolver';
 import { CvSkillService } from './cv-skills/cv-skill.service';
+import { CvPreviewResolver } from './cv-preview/cv-preview.resolver';
+import { CvPreviewService } from './cv-preview/cv-preview.service';
 import { CvPdfResolver } from '@/cvs/cv-pdf/cv-pdf.resolver';
 import { CvPdfService } from '@/cvs/cv-pdf/cv-pdf.service';
 
@@ -18,9 +20,11 @@ import { CvPdfService } from '@/cvs/cv-pdf/cv-pdf.service';
     CvAccessService,
     CvProjectService,
     CvSkillService,
+    CvPreviewResolver,
+    CvPreviewService,
     CvPdfResolver,
     CvPdfService,
   ],
-  exports: [CvAccessService],
+  exports: [CvAccessService, CvPreviewService],
 })
 export class CvModule {}

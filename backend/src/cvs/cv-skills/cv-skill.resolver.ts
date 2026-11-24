@@ -7,6 +7,7 @@ import { ParseUUIDPipe } from '@nestjs/common';
 import { Skill } from '@/skills/models/skill.model';
 import { CreateCvSkillInput } from './dto/create-cv-skill.input';
 import { DeleteCvSkillsArgs } from './dto/delete-cv-skills.args';
+import { UpdateCvSkillInput } from './dto/update-cv-skill.input';
 
 const ACCESS =
   'Own CV or Admin. Fails with NOT_FOUND if the CV does not exist ' +
@@ -18,8 +19,7 @@ export class CvSkillResolver {
 
   @Query(() => [CvSkill], {
     description:
-      "Skills of one CV with the CV owner's mastery; sorted by category name, then skill name. " +
-      ACCESS,
+      'Skills of one CV with their CV mastery; sorted by category name, then skill name. ' + ACCESS,
   })
   cvSkills(
     @CurrentUser() currentUser: User,
@@ -42,7 +42,8 @@ export class CvSkillResolver {
 
   @Mutation(() => CvSkill, {
     description:
-      `Adds one of the CV owner's skills to the CV. ${ACCESS}. ` +
+      "Adds one of the CV owner's skills to the CV with the owner's current mastery. " +
+      `${ACCESS}. ` +
       'Fails with BAD_USER_INPUT (skillId) if the CV owner does not have the skill ' +
       'and with CONFLICT (skillId) if it is already in the CV',
   })
@@ -51,6 +52,19 @@ export class CvSkillResolver {
     @Args('input') input: CreateCvSkillInput,
   ): Promise<CvSkill> {
     return this.cvSkillService.create(currentUser, input);
+  }
+
+  @Mutation(() => CvSkill, {
+    description:
+      "Changes the mastery of a skill in this CV only; the owner's profile skill stays. " +
+      'Own CV or Admin. Fails with NOT_FOUND if the CV skill does not exist ' +
+      "and FORBIDDEN for another user's CV",
+  })
+  updateCvSkill(
+    @CurrentUser() currentUser: User,
+    @Args('input') input: UpdateCvSkillInput,
+  ): Promise<CvSkill> {
+    return this.cvSkillService.update(currentUser, input);
   }
 
   @Mutation(() => [ID], {

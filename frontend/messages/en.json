@@ -152,6 +152,10 @@
       "roleIds": { "required": "At least one role must be selected" },
       "responsibilities": { "maxLength": "Responsibilities must not exceed {max} characters" }
     },
+    "cvSkill": {
+      "skillId": { "required": "Skill is required" },
+      "mastery": { "required": "Skill mastery is required" }
+    },
     "cv": {
       "name": {
         "required": "Name is required",
@@ -465,6 +469,29 @@
     "delete": {
       "title": "Remove project",
       "message": "Are you sure you want to remove project <b>{name}</b>?"
+    }
+  },
+  "cvSkills": {
+    "addButton": "Add skill",
+    "removeButton": "Remove skills",
+    "confirmRemove": "Remove",
+    "remove": {
+      "title": "Remove skills",
+      "message": "Are you sure you want to remove <b>{count, plural, one {# skill} other {# skills}}</b>?"
+    },
+    "empty": "No skills added yet",
+    "loading": "Loading skills",
+    "loadError": "Failed to load skills",
+    "retry": "Retry",
+    "forbidden": "You are not authorized to access this CV",
+    "form": {
+      "createTitle": "Add skill",
+      "updateTitle": "Update skill",
+      "fields": { "skillId": "Skill", "mastery": "Skill mastery" }
+    },
+    "errors": {
+      "alreadyAdded": "Skill is already added to the CV",
+      "notOwnerSkill": "The CV owner no longer has this skill"
     }
   },
   "departments": {
