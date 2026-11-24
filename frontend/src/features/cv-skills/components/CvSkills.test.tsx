@@ -120,13 +120,20 @@ describe('CvSkills', () => {
   });
 
   describe('outside selection mode', () => {
-    // a CV skill has nothing to update: its mastery is the owner's (AGENTS §8.7)
-    it('shows the skills as plain items, not buttons', async () => {
-      renderList();
+    it('opens Update skill with the clicked skill and its CV mastery; Escape closes it', async () => {
+      const { user } = renderList();
 
-      await screen.findByText('React');
-      expect(screen.queryByRole('button', { name: /React/ })).not.toBeInTheDocument();
-      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+      await user.click(await screen.findByRole('button', { name: /NestJS/ }));
+
+      const dialog = screen.getByRole('dialog', { name: 'Update skill' });
+      expect(within(dialog).getByRole('combobox', { name: 'Skill' })).toHaveTextContent('NestJS');
+      expect(within(dialog).getByRole('combobox', { name: 'Skill mastery' })).toHaveTextContent(
+        'Expert',
+      );
+
+      await user.keyboard('{Escape}');
+
+      await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
     });
 
     it('opens Add skill with the owner skills not yet in the CV', async () => {
@@ -143,7 +150,10 @@ describe('CvSkills', () => {
       await user.click(await screen.findByRole('button', { name: 'Add skill' }));
 
       const dialog = screen.getByRole('dialog', { name: 'Add skill' });
-      await user.click(within(dialog).getByRole('combobox', { name: 'Skill' }));
+      const skill = within(dialog).getByRole('combobox', { name: 'Skill' });
+      // disabled until the options are loaded
+      await expect.poll(() => skill).toBeEnabled();
+      await user.click(skill);
       expect(await within(document.body).findByRole('option', { name: 'Vue' })).toBeInTheDocument();
     });
   });
@@ -173,7 +183,7 @@ describe('CvSkills', () => {
       await user.click(screen.getByRole('button', { name: 'Cancel' }));
 
       expect(screen.getByRole('button', { name: 'Remove skills' })).toBeInTheDocument();
-      expect(screen.queryByRole('button', { name: /React/ })).not.toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /React/ })).not.toHaveAttribute('aria-pressed');
     });
 
     it('removes the selected CvSkill ids after confirmation and refreshes the list', async () => {

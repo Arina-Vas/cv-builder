@@ -158,7 +158,8 @@
       "responsibilities": { "maxLength": "Obowiązki nie mogą przekraczać {max} znaków" }
     },
     "cvSkill": {
-      "skillId": { "required": "Umiejętność jest wymagana" }
+      "skillId": { "required": "Umiejętność jest wymagana" },
+      "mastery": { "required": "Poziom umiejętności jest wymagany" }
     },
     "cv": {
       "name": {
@@ -459,7 +460,8 @@
     "forbidden": "Nie masz dostępu do tego CV",
     "form": {
       "createTitle": "Dodaj umiejętność",
-      "fields": { "skillId": "Umiejętność" }
+      "updateTitle": "Aktualizuj umiejętność",
+      "fields": { "skillId": "Umiejętność", "mastery": "Poziom umiejętności" }
     },
     "errors": {
       "alreadyAdded": "Umiejętność jest już dodana do CV",

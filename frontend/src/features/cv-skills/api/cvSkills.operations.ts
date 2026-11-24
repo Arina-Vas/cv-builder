@@ -42,6 +42,14 @@ export const CREATE_CV_SKILL = graphql(`
   }
 `);
 
+export const UPDATE_CV_SKILL = graphql(`
+  mutation UpdateCvSkill($input: UpdateCvSkillInput!) {
+    updateCvSkill(input: $input) {
+      ...CvSkillFields
+    }
+  }
+`);
+
 export const DELETE_CV_SKILLS = graphql(`
   mutation DeleteCvSkills($cvId: ID!, $ids: [ID!]!) {
     deleteCvSkills(cvId: $cvId, ids: $ids)
