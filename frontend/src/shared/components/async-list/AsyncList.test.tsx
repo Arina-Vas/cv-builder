@@ -43,6 +43,18 @@ describe('AsyncList', () => {
     expect(onRetry).toHaveBeenCalled();
   });
 
+  // a final error (e.g. FORBIDDEN): reloading would not help
+  it('shows the error without Retry when onRetry is not given', () => {
+    renderWithProviders(
+      <AsyncList items={undefined} error={new Error('forbidden')} loading={false} {...labels}>
+        {null}
+      </AsyncList>,
+    );
+
+    expect(screen.getByRole('alert')).toHaveTextContent('Failed to load things');
+    expect(screen.queryByRole('button', { name: 'Retry' })).not.toBeInTheDocument();
+  });
+
   it('shows the empty message when items load as an empty list', () => {
     renderWithProviders(
       <AsyncList items={[]} error={undefined} loading={false} onRetry={vi.fn()} {...labels}>

@@ -157,6 +157,9 @@
       "roleIds": { "required": "È necessario selezionare almeno un ruolo" },
       "responsibilities": { "maxLength": "Le responsabilità non devono superare {max} caratteri" }
     },
+    "cvSkill": {
+      "skillId": { "required": "La competenza è obbligatoria" }
+    },
     "cv": {
       "name": {
         "required": "Il nome è obbligatorio",
@@ -439,6 +442,28 @@
     "delete": {
       "title": "Rimuovi progetto",
       "message": "Vuoi davvero eliminare il progetto <b>{name}</b>?"
+    }
+  },
+  "cvSkills": {
+    "addButton": "Aggiungi competenza",
+    "removeButton": "Rimuovi competenze",
+    "confirmRemove": "Rimuovi",
+    "remove": {
+      "title": "Rimuovi competenze",
+      "message": "Vuoi davvero rimuovere <b>{count, plural, one {# competenza} other {# competenze}}</b>?"
+    },
+    "empty": "Nessuna competenza ancora aggiunta",
+    "loading": "Caricamento delle competenze",
+    "loadError": "Impossibile caricare le competenze",
+    "retry": "Riprova",
+    "forbidden": "Non sei autorizzato ad accedere a questo CV",
+    "form": {
+      "createTitle": "Aggiungi competenza",
+      "fields": { "skillId": "Competenza" }
+    },
+    "errors": {
+      "alreadyAdded": "La competenza è già aggiunta al CV",
+      "notOwnerSkill": "Il proprietario del CV non ha più questa competenza"
     }
   },
   "departments": {

@@ -157,6 +157,9 @@
       "roleIds": { "required": "Необходимо выбрать хотя бы одну роль" },
       "responsibilities": { "maxLength": "Обязанности не должны превышать {max} символов" }
     },
+    "cvSkill": {
+      "skillId": { "required": "Навык обязателен" }
+    },
     "cv": {
       "name": {
         "required": "Название обязательно",
@@ -439,6 +442,28 @@
     "delete": {
       "title": "Удалить проект",
       "message": "Вы уверены, что хотите удалить проект <b>{name}</b>?"
+    }
+  },
+  "cvSkills": {
+    "addButton": "Добавить навык",
+    "removeButton": "Удалить навыки",
+    "confirmRemove": "Удалить",
+    "remove": {
+      "title": "Удалить навыки",
+      "message": "Вы уверены, что хотите удалить <b>{count, plural, one {# навык} few {# навыка} many {# навыков} other {# навыка}}</b>?"
+    },
+    "empty": "Навыки ещё не добавлены",
+    "loading": "Загрузка навыков",
+    "loadError": "Не удалось загрузить навыки",
+    "retry": "Повторить",
+    "forbidden": "У вас нет доступа к этому CV",
+    "form": {
+      "createTitle": "Добавить навык",
+      "fields": { "skillId": "Навык" }
+    },
+    "errors": {
+      "alreadyAdded": "Навык уже добавлен в резюме",
+      "notOwnerSkill": "У владельца резюме больше нет этого навыка"
     }
   },
   "departments": {
