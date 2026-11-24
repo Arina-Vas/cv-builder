@@ -123,6 +123,53 @@ type CvPage {
 }
 
 """
+Aggregated read-only data of one CV for the Preview tab and the PDF export
+"""
+type CvPreview {
+  description: String!
+
+  """Distinct domains of the CV projects, sorted alphabetically"""
+  domains: [String!]!
+  education: String!
+  id: ID!
+
+  """The CV owner's languages, sorted by language name"""
+  languages: [UserLanguage!]!
+  name: String!
+
+  """CV projects, the latest start date first"""
+  projects: [CvProject!]!
+
+  """
+  CV skills grouped by category, categories sorted by name; empty categories are omitted
+  """
+  skillGroups: [CvPreviewSkillGroup!]!
+  user: User!
+}
+
+"""
+A CV skill in the Professional skills table, with experience counted from the CV projects
+"""
+type CvPreviewSkill {
+  """
+  Full years since the CV-specific start date of the earliest CV project whose environment contains the skill; 0 under a year; null if no CV project uses it
+  """
+  experienceYears: Int
+
+  """
+  End year of the latest CV project whose environment contains the skill; a project without an end date ("Till now") counts as the current year; null if no CV project uses it
+  """
+  lastUsedYear: Int
+  skill: Skill!
+}
+
+"""CV skills of one category, sorted by skill name"""
+type CvPreviewSkillGroup {
+  category: SkillCategory!
+  skills: [CvPreviewSkill!]!
+}
+
+"""
 A catalog project added to a CV, with CV-specific dates, roles and responsibilities
 """
 type CvProject {
@@ -468,6 +515,11 @@ type Query {
   Own CV or Admin. Fails with NOT_FOUND if the CV does not exist and FORBIDDEN for another user's CV
   """
   cv(id: ID!): Cv!
+
+  """
+  Read-only data of one CV for the Preview tab and the PDF export. Own CV or Admin. Fails with NOT_FOUND if the CV does not exist and FORBIDDEN for another user's CV
+  """
+  cvPreview(id: ID!): CvPreview!
 
   """
   Projects of one CV. Search is case-insensitive, by project name or domain. Own CV or Admin. Fails with NOT_FOUND if the CV does not exist and FORBIDDEN for another user's CV
