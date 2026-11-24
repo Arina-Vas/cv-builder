@@ -333,8 +333,9 @@ service runs: `End date cannot be earlier than start date`, `At least one role m
 | --------------- | -------------- |
 | `generateCvPdf` | Own or Admin † |
 
-† The CV is checked with `CvAccessService.getAccessibleCv` before the PDF is built, so an Employee cannot export
-another user's CV by changing the `cvId` (wiki CV Preview, AC-31, AC-49). The mutation is marked
+† The PDF is built from `CvPreviewService.getPreview`, which checks the CV with
+`CvAccessService.getAccessibleCv`, so an Employee cannot export another user's CV by changing the `cvId` (wiki
+CV Preview, AC-31, AC-49). The mutation is marked
 `@AllowUnverified()`: it changes nothing, and the Preview it prints is readable without a verified email.
 How the PDF is built: [pdf.md](../pdf.md).
 
@@ -348,4 +349,4 @@ Errors:
 | an Employee asks for another user's CV | `FORBIDDEN`             | `You are not authorized to perform this action` |
 | Chromium failed or timed out           | `INTERNAL_SERVER_ERROR` | generic message, the error is logged            |
 
-With the CV Preview data service (B7), incomplete CV data will be rejected with `BAD_USER_INPUT` before rendering.
+Incomplete CV data is not rejected yet: the required data is not defined in the wiki (see [pdf.md](../pdf.md#open)).

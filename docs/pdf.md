@@ -7,18 +7,18 @@ contract is `generateCvPdf` in [api/permissions.md](api/permissions.md#cv-pdf).
 ## How it works
 
 ```
-generateCvPdf(input: { cvId, locale }) → CvAccessService (NOT_FOUND / FORBIDDEN)
-                                       → CV data → HTML template (labels of locale) → headless Chromium → PDF
+generateCvPdf(input: { cvId, locale }) → CvPreviewService.getPreview (NOT_FOUND / FORBIDDEN)
+                                       → CvPreview → HTML template (labels of locale) → headless Chromium → PDF
                                        → { fileName, content: base64 }
 ```
 
-1. **Access.** `CvPdfService.generate` gets the CV through `CvAccessService.getAccessibleCv`, like `cv(id)`:
-   `NOT_FOUND` for a missing CV, `FORBIDDEN` when an Employee asks for another user's CV. The owner is never taken
-   from the request. Access is checked before Chromium is used.
-2. **Data.** Until the CV Preview data service (B7) is ready, `cv-pdf.mapper.ts` builds the data from the CV and
-   its owner, with empty languages, domains, skills and projects; the temporary type is `cv-preview.types.ts`.
-   With B7 the PDF takes the same data as `cvPreview`, and incomplete data is rejected with `BAD_USER_INPUT`
-   before rendering (wiki: the application must not generate an incomplete PDF).
+1. **Access and data.** `CvPdfService.generate` calls `CvPreviewService.getPreview`, the same service as the
+   `cvPreview` query, so the PDF always shows what the Preview shows (wiki: "the generated PDF must use the same
+   underlying data and calculation rules as the Preview page"). `getPreview` checks access with
+   `CvAccessService.getAccessibleCv`: `NOT_FOUND` for a missing CV, `FORBIDDEN` when an Employee asks for another
+   user's CV. The owner is never taken from the request. Both happen before Chromium is used.
+2. **Template data.** The template takes `CvPreview` as is (`CvPreview`, `CvProject`, `CvPreviewSkillGroup`
+   models); there is no PDF-specific mapper. The experience and last-used years come calculated from B7.
 3. **HTML.** `cv-pdf.template.ts` renders a full HTML page as a string. It is a port of the CV Preview components
    (`frontend/src/features/cvs/components/cv-preview/document/`): the same sections, the same rules for hiding
    empty values, the period as `MM.yyyy – Present`, the same list punctuation. Labels come from the requested
@@ -87,11 +87,11 @@ the CSS modules reuse names like `.title` and `.value`.
 | `src/cvs/cv-pdf/cv-pdf.styles.ts`             | CSS of the document                                          |
 | `src/cvs/cv-pdf/cv-pdf.fonts.ts`, `fonts/`    | Roboto `@font-face` rules and the woff2 files                |
 | `src/cvs/cv-pdf/cv-pdf-file-name.ts`          | `toPdfFileName`                                              |
-| `src/cvs/cv-pdf/cv-pdf.mapper.ts`             | **temporary** (until B7): CV → template data                 |
-| `src/cvs/cv-pdf/cv-preview.types.ts`          | **temporary** (until B7): shape of the template data         |
+| `src/cvs/cv-pdf/cv-pdf.fixtures.ts`           | test data: `CvPreview` builders for the unit tests           |
 | `src/common/html/escape-html.ts`              | HTML escaping, shared with the email templates               |
 
-The resolver and the service are registered in `CvModule`, next to `CvAccessService`.
+The resolver and the service are registered in `CvModule`, next to `CvPreviewService`. `*.fixtures.ts` is
+excluded from the build (`tsconfig.build.json`).
 
 ## File name
 
@@ -153,14 +153,17 @@ namespaces), so `backend-integration` sets `PUPPETEER_NO_SANDBOX: true`.
 
 - `cv-pdf.fonts.spec.ts`: three woff2 files (latin, latin-ext, cyrillic) with their unicode ranges.
 - `cv-pdf.labels.spec.ts`: the dictionary equals the frontend messages for every locale.
+- `cv-pdf.fixtures.ts` holds the `CvPreview` test data shared by the template and service specs.
 - `cv-pdf.template.spec.ts`: HTML of the document (escaping, hidden empty sections, period, punctuation, skills
   table, labels and `lang` of the locale), `splitResponsibilities`.
 - `cv-pdf-file-name.spec.ts`: `toPdfFileName`.
-- `cv-pdf.service.spec.ts`: puppeteer is mocked. Access is checked before Chromium starts, one browser for
+- `cv-pdf.service.spec.ts`: puppeteer and `CvPreviewService` are mocked. The preview is requested for the
+  current user, its data reaches the HTML, access errors stop before Chromium starts, one browser for
   sequential and parallel requests, the page is closed after an error, the locale reaches the HTML, the sandbox
   flag, `onModuleDestroy`.
-- `test/cv-pdf.int-spec.ts`: real Chromium and the test database. Own CV → `%PDF-`, the PDF language (`/Lang`)
-  for `ru` and for a request without `locale`, another user's CV → `FORBIDDEN` (wiki AC-31, AC-49), Admin,
+- `test/cv-pdf.int-spec.ts`: real Chromium and the test database. Own CV → `%PDF-`, a CV with every section
+  filled (owner, language, skills, projects; 2 pages) and a long CV that continues on more pages (page count
+  from the PDF), the PDF language (`/Lang`) for `ru` and for a request without `locale`, another user's CV → `FORBIDDEN` (wiki AC-31, AC-49), Admin,
   unverified user, `NOT_FOUND`, `BAD_USER_INPUT` for a non-UUID id and for an unknown locale,
   `UNAUTHENTICATED`.
 
@@ -193,5 +196,6 @@ else {
 
 ## Open
 
-- **Data and incomplete-data rule** come with B7 (`CvPreviewService`): replace `cv-pdf.mapper.ts` and
-  `cv-preview.types.ts`, add the `BAD_USER_INPUT` check and its test.
+- **Incomplete-data rule.** The wiki (CV Preview → Empty State) says the application must not generate an
+  incomplete PDF, but does not name the required data; asked the mentor. Planned: `cvPreview.missingFields`
+  in B7, and `generateCvPdf` fails with `BAD_USER_INPUT` (`fields` = the missing data) before Chromium.
