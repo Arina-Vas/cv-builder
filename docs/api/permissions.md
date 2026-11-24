@@ -326,3 +326,25 @@ Errors thrown by the service:
 
 Both date errors are returned together when both dates are wrong. Rules checked by the input DTO before the
 service runs: `End date cannot be earlier than start date`, `At least one role must be selected`.
+
+### CV PDF
+
+| Operation       | Access         |
+| --------------- | -------------- |
+| `generateCvPdf` | Own or Admin † |
+
+† The CV is checked with `CvAccessService.getAccessibleCv` before the PDF is built, so an Employee cannot export
+another user's CV by changing the `cvId` (wiki CV Preview, AC-31, AC-49). The mutation is marked
+`@AllowUnverified()`: it changes nothing, and the Preview it prints is readable without a verified email.
+How the PDF is built: [pdf.md](../pdf.md).
+
+Errors:
+
+| Case                                   | Code                    | Message                                         |
+| -------------------------------------- | ----------------------- | ----------------------------------------------- |
+| `cvId` is not a UUID                   | `BAD_USER_INPUT`        | from `ParseUUIDPipe`                            |
+| the CV does not exist                  | `NOT_FOUND`             | `CV not found`                                  |
+| an Employee asks for another user's CV | `FORBIDDEN`             | `You are not authorized to perform this action` |
+| Chromium failed or timed out           | `INTERNAL_SERVER_ERROR` | generic message, the error is logged            |
+
+With the CV Preview data service (B7), incomplete CV data will be rejected with `BAD_USER_INPUT` before rendering.
