@@ -90,6 +90,10 @@ export class EnvironmentVariables {
   @IsInt()
   @Min(0)
   TRUST_PROXY_HOPS: number = 0;
+
+  @Transform(({ obj }: { obj: Record<string, unknown> }) => obj['PUPPETEER_NO_SANDBOX'] === 'true')
+  @IsBoolean()
+  PUPPETEER_NO_SANDBOX: boolean = false;
 }
 
 export function validate(config: Record<string, unknown>): EnvironmentVariables {

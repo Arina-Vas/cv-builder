@@ -20,6 +20,7 @@ import { UsersResolver } from '@/users/users.resolver';
 import { CvResolver } from '@/cvs/cv.resolver';
 import { CvProjectResolver } from '@/cvs/cv-projects/cv-project.resolver';
 import { CvSkillResolver } from '@/cvs/cv-skills/cv-skill.resolver';
+import { CvPdfResolver } from '@/cvs/cv-pdf/cv-pdf.resolver';
 import { CvPreviewResolver } from '@/cvs/cv-preview/cv-preview.resolver';
 
 jest.mock('@/prisma/prisma.service', () => ({ PrismaService: class PrismaService {} }));
@@ -45,6 +46,7 @@ const RESOLVERS = [
   CvProjectResolver,
   CvSkillResolver,
   CvPreviewResolver,
+  CvPdfResolver,
 ];
 
 const print = (schema: GraphQLSchema): string => printSchema(lexicographicSortSchema(schema));

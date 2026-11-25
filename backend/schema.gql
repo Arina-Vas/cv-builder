@@ -122,6 +122,12 @@ type CvPage {
   total: Int!
 }
 
+type CvPdf {
+  """PDF file encoded as base64"""
+  content: String!
+  fileName: String!
+}
+
 """
 Aggregated read-only data of one CV for the Preview tab and the PDF export
 """
@@ -249,6 +255,11 @@ enum DepartmentSortField {
   name
 }
 
+input GenerateCvPdfInput {
+  cvId: ID!
+  locale: Locale! = en
+}
+
 type Health {
   status: String!
 }
@@ -274,6 +285,18 @@ type LanguagePage {
 enum LanguageSortField {
   iso
   name
+}
+
+enum Locale {
+  de
+  en
+  es
+  fr
+  it
+  pl
+  pt
+  ru
+  uk
 }
 
 enum Mastery {
@@ -371,6 +394,11 @@ type Mutation {
   Own profile or Admin. Removes the given UserSkill ids of the user; returns the removed ids. The skills are also removed from the user's CVs. Ids already removed are skipped. Fails with FORBIDDEN and removes nothing if an id belongs to another user's assignment
   """
   deleteUserSkills(ids: [ID!]!, userId: ID!): [ID!]!
+
+  """
+  Own CV or Admin. Builds a PDF of the CV preview and returns it as base64. Fails with NOT_FOUND, FORBIDDEN for another user, BAD_USER_INPUT for an invalid cvId or locale
+  """
+  generateCvPdf(input: GenerateCvPdfInput!): CvPdf!
   logout: Boolean!
   refresh: Boolean!
 
