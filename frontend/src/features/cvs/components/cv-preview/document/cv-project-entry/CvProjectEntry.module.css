@@ -57,7 +57,17 @@
 }
 
 @media print {
-  .entry {
+  .name,
+  .label {
+    break-after: avoid;
+  }
+
+  .description {
+    orphans: 4;
+    widows: 4;
+  }
+
+  .list > li {
     break-inside: avoid;
   }
 }

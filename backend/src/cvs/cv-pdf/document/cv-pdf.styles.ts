@@ -225,6 +225,19 @@ body {
 /* CvProjectEntry: aside | red line | details, the same split as the CV summary */
 .project {
   display: flex;
+}
+
+.project__name,
+.project__label {
+  break-after: avoid;
+}
+
+.project__description {
+  orphans: 4;
+  widows: 4;
+}
+
+.project__list > li {
   break-inside: avoid;
 }
 
