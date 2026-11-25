@@ -1,12 +1,13 @@
 import type {
-  CvPreviewData,
-  CvPreviewProject,
-  CvPreviewSkill,
-  CvPreviewSkillGroup,
-} from './cv-preview.types';
+  CvPreviewFieldsFragment,
+  CvPreviewSkillGroupFieldsFragment,
+  CvProjectFieldsFragment,
+} from '@/gql/graphql';
+
+type CvPreviewSkill = CvPreviewSkillGroupFieldsFragment['skills'][number];
 
 /**
- * TEMPORARY mock data for building the CV Preview UI before the B7 `cvPreview` contract exists.
+ * Test data for the CV Preview document, shaped as the `cvPreview` query returns it.
  * Catalog names (skills, categories, projects, roles, languages) match `backend/prisma/seed.ts`.
  * Derived values (experienceYears, lastUsedYear, domains) are precomputed as the backend would
  * return them on 2026-11-20 — the frontend only renders them, it never recalculates.
@@ -17,7 +18,6 @@ import type {
  *   no languages/domains/skills/projects (checks that empty sections are hidden).
  * - `cvPreviewEdgeCasesFixture` — long unbroken text, project without roles/responsibilities,
  *   messy responsibilities, skills without experience, an empty category, duplicate-free domains.
- * - `cvPreviewLongFixture` — many projects and skills for print page breaks and long scrolling.
  */
 
 // --- catalog -----------------------------------------------------------------------------------
@@ -80,7 +80,7 @@ const withExperience = (
 
 // --- projects ----------------------------------------------------------------------------------
 
-const shopWave: CvPreviewProject = {
+const shopWave: CvProjectFieldsFragment = {
   id: 'cv-project-shopwave',
   startDate: '2022-03-01',
   endDate: '2024-12-31',
@@ -92,6 +92,8 @@ const shopWave: CvPreviewProject = {
   roles: [ROLES.frontend, ROLES.fullStack],
   project: {
     id: 'project-shopwave',
+    startDate: '2021-01-01',
+    endDate: '2025-06-30',
     name: 'ShopWave',
     domain: 'E-commerce',
     description:
@@ -106,7 +108,7 @@ const shopWave: CvPreviewProject = {
   },
 };
 
-const mediTrack: CvPreviewProject = {
+const mediTrack: CvProjectFieldsFragment = {
   id: 'cv-project-meditrack',
   startDate: '2023-06-01',
   endDate: '2026-06-30',
@@ -119,6 +121,8 @@ const mediTrack: CvPreviewProject = {
   roles: [ROLES.fullStack, ROLES.teamLead],
   project: {
     id: 'project-meditrack',
+    startDate: '2023-01-01',
+    endDate: '2026-12-31',
     name: 'MediTrack',
     domain: 'Healthcare',
     description: 'Patient appointment and medical records system for a network of private clinics.',
@@ -134,7 +138,7 @@ const mediTrack: CvPreviewProject = {
 };
 
 /** Active project: endDate null → "Till now" */
-const finSight: CvPreviewProject = {
+const finSight: CvProjectFieldsFragment = {
   id: 'cv-project-finsight',
   startDate: '2024-01-15',
   endDate: null,
@@ -145,6 +149,8 @@ const finSight: CvPreviewProject = {
   roles: [ROLES.frontend],
   project: {
     id: 'project-finsight',
+    startDate: '2023-10-01',
+    endDate: '2027-12-31',
     name: 'FinSight',
     domain: 'Finance',
     description: 'Dashboard for personal budgeting with bank account sync and spending analytics.',
@@ -154,7 +160,7 @@ const finSight: CvPreviewProject = {
 
 // --- skill groups (what the backend derives from the projects above) -------------------------
 
-const fullSkillGroups: CvPreviewSkillGroup[] = [
+const fullSkillGroups: CvPreviewSkillGroupFieldsFragment[] = [
   {
     category: CATEGORIES.languages,
     skills: [
@@ -196,7 +202,7 @@ const fullSkillGroups: CvPreviewSkillGroup[] = [
 
 // --- fixtures ----------------------------------------------------------------------------------
 
-export const cvPreviewFixture: CvPreviewData = {
+export const cvPreviewFixture: CvPreviewFieldsFragment = {
   id: 'cv-1',
   name: 'Senior Frontend Developer CV',
   education: 'Belarusian State University of Informatics and Radioelectronics, 2019',
@@ -225,7 +231,7 @@ export const cvPreviewFixture: CvPreviewData = {
   projects: [finSight, mediTrack, shopWave],
 };
 
-export const cvPreviewSparseFixture: CvPreviewData = {
+export const cvPreviewSparseFixture: CvPreviewFieldsFragment = {
   id: 'cv-sparse',
   name: 'Draft CV',
   education: '',
@@ -245,7 +251,7 @@ export const cvPreviewSparseFixture: CvPreviewData = {
 
 const longWord = 'Supercalifragilisticexpialidocious'.repeat(3);
 
-export const cvPreviewEdgeCasesFixture: CvPreviewData = {
+export const cvPreviewEdgeCasesFixture: CvPreviewFieldsFragment = {
   id: 'cv-edge',
   name: `Principal Full Stack Engineer CV for the Enterprise Healthcare Programme ${longWord}`,
   education: `Master of Science in Computer Engineering, ${longWord} University of Technology`,
@@ -294,6 +300,8 @@ export const cvPreviewEdgeCasesFixture: CvPreviewData = {
       roles: [],
       project: {
         id: 'project-edge-1',
+        startDate: '2026-01-01',
+        endDate: '2027-12-31',
         name: `MediTrack Mobile ${longWord}`,
         domain: 'Healthcare',
         description: 'Mobile companion app.',
@@ -312,6 +320,8 @@ export const cvPreviewEdgeCasesFixture: CvPreviewData = {
       roles: [ROLES.backend],
       project: {
         id: 'project-edge-2',
+        startDate: '2025-01-01',
+        endDate: '2025-12-31',
         name: 'MediTrack',
         domain: 'Healthcare',
         description: '',
@@ -327,6 +337,8 @@ export const cvPreviewEdgeCasesFixture: CvPreviewData = {
       roles: [ROLES.frontend, ROLES.backend, ROLES.fullStack, ROLES.teamLead],
       project: {
         id: 'project-edge-3',
+        startDate: '2024-01-01',
+        endDate: '2024-12-31',
         name: 'ShopWave',
         domain: 'E-commerce',
         description:
@@ -335,39 +347,4 @@ export const cvPreviewEdgeCasesFixture: CvPreviewData = {
       },
     },
   ],
-};
-
-const longProjectBases = [finSight, mediTrack, shopWave] as const;
-
-const longProjects: CvPreviewProject[] = Array.from({ length: 10 }, (_, index) => {
-  const base = longProjectBases[index % longProjectBases.length] ?? finSight;
-  const year = 2025 - index;
-  return {
-    ...base,
-    id: `cv-project-long-${index + 1}`,
-    startDate: `${year}-01-01`,
-    endDate: index === 0 ? null : `${year}-12-31`,
-    project: {
-      ...base.project,
-      id: `project-long-${index + 1}`,
-      name: `${base.project.name} ${index + 1}`,
-    },
-  };
-});
-
-export const cvPreviewLongFixture: CvPreviewData = {
-  ...cvPreviewFixture,
-  id: 'cv-long',
-  name: 'Long CV',
-  domains: ['Finance', 'Healthcare', 'E-commerce'],
-  skillGroups: [
-    ...fullSkillGroups,
-    {
-      category: category('extra', 'Additional Tools'),
-      skills: Array.from({ length: 12 }, (_, index) =>
-        withExperience(skill(`Tool ${index + 1}`), index % 5, 2014 + index),
-      ),
-    },
-  ],
-  projects: longProjects,
 };

@@ -5,16 +5,20 @@ import {
   cvPreviewEdgeCasesFixture,
   cvPreviewFixture,
 } from '@/features/cvs/lib/preview/cv-preview.fixtures';
-import type { CvPreviewProject } from '@/features/cvs/lib/preview/cv-preview.types';
+import type { CvProjectFieldsFragment } from '@/gql/graphql';
 import { CvProjectEntry } from './CvProjectEntry';
 
 const [finSight, , shopWave] = cvPreviewFixture.projects as [
-  CvPreviewProject,
-  CvPreviewProject,
-  CvPreviewProject,
+  CvProjectFieldsFragment,
+  CvProjectFieldsFragment,
+  CvProjectFieldsFragment,
 ];
 const [noRolesProject, messyProject, blankResponsibilitiesProject] =
-  cvPreviewEdgeCasesFixture.projects as [CvPreviewProject, CvPreviewProject, CvPreviewProject];
+  cvPreviewEdgeCasesFixture.projects as [
+    CvProjectFieldsFragment,
+    CvProjectFieldsFragment,
+    CvProjectFieldsFragment,
+  ];
 
 // A `term` (dt) has no accessible name in jsdom, so terms are matched by their text
 const queryTerm = (text: string) =>

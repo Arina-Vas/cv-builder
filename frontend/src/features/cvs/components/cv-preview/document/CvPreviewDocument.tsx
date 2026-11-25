@@ -2,15 +2,15 @@
 
 import { type ReactNode, useId } from 'react';
 import { useTranslations } from 'next-intl';
-import { type CvPreviewData } from '@/features/cvs/lib/preview/cv-preview.types';
 import { getFullName } from '@/features/users/lib/getFullName';
 import { CvSummary } from './cv-summary/CvSummary';
 import { CvProjectEntry } from './cv-project-entry/CvProjectEntry';
 import { ProfessionalSkills } from './professional-skills/ProfessionalSkills';
 import s from './CvPreviewDocument.module.css';
+import { type CvPreviewFieldsFragment } from '@/gql/graphql';
 
 type Props = {
-  data: CvPreviewData;
+  data: CvPreviewFieldsFragment;
   actions?: ReactNode;
 };
 export const CvPreviewDocument = ({ data, actions }: Props) => {

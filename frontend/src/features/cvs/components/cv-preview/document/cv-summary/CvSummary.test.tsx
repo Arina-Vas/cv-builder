@@ -6,10 +6,13 @@ import {
   cvPreviewFixture,
   cvPreviewSparseFixture,
 } from '@/features/cvs/lib/preview/cv-preview.fixtures';
-import type { CvPreviewData } from '@/features/cvs/lib/preview/cv-preview.types';
+import type { CvPreviewFieldsFragment } from '@/gql/graphql';
 import { CvSummary } from './CvSummary';
 
-const renderSummary = (data: CvPreviewData, overrides: Partial<CvPreviewData> = {}) => {
+const renderSummary = (
+  data: CvPreviewFieldsFragment,
+  overrides: Partial<CvPreviewFieldsFragment> = {},
+) => {
   const cv = { ...data, ...overrides };
   return renderWithProviders(
     <CvSummary
