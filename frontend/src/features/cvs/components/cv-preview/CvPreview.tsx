@@ -7,6 +7,7 @@ import { ErrorState } from '@/shared/components/error-state/ErrorState';
 import { hasErrorCode } from '@/shared/lib/apollo/graphql-errors';
 import { notFound } from 'next/navigation';
 import { CvPreviewSkeleton } from './CvPreviewSkeleton';
+import { useExportCvPdf } from '@/features/cv-pdf/hooks/useExportCvPdf';
 import { CV_PREVIEW } from '@/features/cvs/api/cvs.operations';
 import { useQuery } from '@apollo/client/react';
 
@@ -21,6 +22,8 @@ export const CvPreview = ({ cvId }: Props) => {
     variables: { id: cvId },
     fetchPolicy: 'cache-and-network',
   });
+
+  const { loading: downloading, exportPdf } = useExportCvPdf(cvId);
 
   if (error) {
     if (hasErrorCode(error, 'NOT_FOUND')) notFound();
@@ -42,7 +45,7 @@ export const CvPreview = ({ cvId }: Props) => {
     <CvPreviewDocument
       data={data.cvPreview}
       actions={
-        <Button variant="secondary" size="sm" disabled>
+        <Button variant="secondary" size="sm" loading={downloading} onClick={exportPdf}>
           {t('exportPdf')}
         </Button>
       }

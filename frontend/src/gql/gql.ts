@@ -25,6 +25,8 @@ type Documents = {
     "\n  mutation Logout {\n    logout\n  }\n": typeof types.LogoutDocument,
     "\n  query BreadcrumbUser($id: ID!) {\n    user(id: $id) {\n      id\n      email\n      firstName\n      lastName\n    }\n  }\n": typeof types.BreadcrumbUserDocument,
     "\n  query BreadcrumbCv($id: ID!) {\n    cv(id: $id) {\n      id\n      name\n    }\n  }\n": typeof types.BreadcrumbCvDocument,
+    "\n  fragment CvPdfFields on CvPdf {\n    content\n    fileName\n  }\n": typeof types.CvPdfFieldsFragmentDoc,
+    "\n  mutation GenerateCvPdf($input: GenerateCvPdfInput!) {\n    generateCvPdf(input: $input) {\n      ...CvPdfFields\n    }\n  }\n": typeof types.GenerateCvPdfDocument,
     "\n  fragment CvProjectFields on CvProject {\n    id\n    startDate\n    endDate\n    responsibilities\n    roles {\n      id\n      name\n    }\n    project {\n      ...ProjectFields\n    }\n  }\n": typeof types.CvProjectFieldsFragmentDoc,
     "\n  query CvProjects(\n    $cvId: ID!\n    $search: String\n    $sortBy: CvProjectSortField!\n    $sortOrder: SortOrder!\n  ) {\n    cvProjects(cvId: $cvId, search: $search, sortBy: $sortBy, sortOrder: $sortOrder) {\n      items {\n        ...CvProjectFields\n      }\n      total\n    }\n  }\n": typeof types.CvProjectsDocument,
     "\n  query AvailableCvProjects($cvId: ID!) {\n    availableCvProjects(cvId: $cvId) {\n      ...ProjectFields\n    }\n  }\n": typeof types.AvailableCvProjectsDocument,
@@ -109,6 +111,8 @@ const documents: Documents = {
     "\n  mutation Logout {\n    logout\n  }\n": types.LogoutDocument,
     "\n  query BreadcrumbUser($id: ID!) {\n    user(id: $id) {\n      id\n      email\n      firstName\n      lastName\n    }\n  }\n": types.BreadcrumbUserDocument,
     "\n  query BreadcrumbCv($id: ID!) {\n    cv(id: $id) {\n      id\n      name\n    }\n  }\n": types.BreadcrumbCvDocument,
+    "\n  fragment CvPdfFields on CvPdf {\n    content\n    fileName\n  }\n": types.CvPdfFieldsFragmentDoc,
+    "\n  mutation GenerateCvPdf($input: GenerateCvPdfInput!) {\n    generateCvPdf(input: $input) {\n      ...CvPdfFields\n    }\n  }\n": types.GenerateCvPdfDocument,
     "\n  fragment CvProjectFields on CvProject {\n    id\n    startDate\n    endDate\n    responsibilities\n    roles {\n      id\n      name\n    }\n    project {\n      ...ProjectFields\n    }\n  }\n": types.CvProjectFieldsFragmentDoc,
     "\n  query CvProjects(\n    $cvId: ID!\n    $search: String\n    $sortBy: CvProjectSortField!\n    $sortOrder: SortOrder!\n  ) {\n    cvProjects(cvId: $cvId, search: $search, sortBy: $sortBy, sortOrder: $sortOrder) {\n      items {\n        ...CvProjectFields\n      }\n      total\n    }\n  }\n": types.CvProjectsDocument,
     "\n  query AvailableCvProjects($cvId: ID!) {\n    availableCvProjects(cvId: $cvId) {\n      ...ProjectFields\n    }\n  }\n": types.AvailableCvProjectsDocument,
@@ -240,6 +244,14 @@ export function graphql(source: "\n  query BreadcrumbUser($id: ID!) {\n    user(
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  query BreadcrumbCv($id: ID!) {\n    cv(id: $id) {\n      id\n      name\n    }\n  }\n"): (typeof documents)["\n  query BreadcrumbCv($id: ID!) {\n    cv(id: $id) {\n      id\n      name\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  fragment CvPdfFields on CvPdf {\n    content\n    fileName\n  }\n"): (typeof documents)["\n  fragment CvPdfFields on CvPdf {\n    content\n    fileName\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation GenerateCvPdf($input: GenerateCvPdfInput!) {\n    generateCvPdf(input: $input) {\n      ...CvPdfFields\n    }\n  }\n"): (typeof documents)["\n  mutation GenerateCvPdf($input: GenerateCvPdfInput!) {\n    generateCvPdf(input: $input) {\n      ...CvPdfFields\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

@@ -56,8 +56,24 @@
   list-style: disc;
 }
 
+/*
+ * A long project may continue on the next page, but only between responsibilities: the name,
+ * the description, a label with its value and one responsibility stay together.
+ * Same page-break rules as `.project__*` in backend/src/cvs/cv-pdf/document/cv-pdf.styles.ts:
+ * keep both in sync.
+ */
 @media print {
-  .entry {
+  .name,
+  .label {
+    break-after: avoid;
+  }
+
+  .description {
+    orphans: 4;
+    widows: 4;
+  }
+
+  .list > li {
     break-inside: avoid;
   }
 }

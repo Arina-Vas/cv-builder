@@ -225,6 +225,26 @@ body {
 /* CvProjectEntry: aside | red line | details, the same split as the CV summary */
 .project {
   display: flex;
+}
+
+/*
+ * A long project may continue on the next page, but only between responsibilities: the name,
+ * the description, a label with its value and one responsibility stay together.
+ * Same page-break rules as the print styles of
+ * frontend/src/features/cvs/components/cv-preview/document/cv-project-entry/CvProjectEntry.module.css:
+ * keep both in sync.
+ */
+.project__name,
+.project__label {
+  break-after: avoid;
+}
+
+.project__description {
+  orphans: 4;
+  widows: 4;
+}
+
+.project__list > li {
   break-inside: avoid;
 }
 
