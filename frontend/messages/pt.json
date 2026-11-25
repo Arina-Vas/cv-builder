@@ -342,7 +342,8 @@
     "delete": {
       "title": "Excluir usuário",
       "message": "Tem certeza de que deseja excluir o usuário <b>{name}</b>?",
-      "lastAdmin": "O último administrador não pode ser excluído. Atribua primeiro a função de administrador a outro usuário"
+      "lastAdmin": "O último administrador não pode ser excluído. Atribua primeiro a função de administrador a outro usuário",
+      "ownAccount": "Você não pode excluir sua própria conta"
     },
     "tabs": {
       "label": "Seções do funcionário",
@@ -353,7 +354,8 @@
     },
     "errors": {
       "emailTaken": "Já existe uma conta com este e-mail",
-      "lastAdminDemote": "O último administrador não pode ser rebaixado. Atribua primeiro a função de administrador a outro usuário"
+      "lastAdminDemote": "O último administrador não pode ser rebaixado. Atribua primeiro a função de administrador a outro usuário",
+      "ownRoleChange": "Você não pode alterar sua própria função"
     }
   },
   "cvs": {

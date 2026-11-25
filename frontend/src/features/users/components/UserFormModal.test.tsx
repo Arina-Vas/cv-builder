@@ -226,7 +226,12 @@ describe('UserFormModal', () => {
     expect(onOpenChange).not.toHaveBeenCalled();
   });
 
-  it('explains why the last admin cannot be demoted, above the buttons', async () => {
+  // OPERATION_NOT_ALLOWED has two causes; extensions.reason tells which one
+  it.each([
+    ['LAST_ADMIN', 'The last admin cannot be demoted. Assign the Admin role to another user first'],
+    ['SELF', 'You cannot change your own role'],
+    [undefined, 'This action is not allowed'],
+  ])('explains reason %j for a refused role change above the buttons', async (reason, shown) => {
     const onOpenChange = vi.fn();
     const admin = { ...existing, role: 'ADMIN' as const };
     const { user } = renderWithProviders(
@@ -251,7 +256,7 @@ describe('UserFormModal', () => {
             result: {
               errors: [
                 new GraphQLError('backend text', {
-                  extensions: { code: 'OPERATION_NOT_ALLOWED' },
+                  extensions: { code: 'OPERATION_NOT_ALLOWED', reason },
                 }),
               ],
             },
@@ -264,9 +269,8 @@ describe('UserFormModal', () => {
     await user.click(screen.getByRole('button', { name: 'Update' }));
 
     const dialog = screen.getByRole('dialog', { name: 'Update user' });
-    expect(await within(dialog).findByRole('alert')).toHaveTextContent(
-      'The last admin cannot be demoted. Assign the Admin role to another user first',
-    );
+    expect(await within(dialog).findByRole('alert')).toHaveTextContent(shown);
+    expect(within(dialog).queryByText('backend text')).not.toBeInTheDocument();
     expect(onOpenChange).not.toHaveBeenCalled();
   });
 });

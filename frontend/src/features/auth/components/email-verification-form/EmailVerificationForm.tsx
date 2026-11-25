@@ -77,7 +77,7 @@ export function EmailVerificationForm({ codeJustSent = false }: EmailVerificatio
       const appError = parseError(error);
 
       if (appError.code === 'BAD_USER_INPUT') {
-        setServerError(t(codeErrorKey(appError.fieldErrors.code ?? appError.message)));
+        setServerError(t(codeErrorKey(appError.reason)));
       } else if (appError.code === 'CONFLICT') {
         toast.info(t('errors.alreadyVerified'));
         router.replace(AuthRoute.home);

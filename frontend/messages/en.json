@@ -337,7 +337,8 @@
     "delete": {
       "title": "Delete user",
       "message": "Are you sure you want to delete user <b>{name}</b>?",
-      "lastAdmin": "The last admin cannot be deleted. Assign the Admin role to another user first"
+      "lastAdmin": "The last admin cannot be deleted. Assign the Admin role to another user first",
+      "ownAccount": "You cannot delete your own account"
     },
     "tabs": {
       "label": "Employee sections",
@@ -348,7 +349,8 @@
     },
     "errors": {
       "emailTaken": "An account with this email already exists",
-      "lastAdminDemote": "The last admin cannot be demoted. Assign the Admin role to another user first"
+      "lastAdminDemote": "The last admin cannot be demoted. Assign the Admin role to another user first",
+      "ownRoleChange": "You cannot change your own role"
     }
   },
   "cvs": {

@@ -342,7 +342,8 @@
     "delete": {
       "title": "Usuń użytkownika",
       "message": "Czy na pewno chcesz usunąć użytkownika <b>{name}</b>?",
-      "lastAdmin": "Nie można usunąć ostatniego administratora. Najpierw nadaj rolę administratora innemu użytkownikowi"
+      "lastAdmin": "Nie można usunąć ostatniego administratora. Najpierw nadaj rolę administratora innemu użytkownikowi",
+      "ownAccount": "Nie możesz usunąć własnego konta"
     },
     "tabs": {
       "label": "Sekcje pracownika",
@@ -353,7 +354,8 @@
     },
     "errors": {
       "emailTaken": "Konto z tym adresem e-mail już istnieje",
-      "lastAdminDemote": "Nie można odebrać roli ostatniemu administratorowi. Najpierw nadaj rolę administratora innemu użytkownikowi"
+      "lastAdminDemote": "Nie można odebrać roli ostatniemu administratorowi. Najpierw nadaj rolę administratora innemu użytkownikowi",
+      "ownRoleChange": "Nie możesz zmienić własnej roli"
     }
   },
   "cvs": {

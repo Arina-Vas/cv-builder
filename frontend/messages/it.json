@@ -342,7 +342,8 @@
     "delete": {
       "title": "Elimina utente",
       "message": "Vuoi davvero eliminare l'utente <b>{name}</b>?",
-      "lastAdmin": "L'ultimo amministratore non può essere eliminato. Assegna prima il ruolo di amministratore a un altro utente"
+      "lastAdmin": "L'ultimo amministratore non può essere eliminato. Assegna prima il ruolo di amministratore a un altro utente",
+      "ownAccount": "Non puoi eliminare il tuo account"
     },
     "tabs": {
       "label": "Sezioni del dipendente",
@@ -353,7 +354,8 @@
     },
     "errors": {
       "emailTaken": "Esiste già un account con questa email",
-      "lastAdminDemote": "L'ultimo amministratore non può essere declassato. Assegna prima il ruolo di amministratore a un altro utente"
+      "lastAdminDemote": "L'ultimo amministratore non può essere declassato. Assegna prima il ruolo di amministratore a un altro utente",
+      "ownRoleChange": "Non puoi modificare il tuo ruolo"
     }
   },
   "cvs": {
