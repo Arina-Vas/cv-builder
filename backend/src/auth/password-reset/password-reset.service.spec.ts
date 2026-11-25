@@ -4,6 +4,7 @@ import { GraphQLError } from 'graphql';
 import { verifyPassword } from '@/common/crypto/password';
 import { hashToken } from '@/common/crypto/tokens';
 import { ErrorCode } from '@/common/errors/error-code.enum';
+import { ErrorReason } from '@/common/errors/error-reason.enum';
 import type { EnvironmentVariables } from '@/config/env.validation';
 import { AuthTokenType } from '@/generated/prisma/enums';
 import type { MailService } from '@/mail/mail.service';
@@ -202,6 +203,7 @@ describe('PasswordResetService', () => {
       expect(error.extensions).toEqual({
         code: ErrorCode.BAD_USER_INPUT,
         fields: [{ field: 'token', message: ResetLinkMessage.invalid }],
+        reason: ErrorReason.INVALID,
       });
       expect(prisma.$transaction).not.toHaveBeenCalled();
     });
@@ -212,6 +214,7 @@ describe('PasswordResetService', () => {
       const error = await errorOf(service.reset(TOKEN, 'new-secret'));
 
       expect(error.message).toBe(ResetLinkMessage.expired);
+      expect(error.extensions['reason']).toBe(ErrorReason.EXPIRED);
       expect(prisma.$transaction).not.toHaveBeenCalled();
     });
 
@@ -222,6 +225,7 @@ describe('PasswordResetService', () => {
       const error = await errorOf(service.reset(TOKEN, 'new-secret'));
 
       expect(error.message).toBe(ResetLinkMessage.invalid);
+      expect(error.extensions['reason']).toBe(ErrorReason.INVALID);
       expect(tx.user.update).not.toHaveBeenCalled();
       expect(tx.session.updateMany).not.toHaveBeenCalled();
     });

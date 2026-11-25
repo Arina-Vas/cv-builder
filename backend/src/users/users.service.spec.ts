@@ -4,6 +4,7 @@ import { plainToInstance } from 'class-transformer';
 import type { GraphQLError } from 'graphql';
 import { verifyPassword } from '@/common/crypto/password';
 import { ErrorCode } from '@/common/errors/error-code.enum';
+import { ErrorReason } from '@/common/errors/error-reason.enum';
 import { UserRole } from '@/common/graphql/enums';
 import { SortOrder } from '@/common/graphql/sort-order.enum';
 import { Prisma } from '@/generated/prisma/client';
@@ -256,6 +257,7 @@ describe('UsersService', () => {
         { field: 'departmentId', message: UserMessage.departmentNotFound },
         { field: 'positionId', message: UserMessage.positionNotFound },
       ]);
+      expect(error.extensions).not.toHaveProperty('reason');
       expect(prisma.user.create).not.toHaveBeenCalled();
     });
 
@@ -324,6 +326,7 @@ describe('UsersService', () => {
 
       expect(error.extensions['code']).toBe(ErrorCode.OPERATION_NOT_ALLOWED);
       expect(error.message).toBe(UserMessage.ownRoleChange);
+      expect(error.extensions['reason']).toBe(ErrorReason.SELF);
       expect(prisma.user.update).not.toHaveBeenCalled();
     });
 
@@ -336,6 +339,7 @@ describe('UsersService', () => {
       expect(prisma.user.count).toHaveBeenCalledWith({ where: { role: UserRole.ADMIN } });
       expect(error.extensions['code']).toBe(ErrorCode.OPERATION_NOT_ALLOWED);
       expect(error.message).toBe(UserMessage.lastAdminDemote);
+      expect(error.extensions['reason']).toBe(ErrorReason.LAST_ADMIN);
       expect(prisma.user.update).not.toHaveBeenCalled();
     });
 
@@ -453,6 +457,7 @@ describe('UsersService', () => {
 
       expect(error.extensions['code']).toBe(ErrorCode.OPERATION_NOT_ALLOWED);
       expect(error.message).toBe(UserMessage.ownAccountDelete);
+      expect(error.extensions['reason']).toBe(ErrorReason.SELF);
       expect(prisma.$transaction).not.toHaveBeenCalled();
     });
 
@@ -473,6 +478,7 @@ describe('UsersService', () => {
 
       expect(error.extensions['code']).toBe(ErrorCode.OPERATION_NOT_ALLOWED);
       expect(error.message).toBe(UserMessage.lastAdminDelete);
+      expect(error.extensions['reason']).toBe(ErrorReason.LAST_ADMIN);
       expect(prisma.user.delete).not.toHaveBeenCalled();
     });
 
@@ -583,6 +589,7 @@ describe('UsersService', () => {
         expect(error.extensions).toMatchObject({
           code: ErrorCode.BAD_USER_INPUT,
           fields: [{ field: 'file', message: ImageUploadMessage.invalidType }],
+          reason: ErrorReason.INVALID_TYPE,
         });
         expect(storage.upload).not.toHaveBeenCalled();
       });

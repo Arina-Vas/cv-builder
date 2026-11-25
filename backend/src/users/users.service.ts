@@ -17,16 +17,17 @@ import { hashPassword } from '@/common/crypto/password';
 import {
   badUserInput,
   conflict,
+  type FieldError,
   forbidden,
   notFound,
   operationNotAllowed,
-  type FieldError,
 } from '@/common/errors/app-errors';
 import { isPrismaError } from '@/prisma/prisma-errors';
 import { readImageUpload } from '@/files/image-upload';
 import { StorageService } from '@/files/storage.service';
 
 import { UserMessage } from './user.messages';
+import { ErrorReason } from '@/common/errors/error-reason.enum';
 
 const userCredentialsSelect = { id: true, passwordHash: true } satisfies Prisma.UserSelect;
 export type UserCredentials = Prisma.UserGetPayload<{ select: typeof userCredentialsSelect }>;
@@ -133,10 +134,10 @@ export class UsersService {
 
         if (target.role !== role) {
           if (id === currentUserId) {
-            throw operationNotAllowed(UserMessage.ownRoleChange);
+            throw operationNotAllowed(UserMessage.ownRoleChange, ErrorReason.SELF);
           }
           if (target.role === UserRole.ADMIN && (await countAdmins(tx)) <= 1) {
-            throw operationNotAllowed(UserMessage.lastAdminDemote);
+            throw operationNotAllowed(UserMessage.lastAdminDemote, ErrorReason.LAST_ADMIN);
           }
         }
 
@@ -175,7 +176,7 @@ export class UsersService {
 
   async delete(id: string, currentUserId: string): Promise<string> {
     if (id === currentUserId) {
-      throw operationNotAllowed(UserMessage.ownAccountDelete);
+      throw operationNotAllowed(UserMessage.ownAccountDelete, ErrorReason.SELF);
     }
 
     const avatarKey = await this.prisma.$transaction(
@@ -188,7 +189,7 @@ export class UsersService {
           throw notFound(UserMessage.notFound);
         }
         if (target.role === UserRole.ADMIN && (await countAdmins(tx)) <= 1) {
-          throw operationNotAllowed(UserMessage.lastAdminDelete);
+          throw operationNotAllowed(UserMessage.lastAdminDelete, ErrorReason.LAST_ADMIN);
         }
 
         await tx.user.delete({ where: { id } });

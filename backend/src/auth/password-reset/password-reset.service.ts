@@ -9,6 +9,7 @@ import { MailService } from '@/mail/mail.service';
 import { PrismaService } from '@/prisma/prisma.service';
 import { UsersService } from '@/users/users.service';
 import { ResetLinkMessage } from './password-reset.messages';
+import { ErrorReason } from '@/common/errors/error-reason.enum';
 
 export const RESET_TOKEN_TTL_MINUTES = 30;
 export const REQUEST_COOLDOWN_SECONDS = 60;
@@ -17,8 +18,8 @@ export const RESET_PASSWORD_PATH = '/reset-password';
 const MINUTE_MS = 60 * 1000;
 const SECOND_MS = 1000;
 
-const linkError = (message: string) =>
-  badUserInput({ fields: [{ field: 'token', message }], message });
+const linkError = (message: string, reason: ErrorReason) =>
+  badUserInput({ fields: [{ field: 'token', message }], message, reason });
 
 @Injectable()
 export class PasswordResetService {
@@ -74,10 +75,10 @@ export class PasswordResetService {
     });
 
     if (!found || found.usedAt) {
-      throw linkError(ResetLinkMessage.invalid);
+      throw linkError(ResetLinkMessage.invalid, ErrorReason.INVALID);
     }
     if (found.expiresAt <= new Date()) {
-      throw linkError(ResetLinkMessage.expired);
+      throw linkError(ResetLinkMessage.expired, ErrorReason.EXPIRED);
     }
 
     const passwordHash = await hashPassword(newPassword);
@@ -89,7 +90,7 @@ export class PasswordResetService {
         data: { usedAt: now },
       });
       if (count === 0) {
-        throw linkError(ResetLinkMessage.invalid);
+        throw linkError(ResetLinkMessage.invalid, ErrorReason.INVALID);
       }
       await tx.user.update({ where: { id: found.userId }, data: { passwordHash } });
       await tx.session.updateMany({

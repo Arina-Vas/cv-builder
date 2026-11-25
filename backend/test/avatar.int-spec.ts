@@ -138,6 +138,7 @@ describe('Avatar (integration)', () => {
       expect(body.errors?.[0]?.extensions).toMatchObject({
         code: 'BAD_USER_INPUT',
         fields: [{ field: 'file', message: ImageUploadMessage.invalidType }],
+        reason: 'INVALID_TYPE',
       });
       expect(await storedKey(user.id)).toBeNull();
       expect(t.storage.files.size).toBe(0);
@@ -162,6 +163,7 @@ describe('Avatar (integration)', () => {
       expect(rejected.body.errors?.[0]?.extensions).toMatchObject({
         code: 'BAD_USER_INPUT',
         fields: [{ field: 'file', message: ImageUploadMessage.tooLarge }],
+        reason: 'TOO_LARGE',
       });
       expect(t.storage.files.size).toBe(1);
     });
@@ -179,6 +181,7 @@ describe('Avatar (integration)', () => {
       expect(body.errors?.[0]?.extensions).toMatchObject({
         code: 'BAD_USER_INPUT',
         fields: [{ field: 'file', message: ImageUploadMessage.tooLarge }],
+        reason: 'TOO_LARGE',
       });
       expect(await storedKey(user.id)).toBeNull();
     });

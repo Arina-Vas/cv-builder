@@ -308,6 +308,7 @@ describe('Users (integration)', () => {
 
       expect(error.extensions.code).toBe('OPERATION_NOT_ALLOWED');
       expect(error.message).toBe(UserMessage.ownRoleChange);
+      expect(error.extensions.reason).toBe('SELF');
     });
 
     it('lets an Admin change their own department while keeping the role', async () => {
@@ -494,6 +495,7 @@ describe('Users (integration)', () => {
 
       expect(error.extensions.code).toBe('OPERATION_NOT_ALLOWED');
       expect(error.message).toBe(UserMessage.ownAccountDelete);
+      expect(error.extensions.reason).toBe('SELF');
     });
 
     it('fails with NOT_FOUND for a user that is already deleted', async () => {
