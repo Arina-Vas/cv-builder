@@ -405,6 +405,45 @@
         "title": "Нет доступа",
         "message": "У вас нет доступа к этому резюме"
       }
+    },
+    "preview": {
+      "loading": "Загрузка предпросмотра резюме",
+      "loadError": "Не удалось загрузить предпросмотр резюме",
+      "loadErrorTitle": "Упс",
+      "retry": "Повторить",
+      "empty": "Предпросмотр резюме недоступен",
+      "forbidden": {
+        "title": "Нет доступа",
+        "message": "У вас нет доступа к этому резюме"
+      },
+      "exportPdf": "Экспорт в PDF",
+      "exportingPdf": "Создание PDF",
+      "exportError": "Не удалось создать PDF",
+      "document": {
+        "sections": {
+          "education": "Образование",
+          "languages": "Владение языками",
+          "domains": "Домены",
+          "projects": "Проекты",
+          "professionalSkills": "Профессиональные навыки"
+        },
+        "languageLevel": "{language} — {level}",
+        "project": {
+          "roles": "Роли в проекте",
+          "period": "Период",
+          "responsibilities": "Обязанности",
+          "environment": "Технологии"
+        },
+        "period": "{start} – {end}",
+        "present": "по настоящее время",
+        "skillsTable": {
+          "skills": "Навыки",
+          "category": "Категория навыков",
+          "skill": "Навык",
+          "experience": "Опыт (лет)",
+          "lastUsed": "Последнее использование"
+        }
+      }
     }
   },
   "cvProjects": {

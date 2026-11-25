@@ -405,6 +405,45 @@
         "title": "Accesso negato",
         "message": "Non sei autorizzato ad accedere a questo CV"
       }
+    },
+    "preview": {
+      "loading": "Caricamento dell'anteprima del CV",
+      "loadError": "Impossibile caricare l'anteprima del CV",
+      "loadErrorTitle": "Ops",
+      "retry": "Riprova",
+      "empty": "L'anteprima del CV non è disponibile",
+      "forbidden": {
+        "title": "Accesso negato",
+        "message": "Non sei autorizzato ad accedere a questo CV"
+      },
+      "exportPdf": "Esporta PDF",
+      "exportingPdf": "Generazione del PDF",
+      "exportError": "Impossibile generare il PDF",
+      "document": {
+        "sections": {
+          "education": "Istruzione",
+          "languages": "Conoscenze linguistiche",
+          "domains": "Domini",
+          "projects": "Progetti",
+          "professionalSkills": "Competenze professionali"
+        },
+        "languageLevel": "{language} — {level}",
+        "project": {
+          "roles": "Ruoli nel progetto",
+          "period": "Periodo",
+          "responsibilities": "Responsabilità",
+          "environment": "Tecnologie"
+        },
+        "period": "{start} – {end}",
+        "present": "oggi",
+        "skillsTable": {
+          "skills": "Competenze",
+          "category": "Categoria di competenze",
+          "skill": "Competenza",
+          "experience": "Esperienza (anni)",
+          "lastUsed": "Ultimo utilizzo"
+        }
+      }
     }
   },
   "cvProjects": {

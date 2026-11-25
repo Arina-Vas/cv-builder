@@ -414,6 +414,45 @@
         "title": "Accès refusé",
         "message": "Vous n'êtes pas autorisé à accéder à ce CV"
       }
+    },
+    "preview": {
+      "loading": "Chargement de l'aperçu du CV",
+      "loadError": "Impossible de charger l'aperçu du CV",
+      "loadErrorTitle": "Oups",
+      "retry": "Réessayer",
+      "empty": "L'aperçu du CV n'est pas disponible",
+      "forbidden": {
+        "title": "Accès refusé",
+        "message": "Vous n'êtes pas autorisé à accéder à ce CV"
+      },
+      "exportPdf": "Exporter en PDF",
+      "exportingPdf": "Génération du PDF",
+      "exportError": "Impossible de générer le PDF",
+      "document": {
+        "sections": {
+          "education": "Formation",
+          "languages": "Langues",
+          "domains": "Domaines",
+          "projects": "Projets",
+          "professionalSkills": "Compétences professionnelles"
+        },
+        "languageLevel": "{language} — {level}",
+        "project": {
+          "roles": "Rôles sur le projet",
+          "period": "Période",
+          "responsibilities": "Responsabilités",
+          "environment": "Environnement technique"
+        },
+        "period": "{start} – {end}",
+        "present": "aujourd'hui",
+        "skillsTable": {
+          "skills": "Compétences",
+          "category": "Catégorie de compétences",
+          "skill": "Compétence",
+          "experience": "Expérience (années)",
+          "lastUsed": "Dernière utilisation"
+        }
+      }
     }
   },
   "cvProjects": {
