@@ -1,8 +1,8 @@
 import { Locale } from '@/common/graphql/locale.enum';
 import { escapeHtml } from '@/common/html/escape-html';
-import { getCvPdfFontFaces } from '@/cvs/cv-pdf/cv-pdf.fonts';
-import { CV_PDF_LABELS, type CvPdfLabels } from '@/cvs/cv-pdf/cv-pdf.labels';
-import { CV_PDF_STYLES } from '@/cvs/cv-pdf/cv-pdf.styles';
+import { getCvPdfFontFaces } from '@/cvs/cv-pdf/document/cv-pdf.fonts';
+import { CV_PDF_LABELS, type CvPdfLabels } from '@/cvs/cv-pdf/document/cv-pdf.labels';
+import { CV_PDF_STYLES } from '@/cvs/cv-pdf/document/cv-pdf.styles';
 import type { CvPreview } from '@/cvs/cv-preview/models/cv-preview.model';
 import type { CvProject } from '@/cvs/cv-projects/models/cv-project.model';
 import type { CvPreviewSkillGroup } from '@/cvs/cv-preview/models/cv-preview-skill-group.model';

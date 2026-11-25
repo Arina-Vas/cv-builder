@@ -71,10 +71,10 @@ in the Preview and the PDF alike.
 
 The template and the styles are copies of the Preview markup and CSS. A change to
 `frontend/src/features/cvs/components/cv-preview/document/**` (markup, CSS modules) needs the same change in
-`backend/src/cvs/cv-pdf/cv-pdf.template.ts` or `cv-pdf.styles.ts`. A change to the texts in
+`backend/src/cvs/cv-pdf/document/cv-pdf.template.ts` or `cv-pdf.styles.ts`. A change to the texts in
 `messages/*.json` → `cvs.preview.document` or `userLanguage.proficiencyLevel` needs the same change in
-`cv-pdf.labels.ts` (the labels test points to it). Class names in the PDF have a block prefix (`summary__title`, `project__name`), because
-the CSS modules reuse names like `.title` and `.value`.
+`cv-pdf.labels.ts` (the labels test points to it). Class names in the PDF have a block prefix
+(`summary__title`, `project__name`), because the CSS modules reuse names like `.title` and `.value`.
 
 ### Browser lifecycle
 
@@ -102,19 +102,19 @@ the CSS modules reuse names like `.title` and `.value`.
 
 ## Files
 
-| File                                          | What it does                                                 |
-| --------------------------------------------- | ------------------------------------------------------------ |
-| `src/cvs/cv-pdf/cv-pdf.resolver.ts`           | `generateCvPdf(input)`, `@AllowUnverified()`                 |
-| `src/cvs/cv-pdf/dto/generate-cv-pdf.input.ts` | `GenerateCvPdfInput`: `cvId` (UUID), `locale` (default `en`) |
-| `src/cvs/cv-pdf/cv-pdf.service.ts`            | access → data → HTML → PDF → base64; owns the browser        |
-| `src/cvs/cv-pdf/cv-pdf.template.ts`           | HTML of the document; `splitResponsibilities`                |
-| `src/cvs/cv-pdf/cv-pdf.labels.ts`             | `CV_PDF_LABELS`: texts of the document for every locale      |
-| `src/common/graphql/locale.enum.ts`           | `Locale` GraphQL enum                                        |
-| `src/cvs/cv-pdf/cv-pdf.styles.ts`             | CSS of the document                                          |
-| `src/cvs/cv-pdf/cv-pdf.fonts.ts`, `fonts/`    | Roboto `@font-face` rules and the woff2 files                |
-| `src/cvs/cv-pdf/cv-pdf-file-name.ts`          | `toPdfFileName`                                              |
-| `src/cvs/cv-pdf/cv-pdf.fixtures.ts`           | test data: `CvPreview` builders for the unit tests           |
-| `src/common/html/escape-html.ts`              | HTML escaping, shared with the email templates               |
+| File                                                | What it does                                                 |
+| --------------------------------------------------- | ------------------------------------------------------------ |
+| `src/cvs/cv-pdf/cv-pdf.resolver.ts`                 | `generateCvPdf(input)`, `@AllowUnverified()`                 |
+| `src/cvs/cv-pdf/dto/generate-cv-pdf.input.ts`       | `GenerateCvPdfInput`: `cvId` (UUID), `locale` (default `en`) |
+| `src/cvs/cv-pdf/cv-pdf.service.ts`                  | access → data → HTML → PDF → base64; owns the browser        |
+| `src/cvs/cv-pdf/document/cv-pdf.template.ts`        | HTML of the document; `splitResponsibilities`                |
+| `src/cvs/cv-pdf/document/cv-pdf.labels.ts`          | `CV_PDF_LABELS`: texts of the document for every locale      |
+| `src/common/graphql/locale.enum.ts`                 | `Locale` GraphQL enum                                        |
+| `src/cvs/cv-pdf/document/cv-pdf.styles.ts`          | CSS of the document                                          |
+| `src/cvs/cv-pdf/document/cv-pdf.fonts.ts`, `fonts/` | Roboto `@font-face` rules and the woff2 files                |
+| `src/cvs/cv-pdf/cv-pdf.file-name.ts`                | `toPdfFileName`                                              |
+| `src/cvs/cv-pdf/cv-pdf.fixtures.ts`                 | test data: `CvPreview` builders for the unit tests           |
+| `src/common/html/escape-html.ts`                    | HTML escaping, shared with the email templates               |
 
 The resolver and the service are registered in `CvModule`, next to `CvPreviewService`. `*.fixtures.ts` is
 excluded from the build (`tsconfig.build.json`).
@@ -182,7 +182,7 @@ namespaces), so `backend-integration` sets `PUPPETEER_NO_SANDBOX: true`.
 - `cv-pdf.fixtures.ts` holds the `CvPreview` test data shared by the template and service specs.
 - `cv-pdf.template.spec.ts`: HTML of the document (escaping, hidden empty sections, period, punctuation, skills
   table, labels and `lang` of the locale, the Content-Security-Policy), `splitResponsibilities`.
-- `cv-pdf-file-name.spec.ts`: `toPdfFileName`.
+- `cv-pdf.file-name.spec.ts`: `toPdfFileName`.
 - `cv-pdf.service.spec.ts`: puppeteer and `CvPreviewService` are mocked. The preview is requested for the
   current user, its data reaches the HTML, access errors stop before Chromium starts, one browser for
   sequential and parallel requests, a new launch after a failed launch or a disconnect, one PDF at a time

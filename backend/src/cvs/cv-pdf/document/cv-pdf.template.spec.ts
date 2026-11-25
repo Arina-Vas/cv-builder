@@ -10,7 +10,7 @@ import {
   skillFixture,
   userFixture,
   userLanguageFixture,
-} from './cv-pdf.fixtures';
+} from '../cv-pdf.fixtures';
 import { renderCvPdfHtml, splitResponsibilities } from './cv-pdf.template';
 
 /** The document without <head>: styles and fonts would match any text search */

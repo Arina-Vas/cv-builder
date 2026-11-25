@@ -5,7 +5,7 @@ import { CV_PDF_LABELS } from './cv-pdf.labels';
 
 type Messages = { [key: string]: string | Messages };
 
-const MESSAGES_DIR = join(__dirname, '../../../../frontend/messages');
+const MESSAGES_DIR = join(__dirname, '../../../../../frontend/messages');
 
 const readMessages = (locale: string): Messages =>
   JSON.parse(readFileSync(join(MESSAGES_DIR, `${locale}.json`), 'utf8')) as Messages;
