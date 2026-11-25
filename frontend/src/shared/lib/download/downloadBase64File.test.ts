@@ -1,9 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { downloadBase64File } from './downloadBase64File';
+import { downloadBase64File, REVOKE_URL_DELAY_MS } from './downloadBase64File';
 
 // "%PDF" in base64
 const BASE64 = 'JVBERg==';
 const BLOB_URL = 'blob:http://localhost/pdf';
+const PDF = 'application/pdf';
 
 describe('downloadBase64File', () => {
   let createObjectURL: ReturnType<typeof vi.fn>;
@@ -24,7 +25,7 @@ describe('downloadBase64File', () => {
   });
 
   it('clicks a link to the blob with the given file name', () => {
-    downloadBase64File(BASE64, 'software-engineer.pdf');
+    downloadBase64File(BASE64, 'software-engineer.pdf', PDF);
 
     expect(click).toHaveBeenCalledTimes(1);
     const link = click.mock.contexts[0] as HTMLAnchorElement;
@@ -33,7 +34,7 @@ describe('downloadBase64File', () => {
   });
 
   it('puts the decoded bytes into a PDF blob', async () => {
-    downloadBase64File(BASE64, 'cv.pdf');
+    downloadBase64File(BASE64, 'cv.pdf', PDF);
 
     const blob = createObjectURL.mock.calls[0]?.[0] as Blob;
     expect(blob.type).toBe('application/pdf');
@@ -46,16 +47,19 @@ describe('downloadBase64File', () => {
     expect((createObjectURL.mock.calls[0]?.[0] as Blob).type).toBe('text/plain');
   });
 
-  it('revokes the blob URL after the click', () => {
-    downloadBase64File(BASE64, 'cv.pdf');
+  // Firefox and Safari may start the download after the click handler returns
+  it('revokes the blob URL only after a delay, not right after the click', () => {
+    downloadBase64File(BASE64, 'cv.pdf', PDF);
+
+    vi.advanceTimersByTime(REVOKE_URL_DELAY_MS - 1);
     expect(revokeObjectURL).not.toHaveBeenCalled();
 
-    vi.runAllTimers();
+    vi.advanceTimersByTime(1);
     expect(revokeObjectURL).toHaveBeenCalledWith(BLOB_URL);
   });
 
   it('does not leave the link in the document', () => {
-    downloadBase64File(BASE64, 'cv.pdf');
+    downloadBase64File(BASE64, 'cv.pdf', PDF);
 
     expect(document.querySelector('a[download]')).toBeNull();
   });
