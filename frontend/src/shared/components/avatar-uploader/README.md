@@ -62,7 +62,10 @@ The limit and the types are the same as on the backend (`backend/src/files/image
 checks them again by the file content: these checks only save a request.
 
 `tooLarge` and the hint under the link (`hint`: `png, jpg or gif no more than 5 MB`) take the limit as
-`{maxSize}`: pass it as ready text (`5 MB`), not as the byte count used for the check.
+`{maxSize}`: pass it as ready text (`5 MB`), not as the byte count used for the check. That text is
+exported as `MAX_SIZE_LABEL`, for a parent that shows `tooLarge` itself: `ProfileAvatar` does so when
+the backend rejects the file with `reason: 'TOO_LARGE'` (and shows `invalidType` for
+`reason: 'INVALID_TYPE'`, see `docs/api/conventions.md` → Reasons).
 
 `accept` on the input only filters the file dialog (the user can switch it to "All files"), so the type
 is checked again in code. The input value is reset after every choice, so choosing the same file again
