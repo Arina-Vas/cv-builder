@@ -170,7 +170,11 @@ describe('CvPreview', () => {
       await user.click(exportButton());
 
       await waitFor(() =>
-        expect(downloadBase64File).toHaveBeenCalledExactlyOnceWith(PDF.content, PDF.fileName),
+        expect(downloadBase64File).toHaveBeenCalledExactlyOnceWith(
+          PDF.content,
+          PDF.fileName,
+          'application/pdf',
+        ),
       );
     });
 

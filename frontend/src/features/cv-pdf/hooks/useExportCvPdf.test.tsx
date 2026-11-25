@@ -9,7 +9,7 @@ import { GENERATE_CV_PDF } from '@/features/cv-pdf/api/cv-pdf.operations';
 import type { Locale } from '@/i18n/config';
 import { ToastProvider } from '@/shared/components/toast/ToastProvider';
 import { downloadBase64File } from '@/shared/lib/download/downloadBase64File';
-import en from '../../../../../messages/en.json';
+import en from '../../../../messages/en.json';
 import { useExportCvPdf } from './useExportCvPdf';
 
 vi.mock('@/shared/lib/download/downloadBase64File', () => ({ downloadBase64File: vi.fn() }));
@@ -55,7 +55,11 @@ describe('useExportCvPdf', () => {
 
     await act(() => result.current.exportPdf());
 
-    expect(downloadBase64File).toHaveBeenCalledExactlyOnceWith(PDF.content, PDF.fileName);
+    expect(downloadBase64File).toHaveBeenCalledExactlyOnceWith(
+      PDF.content,
+      PDF.fileName,
+      'application/pdf',
+    );
     expect(screen.queryByRole('status')).toBeNull();
   });
 

@@ -4,7 +4,7 @@ import { type Column, DataTable, TableToolbar } from '@/shared/components/table'
 import type { CvFieldsFragment } from '@/gql/graphql';
 import { useTranslations } from 'next-intl';
 import { Pagination } from '@/shared/components/pagination';
-import { useCvList } from '@/features/cvs/lib/hooks/useCvList';
+import { useCvList } from '@/features/cvs/hooks/useCvList';
 import { notFound, useRouter } from 'next/navigation';
 import { useCurrentUser } from '@/features/auth/hooks/useCurrentUser';
 import { useState } from 'react';

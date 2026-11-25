@@ -26,7 +26,12 @@ export const useExportCvPdf = (cvId: string) => {
       const { data } = await generatePdf({
         variables: { input: { locale, cvId } },
       });
-      if (data) downloadBase64File(data.generateCvPdf.content, data.generateCvPdf.fileName);
+      if (data)
+        downloadBase64File(
+          data.generateCvPdf.content,
+          data.generateCvPdf.fileName,
+          'application/pdf',
+        );
     } catch (error) {
       const appError = parseError(error);
       toast.error(appError.code ? errorMessage(appError) : t('exportError'));

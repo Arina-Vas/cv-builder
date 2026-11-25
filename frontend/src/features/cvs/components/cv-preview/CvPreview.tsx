@@ -7,7 +7,7 @@ import { ErrorState } from '@/shared/components/error-state/ErrorState';
 import { hasErrorCode } from '@/shared/lib/apollo/graphql-errors';
 import { notFound } from 'next/navigation';
 import { CvPreviewSkeleton } from './CvPreviewSkeleton';
-import { useExportCvPdf } from '@/features/cv-pdf/lib/hooks/useExportCvPdf';
+import { useExportCvPdf } from '@/features/cv-pdf/hooks/useExportCvPdf';
 import { CV_PREVIEW } from '@/features/cvs/api/cvs.operations';
 import { useQuery } from '@apollo/client/react';
 
