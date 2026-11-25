@@ -13,7 +13,7 @@ export class CvPdfResolver {
   @Mutation(() => CvPdf, {
     description:
       'Own CV or Admin. Builds a PDF of the CV preview and returns it as base64. ' +
-      'Fails with NOT_FOUND, FORBIDDEN for another user, BAD_USER_INPUT when preview data is incomplete',
+      'Fails with NOT_FOUND, FORBIDDEN for another user, BAD_USER_INPUT for an invalid cvId or locale',
   })
   generateCvPdf(
     @CurrentUser() user: User,

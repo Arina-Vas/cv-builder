@@ -33,7 +33,7 @@ const createPage = () => ({
 
 describe('CvPdfService', () => {
   let page: ReturnType<typeof createPage>;
-  let browser: { newPage: jest.Mock; close: jest.Mock };
+  let browser: { newPage: jest.Mock; close: jest.Mock; once: jest.Mock };
   let cvPreview: { getPreview: jest.Mock };
   let config: { get: jest.Mock };
   let service: CvPdfService;
@@ -41,7 +41,7 @@ describe('CvPdfService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     page = createPage();
-    browser = { newPage: jest.fn().mockResolvedValue(page), close: jest.fn() };
+    browser = { newPage: jest.fn().mockResolvedValue(page), close: jest.fn(), once: jest.fn() };
     mockLaunch.mockResolvedValue(browser);
     cvPreview = { getPreview: jest.fn().mockResolvedValue(preview) };
     config = { get: jest.fn().mockReturnValue(false) };
@@ -124,6 +124,40 @@ describe('CvPdfService', () => {
       await Promise.all([service.generate(INPUT, OWNER), service.generate(INPUT, OWNER)]);
 
       expect(mockLaunch).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not keep a failed launch: the next PDF starts Chromium again', async () => {
+      const error = new Error('Failed to launch the browser process');
+      mockLaunch.mockRejectedValueOnce(error);
+
+      await expect(service.generate(INPUT, OWNER)).rejects.toBe(error);
+      await service.generate(INPUT, OWNER);
+
+      expect(mockLaunch).toHaveBeenCalledTimes(2);
+      expect(browser.newPage).toHaveBeenCalledTimes(1);
+    });
+
+    it('starts a new Chromium after the browser crashes or disconnects', async () => {
+      await service.generate(INPUT, OWNER);
+      const [event, onDisconnected] = browser.once.mock.calls[0] as [string, () => void];
+      expect(event).toBe('disconnected');
+
+      onDisconnected();
+      await service.generate(INPUT, OWNER);
+
+      expect(mockLaunch).toHaveBeenCalledTimes(2);
+    });
+
+    it('ignores a late disconnect of a browser that was already replaced', async () => {
+      await service.generate(INPUT, OWNER);
+      const [, onOldDisconnected] = browser.once.mock.calls[0] as [string, () => void];
+      onOldDisconnected();
+      await service.generate(INPUT, OWNER);
+
+      onOldDisconnected();
+      await service.generate(INPUT, OWNER);
+
+      expect(mockLaunch).toHaveBeenCalledTimes(2);
     });
 
     it('starts the headless shell with the sandbox by default', async () => {

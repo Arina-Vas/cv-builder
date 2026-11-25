@@ -81,7 +81,9 @@ the CSS modules reuse names like `.title` and `.value`.
   start two browsers. Every PDF gets its own page, closed in `finally`.
 - `onModuleDestroy` closes the browser. `main.ts` calls `app.enableShutdownHooks()`, so it also happens on
   Ctrl+C, SIGTERM and `nest start --watch` restarts; without it a Chromium process stays behind.
-- A failed launch stays cached until the backend restarts (accepted for now).
+- A failed launch is not kept: the request fails, and the next PDF tries to launch Chromium again. A browser
+  that crashes or disconnects is dropped on its `disconnected` event, so the next PDF launches a new one
+  instead of failing until the backend restarts (`CvPdfService.getBrowser`).
 
 ## Files
 
@@ -168,8 +170,8 @@ namespaces), so `backend-integration` sets `PUPPETEER_NO_SANDBOX: true`.
 - `cv-pdf-file-name.spec.ts`: `toPdfFileName`.
 - `cv-pdf.service.spec.ts`: puppeteer and `CvPreviewService` are mocked. The preview is requested for the
   current user, its data reaches the HTML, access errors stop before Chromium starts, one browser for
-  sequential and parallel requests, the page is closed after an error, the locale reaches the HTML, the sandbox
-  flag, `onModuleDestroy`.
+  sequential and parallel requests, a new launch after a failed launch or a disconnect, the page is closed
+  after an error, the locale reaches the HTML, the sandbox flag, `onModuleDestroy`.
 - `test/cv-pdf.int-spec.ts`: real Chromium and the test database. Own CV → `%PDF-`, a CV with every section
   filled (owner, language, skills, projects; 2 pages) and a long CV that continues on more pages (page count
   from the PDF), the PDF language (`/Lang`) for `ru` and for a request without `locale`, another user's CV → `FORBIDDEN` (wiki AC-31, AC-49), Admin,

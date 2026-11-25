@@ -20,7 +20,7 @@ export class CvPdfService implements OnModuleDestroy {
 
   async generate(input: GenerateCvPdfInput, currentUser: User): Promise<CvPdf> {
     const preview = await this.cvPreviewService.getPreview(currentUser, input.cvId);
-    const page = await (this.browser ??= this.launch()).then((browser) => browser.newPage());
+    const page = await this.getBrowser().then((browser) => browser.newPage());
 
     try {
       await page.setContent(renderCvPdfHtml(preview, input.locale), { waitUntil: 'load' });
@@ -35,11 +35,27 @@ export class CvPdfService implements OnModuleDestroy {
   }
 
   async onModuleDestroy(): Promise<void> {
-    await (await this.browser)?.close();
+    await (await this.browser?.catch(() => undefined))?.close();
   }
 
   private launch(): Promise<Browser> {
     const noSandbox = this.config.get('PUPPETEER_NO_SANDBOX', { infer: true });
     return puppeteer.launch({ headless: 'shell', args: noSandbox ? ['--no-sandbox'] : [] });
+  }
+
+  private getBrowser(): Promise<Browser> {
+    if (!this.browser) {
+      const launching = this.launch().then((browser) => {
+        browser.once('disconnected', () => {
+          if (this.browser === launching) this.browser = undefined;
+        });
+        return browser;
+      });
+      launching.catch(() => {
+        if (this.browser === launching) this.browser = undefined;
+      });
+      this.browser = launching;
+    }
+    return this.browser;
   }
 }
