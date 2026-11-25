@@ -12,4 +12,4 @@ const toFieldErrors = (errors: ValidationError[], parent = ''): FieldError[] => 
 };
 
 export const validationExceptionFactory = (errors: ValidationError[]): GraphQLError =>
-  badUserInput(toFieldErrors(errors));
+  badUserInput({ fields: toFieldErrors(errors) });

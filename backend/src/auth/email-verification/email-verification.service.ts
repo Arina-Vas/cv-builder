@@ -22,7 +22,8 @@ export const VerificationMessage = {
 const MINUTE_MS = 60 * 1000;
 const SECOND_MS = 1000;
 
-const codeError = (message: string) => badUserInput([{ field: 'code', message }], message);
+const codeError = (message: string) =>
+  badUserInput({ fields: [{ field: 'code', message }], message });
 
 @Injectable()
 export class EmailVerificationService {

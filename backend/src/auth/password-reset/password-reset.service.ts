@@ -17,7 +17,8 @@ export const RESET_PASSWORD_PATH = '/reset-password';
 const MINUTE_MS = 60 * 1000;
 const SECOND_MS = 1000;
 
-const linkError = (message: string) => badUserInput([{ field: 'token', message }], message);
+const linkError = (message: string) =>
+  badUserInput({ fields: [{ field: 'token', message }], message });
 
 @Injectable()
 export class PasswordResetService {

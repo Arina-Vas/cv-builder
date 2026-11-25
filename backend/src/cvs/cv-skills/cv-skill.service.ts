@@ -57,7 +57,9 @@ export class CvSkillService {
       select: { mastery: true },
     });
     if (!ownerSkill) {
-      throw badUserInput([{ field: 'skillId', message: 'Skill is not assigned to the CV owner' }]);
+      throw badUserInput({
+        fields: [{ field: 'skillId', message: 'Skill is not assigned to the CV owner' }],
+      });
     }
 
     try {

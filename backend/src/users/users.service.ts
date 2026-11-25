@@ -315,7 +315,7 @@ export class UsersService {
       fields.push({ field: 'positionId', message: UserMessage.positionNotFound });
     }
     if (fields.length > 0) {
-      throw badUserInput(fields);
+      throw badUserInput({ fields });
     }
   }
 }

@@ -74,7 +74,8 @@ export class CvProjectService {
       where: { id: projectId },
       select: { startDate: true, endDate: true },
     });
-    if (!project) throw badUserInput([{ field: 'projectId', message: 'Project not found' }]);
+    if (!project)
+      throw badUserInput({ fields: [{ field: 'projectId', message: 'Project not found' }] });
 
     this.assertWithinProject(project, startDate, endDate);
     await this.assertRolesExist(roleIds);
@@ -97,7 +98,7 @@ export class CvProjectService {
       if (isPrismaError(error, 'P2002'))
         throw conflict('projectId', 'Project is already added to the CV');
       if (isPrismaError(error, 'P2003'))
-        throw badUserInput([{ field: 'roleIds', message: 'Role not found' }]);
+        throw badUserInput({ fields: [{ field: 'roleIds', message: 'Role not found' }] });
       throw error;
     }
   }
@@ -132,7 +133,7 @@ export class CvProjectService {
       return toCvProject(row);
     } catch (error) {
       if (isPrismaError(error, 'P2003'))
-        throw badUserInput([{ field: 'roleIds', message: 'Role not found' }]);
+        throw badUserInput({ fields: [{ field: 'roleIds', message: 'Role not found' }] });
       if (isPrismaError(error, 'P2025')) throw notFound('CV project not found');
       throw error;
     }
@@ -177,14 +178,14 @@ export class CvProjectService {
       fields.push({ field: 'endDate', message: 'End date must be within project duration' });
     }
 
-    if (fields.length > 0) throw badUserInput(fields);
+    if (fields.length > 0) throw badUserInput({ fields });
   }
 
   private async assertRolesExist(roleIds: string[]): Promise<void> {
     const found = await this.prisma.projectRole.count({ where: { id: { in: roleIds } } });
 
     if (found !== roleIds.length) {
-      throw badUserInput([{ field: 'roleIds', message: 'Role not found' }]);
+      throw badUserInput({ fields: [{ field: 'roleIds', message: 'Role not found' }] });
     }
   }
 }

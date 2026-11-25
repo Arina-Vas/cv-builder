@@ -40,7 +40,7 @@ export const detectImageType = (body: Buffer): Omit<ImageType, 'signatures'> | n
   return type ? { contentType: type.contentType, extension: type.extension } : null;
 };
 
-const fileError = (message: string) => badUserInput([{ field: 'file', message }]);
+const fileError = (message: string) => badUserInput({ fields: [{ field: 'file', message }] });
 
 const isSizeLimitError = (error: unknown): boolean =>
   typeof error === 'object' && error !== null && 'status' in error && error.status === 413;
