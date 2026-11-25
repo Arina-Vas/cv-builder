@@ -430,8 +430,9 @@ last Admin can be neither demoted nor deleted.
 The list of reasons is `ErrorReason` in `backend/src/common/errors/error-reason.enum.ts`. The frontend repeats it as
 `ERROR_REASONS` (`frontend/src/shared/lib/apollo/graphql-errors.ts`); `parseError` returns a known reason and drops
 an unknown one, and `error-codes.test.ts` fails when the two lists differ. The texts are not global: each form maps
-the reasons it can get (`reasonMessages` on `FormModal` / `ConfirmDialog`, `authErrors.ts` for the auth forms), and
-an unknown or missing reason falls back to its text for the code.
+the reasons it can get, always together with the code, because the same reason value can come with another code
+(`reasonMessages={{ OPERATION_NOT_ALLOWED: { SELF: … } }}` on `FormModal` / `ConfirmDialog`; `authErrors.ts` for the
+auth forms, called only for `BAD_USER_INPUT`). An unknown or missing reason falls back to the text for the code.
 
 ### Messages
 

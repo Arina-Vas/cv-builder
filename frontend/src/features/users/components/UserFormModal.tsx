@@ -103,7 +103,12 @@ export const UserFormModal = ({ open, onOpenChange, user, isSelf = false }: Prop
       errorMessages={{
         CONFLICT: t('errors.emailTaken'),
       }}
-      reasonMessages={{ SELF: t('errors.ownRoleChange'), LAST_ADMIN: t('errors.lastAdminDemote') }}
+      reasonMessages={{
+        OPERATION_NOT_ALLOWED: {
+          SELF: t('errors.ownRoleChange'),
+          LAST_ADMIN: t('errors.lastAdminDemote'),
+        },
+      }}
     >
       <Input
         label={t('fields.email')}

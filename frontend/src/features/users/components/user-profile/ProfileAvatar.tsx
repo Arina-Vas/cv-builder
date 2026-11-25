@@ -33,9 +33,11 @@ export const ProfileAvatar = ({ userId, avatarUrl, fullName, canEdit }: ProfileA
   const showError = (error: unknown) => {
     const appError = parseError(error);
 
-    if (appError.reason === 'TOO_LARGE') {
+    const fileError = appError.code === 'BAD_USER_INPUT' ? appError.reason : undefined;
+
+    if (fileError === 'TOO_LARGE') {
       toast.error(tUploader('tooLarge', { maxSize: MAX_SIZE_LABEL }));
-    } else if (appError.reason === 'INVALID_TYPE') {
+    } else if (fileError === 'INVALID_TYPE') {
       toast.error(tUploader('invalidType'));
     } else if (appError.code) {
       toast.error(errorMessage(appError));

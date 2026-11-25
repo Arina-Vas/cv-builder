@@ -1,6 +1,13 @@
 import { CombinedGraphQLErrors, ServerError, ServerParseError } from '@apollo/client/errors';
 import { describe, expect, it } from 'vitest';
-import { hasErrorCode, isErrorCode, isErrorReason, parseError } from './graphql-errors';
+import {
+  hasErrorCode,
+  isErrorCode,
+  isErrorReason,
+  parseError,
+  reasonMessage,
+  type ReasonMessages,
+} from './graphql-errors';
 
 function graphQLError(message: string, extensions: Record<string, unknown>) {
   return new CombinedGraphQLErrors({ errors: [{ message, extensions }] });
@@ -154,5 +161,41 @@ describe('isErrorReason', () => {
 
   it.each([['ENTITY_IN_USE'], ['last_admin'], [''], [undefined], [42]])('rejects %j', (value) => {
     expect(isErrorReason(value)).toBe(false);
+  });
+});
+
+describe('reasonMessage', () => {
+  const messages: ReasonMessages = {
+    OPERATION_NOT_ALLOWED: { SELF: 'own account', LAST_ADMIN: 'last admin' },
+  };
+
+  it('finds the text by code and reason', () => {
+    expect(
+      reasonMessage(
+        { code: 'OPERATION_NOT_ALLOWED', reason: 'SELF', message: '', fieldErrors: {} },
+        messages,
+      ),
+    ).toBe('own account');
+  });
+
+  it.each([
+    ['the same reason under another code', { code: 'FORBIDDEN' as const, reason: 'SELF' as const }],
+    [
+      'a reason without a text',
+      { code: 'OPERATION_NOT_ALLOWED' as const, reason: 'USED' as const },
+    ],
+    ['no reason', { code: 'OPERATION_NOT_ALLOWED' as const }],
+    ['no code', { reason: 'SELF' as const }],
+  ])('has no text for %s', (_, error) => {
+    expect(reasonMessage({ message: '', fieldErrors: {}, ...error }, messages)).toBeUndefined();
+  });
+
+  it('has no text without messages', () => {
+    expect(
+      reasonMessage(
+        { code: 'OPERATION_NOT_ALLOWED', reason: 'SELF', message: '', fieldErrors: {} },
+        undefined,
+      ),
+    ).toBeUndefined();
   });
 });

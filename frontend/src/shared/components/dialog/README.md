@@ -112,22 +112,22 @@ const [deleteDepartment] = useMutation(DELETE_DEPARTMENT, DEPARTMENT_MUTATION_OP
 />;
 ```
 
-| Prop             | Values                                 | Default                  |
-| ---------------- | -------------------------------------- | ------------------------ |
-| `open`           | `boolean`                              | required                 |
-| `onOpenChange`   | `(open: boolean) => void`              | required                 |
-| `title`          | `string`                               | required                 |
-| `message`        | `ReactNode`                            | required                 |
-| `onConfirm`      | `() => Promise<unknown>`               | required                 |
-| `confirmLabel`   | `string`                               | `common.actions.confirm` |
-| `cancelLabel`    | `string`                               | `common.actions.cancel`  |
-| `errorMessages`  | `Partial<Record<ErrorCode, string>>`   | —                        |
-| `reasonMessages` | `Partial<Record<ErrorReason, string>>` | —                        |
+| Prop             | Values                                  | Default                  |
+| ---------------- | --------------------------------------- | ------------------------ |
+| `open`           | `boolean`                               | required                 |
+| `onOpenChange`   | `(open: boolean) => void`               | required                 |
+| `title`          | `string`                                | required                 |
+| `message`        | `ReactNode`                             | required                 |
+| `onConfirm`      | `() => Promise<unknown>`                | required                 |
+| `confirmLabel`   | `string`                                | `common.actions.confirm` |
+| `cancelLabel`    | `string`                                | `common.actions.cancel`  |
+| `errorMessages`  | `Partial<Record<ErrorCode, string>>`    | —                        |
+| `reasonMessages` | `ReasonMessages` (code → reason → text) | —                        |
 
 - CONFIRM awaits `onConfirm`. While the promise runs: spinner on CONFIRM (`aria-busy`, disabled, so a second
   click is ignored), CANCEL and × disabled, the dialog can't be closed (`preventClose`).
 - Resolved → the dialog calls `onOpenChange(false)`. Rejected → it shows, above the buttons, the first text it
-  finds: `reasonMessages[reason]` (the error's `extensions.reason`), `errorMessages[code]`, then
+  finds: `reasonMessages[code][reason]` (the error's `extensions.reason`), `errorMessages[code]`, then
   `useErrorMessage()(parseError(error))`; it stays open and CONFIRM retries. The page needs no `try / catch`, `loading`, `error` or
   `reset()`.
 - The error is cleared whenever the dialog closes (CANCEL, ×, Esc, overlay), so the next opening starts clean.
@@ -162,13 +162,15 @@ its entity's text for `ENTITY_IN_USE` (`<namespace>.delete.inUse`, as the wiki a
 `errors.ENTITY_IN_USE` ("This item is in use and can't be deleted") stays as the fallback. An error that belongs to a
 form field (`CONFLICT` / `BAD_USER_INPUT` with `field`) goes under that field, not into `error`.
 
-When one code has several causes, the backend adds `extensions.reason` and the page passes a text per reason in
-`reasonMessages`. `deleteUser` sends `OPERATION_NOT_ALLOWED` for deleting your own account (`SELF`) and for the
+When one code has several causes, the backend adds `extensions.reason` and the page passes a text per code and
+reason in `reasonMessages` (keyed by code first: reasons are shared values, so a text never shows for another code). `deleteUser` sends `OPERATION_NOT_ALLOWED` for deleting your own account (`SELF`) and for the
 last admin (`LAST_ADMIN`):
 
 ```tsx
 <ConfirmDialog
-  reasonMessages={{ SELF: t('delete.ownAccount'), LAST_ADMIN: t('delete.lastAdmin') }}
+  reasonMessages={{
+    OPERATION_NOT_ALLOWED: { SELF: t('delete.ownAccount'), LAST_ADMIN: t('delete.lastAdmin') },
+  }}
   …
 />
 ```
@@ -223,10 +225,10 @@ Each behaviour is checked once, as `frontend/README.md` → Tests asks: unit tes
 browser: focus, the overlay click, layout, Radix portals, CSS and the page flow. Stories run in Storybook
 (Interactions panel) and in Vitest (`storybook` project, needs `pnpm exec playwright install chromium` once).
 
-| Unit test                | Checks                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Dialog.test.tsx`        | closed → nothing; named by the title, × "Close"; description / no `aria-describedby`; footer and error only when passed; `size`, `className`; Esc and × call `onOpenChange(false)`; `preventClose` disables × and ignores Esc                                                                                                                                                                                                                      |
-| `ConfirmDialog.test.tsx` | `sm`, title and message; default and own labels; closes after `onConfirm` resolves; CANCEL closes; while it runs the buttons and Esc are disabled, no second call; rejected → error shown, dialog open; `errorMessages` text for its code, `errors.<code>` for others; `reasonMessages` text wins over the code, a reason without a text / unknown / none falls back to the code and then to `errors.<code>`; retry closes; error cleared on close |
+| Unit test                | Checks                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Dialog.test.tsx`        | closed → nothing; named by the title, × "Close"; description / no `aria-describedby`; footer and error only when passed; `size`, `className`; Esc and × call `onOpenChange(false)`; `preventClose` disables × and ignores Esc                                                                                                                                                                                                                                                              |
+| `ConfirmDialog.test.tsx` | `sm`, title and message; default and own labels; closes after `onConfirm` resolves; CANCEL closes; while it runs the buttons and Esc are disabled, no second call; rejected → error shown, dialog open; `errorMessages` text for its code, `errors.<code>` for others; `reasonMessages` text wins over the code, a reason without a text / unknown / none, or the same reason under another code, falls back to the code and then to `errors.<code>`; retry closes; error cleared on close |
 
 | Story (Shared/Dialog)                               | Checks                                                     |
 | --------------------------------------------------- | ---------------------------------------------------------- |

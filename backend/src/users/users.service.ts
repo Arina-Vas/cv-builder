@@ -22,12 +22,12 @@ import {
   notFound,
   operationNotAllowed,
 } from '@/common/errors/app-errors';
+import { ErrorReason } from '@/common/errors/error-reason.enum';
 import { isPrismaError } from '@/prisma/prisma-errors';
 import { readImageUpload } from '@/files/image-upload';
 import { StorageService } from '@/files/storage.service';
 
 import { UserMessage } from './user.messages';
-import { ErrorReason } from '@/common/errors/error-reason.enum';
 
 const userCredentialsSelect = { id: true, passwordHash: true } satisfies Prisma.UserSelect;
 export type UserCredentials = Prisma.UserGetPayload<{ select: typeof userCredentialsSelect }>;

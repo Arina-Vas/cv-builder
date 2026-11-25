@@ -230,8 +230,10 @@ export const WithReasonMessage: Story = {
     outcome: 'lastAdmin',
     errorMessages: { OPERATION_NOT_ALLOWED: 'This user cannot be deleted' },
     reasonMessages: {
-      SELF: 'You cannot delete your own account',
-      LAST_ADMIN: 'The last admin cannot be deleted. Assign the Admin role to another user first',
+      OPERATION_NOT_ALLOWED: {
+        SELF: 'You cannot delete your own account',
+        LAST_ADMIN: 'The last admin cannot be deleted. Assign the Admin role to another user first',
+      },
     },
   },
   play: async ({ canvasElement }) => {

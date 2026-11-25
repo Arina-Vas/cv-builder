@@ -3,13 +3,13 @@ import { ConfigService } from '@nestjs/config';
 import { hashPassword } from '@/common/crypto/password';
 import { generateToken, hashToken } from '@/common/crypto/tokens';
 import { badUserInput } from '@/common/errors/app-errors';
+import { ErrorReason } from '@/common/errors/error-reason.enum';
 import type { EnvironmentVariables } from '@/config/env.validation';
 import { AuthTokenType } from '@/generated/prisma/enums';
 import { MailService } from '@/mail/mail.service';
 import { PrismaService } from '@/prisma/prisma.service';
 import { UsersService } from '@/users/users.service';
 import { ResetLinkMessage } from './password-reset.messages';
-import { ErrorReason } from '@/common/errors/error-reason.enum';
 
 export const RESET_TOKEN_TTL_MINUTES = 30;
 export const REQUEST_COOLDOWN_SECONDS = 60;

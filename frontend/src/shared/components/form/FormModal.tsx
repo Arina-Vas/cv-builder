@@ -8,7 +8,12 @@ import {
   FormProvider,
 } from 'react-hook-form';
 import { Button } from '@/shared/components/buttons';
-import { parseError, type ErrorCode, type ErrorReason } from '@/shared/lib/apollo/graphql-errors';
+import {
+  parseError,
+  reasonMessage,
+  type ErrorCode,
+  type ReasonMessages,
+} from '@/shared/lib/apollo/graphql-errors';
 import { useErrorMessage } from '@/shared/lib/apollo/useErrorMessage';
 import { useTranslations } from 'next-intl';
 import layout from './FormLayout.module.css';
@@ -33,8 +38,9 @@ type Props<TInput extends FieldValues, TOutput extends FieldValues> = {
   // layout of the fields, set on <form>: FormLayout.module.css `grid` (+ `full` on a field) or own
   className?: string;
   errorMessages?: ErrorMessages<TInput>;
-  // A text per extensions.reason; wins over errorMessages (OPERATION_NOT_ALLOWED: SELF vs LAST_ADMIN)
-  reasonMessages?: Partial<Record<ErrorReason, string>>;
+  // A text per code and extensions.reason; wins over errorMessages
+  // ({ OPERATION_NOT_ALLOWED: { SELF: '…', LAST_ADMIN: '…' } })
+  reasonMessages?: ReasonMessages;
 };
 
 export const FormModal = <TInput extends FieldValues, TOutput extends FieldValues>({
@@ -84,7 +90,7 @@ export const FormModal = <TInput extends FieldValues, TOutput extends FieldValue
         (name): name is Path<TInput> => name in form.getValues(),
       );
 
-      const byReason = appError.reason && reasonMessages?.[appError.reason];
+      const byReason = reasonMessage(appError, reasonMessages);
       const custom = appError.code && errorMessages?.[appError.code];
       const byCode = typeof custom === 'string' ? custom : field && custom?.[field];
       const message = byReason ?? byCode ?? errorMessage(appError);

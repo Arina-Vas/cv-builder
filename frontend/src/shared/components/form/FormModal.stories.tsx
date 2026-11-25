@@ -507,8 +507,10 @@ export const TextByReason: Story = {
     outcome: 'notAllowed',
     errorMessages: { OPERATION_NOT_ALLOWED: 'This action is not allowed for this department' },
     reasonMessages: {
-      SELF: 'You cannot change your own department',
-      LAST_ADMIN: 'The last admin cannot be demoted',
+      OPERATION_NOT_ALLOWED: {
+        SELF: 'You cannot change your own department',
+        LAST_ADMIN: 'The last admin cannot be demoted',
+      },
     },
   },
   play: async ({ canvasElement }) => {

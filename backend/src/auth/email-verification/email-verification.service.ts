@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { generateVerificationCode, hashToken, matchesHash } from '@/common/crypto/tokens';
 import { badUserInput, conflict, rateLimited } from '@/common/errors/app-errors';
+import { ErrorReason } from '@/common/errors/error-reason.enum';
 import { AuthTokenType } from '@/generated/prisma/enums';
 import { MailService } from '@/mail/mail.service';
 import { PrismaService } from '@/prisma/prisma.service';
 import type { User } from '@/users/models/user.model';
 import { UsersService } from '@/users/users.service';
-import { ErrorReason } from '@/common/errors/error-reason.enum';
 
 export const CODE_TTL_MINUTES = 10;
 export const RESEND_COOLDOWN_SECONDS = 60;

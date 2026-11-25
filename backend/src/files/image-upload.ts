@@ -1,8 +1,8 @@
 import type { FileUpload } from 'graphql-upload-minimal';
 import sharp from 'sharp';
 import { badUserInput } from '@/common/errors/app-errors';
-import type { StoredFile } from './storage.service';
 import { ErrorReason } from '@/common/errors/error-reason.enum';
+import type { StoredFile } from './storage.service';
 
 export const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 

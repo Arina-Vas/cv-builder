@@ -161,7 +161,7 @@ describe('ConfirmDialog', () => {
         const { user } = renderConfirm({
           onConfirm: () => Promise.reject(notAllowed('LAST_ADMIN')),
           errorMessages: { OPERATION_NOT_ALLOWED: NOT_ALLOWED },
-          reasonMessages: { SELF, LAST_ADMIN },
+          reasonMessages: { OPERATION_NOT_ALLOWED: { SELF, LAST_ADMIN } },
         });
 
         await user.click(screen.getByRole('button', { name: 'Confirm' }));
@@ -178,7 +178,19 @@ describe('ConfirmDialog', () => {
         const { user } = renderConfirm({
           onConfirm: () => Promise.reject(notAllowed(reason)),
           errorMessages: { OPERATION_NOT_ALLOWED: NOT_ALLOWED },
-          reasonMessages: { SELF },
+          reasonMessages: { OPERATION_NOT_ALLOWED: { SELF } },
+        });
+
+        await user.click(screen.getByRole('button', { name: 'Confirm' }));
+
+        expect(await screen.findByRole('alert')).toHaveTextContent(NOT_ALLOWED);
+      });
+
+      it('ignores a text given for the same reason under another code', async () => {
+        const { user } = renderConfirm({
+          onConfirm: () => Promise.reject(notAllowed('LAST_ADMIN')),
+          errorMessages: { OPERATION_NOT_ALLOWED: NOT_ALLOWED },
+          reasonMessages: { ENTITY_IN_USE: { LAST_ADMIN } },
         });
 
         await user.click(screen.getByRole('button', { name: 'Confirm' }));
@@ -189,7 +201,7 @@ describe('ConfirmDialog', () => {
       it('falls back to errors.<code> when neither the reason nor the code has a text', async () => {
         const { user } = renderConfirm({
           onConfirm: () => Promise.reject(notAllowed('LAST_ADMIN')),
-          reasonMessages: { SELF },
+          reasonMessages: { OPERATION_NOT_ALLOWED: { SELF } },
         });
 
         await user.click(screen.getByRole('button', { name: 'Confirm' }));

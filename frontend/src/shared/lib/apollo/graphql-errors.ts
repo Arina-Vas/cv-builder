@@ -80,6 +80,17 @@ export function parseError(error: unknown): AppError {
   };
 }
 
+// The page's text for a cause within a code: { OPERATION_NOT_ALLOWED: { SELF: '…', LAST_ADMIN: '…' } }.
+// Keyed by code first: reasons are shared values (INVALID, SELF) and must not match another code.
+export type ReasonMessages = Partial<Record<ErrorCode, Partial<Record<ErrorReason, string>>>>;
+
+export function reasonMessage(
+  { code, reason }: AppError,
+  messages: ReasonMessages | undefined,
+): string | undefined {
+  return code && reason ? messages?.[code]?.[reason] : undefined;
+}
+
 export function hasErrorCode(error: unknown, code: ErrorCode): boolean {
   return (
     CombinedGraphQLErrors.is(error) &&

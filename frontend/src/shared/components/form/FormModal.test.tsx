@@ -442,7 +442,7 @@ describe('FormModal', () => {
         onSubmit: () => Promise.reject(notAllowed('SELF')),
         values: { name: 'Engineering' },
         errorMessages: { OPERATION_NOT_ALLOWED: NOT_ALLOWED },
-        reasonMessages: { SELF, LAST_ADMIN },
+        reasonMessages: { OPERATION_NOT_ALLOWED: { SELF, LAST_ADMIN } },
       });
 
       await user.click(screen.getByRole('button', { name: 'Create' }));
@@ -457,7 +457,7 @@ describe('FormModal', () => {
         onSubmit: () => Promise.reject(notAllowed('LAST_ADMIN')),
         values: { name: 'Engineering' },
         errorMessages: { OPERATION_NOT_ALLOWED: NOT_ALLOWED },
-        reasonMessages: { SELF },
+        reasonMessages: { OPERATION_NOT_ALLOWED: { SELF } },
       });
 
       await user.click(screen.getByRole('button', { name: 'Create' }));
@@ -470,7 +470,7 @@ describe('FormModal', () => {
         onSubmit: () => Promise.reject(notAllowed('SOMETHING_NEW')),
         values: { name: 'Engineering' },
         errorMessages: { OPERATION_NOT_ALLOWED: NOT_ALLOWED },
-        reasonMessages: { SELF },
+        reasonMessages: { OPERATION_NOT_ALLOWED: { SELF } },
       });
 
       await user.click(screen.getByRole('button', { name: 'Create' }));
@@ -482,7 +482,7 @@ describe('FormModal', () => {
       const { user } = renderModal({
         onSubmit: () => Promise.reject(notAllowed()),
         values: { name: 'Engineering' },
-        reasonMessages: { SELF },
+        reasonMessages: { OPERATION_NOT_ALLOWED: { SELF } },
       });
 
       await user.click(screen.getByRole('button', { name: 'Create' }));
@@ -500,7 +500,7 @@ describe('FormModal', () => {
             }),
           ),
         values: { name: 'Engineering' },
-        reasonMessages: { INVALID: 'The name is not valid' },
+        reasonMessages: { BAD_USER_INPUT: { INVALID: 'The name is not valid' } },
       });
 
       await user.click(screen.getByRole('button', { name: 'Create' }));
@@ -509,6 +509,20 @@ describe('FormModal', () => {
       expect(screen.getAllByRole('alert')).toHaveLength(1);
       expect(getInput()).toHaveAttribute('aria-invalid', 'true');
       expect(getInput()).toHaveAccessibleDescription('The name is not valid');
+    });
+
+    it('ignores a text given for the same reason under another code', async () => {
+      const { user } = renderModal({
+        onSubmit: () => Promise.reject(notAllowed('SELF')),
+        values: { name: 'Engineering' },
+        errorMessages: { OPERATION_NOT_ALLOWED: NOT_ALLOWED },
+        reasonMessages: { FORBIDDEN: { SELF } },
+      });
+
+      await user.click(screen.getByRole('button', { name: 'Create' }));
+
+      expect(await screen.findByRole('alert')).toHaveTextContent(NOT_ALLOWED);
+      expect(screen.queryByText(SELF)).not.toBeInTheDocument();
     });
   });
 });
