@@ -177,6 +177,7 @@ or the database.
 | Operations                                                                                                                                 | Limit per IP                             |
 | ------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------- |
 | `signUp`, `signIn`, `requestPasswordReset`, `resetPassword`, `changePassword`, `verifyEmail`, `resendVerificationCode` (`@AuthThrottle()`) | 10 per minute, each operation separately |
+| `generateCvPdf` (`@PdfThrottle()`, see [pdf.md](pdf.md#limits))                                                                            | 10 per minute                            |
 | every other operation                                                                                                                      | 100 per minute                           |
 | `health` query and `GET /health` (`@SkipThrottle()`)                                                                                       | none                                     |
 

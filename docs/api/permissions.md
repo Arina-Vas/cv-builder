@@ -347,6 +347,7 @@ Errors:
 | `locale` is not a `Locale` value       | `BAD_USER_INPUT`        | GraphQL variable error, no `fields`             |
 | the CV does not exist                  | `NOT_FOUND`             | `CV not found`                                  |
 | an Employee asks for another user's CV | `FORBIDDEN`             | `You are not authorized to perform this action` |
+| more than 10 requests a minute per IP  | `RATE_LIMITED`          | `Please wait before trying again`, `retryAfter` |
 | Chromium failed or timed out           | `INTERNAL_SERVER_ERROR` | generic message, the error is logged            |
 
 There is no incomplete-data error: the required CV data (name, education, description) is validated on create

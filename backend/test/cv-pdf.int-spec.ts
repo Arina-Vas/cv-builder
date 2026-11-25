@@ -1,4 +1,5 @@
 import { Mastery, Proficiency, UserRole } from '@/common/graphql/enums';
+import { PDF_THROTTLE_LIMIT } from '@/common/throttling/throttle.decorators';
 import { createUser, signIn, uniqueEmail } from './utils/fixtures';
 import { GqlClient } from './utils/graphql-client';
 import { createTestApp, resetDatabase, type TestApp } from './utils/test-app';
@@ -245,6 +246,23 @@ describe('CV PDF (integration)', () => {
     const error = await browser.error(GENERATE_CV_PDF, { input: { cvId, locale: 'xx' } });
 
     expect(error.extensions.code).toBe('BAD_USER_INPUT');
+  });
+
+  it(`allows ${PDF_THROTTLE_LIMIT} PDF requests per minute from one IP`, async () => {
+    // Missing CVs fail before Chromium, so the limit is reached fast; the throttler counts every request
+    const { browser } = await signedIn({ role: UserRole.ADMIN });
+    for (let attempt = 0; attempt < PDF_THROTTLE_LIMIT; attempt += 1) {
+      const error = await browser.error(GENERATE_CV_PDF, { input: { cvId: MISSING_ID } });
+      expect(error.extensions.code).toBe('NOT_FOUND');
+    }
+
+    const blocked = await browser.error(GENERATE_CV_PDF, { input: { cvId: MISSING_ID } });
+
+    expect(blocked.extensions.code).toBe('RATE_LIMITED');
+    expect(blocked.extensions['retryAfter']).toBeGreaterThan(0);
+    const { browser: other } = await signedIn({ role: UserRole.ADMIN });
+    const allowed = await other.error(GENERATE_CV_PDF, { input: { cvId: MISSING_ID } });
+    expect(allowed.extensions.code).toBe('NOT_FOUND');
   });
 
   it('requires authentication', async () => {

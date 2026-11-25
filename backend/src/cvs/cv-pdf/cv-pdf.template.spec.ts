@@ -63,6 +63,20 @@ describe('renderCvPdfHtml', () => {
       expect(html).toContain('.document {');
     });
 
+    it('allows only inline styles and data: fonts, so the page loads nothing and runs no scripts', () => {
+      const html = renderCvPdfHtml(cvPreviewFixture(), Locale.en);
+      const head = html.slice(0, html.indexOf('</head>'));
+      const policy = /http-equiv="Content-Security-Policy"\s+content="([^"]+)"/.exec(head)?.[1];
+
+      expect(policy?.split(/;\s*/)).toEqual([
+        "default-src 'none'",
+        "style-src 'unsafe-inline'",
+        'font-src data:',
+      ]);
+      // the policy must come before the styles and fonts it allows
+      expect(head.indexOf('Content-Security-Policy')).toBeLessThan(head.indexOf('<style>'));
+    });
+
     it('sets the page language to the locale', () => {
       expect(renderCvPdfHtml(cvPreviewFixture(), Locale.en)).toContain('<html lang="en">');
       expect(renderCvPdfHtml(cvPreviewFixture(), Locale.ru)).toContain('<html lang="ru">');

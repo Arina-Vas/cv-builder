@@ -26,6 +26,7 @@ const OWNER = userFixture();
 const preview = cvPreviewFixture({ id: CV_ID, name: 'Frontend Developer' });
 
 const createPage = () => ({
+  setJavaScriptEnabled: jest.fn().mockResolvedValue(undefined),
   setContent: jest.fn().mockResolvedValue(undefined),
   pdf: jest.fn().mockResolvedValue(PDF_BYTES),
   close: jest.fn().mockResolvedValue(undefined),
@@ -86,6 +87,15 @@ describe('CvPdfService', () => {
       expect(html).not.toContain('Education');
     });
 
+    it('turns JavaScript off before the document is loaded', async () => {
+      await service.generate(INPUT, OWNER);
+
+      expect(page.setJavaScriptEnabled).toHaveBeenCalledWith(false);
+      expect(page.setJavaScriptEnabled.mock.invocationCallOrder[0]).toBeLessThan(
+        page.setContent.mock.invocationCallOrder[0] ?? 0,
+      );
+    });
+
     it('closes the page after the PDF is built', async () => {
       await service.generate(INPUT, OWNER);
 
@@ -108,6 +118,49 @@ describe('CvPdfService', () => {
 
       await expect(service.generate(INPUT, OWNER)).rejects.toBe(error);
       expect(page.close).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('queue', () => {
+    /** Lets the pending promise callbacks run, so the service reaches its next await */
+    const settle = () => new Promise((resolve) => setImmediate(resolve));
+
+    it('renders one PDF at a time: the next page opens only after the previous PDF is built', async () => {
+      let finishFirst!: () => void;
+      page.setContent.mockImplementationOnce(
+        () => new Promise<void>((resolve) => (finishFirst = resolve)),
+      );
+
+      const first = service.generate(INPUT, OWNER);
+      const second = service.generate(INPUT, OWNER);
+      await settle();
+      expect(browser.newPage).toHaveBeenCalledTimes(1);
+
+      finishFirst();
+      await Promise.all([first, second]);
+      expect(browser.newPage).toHaveBeenCalledTimes(2);
+      expect(page.close).toHaveBeenCalledTimes(2);
+    });
+
+    it('goes on with the next PDF after one fails', async () => {
+      const error = new Error('Navigation timeout');
+      page.pdf.mockRejectedValueOnce(error);
+
+      const failed = service.generate(INPUT, OWNER);
+      const next = service.generate(INPUT, OWNER);
+
+      await expect(failed).rejects.toBe(error);
+      await expect(next).resolves.toMatchObject({ fileName: 'frontend-developer.pdf' });
+    });
+
+    it('checks access before the queue: a forbidden CV does not wait for other PDFs', async () => {
+      page.setContent.mockImplementationOnce(() => new Promise<void>(() => undefined));
+      void service.generate(INPUT, OWNER);
+      await settle();
+      const error = forbidden();
+      cvPreview.getPreview.mockRejectedValueOnce(error);
+
+      await expect(service.generate(INPUT, OWNER)).rejects.toBe(error);
     });
   });
 

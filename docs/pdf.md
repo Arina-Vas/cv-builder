@@ -32,7 +32,10 @@ generateCvPdf(input: { cvId, locale }) → CvPreviewService.getPreview (NOT_FOUN
    `ą ę ł ń ś ź ż`. Variable fonts from Google Fonts, one file per subset with Google's `unicode-range`. The page
    loads nothing from the network, and a server without system fonts still renders the text of every UI
    language.
-6. **PDF.** `page.setContent(html)` and `page.pdf({ format: 'A4', printBackground: true })` in Chromium.
+6. **PDF.** `page.setContent(html)` and `page.pdf({ format: 'A4', printBackground: true })` in Chromium. The page
+   runs with JavaScript disabled (`page.setJavaScriptEnabled(false)`), and the template's Content-Security-Policy
+   allows only inline styles and `data:` fonts (`default-src 'none'`). Markup that slipped past escaping can
+   neither run scripts nor make requests from the server to internal addresses (SSRF).
 7. **Response.** `{ fileName, content }`: `content` is the PDF in base64, `fileName` is the CV name in kebab-case
    with `.pdf` (`toPdfFileName`, see [File name](#file-name)). The frontend turns `content` into a Blob and
    downloads it with `fileName`. The file is not stored anywhere.
@@ -84,6 +87,18 @@ the CSS modules reuse names like `.title` and `.value`.
 - A failed launch is not kept: the request fails, and the next PDF tries to launch Chromium again. A browser
   that crashes or disconnects is dropped on its `disconnected` event, so the next PDF launches a new one
   instead of failing until the backend restarts (`CvPdfService.getBrowser`).
+
+### Limits
+
+- **One PDF at a time.** `CvPdfService.enqueue` chains the renders on one promise, so at most one Chromium page
+  is open on top of the browser, whatever the number of requests. The others wait in the queue; a failed PDF
+  does not block the ones after it. Access is checked before the queue, so a missing or another user's CV
+  fails at once. A PDF takes well under a second with a running browser, so the wait is short at the expected
+  load; move to a small concurrency limit only if many exports happen at the same time.
+- **10 requests a minute per client IP.** `@PdfThrottle()` (`common/throttling/throttle.decorators.ts`) on
+  `generateCvPdf`; over the limit the request fails with `RATE_LIMITED` and `retryAfter` before it reaches the
+  database or Chromium. See [auth.md → Rate limiting](auth.md#rate-limiting).
+- Both live in the API process: with several instances each one has its own queue and counters.
 
 ## Files
 
@@ -166,17 +181,19 @@ namespaces), so `backend-integration` sets `PUPPETEER_NO_SANDBOX: true`.
 - `cv-pdf.labels.spec.ts`: the dictionary equals the frontend messages for every locale.
 - `cv-pdf.fixtures.ts` holds the `CvPreview` test data shared by the template and service specs.
 - `cv-pdf.template.spec.ts`: HTML of the document (escaping, hidden empty sections, period, punctuation, skills
-  table, labels and `lang` of the locale), `splitResponsibilities`.
+  table, labels and `lang` of the locale, the Content-Security-Policy), `splitResponsibilities`.
 - `cv-pdf-file-name.spec.ts`: `toPdfFileName`.
 - `cv-pdf.service.spec.ts`: puppeteer and `CvPreviewService` are mocked. The preview is requested for the
   current user, its data reaches the HTML, access errors stop before Chromium starts, one browser for
-  sequential and parallel requests, a new launch after a failed launch or a disconnect, the page is closed
-  after an error, the locale reaches the HTML, the sandbox flag, `onModuleDestroy`.
+  sequential and parallel requests, a new launch after a failed launch or a disconnect, one PDF at a time
+  (the next page opens after the previous PDF), the queue goes on after a failed PDF, access is checked
+  before the queue, the page is closed after an error, JavaScript is off before the HTML is loaded, the locale reaches the HTML, the sandbox flag,
+  `onModuleDestroy`.
 - `test/cv-pdf.int-spec.ts`: real Chromium and the test database. Own CV → `%PDF-`, a CV with every section
   filled (owner, language, skills, projects; 2 pages) and a long CV that continues on more pages (page count
-  from the PDF), the PDF language (`/Lang`) for `ru` and for a request without `locale`, another user's CV → `FORBIDDEN` (wiki AC-31, AC-49), Admin,
-  unverified user, `NOT_FOUND`, `BAD_USER_INPUT` for a non-UUID id and for an unknown locale,
-  `UNAUTHENTICATED`.
+  from the PDF), the PDF language (`/Lang`) for `ru` and for a request without `locale`, another user's CV →
+  `FORBIDDEN` (wiki AC-31, AC-49), Admin, unverified user, `NOT_FOUND`, `BAD_USER_INPUT` for a non-UUID id and
+  for an unknown locale, `RATE_LIMITED` after 10 requests a minute from one IP, `UNAUTHENTICATED`.
 
 ## Checking by hand
 

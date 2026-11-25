@@ -209,6 +209,8 @@ export const renderCvPdfHtml = (data: CvPreview, locale: Locale = Locale.en): st
 <html lang="${locale}">
 <head>
   <meta charset="utf-8" />
+  <meta http-equiv="Content-Security-Policy"
+      content="default-src 'none'; style-src 'unsafe-inline'; font-src data:">
   <title>${escapeHtml(data.name)}</title>
   <style>${getCvPdfFontFaces()}${CV_PDF_STYLES}</style>
 </head>
