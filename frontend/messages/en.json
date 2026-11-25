@@ -394,6 +394,45 @@
         "title": "Access denied",
         "message": "You are not authorized to access this CV"
       }
+    },
+    "preview": {
+      "loading": "Loading CV preview",
+      "loadError": "Failed to load CV preview",
+      "loadErrorTitle": "Oops",
+      "retry": "Retry",
+      "empty": "CV preview is not available",
+      "forbidden": {
+        "title": "Access denied",
+        "message": "You are not authorized to access this CV"
+      },
+      "exportPdf": "Export PDF",
+      "exportingPdf": "Generating PDF",
+      "exportError": "Failed to generate PDF",
+      "document": {
+        "sections": {
+          "education": "Education",
+          "languages": "Language proficiency",
+          "domains": "Domains",
+          "projects": "Projects",
+          "professionalSkills": "Professional skills"
+        },
+        "languageLevel": "{language} — {level}",
+        "project": {
+          "roles": "Project roles",
+          "period": "Period",
+          "responsibilities": "Responsibilities",
+          "environment": "Environment"
+        },
+        "period": "{start} – {end}",
+        "present": "Present",
+        "skillsTable": {
+          "skills": "Skills",
+          "category": "Skill category",
+          "skill": "Skill",
+          "experience": "Experience in years",
+          "lastUsed": "Last used"
+        }
+      }
     }
   },
   "cvProjects": {

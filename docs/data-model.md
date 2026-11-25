@@ -122,6 +122,10 @@ The Preview tab and the PDF export show the same data: both read it from `CvPrev
 `cvPreview(id)`). Nothing is stored for the preview: every value below is derived from the tables above
 when the CV is requested.
 
+The only required data are the CV name, education and description (validated on create and update). A CV
+without skills, languages or projects is complete: the Preview hides those sections and the PDF can be
+exported (mentor, 24.11.2026).
+
 ### Where each part comes from
 
 | Part                   | Source                                                                           |

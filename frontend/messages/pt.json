@@ -407,6 +407,45 @@
         "title": "Acesso negado",
         "message": "Você não tem autorização para acessar este currículo"
       }
+    },
+    "preview": {
+      "loading": "Carregando pré-visualização do currículo",
+      "loadError": "Não foi possível carregar a pré-visualização do currículo",
+      "loadErrorTitle": "Ops",
+      "retry": "Tentar novamente",
+      "empty": "A pré-visualização do currículo não está disponível",
+      "forbidden": {
+        "title": "Acesso negado",
+        "message": "Você não tem autorização para acessar este currículo"
+      },
+      "exportPdf": "Exportar PDF",
+      "exportingPdf": "Gerando PDF",
+      "exportError": "Não foi possível gerar o PDF",
+      "document": {
+        "sections": {
+          "education": "Formação",
+          "languages": "Idiomas",
+          "domains": "Domínios",
+          "projects": "Projetos",
+          "professionalSkills": "Competências profissionais"
+        },
+        "languageLevel": "{language} — {level}",
+        "project": {
+          "roles": "Funções no projeto",
+          "period": "Período",
+          "responsibilities": "Responsabilidades",
+          "environment": "Tecnologias"
+        },
+        "period": "{start} – {end}",
+        "present": "atual",
+        "skillsTable": {
+          "skills": "Competências",
+          "category": "Categoria de competências",
+          "skill": "Competência",
+          "experience": "Experiência (anos)",
+          "lastUsed": "Último uso"
+        }
+      }
     }
   },
   "cvProjects": {

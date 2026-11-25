@@ -13,6 +13,47 @@ graphql(`
       email
     }
   }
+
+  fragment CvPreviewSkillGroupFields on CvPreviewSkillGroup {
+    category {
+      id
+      name
+    }
+    skills {
+      experienceYears
+      lastUsedYear
+      skill {
+        id
+        name
+      }
+    }
+  }
+
+  fragment CvPreviewFields on CvPreview {
+    id
+    name
+    education
+    description
+    domains
+    user {
+      id
+      email
+      firstName
+      lastName
+      position {
+        ...PositionFields
+      }
+    }
+    languages {
+      ...UserLanguageFields
+    }
+    skillGroups {
+      ...CvPreviewSkillGroupFields
+    }
+    projects {
+      ...CvProjectFields
+    }
+  }
 `);
 
 export const CVS = graphql(`
@@ -30,6 +71,14 @@ export const CVS = graphql(`
       page
       pageSize
       total
+    }
+  }
+`);
+
+export const CV_PREVIEW = graphql(`
+  query CvPreview($id: ID!) {
+    cvPreview(id: $id) {
+      ...CvPreviewFields
     }
   }
 `);

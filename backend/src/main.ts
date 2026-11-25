@@ -10,6 +10,9 @@ async function bootstrap(): Promise<void> {
   configureApp(app);
 
   const config = app.get<ConfigService<EnvironmentVariables, true>>(ConfigService);
+
+  app.enableShutdownHooks();
+
   await app.listen(config.get('PORT', { infer: true }));
 }
 

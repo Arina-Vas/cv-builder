@@ -1,15 +1,10 @@
+import { escapeHtml } from '@/common/html/escape-html';
+
 export interface MailContent {
   subject: string;
   text: string;
   html: string;
 }
-
-const escapeHtml = (value: string): string =>
-  value
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;');
 
 export const verificationCodeMail = (code: string, expiresInMinutes: number): MailContent => ({
   subject: 'Your CV Builder verification code',

@@ -113,9 +113,12 @@ any timezone ahead of UTC the day moves back by one (`2025-09-04T00:00` in Minsk
 format(date, 'yyyy-MM-dd'); // send
 parseISO('2025-09-04'); // receive → local midnight
 formatDate('2025-09-04'); // show → '09/04/2025' (also takes a Date)
+formatDate('2025-09-04', 'MM.yyyy'); // month and year → '09.2025' (CV preview project period)
 ```
 
-`formatDate` is for display only; the API always gets `yyyy-MM-dd`.
+`formatDate` is for display only; the API always gets `yyyy-MM-dd`. It takes only the formats listed in its
+`DateFormat` type (`MM/dd/yyyy` by default, `MM.yyyy`); add a new one there with a test. Use `yyyy`, not `YYYY`:
+in `date-fns` `YYYY` is the week-numbering year and shows the wrong year around New Year.
 
 ## Usage with react-hook-form
 

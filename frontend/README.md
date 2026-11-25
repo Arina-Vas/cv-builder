@@ -128,7 +128,10 @@ does not deal with it. Nine languages, the list from the Settings spec: English,
 Portuguese, Russian, Spanish, Ukrainian.
 
 - **Locales.** `src/i18n/config.ts` lists them (`LOCALES`, in the order of the Settings select) and the default
-  (`en`). Adding one = a code in `LOCALES`, its name in `LOCALE_NAMES` and a `messages/<code>.json`.
+  (`en`). Adding one = a code in `LOCALES`, its name in `LOCALE_NAMES` and a `messages/<code>.json`, plus the
+  backend CV PDF: the code in `Locale` (`../backend/src/common/graphql/locale.enum.ts`) and its texts in
+  `CV_PDF_LABELS` (`../backend/src/cvs/cv-pdf/document/cv-pdf.labels.ts`); `cv-pdf.labels.spec.ts` fails
+  until both match.
 - **Language names** in the select are in their own language (`Français`, `Українська`) and do not follow the UI
   language, so someone who switched to a language they cannot read still finds theirs. They live in
   `LOCALE_NAMES`, not in the messages files.
