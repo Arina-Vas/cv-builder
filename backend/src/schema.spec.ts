@@ -45,8 +45,8 @@ const RESOLVERS = [
   CvResolver,
   CvProjectResolver,
   CvSkillResolver,
-  CvPdfResolver,
   CvPreviewResolver,
+  CvPdfResolver,
 ];
 
 const print = (schema: GraphQLSchema): string => printSchema(lexicographicSortSchema(schema));

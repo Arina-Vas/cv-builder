@@ -8,3 +8,8 @@ export const AUTH_THROTTLE_LIMIT = 10;
 
 export const AuthThrottle = (): MethodDecorator & ClassDecorator =>
   Throttle({ default: { ttl: MINUTE_MS, limit: AUTH_THROTTLE_LIMIT } });
+
+export const PDF_THROTTLE_LIMIT = 10;
+
+export const PdfThrottle = (): MethodDecorator & ClassDecorator =>
+  Throttle({ default: { ttl: MINUTE_MS, limit: PDF_THROTTLE_LIMIT } });

@@ -1,63 +1,20 @@
 import { Proficiency } from '@/common/graphql/enums';
 import { Locale } from '@/common/graphql/locale.enum';
+import type { CvPreview } from '@/cvs/cv-preview/models/cv-preview.model';
+import {
+  calendarDate,
+  cvPreviewFixture,
+  cvProjectFixture,
+  projectFixture,
+  skillCategoryFixture,
+  skillFixture,
+  userFixture,
+  userLanguageFixture,
+} from '../cv-pdf.fixtures';
 import { renderCvPdfHtml, splitResponsibilities } from './cv-pdf.template';
-import type { CvPdfData, CvPdfProject } from './cv-preview.types';
-
-const date = (value: string) => new Date(`${value}T00:00:00.000Z`);
-
-const project = (overrides: Partial<CvPdfProject> = {}): CvPdfProject => ({
-  id: 'cv-project-1',
-  startDate: date('2022-03-01'),
-  endDate: date('2024-12-31'),
-  responsibilities: 'Built the catalog\nReviewed code',
-  roles: [
-    { id: 'role-1', name: 'Frontend Developer' },
-    { id: 'role-2', name: 'Team Lead' },
-  ],
-  project: {
-    id: 'project-1',
-    name: 'ShopWave',
-    domain: 'E-commerce',
-    description: 'Online marketplace',
-    technologies: [
-      { id: 'skill-1', name: 'TypeScript' },
-      { id: 'skill-2', name: 'React' },
-    ],
-  },
-  ...overrides,
-});
-
-const cv = (overrides: Partial<CvPdfData> = {}): CvPdfData => ({
-  id: 'cv-1',
-  name: 'Frontend Developer CV',
-  education: 'BSUIR, Software Engineering',
-  description: 'Five years of web development',
-  user: {
-    email: 'employee@cv-builder.local',
-    firstName: 'Anna',
-    lastName: 'Smith',
-    position: { id: 'position-1', name: 'Software Engineer' },
-  },
-  languages: [
-    { id: 'ul-1', proficiency: Proficiency.NATIVE, language: { id: 'l-1', name: 'Russian' } },
-    { id: 'ul-2', proficiency: Proficiency.B2, language: { id: 'l-2', name: 'English' } },
-  ],
-  domains: ['E-commerce', 'Healthcare'],
-  skillGroups: [
-    {
-      category: { id: 'category-1', name: 'Frontend' },
-      skills: [
-        { skill: { id: 'skill-2', name: 'React' }, experienceYears: 4, lastUsedYear: 2026 },
-        { skill: { id: 'skill-3', name: 'Next.js' }, experienceYears: null, lastUsedYear: null },
-      ],
-    },
-  ],
-  projects: [project()],
-  ...overrides,
-});
 
 /** The document without <head>: styles and fonts would match any text search */
-const renderBody = (data: CvPdfData, locale: Locale = Locale.en): string => {
+const renderBody = (data: CvPreview, locale: Locale = Locale.en): string => {
   const html = renderCvPdfHtml(data, locale);
   return html.slice(html.indexOf('<body>'));
 };
@@ -97,7 +54,7 @@ describe('splitResponsibilities', () => {
 describe('renderCvPdfHtml', () => {
   describe('document', () => {
     it('is a full UTF-8 HTML page with the styles and Roboto embedded', () => {
-      const html = renderCvPdfHtml(cv(), Locale.en);
+      const html = renderCvPdfHtml(cvPreviewFixture(), Locale.en);
 
       expect(html.startsWith('<!doctype html>')).toBe(true);
       expect(html).toContain('<meta charset="utf-8" />');
@@ -106,13 +63,27 @@ describe('renderCvPdfHtml', () => {
       expect(html).toContain('.document {');
     });
 
+    it('allows only inline styles and data: fonts, so the page loads nothing and runs no scripts', () => {
+      const html = renderCvPdfHtml(cvPreviewFixture(), Locale.en);
+      const head = html.slice(0, html.indexOf('</head>'));
+      const policy = /http-equiv="Content-Security-Policy"\s+content="([^"]+)"/.exec(head)?.[1];
+
+      expect(policy?.split(/;\s*/)).toEqual([
+        "default-src 'none'",
+        "style-src 'unsafe-inline'",
+        'font-src data:',
+      ]);
+      // the policy must come before the styles and fonts it allows
+      expect(head.indexOf('Content-Security-Policy')).toBeLessThan(head.indexOf('<style>'));
+    });
+
     it('sets the page language to the locale', () => {
-      expect(renderCvPdfHtml(cv(), Locale.en)).toContain('<html lang="en">');
-      expect(renderCvPdfHtml(cv(), Locale.ru)).toContain('<html lang="ru">');
+      expect(renderCvPdfHtml(cvPreviewFixture(), Locale.en)).toContain('<html lang="en">');
+      expect(renderCvPdfHtml(cvPreviewFixture(), Locale.ru)).toContain('<html lang="ru">');
     });
 
     it('shows the owner name and position in the header', () => {
-      const body = renderBody(cv());
+      const body = renderBody(cvPreviewFixture());
 
       expect(body).toContain('<h1 class="document__title">Anna Smith</h1>');
       expect(body).toContain('<p class="document__sub-title">Software Engineer</p>');
@@ -120,13 +91,8 @@ describe('renderCvPdfHtml', () => {
 
     it('falls back to the email without a name and hides a missing position', () => {
       const body = renderBody(
-        cv({
-          user: {
-            email: 'employee@cv-builder.local',
-            firstName: null,
-            lastName: null,
-            position: null,
-          },
+        cvPreviewFixture({
+          user: userFixture({ firstName: null, lastName: null, position: null }),
         }),
       );
 
@@ -139,35 +105,29 @@ describe('renderCvPdfHtml', () => {
     it('escapes markup in every value taken from the data', () => {
       const xss = '<script>alert(1)</script>';
       const body = renderBody(
-        cv({
+        cvPreviewFixture({
           name: xss,
           education: xss,
           description: xss,
           domains: [xss],
-          user: {
-            email: 'e@x.io',
-            firstName: xss,
-            lastName: null,
-            position: { id: 'p', name: xss },
-          },
-          languages: [{ id: 'ul', proficiency: Proficiency.B1, language: { id: 'l', name: xss } }],
+          user: userFixture({ firstName: xss, lastName: null, position: { id: 'p', name: xss } }),
+          languages: [userLanguageFixture(xss, Proficiency.B1)],
           skillGroups: [
             {
-              category: { id: 'c', name: xss },
-              skills: [{ skill: { id: 's', name: xss }, experienceYears: 1, lastUsedYear: 2026 }],
+              category: skillCategoryFixture(xss),
+              skills: [{ skill: skillFixture(xss), experienceYears: 1, lastUsedYear: 2026 }],
             },
           ],
           projects: [
-            project({
+            cvProjectFixture({
               responsibilities: xss,
               roles: [{ id: 'r', name: xss }],
-              project: {
-                id: 'p',
+              project: projectFixture({
                 name: xss,
                 domain: xss,
                 description: xss,
-                technologies: [{ id: 't', name: xss }],
-              },
+                technologies: [skillFixture(xss)],
+              }),
             }),
           ],
         }),
@@ -180,7 +140,12 @@ describe('renderCvPdfHtml', () => {
 
   describe('locale', () => {
     it('renders the labels of the requested locale', () => {
-      const text = textOf(renderBody(cv({ projects: [project({ endDate: null })] }), Locale.ru));
+      const text = textOf(
+        renderBody(
+          cvPreviewFixture({ projects: [cvProjectFixture({ endDate: null })] }),
+          Locale.ru,
+        ),
+      );
 
       expect(text).toContain('Образование BSUIR, Software Engineering');
       expect(text).toContain('Владение языками Russian — Родной, English — B2');
@@ -192,7 +157,10 @@ describe('renderCvPdfHtml', () => {
     });
 
     it('escapes an apostrophe in a translation', () => {
-      const body = renderBody(cv({ projects: [project({ endDate: null })] }), Locale.fr);
+      const body = renderBody(
+        cvPreviewFixture({ projects: [cvProjectFixture({ endDate: null })] }),
+        Locale.fr,
+      );
 
       expect(body).toContain('03.2022 – aujourd&#39;hui');
     });
@@ -200,7 +168,7 @@ describe('renderCvPdfHtml', () => {
 
   describe('summary', () => {
     it('lists education, languages with levels, domains and skills by category', () => {
-      const text = textOf(renderBody(cv()));
+      const text = textOf(renderBody(cvPreviewFixture()));
 
       expect(text).toContain('Education BSUIR, Software Engineering');
       expect(text).toContain('Language proficiency Russian — Native, English — B2');
@@ -211,12 +179,12 @@ describe('renderCvPdfHtml', () => {
 
     it('hides empty education, languages, domains, description and skill categories', () => {
       const body = renderBody(
-        cv({
+        cvPreviewFixture({
           education: '  ',
           description: '',
           languages: [],
           domains: [],
-          skillGroups: [{ category: { id: 'c', name: 'Empty category' }, skills: [] }],
+          skillGroups: [{ category: skillCategoryFixture('Empty category'), skills: [] }],
         }),
       );
 
@@ -230,7 +198,7 @@ describe('renderCvPdfHtml', () => {
 
   describe('projects', () => {
     it('shows roles, the period as MM.yyyy and the environment', () => {
-      const text = textOf(renderBody(cv()));
+      const text = textOf(renderBody(cvPreviewFixture()));
 
       expect(text).toContain('Projects ShopWave Online marketplace');
       expect(text).toContain('Project roles Frontend Developer, Team Lead');
@@ -239,7 +207,9 @@ describe('renderCvPdfHtml', () => {
     });
 
     it('shows Present for a project without an end date', () => {
-      const text = textOf(renderBody(cv({ projects: [project({ endDate: null })] })));
+      const text = textOf(
+        renderBody(cvPreviewFixture({ projects: [cvProjectFixture({ endDate: null })] })),
+      );
 
       expect(text).toContain('Period 03.2022 – Present');
     });
@@ -247,8 +217,13 @@ describe('renderCvPdfHtml', () => {
     it('formats the period in UTC, so the server time zone does not shift the month', () => {
       const text = textOf(
         renderBody(
-          cv({
-            projects: [project({ startDate: date('2023-01-01'), endDate: date('2023-12-31') })],
+          cvPreviewFixture({
+            projects: [
+              cvProjectFixture({
+                startDate: calendarDate('2023-01-01'),
+                endDate: calendarDate('2023-12-31'),
+              }),
+            ],
           }),
         ),
       );
@@ -258,8 +233,10 @@ describe('renderCvPdfHtml', () => {
 
     it('ends responsibilities with ";" and the last one with "." in place of their own punctuation', () => {
       const body = renderBody(
-        cv({
-          projects: [project({ responsibilities: 'Built the catalog.\nReviewed code;, Tests' })],
+        cvPreviewFixture({
+          projects: [
+            cvProjectFixture({ responsibilities: 'Built the catalog.\nReviewed code;, Tests' }),
+          ],
         }),
       );
 
@@ -268,12 +245,12 @@ describe('renderCvPdfHtml', () => {
 
     it('hides empty roles, responsibilities, environment and description', () => {
       const body = renderBody(
-        cv({
+        cvPreviewFixture({
           projects: [
-            project({
+            cvProjectFixture({
               roles: [],
               responsibilities: null,
-              project: { ...project().project, description: ' ', technologies: [] },
+              project: projectFixture({ description: ' ', technologies: [] }),
             }),
           ],
         }),
@@ -287,13 +264,13 @@ describe('renderCvPdfHtml', () => {
     });
 
     it('hides the section without projects', () => {
-      expect(renderBody(cv({ projects: [] }))).not.toContain('Projects');
+      expect(renderBody(cvPreviewFixture({ projects: [] }))).not.toContain('Projects');
     });
   });
 
   describe('professional skills', () => {
     it('renders one table body per category with the category cell spanning its skills', () => {
-      const body = renderBody(cv());
+      const body = renderBody(cvPreviewFixture());
 
       expect(textOf(body)).toContain('Professional skills');
       expect(body.match(/<tbody>/g)).toHaveLength(1);
@@ -304,7 +281,7 @@ describe('renderCvPdfHtml', () => {
     });
 
     it('leaves experience and last used empty for a skill without projects', () => {
-      const body = renderBody(cv());
+      const body = renderBody(cvPreviewFixture());
       const nextRow = body.slice(body.indexOf('Next.js'));
 
       expect(nextRow).toMatch(
@@ -314,7 +291,7 @@ describe('renderCvPdfHtml', () => {
 
     it('hides the section when no category has skills', () => {
       const body = renderBody(
-        cv({ skillGroups: [{ category: { id: 'c', name: 'Frontend' }, skills: [] }] }),
+        cvPreviewFixture({ skillGroups: [{ category: skillCategoryFixture(), skills: [] }] }),
       );
 
       expect(body).not.toContain('Professional skills');

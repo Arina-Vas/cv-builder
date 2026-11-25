@@ -7,18 +7,18 @@ contract is `generateCvPdf` in [api/permissions.md](api/permissions.md#cv-pdf).
 ## How it works
 
 ```
-generateCvPdf(input: { cvId, locale }) → CvAccessService (NOT_FOUND / FORBIDDEN)
-                                       → CV data → HTML template (labels of locale) → headless Chromium → PDF
+generateCvPdf(input: { cvId, locale }) → CvPreviewService.getPreview (NOT_FOUND / FORBIDDEN)
+                                       → CvPreview → HTML template (labels of locale) → headless Chromium → PDF
                                        → { fileName, content: base64 }
 ```
 
-1. **Access.** `CvPdfService.generate` gets the CV through `CvAccessService.getAccessibleCv`, like `cv(id)`:
-   `NOT_FOUND` for a missing CV, `FORBIDDEN` when an Employee asks for another user's CV. The owner is never taken
-   from the request. Access is checked before Chromium is used.
-2. **Data.** Until the CV Preview data service (B7) is ready, `cv-pdf.mapper.ts` builds the data from the CV and
-   its owner, with empty languages, domains, skills and projects; the temporary type is `cv-preview.types.ts`.
-   With B7 the PDF takes the same data as `cvPreview`, and incomplete data is rejected with `BAD_USER_INPUT`
-   before rendering (wiki: the application must not generate an incomplete PDF).
+1. **Access and data.** `CvPdfService.generate` calls `CvPreviewService.getPreview`, the same service as the
+   `cvPreview` query, so the PDF always shows what the Preview shows (wiki: "the generated PDF must use the same
+   underlying data and calculation rules as the Preview page"). `getPreview` checks access with
+   `CvAccessService.getAccessibleCv`: `NOT_FOUND` for a missing CV, `FORBIDDEN` when an Employee asks for another
+   user's CV. The owner is never taken from the request. Both happen before Chromium is used.
+2. **Template data.** The template takes `CvPreview` as is (`CvPreview`, `CvProject`, `CvPreviewSkillGroup`
+   models); there is no PDF-specific mapper. The experience and last-used years come calculated from B7.
 3. **HTML.** `cv-pdf.template.ts` renders a full HTML page as a string. It is a port of the CV Preview components
    (`frontend/src/features/cvs/components/cv-preview/document/`): the same sections, the same rules for hiding
    empty values, the period as `MM.yyyy – Present`, the same list punctuation. Labels come from the requested
@@ -32,7 +32,10 @@ generateCvPdf(input: { cvId, locale }) → CvAccessService (NOT_FOUND / FORBIDDE
    `ą ę ł ń ś ź ż`. Variable fonts from Google Fonts, one file per subset with Google's `unicode-range`. The page
    loads nothing from the network, and a server without system fonts still renders the text of every UI
    language.
-6. **PDF.** `page.setContent(html)` and `page.pdf({ format: 'A4', printBackground: true })` in Chromium.
+6. **PDF.** `page.setContent(html)` and `page.pdf({ format: 'A4', printBackground: true })` in Chromium. The page
+   runs with JavaScript disabled (`page.setJavaScriptEnabled(false)`), and the template's Content-Security-Policy
+   allows only inline styles and `data:` fonts (`default-src 'none'`). Markup that slipped past escaping can
+   neither run scripts nor make requests from the server to internal addresses (SSRF).
 7. **Response.** `{ fileName, content }`: `content` is the PDF in base64, `fileName` is the CV name in kebab-case
    with `.pdf` (`toPdfFileName`, see [File name](#file-name)). The frontend turns `content` into a Blob and
    downloads it with `fileName`. The file is not stored anywhere.
@@ -55,14 +58,23 @@ The PDF is in the language the user sees the Preview in. The frontend sends its 
   the PDF as the document language (`/Lang`).
 - Only the labels are translated. The CV data (names, descriptions, skills) is printed as the user entered it.
 
+### Incomplete CV data
+
+The wiki (CV Preview → Empty State) forbids an incomplete PDF but does not list the required data. The mentor
+confirmed (24.11.2026): the required data are the three fields of the CV Details form, **name, education and
+description**. `CreateCvInput` and `UpdateCvInput` trim them and reject empty values, and the columns are
+`NOT NULL`, so every CV saved through the API can be exported. There is no incomplete-data check or error:
+empty skills, languages, projects, roles or responsibilities are a normal state, and their sections are hidden
+in the Preview and the PDF alike.
+
 ### Keeping the PDF in sync with the Preview
 
 The template and the styles are copies of the Preview markup and CSS. A change to
 `frontend/src/features/cvs/components/cv-preview/document/**` (markup, CSS modules) needs the same change in
-`backend/src/cvs/cv-pdf/cv-pdf.template.ts` or `cv-pdf.styles.ts`. A change to the texts in
+`backend/src/cvs/cv-pdf/document/cv-pdf.template.ts` or `cv-pdf.styles.ts`. A change to the texts in
 `messages/*.json` → `cvs.preview.document` or `userLanguage.proficiencyLevel` needs the same change in
-`cv-pdf.labels.ts` (the labels test points to it). Class names in the PDF have a block prefix (`summary__title`, `project__name`), because
-the CSS modules reuse names like `.title` and `.value`.
+`cv-pdf.labels.ts` (the labels test points to it). Class names in the PDF have a block prefix
+(`summary__title`, `project__name`), because the CSS modules reuse names like `.title` and `.value`.
 
 ### Browser lifecycle
 
@@ -72,26 +84,40 @@ the CSS modules reuse names like `.title` and `.value`.
   start two browsers. Every PDF gets its own page, closed in `finally`.
 - `onModuleDestroy` closes the browser. `main.ts` calls `app.enableShutdownHooks()`, so it also happens on
   Ctrl+C, SIGTERM and `nest start --watch` restarts; without it a Chromium process stays behind.
-- A failed launch stays cached until the backend restarts (accepted for now).
+- A failed launch is not kept: the request fails, and the next PDF tries to launch Chromium again. A browser
+  that crashes or disconnects is dropped on its `disconnected` event, so the next PDF launches a new one
+  instead of failing until the backend restarts (`CvPdfService.getBrowser`).
+
+### Limits
+
+- **One PDF at a time.** `CvPdfService.enqueue` chains the renders on one promise, so at most one Chromium page
+  is open on top of the browser, whatever the number of requests. The others wait in the queue; a failed PDF
+  does not block the ones after it. Access is checked before the queue, so a missing or another user's CV
+  fails at once. A PDF takes well under a second with a running browser, so the wait is short at the expected
+  load; move to a small concurrency limit only if many exports happen at the same time.
+- **10 requests a minute per client IP.** `@PdfThrottle()` (`common/throttling/throttle.decorators.ts`) on
+  `generateCvPdf`; over the limit the request fails with `RATE_LIMITED` and `retryAfter` before it reaches the
+  database or Chromium. See [auth.md → Rate limiting](auth.md#rate-limiting).
+- Both live in the API process: with several instances each one has its own queue and counters.
 
 ## Files
 
-| File                                          | What it does                                                 |
-| --------------------------------------------- | ------------------------------------------------------------ |
-| `src/cvs/cv-pdf/cv-pdf.resolver.ts`           | `generateCvPdf(input)`, `@AllowUnverified()`                 |
-| `src/cvs/cv-pdf/dto/generate-cv-pdf.input.ts` | `GenerateCvPdfInput`: `cvId` (UUID), `locale` (default `en`) |
-| `src/cvs/cv-pdf/cv-pdf.service.ts`            | access → data → HTML → PDF → base64; owns the browser        |
-| `src/cvs/cv-pdf/cv-pdf.template.ts`           | HTML of the document; `splitResponsibilities`                |
-| `src/cvs/cv-pdf/cv-pdf.labels.ts`             | `CV_PDF_LABELS`: texts of the document for every locale      |
-| `src/common/graphql/locale.enum.ts`           | `Locale` GraphQL enum                                        |
-| `src/cvs/cv-pdf/cv-pdf.styles.ts`             | CSS of the document                                          |
-| `src/cvs/cv-pdf/cv-pdf.fonts.ts`, `fonts/`    | Roboto `@font-face` rules and the woff2 files                |
-| `src/cvs/cv-pdf/cv-pdf-file-name.ts`          | `toPdfFileName`                                              |
-| `src/cvs/cv-pdf/cv-pdf.mapper.ts`             | **temporary** (until B7): CV → template data                 |
-| `src/cvs/cv-pdf/cv-preview.types.ts`          | **temporary** (until B7): shape of the template data         |
-| `src/common/html/escape-html.ts`              | HTML escaping, shared with the email templates               |
+| File                                                | What it does                                                 |
+| --------------------------------------------------- | ------------------------------------------------------------ |
+| `src/cvs/cv-pdf/cv-pdf.resolver.ts`                 | `generateCvPdf(input)`, `@AllowUnverified()`                 |
+| `src/cvs/cv-pdf/dto/generate-cv-pdf.input.ts`       | `GenerateCvPdfInput`: `cvId` (UUID), `locale` (default `en`) |
+| `src/cvs/cv-pdf/cv-pdf.service.ts`                  | access → data → HTML → PDF → base64; owns the browser        |
+| `src/cvs/cv-pdf/document/cv-pdf.template.ts`        | HTML of the document; `splitResponsibilities`                |
+| `src/cvs/cv-pdf/document/cv-pdf.labels.ts`          | `CV_PDF_LABELS`: texts of the document for every locale      |
+| `src/common/graphql/locale.enum.ts`                 | `Locale` GraphQL enum                                        |
+| `src/cvs/cv-pdf/document/cv-pdf.styles.ts`          | CSS of the document                                          |
+| `src/cvs/cv-pdf/document/cv-pdf.fonts.ts`, `fonts/` | Roboto `@font-face` rules and the woff2 files                |
+| `src/cvs/cv-pdf/cv-pdf.file-name.ts`                | `toPdfFileName`                                              |
+| `src/cvs/cv-pdf/cv-pdf.fixtures.ts`                 | test data: `CvPreview` builders for the unit tests           |
+| `src/common/html/escape-html.ts`                    | HTML escaping, shared with the email templates               |
 
-The resolver and the service are registered in `CvModule`, next to `CvAccessService`.
+The resolver and the service are registered in `CvModule`, next to `CvPreviewService`. `*.fixtures.ts` is
+excluded from the build (`tsconfig.build.json`).
 
 ## File name
 
@@ -153,16 +179,21 @@ namespaces), so `backend-integration` sets `PUPPETEER_NO_SANDBOX: true`.
 
 - `cv-pdf.fonts.spec.ts`: three woff2 files (latin, latin-ext, cyrillic) with their unicode ranges.
 - `cv-pdf.labels.spec.ts`: the dictionary equals the frontend messages for every locale.
+- `cv-pdf.fixtures.ts` holds the `CvPreview` test data shared by the template and service specs.
 - `cv-pdf.template.spec.ts`: HTML of the document (escaping, hidden empty sections, period, punctuation, skills
-  table, labels and `lang` of the locale), `splitResponsibilities`.
-- `cv-pdf-file-name.spec.ts`: `toPdfFileName`.
-- `cv-pdf.service.spec.ts`: puppeteer is mocked. Access is checked before Chromium starts, one browser for
-  sequential and parallel requests, the page is closed after an error, the locale reaches the HTML, the sandbox
-  flag, `onModuleDestroy`.
-- `test/cv-pdf.int-spec.ts`: real Chromium and the test database. Own CV → `%PDF-`, the PDF language (`/Lang`)
-  for `ru` and for a request without `locale`, another user's CV → `FORBIDDEN` (wiki AC-31, AC-49), Admin,
-  unverified user, `NOT_FOUND`, `BAD_USER_INPUT` for a non-UUID id and for an unknown locale,
-  `UNAUTHENTICATED`.
+  table, labels and `lang` of the locale, the Content-Security-Policy), `splitResponsibilities`.
+- `cv-pdf.file-name.spec.ts`: `toPdfFileName`.
+- `cv-pdf.service.spec.ts`: puppeteer and `CvPreviewService` are mocked. The preview is requested for the
+  current user, its data reaches the HTML, access errors stop before Chromium starts, one browser for
+  sequential and parallel requests, a new launch after a failed launch or a disconnect, one PDF at a time
+  (the next page opens after the previous PDF), the queue goes on after a failed PDF, access is checked
+  before the queue, the page is closed after an error, JavaScript is off before the HTML is loaded, the locale reaches the HTML, the sandbox flag,
+  `onModuleDestroy`.
+- `test/cv-pdf.int-spec.ts`: real Chromium and the test database. Own CV → `%PDF-`, a CV with every section
+  filled (owner, language, skills, projects; 2 pages) and a long CV that continues on more pages (page count
+  from the PDF), the PDF language (`/Lang`) for `ru` and for a request without `locale`, another user's CV →
+  `FORBIDDEN` (wiki AC-31, AC-49), Admin, unverified user, `NOT_FOUND`, `BAD_USER_INPUT` for a non-UUID id and
+  for an unknown locale, `RATE_LIMITED` after 10 requests a minute from one IP, `UNAUTHENTICATED`.
 
 ## Checking by hand
 
@@ -190,8 +221,3 @@ else {
   link.click();
 }
 ```
-
-## Open
-
-- **Data and incomplete-data rule** come with B7 (`CvPreviewService`): replace `cv-pdf.mapper.ts` and
-  `cv-preview.types.ts`, add the `BAD_USER_INPUT` check and its test.

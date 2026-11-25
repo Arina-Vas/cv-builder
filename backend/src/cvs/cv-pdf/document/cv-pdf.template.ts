@@ -1,9 +1,11 @@
 import { Locale } from '@/common/graphql/locale.enum';
 import { escapeHtml } from '@/common/html/escape-html';
-import { getCvPdfFontFaces } from '@/cvs/cv-pdf/cv-pdf.fonts';
-import { CV_PDF_LABELS, type CvPdfLabels } from '@/cvs/cv-pdf/cv-pdf.labels';
-import { CV_PDF_STYLES } from '@/cvs/cv-pdf/cv-pdf.styles';
-import type { CvPdfData, CvPdfProject, CvPdfSkillGroup } from '@/cvs/cv-pdf/cv-preview.types';
+import { getCvPdfFontFaces } from '@/cvs/cv-pdf/document/cv-pdf.fonts';
+import { CV_PDF_LABELS, type CvPdfLabels } from '@/cvs/cv-pdf/document/cv-pdf.labels';
+import { CV_PDF_STYLES } from '@/cvs/cv-pdf/document/cv-pdf.styles';
+import type { CvPreview } from '@/cvs/cv-preview/models/cv-preview.model';
+import type { CvProject } from '@/cvs/cv-projects/models/cv-project.model';
+import type { CvPreviewSkillGroup } from '@/cvs/cv-preview/models/cv-preview-skill-group.model';
 
 /**
  * HTML of the CV PDF. A port of the CV Preview components
@@ -35,7 +37,7 @@ const format = (template: string, values: Record<string, string>): string =>
   template.replace(/\{(\w+)\}/g, (match, key: string) => values[key] ?? match);
 
 /** "First Last", or the email when the user has no name yet (as `getFullName` on the frontend) */
-const getFullName = (user: CvPdfData['user']): string =>
+const getFullName = (user: CvPreview['user']): string =>
   [user.firstName, user.lastName].filter(Boolean).join(' ') || user.email;
 
 /** Renders the block only when the condition holds, like `{cond && …}` in JSX */
@@ -45,7 +47,7 @@ const joinNames = (items: { name: string }[]): string =>
   escapeHtml(items.map((item) => item.name).join(', '));
 
 // CvSummary
-const renderSummary = (data: CvPdfData, labels: CvPdfLabels): string => {
+const renderSummary = (data: CvPreview, labels: CvPdfLabels): string => {
   const education = data.education.trim();
   const description = data.description.trim();
   const groups = data.skillGroups.filter((group) => group.skills.length > 0);
@@ -113,7 +115,7 @@ const renderResponsibilities = (items: string[]): string =>
     )
     .join('');
 
-const renderProject = (entry: CvPdfProject, labels: CvPdfLabels): string => {
+const renderProject = (entry: CvProject, labels: CvPdfLabels): string => {
   const responsibilities = splitResponsibilities(entry.responsibilities);
   const description = entry.project.description.trim();
   const { technologies } = entry.project;
@@ -154,7 +156,7 @@ const renderProject = (entry: CvPdfProject, labels: CvPdfLabels): string => {
 };
 
 // ProfessionalSkills
-const renderSkillGroup = (group: CvPdfSkillGroup): string => `
+const renderSkillGroup = (group: CvPreviewSkillGroup): string => `
     <tbody>
       ${group.skills
         .map(
@@ -173,7 +175,7 @@ const renderSkillGroup = (group: CvPdfSkillGroup): string => `
         .join('')}
     </tbody>`;
 
-const renderSkills = (skillGroups: CvPdfSkillGroup[], labels: CvPdfLabels): string => {
+const renderSkills = (skillGroups: CvPreviewSkillGroup[], labels: CvPdfLabels): string => {
   const groups = skillGroups.filter((group) => group.skills.length > 0);
   if (groups.length === 0) return '';
 
@@ -200,13 +202,15 @@ const renderSkills = (skillGroups: CvPdfSkillGroup[], labels: CvPdfLabels): stri
 };
 
 // CvPreviewDocument
-export const renderCvPdfHtml = (data: CvPdfData, locale: Locale = Locale.en): string => {
+export const renderCvPdfHtml = (data: CvPreview, locale: Locale = Locale.en): string => {
   const labels = CV_PDF_LABELS[locale];
 
   return `<!doctype html>
 <html lang="${locale}">
 <head>
   <meta charset="utf-8" />
+  <meta http-equiv="Content-Security-Policy"
+      content="default-src 'none'; style-src 'unsafe-inline'; font-src data:">
   <title>${escapeHtml(data.name)}</title>
   <style>${getCvPdfFontFaces()}${CV_PDF_STYLES}</style>
 </head>

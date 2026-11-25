@@ -5,6 +5,7 @@ import { CvPdfService } from '@/cvs/cv-pdf/cv-pdf.service';
 import { User } from '@/users/models/user.model';
 import { CurrentUser } from '@/common/auth/current-user.decorator';
 import { GenerateCvPdfInput } from '@/cvs/cv-pdf/dto/generate-cv-pdf.input';
+import { PdfThrottle } from '@/common/throttling/throttle.decorators';
 
 @Resolver()
 export class CvPdfResolver {
@@ -13,8 +14,9 @@ export class CvPdfResolver {
   @Mutation(() => CvPdf, {
     description:
       'Own CV or Admin. Builds a PDF of the CV preview and returns it as base64. ' +
-      'Fails with NOT_FOUND, FORBIDDEN for another user, BAD_USER_INPUT when preview data is incomplete',
+      'Fails with NOT_FOUND, FORBIDDEN for another user, BAD_USER_INPUT for an invalid cvId or locale',
   })
+  @PdfThrottle()
   generateCvPdf(
     @CurrentUser() user: User,
     @Args('input') input: GenerateCvPdfInput,

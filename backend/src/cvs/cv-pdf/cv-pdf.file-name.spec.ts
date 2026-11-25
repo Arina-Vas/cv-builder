@@ -1,4 +1,4 @@
-import { toPdfFileName } from './cv-pdf-file-name';
+import { toPdfFileName } from './cv-pdf.file-name';
 
 describe('toPdfFileName', () => {
   it('turns the CV name into kebab-case with the .pdf extension, as in the wiki', () => {
