@@ -112,22 +112,23 @@ const [deleteDepartment] = useMutation(DELETE_DEPARTMENT, DEPARTMENT_MUTATION_OP
 />;
 ```
 
-| Prop            | Values                               | Default                  |
-| --------------- | ------------------------------------ | ------------------------ |
-| `open`          | `boolean`                            | required                 |
-| `onOpenChange`  | `(open: boolean) => void`            | required                 |
-| `title`         | `string`                             | required                 |
-| `message`       | `ReactNode`                          | required                 |
-| `onConfirm`     | `() => Promise<unknown>`             | required                 |
-| `confirmLabel`  | `string`                             | `common.actions.confirm` |
-| `cancelLabel`   | `string`                             | `common.actions.cancel`  |
-| `errorMessages` | `Partial<Record<ErrorCode, string>>` | —                        |
+| Prop             | Values                                 | Default                  |
+| ---------------- | -------------------------------------- | ------------------------ |
+| `open`           | `boolean`                              | required                 |
+| `onOpenChange`   | `(open: boolean) => void`              | required                 |
+| `title`          | `string`                               | required                 |
+| `message`        | `ReactNode`                            | required                 |
+| `onConfirm`      | `() => Promise<unknown>`               | required                 |
+| `confirmLabel`   | `string`                               | `common.actions.confirm` |
+| `cancelLabel`    | `string`                               | `common.actions.cancel`  |
+| `errorMessages`  | `Partial<Record<ErrorCode, string>>`   | —                        |
+| `reasonMessages` | `Partial<Record<ErrorReason, string>>` | —                        |
 
 - CONFIRM awaits `onConfirm`. While the promise runs: spinner on CONFIRM (`aria-busy`, disabled, so a second
   click is ignored), CANCEL and × disabled, the dialog can't be closed (`preventClose`).
-- Resolved → the dialog calls `onOpenChange(false)`. Rejected → it shows `errorMessages[code]` when the page
-  passed one for the error's code, otherwise `useErrorMessage()(parseError(error))`, above the buttons and stays
-  open; CONFIRM retries. The page needs no `try / catch`, `loading`, `error` or
+- Resolved → the dialog calls `onOpenChange(false)`. Rejected → it shows, above the buttons, the first text it
+  finds: `reasonMessages[reason]` (the error's `extensions.reason`), `errorMessages[code]`, then
+  `useErrorMessage()(parseError(error))`; it stays open and CONFIRM retries. The page needs no `try / catch`, `loading`, `error` or
   `reset()`.
 - The error is cleared whenever the dialog closes (CANCEL, ×, Esc, overlay), so the next opening starts clean.
 - `message` becomes the dialog's accessible description; the entity name is bold, as in Figma (`t.rich`).
@@ -160,6 +161,20 @@ The text comes from `useErrorMessage()(parseError(error))`, never the backend `m
 its entity's text for `ENTITY_IN_USE` (`<namespace>.delete.inUse`, as the wiki asks) through `errorMessages`;
 `errors.ENTITY_IN_USE` ("This item is in use and can't be deleted") stays as the fallback. An error that belongs to a
 form field (`CONFLICT` / `BAD_USER_INPUT` with `field`) goes under that field, not into `error`.
+
+When one code has several causes, the backend adds `extensions.reason` and the page passes a text per reason in
+`reasonMessages`. `deleteUser` sends `OPERATION_NOT_ALLOWED` for deleting your own account (`SELF`) and for the
+last admin (`LAST_ADMIN`):
+
+```tsx
+<ConfirmDialog
+  reasonMessages={{ SELF: t('delete.ownAccount'), LAST_ADMIN: t('delete.lastAdmin') }}
+  …
+/>
+```
+
+A reason the page did not list, an unknown one or none falls back to `errorMessages[code]` and then to
+`errors.<code>`.
 
 ## Sizing rules
 
@@ -208,10 +223,10 @@ Each behaviour is checked once, as `frontend/README.md` → Tests asks: unit tes
 browser: focus, the overlay click, layout, Radix portals, CSS and the page flow. Stories run in Storybook
 (Interactions panel) and in Vitest (`storybook` project, needs `pnpm exec playwright install chromium` once).
 
-| Unit test                | Checks                                                                                                                                                                                                                                                                                                      |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Dialog.test.tsx`        | closed → nothing; named by the title, × "Close"; description / no `aria-describedby`; footer and error only when passed; `size`, `className`; Esc and × call `onOpenChange(false)`; `preventClose` disables × and ignores Esc                                                                               |
-| `ConfirmDialog.test.tsx` | `sm`, title and message; default and own labels; closes after `onConfirm` resolves; CANCEL closes; while it runs the buttons and Esc are disabled, no second call; rejected → error shown, dialog open; `errorMessages` text for its code, `errors.<code>` for others; retry closes; error cleared on close |
+| Unit test                | Checks                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Dialog.test.tsx`        | closed → nothing; named by the title, × "Close"; description / no `aria-describedby`; footer and error only when passed; `size`, `className`; Esc and × call `onOpenChange(false)`; `preventClose` disables × and ignores Esc                                                                                                                                                                                                                      |
+| `ConfirmDialog.test.tsx` | `sm`, title and message; default and own labels; closes after `onConfirm` resolves; CANCEL closes; while it runs the buttons and Esc are disabled, no second call; rejected → error shown, dialog open; `errorMessages` text for its code, `errors.<code>` for others; `reasonMessages` text wins over the code, a reason without a text / unknown / none falls back to the code and then to `errors.<code>`; retry closes; error cleared on close |
 
 | Story (Shared/Dialog)                               | Checks                                                     |
 | --------------------------------------------------- | ---------------------------------------------------------- |
@@ -231,6 +246,7 @@ browser: focus, the overlay click, layout, Radix portals, CSS and the page flow.
 | `Loading`                                                                  | the loading CONFIRM keeps its accessible name; the overlay does not close                           |
 | `WithError`                                                                | a rejected `onConfirm` shows the ENTITY_IN_USE text                                                 |
 | `WithEntityMessage`                                                        | with `errorMessages`, ENTITY_IN_USE shows the page's text                                           |
+| `WithReasonMessage`                                                        | `OPERATION_NOT_ALLOWED` with `reason: 'LAST_ADMIN'` shows the `reasonMessages` text, not the code's |
 | `FlowSuccess`, `FlowDoubleClick`, `FlowError`, `FlowRetryAfterError`       | `onConfirm` returns a simulated mutation: loading, close on success, error, retry, cleared on close |
 | `Default`, `CustomLabels`, `Light`, `Dark`, `DarkWithError`, `DarkLoading` | visual only; the request result can be changed in Controls (`outcome`)                              |
 

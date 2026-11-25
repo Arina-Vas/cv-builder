@@ -1,6 +1,6 @@
 import { CombinedGraphQLErrors, ServerError, ServerParseError } from '@apollo/client/errors';
 import { describe, expect, it } from 'vitest';
-import { hasErrorCode, isErrorCode, parseError } from './graphql-errors';
+import { hasErrorCode, isErrorCode, isErrorReason, parseError } from './graphql-errors';
 
 function graphQLError(message: string, extensions: Record<string, unknown>) {
   return new CombinedGraphQLErrors({ errors: [{ message, extensions }] });
@@ -87,6 +87,38 @@ describe('parseError', () => {
 
     expect(parseError(error)).toMatchObject({ code: 'RATE_LIMITED', retryAfter: 42 });
   });
+
+  it('passes a known extensions.reason through', () => {
+    const error = graphQLError('Verification code has expired', {
+      code: 'BAD_USER_INPUT',
+      fields: [{ field: 'code', message: 'Verification code has expired' }],
+      reason: 'EXPIRED',
+    });
+
+    expect(parseError(error)).toMatchObject({
+      code: 'BAD_USER_INPUT',
+      reason: 'EXPIRED',
+      fieldErrors: { code: 'Verification code has expired' },
+    });
+  });
+
+  it.each([['NOT_A_REASON'], ['expired'], [''], [42], [null]])(
+    'drops an unknown reason %j, so the UI falls back to the text by code',
+    (reason) => {
+      const error = graphQLError('The last admin cannot be deleted', {
+        code: 'OPERATION_NOT_ALLOWED',
+        reason,
+      });
+
+      expect(parseError(error)).toMatchObject({ code: 'OPERATION_NOT_ALLOWED', reason: undefined });
+    },
+  );
+
+  it('has no reason when the backend sends none', () => {
+    const error = graphQLError('Department already exists', { code: 'CONFLICT', field: 'name' });
+
+    expect(parseError(error).reason).toBeUndefined();
+  });
 });
 
 describe('hasErrorCode', () => {
@@ -113,4 +145,14 @@ describe('isErrorCode', () => {
       expect(isErrorCode(value)).toBe(false);
     },
   );
+});
+
+describe('isErrorReason', () => {
+  it('accepts a backend reason', () => {
+    expect(isErrorReason('LAST_ADMIN')).toBe(true);
+  });
+
+  it.each([['ENTITY_IN_USE'], ['last_admin'], [''], [undefined], [42]])('rejects %j', (value) => {
+    expect(isErrorReason(value)).toBe(false);
+  });
 });

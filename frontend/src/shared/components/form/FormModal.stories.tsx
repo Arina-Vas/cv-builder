@@ -26,7 +26,7 @@ import { FormModal } from './FormModal';
 /* Simulated request                                                   */
 /* ------------------------------------------------------------------ */
 
-type Outcome = 'success' | 'error' | 'conflict';
+type Outcome = 'success' | 'error' | 'conflict' | 'notAllowed';
 
 const ERRORS: Record<Exclude<Outcome, 'success'>, CombinedGraphQLErrors> = {
   // an error without a field: shown above the buttons
@@ -39,6 +39,15 @@ const ERRORS: Record<Exclude<Outcome, 'success'>, CombinedGraphQLErrors> = {
       {
         message: 'Department already exists',
         extensions: { code: 'CONFLICT', field: 'name' },
+      },
+    ],
+  }),
+  // one code with several causes: extensions.reason tells which one (shown above the buttons)
+  notAllowed: new CombinedGraphQLErrors({
+    errors: [
+      {
+        message: 'The last admin cannot be demoted',
+        extensions: { code: 'OPERATION_NOT_ALLOWED', reason: 'LAST_ADMIN' },
       },
     ],
   }),
@@ -78,6 +87,10 @@ type DepartmentDemoProps = {
   errorMessages?: ComponentProps<
     typeof FormModal<{ name: string }, { name: string }>
   >['errorMessages'];
+  // the page's own texts by extensions.reason, e.g. { LAST_ADMIN: 'The last admin cannot be demoted' }
+  reasonMessages?: ComponentProps<
+    typeof FormModal<{ name: string }, { name: string }>
+  >['reasonMessages'];
 };
 
 const DepartmentDemo = ({
@@ -88,6 +101,7 @@ const DepartmentDemo = ({
   requireDirty,
   initialOpen = false,
   errorMessages,
+  reasonMessages,
 }: DepartmentDemoProps) => {
   const t = useTranslations('validation');
   const schema = useMemo(() => departmentSchema(t), [t]);
@@ -109,6 +123,7 @@ const DepartmentDemo = ({
         values={{ name: department ?? '' }}
         requireDirty={requireDirty}
         errorMessages={errorMessages}
+        reasonMessages={reasonMessages}
         onSubmit={(values) => {
           onSubmit(values);
           return request(outcome, delay);
@@ -263,7 +278,10 @@ const meta = {
   },
   argTypes: {
     onSubmit: { control: false },
-    outcome: { control: 'inline-radio', options: ['success', 'error', 'conflict'] },
+    outcome: {
+      control: 'inline-radio',
+      options: ['success', 'error', 'conflict', 'notAllowed'],
+    },
   },
   parameters: {
     layout: 'centered',
@@ -479,6 +497,34 @@ export const ConflictWithPageText: Story = {
     await expect(await within(dialog).findByText('Department already exists')).toBeVisible();
     await expect(within(dialog).queryByText('This value is already taken')).toBeNull();
     await expect(input).toHaveAttribute('aria-invalid', 'true');
+  },
+};
+
+// One code, several causes: the page passes a text per extensions.reason, which wins over errorMessages
+export const TextByReason: Story = {
+  args: {
+    department: 'Engineering',
+    outcome: 'notAllowed',
+    errorMessages: { OPERATION_NOT_ALLOWED: 'This action is not allowed for this department' },
+    reasonMessages: {
+      SELF: 'You cannot change your own department',
+      LAST_ADMIN: 'The last admin cannot be demoted',
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const dialog = await openDialog(canvasElement, 'Edit department');
+    const input = within(dialog).getByRole('textbox', { name: 'Department' });
+
+    await userEvent.type(input, ' Team');
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Update' }));
+
+    await expect(await within(dialog).findByRole('alert')).toHaveTextContent(
+      'The last admin cannot be demoted',
+    );
+    await expect(
+      within(dialog).queryByText('This action is not allowed for this department'),
+    ).toBeNull();
+    await expect(input).not.toHaveAttribute('aria-invalid', 'true');
   },
 };
 

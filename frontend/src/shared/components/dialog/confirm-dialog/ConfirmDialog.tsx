@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/shared/components/buttons';
 import { useTranslations } from 'next-intl';
 import { useErrorMessage } from '@/shared/lib/apollo/useErrorMessage';
-import { parseError, type ErrorCode } from '@/shared/lib/apollo/graphql-errors';
+import { parseError, type ErrorCode, type ErrorReason } from '@/shared/lib/apollo/graphql-errors';
 
 type Props = {
   title: string;
@@ -17,6 +17,8 @@ type Props = {
   // The page's own text for some error codes, e.g. { ENTITY_IN_USE: t('delete.inUse') };
   // other codes show errors.<code>
   errorMessages?: Partial<Record<ErrorCode, string>>;
+  // A text per extensions.reason; wins over errorMessages (OPERATION_NOT_ALLOWED: SELF vs LAST_ADMIN)
+  reasonMessages?: Partial<Record<ErrorReason, string>>;
 };
 export const ConfirmDialog = ({
   title,
@@ -27,6 +29,7 @@ export const ConfirmDialog = ({
   confirmLabel,
   onConfirm,
   errorMessages,
+  reasonMessages,
 }: Props) => {
   const t = useTranslations('common.actions');
 
@@ -49,7 +52,10 @@ export const ConfirmDialog = ({
     } catch (err) {
       const appError = parseError(err);
 
-      setError((appError.code && errorMessages?.[appError.code]) ?? errorMessage(appError));
+      const byReason = appError.reason && reasonMessages?.[appError.reason];
+      const byCode = appError.code && errorMessages?.[appError.code];
+
+      setError(byReason ?? byCode ?? errorMessage(appError));
     } finally {
       setPending(false);
     }

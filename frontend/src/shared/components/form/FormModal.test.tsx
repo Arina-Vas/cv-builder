@@ -427,4 +427,88 @@ describe('FormModal', () => {
       expect(getInput()).not.toHaveAttribute('aria-invalid', 'true');
     });
   });
+
+  // one code, several causes: the backend sends extensions.reason, the page passes a text per reason
+  describe('reasonMessages', () => {
+    const SELF = 'You cannot change your own role';
+    const LAST_ADMIN = 'The last admin cannot be demoted';
+    const NOT_ALLOWED = 'Not allowed for this user';
+
+    const notAllowed = (reason?: string) =>
+      graphQLError('OPERATION_NOT_ALLOWED', reason ? { reason } : {});
+
+    it('shows the text for the reason over the text for the code', async () => {
+      const { user } = renderModal({
+        onSubmit: () => Promise.reject(notAllowed('SELF')),
+        values: { name: 'Engineering' },
+        errorMessages: { OPERATION_NOT_ALLOWED: NOT_ALLOWED },
+        reasonMessages: { SELF, LAST_ADMIN },
+      });
+
+      await user.click(screen.getByRole('button', { name: 'Create' }));
+
+      expect(await screen.findByRole('alert')).toHaveTextContent(SELF);
+      expect(screen.queryByText(NOT_ALLOWED)).not.toBeInTheDocument();
+      expect(screen.queryByText('backend text')).not.toBeInTheDocument();
+    });
+
+    it('falls back to the text for the code for a reason without a text', async () => {
+      const { user } = renderModal({
+        onSubmit: () => Promise.reject(notAllowed('LAST_ADMIN')),
+        values: { name: 'Engineering' },
+        errorMessages: { OPERATION_NOT_ALLOWED: NOT_ALLOWED },
+        reasonMessages: { SELF },
+      });
+
+      await user.click(screen.getByRole('button', { name: 'Create' }));
+
+      expect(await screen.findByRole('alert')).toHaveTextContent(NOT_ALLOWED);
+    });
+
+    it('falls back to the text for the code for an unknown reason', async () => {
+      const { user } = renderModal({
+        onSubmit: () => Promise.reject(notAllowed('SOMETHING_NEW')),
+        values: { name: 'Engineering' },
+        errorMessages: { OPERATION_NOT_ALLOWED: NOT_ALLOWED },
+        reasonMessages: { SELF },
+      });
+
+      await user.click(screen.getByRole('button', { name: 'Create' }));
+
+      expect(await screen.findByRole('alert')).toHaveTextContent(NOT_ALLOWED);
+    });
+
+    it('falls back to errors.<code> when neither the reason nor the code has a text', async () => {
+      const { user } = renderModal({
+        onSubmit: () => Promise.reject(notAllowed()),
+        values: { name: 'Engineering' },
+        reasonMessages: { SELF },
+      });
+
+      await user.click(screen.getByRole('button', { name: 'Create' }));
+
+      expect(await screen.findByRole('alert')).toHaveTextContent('This action is not allowed');
+    });
+
+    it('shows the text for the reason under the field when the error has one', async () => {
+      const { user } = renderModal({
+        onSubmit: () =>
+          Promise.reject(
+            graphQLError('BAD_USER_INPUT', {
+              fields: [{ field: 'name', message: 'backend text' }],
+              reason: 'INVALID',
+            }),
+          ),
+        values: { name: 'Engineering' },
+        reasonMessages: { INVALID: 'The name is not valid' },
+      });
+
+      await user.click(screen.getByRole('button', { name: 'Create' }));
+
+      expect(await screen.findByRole('alert')).toHaveTextContent('The name is not valid');
+      expect(screen.getAllByRole('alert')).toHaveLength(1);
+      expect(getInput()).toHaveAttribute('aria-invalid', 'true');
+      expect(getInput()).toHaveAccessibleDescription('The name is not valid');
+    });
+  });
 });
