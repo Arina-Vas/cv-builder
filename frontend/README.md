@@ -175,8 +175,9 @@ Add a namespace together with the first UI that uses it, not in advance. The one
 The frontend shows its own text for an API error, chosen by `extensions.code` (and `field` where the form
 needs more), never the backend `message` ([conventions](../docs/api/conventions.md#messages)).
 
-- `parseError(error)` returns `{ code, fieldErrors, retryAfter, message }`; `message` is the backend text, for
-  logs only.
+- `parseError(error)` returns `{ code, reason, fieldErrors, retryAfter, ids, message }`; `message` is the backend
+  text, for logs only. `ids` are the items that blocked a delete (`ENTITY_IN_USE` from `deleteUserSkills`), so
+  the page can name them.
 - `useErrorMessage()` (`src/shared/lib/apollo/useErrorMessage.ts`) returns a function that turns that result
   into the `errors.<code>` text; no code falls back to `errors.INTERNAL_SERVER_ERROR`. There is no code for a
   network failure (fetch rejects with `TypeError`), a non-GraphQL HTTP response (`ServerError`, e.g. a proxy

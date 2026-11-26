@@ -203,6 +203,13 @@ Deleting a user removes their sessions, codes, skill and language assignments an
 projects); departments, positions, skills and languages stay. Before deleting, the service rejects deleting
 oneself and the last Admin ([permissions](api/permissions.md#users)).
 
+**A profile skill used in the owner's CVs cannot be removed.** `user_skills` and `cv_skills` have no foreign key
+between them, so this is a service rule, not `Restrict`: `deleteUserSkills` looks for the selected skills in the
+CVs of that user and, if any CV lists one, rejects the whole request with `ENTITY_IN_USE` and the ids of the
+blocked assignments in `extensions.ids` (see [conventions](api/conventions.md#codes)). The user removes the skill
+from those CVs first. The same skill in another user's CV does not block it. Profile languages have no such rule:
+a CV has no languages of its own (see [CV preview](#cv-preview)).
+
 ## Constraints
 
 ### Uniqueness
@@ -248,7 +255,7 @@ constraints are added in the `add_dates_checks` migration; the rest is checked i
 | Project end date is not earlier than the start date                          | Input DTO (`@IsNotBeforeDate()`, see [conventions](api/conventions.md#shared-building-blocks))                                 |
 | CV project `start_date <= end_date` (if end date is set)                     | `ALTER TABLE "cv_projects" ADD CONSTRAINT "cv_projects_dates_check" CHECK ("end_date" IS NULL OR "start_date" <= "end_date");` |
 | CV project dates are within the project's dates                              | Service (a CHECK cannot reference another table)                                                                               |
-| CV skills belong to the CV owner's skills                                    | Service                                                                                                                        |
+| CV skills belong to the CV owner's skills                                    | Service (`createCvSkill` checks the profile; `deleteUserSkills` rejects a skill used in the owner's CVs)                       |
 | Names are trimmed, repeated spaces collapsed; ISO upper-cased                | Input DTO (`@NormalizeText()`, `@ToUpperCaseText()`, see [conventions](api/conventions.md#shared-building-blocks))             |
 | A new verification code invalidates the previous one; resend is rate-limited | Service                                                                                                                        |
 
@@ -296,6 +303,11 @@ pnpm db:migrate
   skill to a CV copies the owner's current level; after that `updateCvSkill` changes it in this CV only, and changing
   the level in the profile does not touch CVs. The migration filled existing rows from `user_skills` and dropped CV
   skills whose owner no longer had the skill (they were never listed).
+- **Removing a profile skill used in CVs is rejected, not cascaded.** It used to remove the skill from every CV of
+  the owner silently, losing the level set in each CV (`cv_skills.mastery`). The wiki gives no rule for this case;
+  the team chose the same policy as for catalogs (Restrict over cascade): the user sees which skills are in use and
+  removes them from the CVs first. As a result, the skills of a CV are always a subset of the owner's profile
+  skills, and the Add skill dialog of a CV can tell "the profile has no skills" from "all are already added".
 - **CV preview has no mastery.** The wiki's Professional skills table shows category, skill, experience and last
   used year only; mastery is edited on the CV Skills tab (`cv_skills.mastery`, see above).
 - **CV preview values are calculated on request**, not stored, so they never go stale after a CV project or a
