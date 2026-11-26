@@ -54,7 +54,11 @@ export const CvProjectFormModal = ({ open, onOpenChange, cvId, cvProject }: Prop
     data: availableData,
     loading: availableLoading,
     error: availableError,
-  } = useQuery(AVAILABLE_CV_PROJECTS, open && !cvProject ? { variables: { cvId } } : skipToken);
+  } = useQuery(
+    AVAILABLE_CV_PROJECTS,
+    open && !cvProject ? { variables: { cvId }, fetchPolicy: 'network-only' } : skipToken,
+  );
+
   const {
     data: rolesData,
     loading: rolesLoading,
@@ -224,7 +228,10 @@ export const CvProjectFormModal = ({ open, onOpenChange, cvId, cvProject }: Prop
             label={t('fields.roles')}
             options={roleOptions}
             value={field.value}
-            onValueChange={field.onChange}
+            onValueChange={(ids) => {
+              field.onChange(ids);
+              field.onBlur();
+            }}
             onBlur={field.onBlur}
             disabled={rolesLoading}
             error={
