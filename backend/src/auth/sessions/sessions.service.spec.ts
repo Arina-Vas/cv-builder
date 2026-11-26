@@ -108,38 +108,77 @@ describe('SessionsService', () => {
     });
   });
 
-  describe('wasJustRotated', () => {
+  describe('checkPreviousToken', () => {
     const rotatedSession = (
-      overrides: Partial<{ revokedAt: Date | null; rotatedAt: Date | null }>,
+      overrides: Partial<{ expiresAt: Date; revokedAt: Date | null; rotatedAt: Date | null }>,
     ) => ({
+      id: 'session-1',
+      userId: 'user-1',
       expiresAt: IN_ONE_DAY,
       revokedAt: null,
       rotatedAt: new Date(NOW.getTime() - (REFRESH_GRACE_SECONDS - 1) * 1000),
       ...overrides,
     });
 
-    it('is true for the replaced token of an active session within the grace period', async () => {
+    it('is grace for the replaced token of an active session within the grace period', async () => {
       prisma.session.findUnique.mockResolvedValue(rotatedSession({}));
 
-      await expect(service.wasJustRotated('old-token')).resolves.toBe(true);
+      await expect(service.checkPreviousToken('old-token')).resolves.toEqual({
+        status: 'grace',
+      });
       expect(prisma.session.findUnique).toHaveBeenCalledWith({
         where: { previousTokenHash: hashToken('old-token') },
-        select: { expiresAt: true, revokedAt: true, rotatedAt: true },
+        select: { id: true, userId: true, expiresAt: true, revokedAt: true, rotatedAt: true },
+      });
+    });
+
+    it.each([
+      [
+        'grace period is over',
+        rotatedSession({ rotatedAt: new Date(NOW.getTime() - REFRESH_GRACE_SECONDS * 1000) }),
+      ],
+      ['rotation time is missing', rotatedSession({ rotatedAt: null })],
+    ])('is reused with the session when the %s', async (_, row) => {
+      prisma.session.findUnique.mockResolvedValue(row);
+
+      await expect(service.checkPreviousToken('old-token')).resolves.toEqual({
+        status: 'reused',
+        sessionId: 'session-1',
+        userId: 'user-1',
       });
     });
 
     it.each([
       ['unknown token', null],
-      [
-        'grace period is over',
-        rotatedSession({ rotatedAt: new Date(NOW.getTime() - REFRESH_GRACE_SECONDS * 1000) }),
-      ],
       ['revoked session', rotatedSession({ revokedAt: NOW })],
-      ['never rotated', rotatedSession({ rotatedAt: null })],
-    ])('is false for %s', async (_, row) => {
+      ['expired session', rotatedSession({ expiresAt: NOW })],
+    ])('is unknown for %s', async (_, row) => {
       prisma.session.findUnique.mockResolvedValue(row);
 
-      await expect(service.wasJustRotated('old-token')).resolves.toBe(false);
+      await expect(service.checkPreviousToken('old-token')).resolves.toEqual({
+        status: 'unknown',
+      });
+    });
+
+    it('does not change any session', async () => {
+      prisma.session.findUnique.mockResolvedValue(
+        rotatedSession({ rotatedAt: new Date(NOW.getTime() - REFRESH_GRACE_SECONDS * 1000) }),
+      );
+
+      await service.checkPreviousToken('old-token');
+
+      expect(prisma.session.updateMany).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('revoke', () => {
+    it('revokes an active session by id', async () => {
+      await service.revoke('session-1');
+
+      expect(prisma.session.updateMany).toHaveBeenCalledWith({
+        where: { id: 'session-1', revokedAt: null },
+        data: { revokedAt: NOW },
+      });
     });
   });
 

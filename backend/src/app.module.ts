@@ -16,11 +16,13 @@ import { LanguageModule } from '@/languages/language.module';
 import { SkillModule } from '@/skills/skill.module';
 import { ProjectModule } from '@/projects/project.module';
 import { CvModule } from '@/cvs/cv.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, validate }),
     PrismaModule,
+    ScheduleModule.forRoot(),
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,
       inject: [ConfigService],

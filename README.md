@@ -226,6 +226,12 @@ The database and storage credentials in `docker-compose.yml` are for local devel
 ### Authentication
 
 - Access and refresh tokens in httpOnly cookies; access JWT for 30 minutes, refresh token for 1 day with rotation.
+  A replaced refresh token used again after the 30-second grace period revokes the whole session (reuse
+  detection).
+- Dead sessions and auth tokens are deleted by a daily cron job (`@nestjs/schedule`, pinned to v6), one day
+  after they expired, were revoked or used.
+- Forgot password answers before the request is processed, so the response time does not reveal whether the
+  email has an account.
 - Sign up starts a session; email verification uses it. Unverified users are read-only: every mutation
   except sign-in/up, logout, refresh and the verification ones is rejected with `EMAIL_NOT_VERIFIED`,
   including editing their own profile and changing the password.

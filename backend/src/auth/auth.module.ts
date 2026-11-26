@@ -10,6 +10,7 @@ import type { EnvironmentVariables } from '@/config/env.validation';
 import { MailModule } from '@/mail/mail.module';
 import { UsersModule } from '@/users/users.module';
 import { AccessTokenService } from './sessions/access-token.service';
+import { AuthCleanupService } from './sessions/auth-cleanup.service';
 import { AuthGuard } from './guards/auth.guard';
 import { AuthResolver } from './auth.resolver';
 import { AuthService } from './auth.service';
@@ -37,6 +38,7 @@ import { SessionsService } from './sessions/sessions.service';
   providers: [
     AccessTokenService,
     SessionsService,
+    AuthCleanupService,
     AuthService,
     AuthResolver,
     EmailVerificationService,
