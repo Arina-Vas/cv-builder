@@ -215,10 +215,23 @@ The database and storage credentials in `docker-compose.yml` are for local devel
 - **Skill mastery levels** follow the wiki: Beginner → Elementary → Intermediate → Advanced → Expert (`Mastery`
   enum, in this order). The initial names were renamed in place by the `rename_mastery_values` migration; see
   [docs/data-model.md](docs/data-model.md#decisions).
+- **Roboto is self-hosted** (`frontend/src/app/fonts`, loaded with `next/font/local`). `next/font/google` broke in
+  November 2026: Google started serving font files at `fonts.gstatic.com/l/font?kit=…&skey=…`, and Turbopack in
+  Next 16.4 fails to resolve such URLs (`next/font/google queries have exactly one entry`). Self-hosting also
+  removes the network request to Google from every build. The two files are Google's variable fonts (weights
+  300–600) for the latin and cyrillic subsets; to update them, download the woff2 URLs from
+  `https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600` (with a browser User-Agent) and copy the
+  `unicode-range` values into `layout.tsx`.
 
 ### Authentication
 
 - Access and refresh tokens in httpOnly cookies; access JWT for 30 minutes, refresh token for 1 day with rotation.
+  A replaced refresh token used again after the 30-second grace period revokes the whole session (reuse
+  detection).
+- Dead sessions and auth tokens are deleted by a daily cron job (`@nestjs/schedule`, pinned to v6), one day
+  after they expired, were revoked or used.
+- Forgot password answers before the request is processed, so the response time does not reveal whether the
+  email has an account.
 - Sign up starts a session; email verification uses it. Unverified users are read-only: every mutation
   except sign-in/up, logout, refresh and the verification ones is rejected with `EMAIL_NOT_VERIFIED`,
   including editing their own profile and changing the password.

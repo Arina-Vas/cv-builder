@@ -4,7 +4,7 @@ import { ProjectsArgs } from '@/projects/dto/projects.args';
 import { ProjectList } from '@/projects/models/project-list.model';
 import type { Prisma } from '@/generated/prisma/client';
 import { SortOrder } from '@/common/graphql/sort-order.enum';
-import { projectInclude, toProject } from '@/projects/project.mapper';
+import { projectInclude, toProject, toProjectRole } from '@/projects/project.mapper';
 import { CreateProjectInput } from '@/projects/dto/create-project.input';
 import { Project } from '@/projects/models/project.model';
 import { UpdateProjectInput } from '@/projects/dto/update-project.input';
@@ -12,6 +12,8 @@ import { badUserInput, entityInUse } from '@/common/errors/app-errors';
 import { isPrismaError } from '@/prisma/prisma-errors';
 import { Skill } from '@/skills/models/skill.model';
 import { skillInclude, toSkill } from '@/skills/skill.mapper';
+import { ProjectRole } from '@/projects/models/project-role.model';
+import { containsInsensitive } from '@/common/prisma/search';
 
 @Injectable()
 export class ProjectService {
@@ -20,14 +22,7 @@ export class ProjectService {
   async findAll({ sortOrder, sortBy, search }: ProjectsArgs): Promise<ProjectList> {
     const where: Prisma.ProjectWhereInput = search
       ? {
-          OR: [
-            {
-              name: { contains: search, mode: 'insensitive' },
-            },
-            {
-              domain: { contains: search, mode: 'insensitive' },
-            },
-          ],
+          OR: [{ name: containsInsensitive(search) }, { domain: containsInsensitive(search) }],
         }
       : {};
 
@@ -51,6 +46,14 @@ export class ProjectService {
     return rows.map(toSkill);
   }
 
+  async findProjectRoles(): Promise<ProjectRole[]> {
+    const rows = await this.prisma.projectRole.findMany({
+      orderBy: [{ name: 'asc' }, { id: 'asc' }],
+    });
+
+    return rows.map(toProjectRole);
+  }
+
   async create({ technologyIds, ...input }: CreateProjectInput): Promise<Project> {
     await this.assertTechnologiesExist(technologyIds);
 
@@ -63,7 +66,9 @@ export class ProjectService {
       return toProject(row);
     } catch (error) {
       if (isPrismaError(error, 'P2003'))
-        throw badUserInput([{ field: 'technologyIds', message: 'Technology not found' }]);
+        throw badUserInput({
+          fields: [{ field: 'technologyIds', message: 'Technology not found' }],
+        });
       throw error;
     }
   }
@@ -83,7 +88,9 @@ export class ProjectService {
       return toProject(row);
     } catch (error) {
       if (isPrismaError(error, 'P2003'))
-        throw badUserInput([{ field: 'technologyIds', message: 'Technology not found' }]);
+        throw badUserInput({
+          fields: [{ field: 'technologyIds', message: 'Technology not found' }],
+        });
       throw error;
     }
   }
@@ -104,7 +111,7 @@ export class ProjectService {
 
     const found = await this.prisma.skill.count({ where: { id: { in: technologyIds } } });
     if (found !== technologyIds.length) {
-      throw badUserInput([{ field: 'technologyIds', message: 'Technology not found' }]);
+      throw badUserInput({ fields: [{ field: 'technologyIds', message: 'Technology not found' }] });
     }
   }
 }

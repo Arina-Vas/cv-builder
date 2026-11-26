@@ -30,7 +30,15 @@ Email Verification pages. Tables are described in [data-model.md](data-model.md)
   (`previous_token_hash`, `rotated_at`). If a refresh comes with that token within 30 seconds of the rotation
   (`REFRESH_GRACE_SECONDS`), another request has just rotated it and the browser already has the new cookies:
   `refresh` returns `true` and leaves the cookies alone. It issues nothing new, so a stolen old token gains nothing.
-  After 30 seconds the old token is rejected as usual.
+- **Refresh token reuse.** The replaced token coming back **after** the 30 seconds cannot be a parallel tab: the
+  browser has had the new token for a while, so someone else holds a copy. The server cannot tell which side is
+  the thief, so it revokes the **whole session**: the request gets `UNAUTHENTICATED`, and whoever holds the current
+  tokens is signed out too (the auth guard checks the session on every request, so the access token stops working
+  at once). The real user signs in again with the password; the thief has none. The reuse is logged with the
+  session and user ids only.
+  - Only the **last** replaced token is kept. A token two or more rotations old is no longer in the database and is
+    just rejected without revoking anything. Catching those too would need a history table of every token of the
+    session; we accepted this limit, since the common case (one stolen token used once) is covered.
 - An active user stays signed in; a user who is inactive for more than a day signs in again.
 
 ## Sessions and the auth guard
@@ -41,6 +49,26 @@ Email Verification pages. Tables are described in [data-model.md](data-model.md)
 - Logout revokes the current session and clears both cookies.
 - Password reset revokes all sessions of the user.
 - Changing the password in Settings revokes every other session of the user; the current one stays signed in.
+- Reusing a replaced refresh token after the grace period revokes the session (see above).
+
+### Cleanup of dead records
+
+Revoking or expiring a session, and using or replacing a code or reset link, only marks the row. Without cleanup
+`sessions` and `auth_tokens` would grow forever and keep hashes and user agents nobody needs.
+
+- `AuthCleanupService` (`backend/src/auth/sessions/auth-cleanup.service.ts`) runs **every day at 03:00** server time
+  (`@nestjs/schedule`, `@Cron`). In one transaction it deletes:
+  - sessions that expired or were revoked more than a day ago;
+  - auth tokens (verification codes, reset links) that expired or were used more than a day ago.
+- **Why keep them a day (`CLEANUP_RETENTION_DAYS = 1`).** The newest token is still read after it is dead: the
+  60-second resend / reset cooldown counts from its `created_at`, and `verifyEmail` answers `expired` or
+  `already been used` from it. Deleting at once would break both.
+- Only the counts are logged. Deleting is safe to run twice, so several backend instances running the job at
+  the same time is harmless.
+- `auth_tokens.expires_at` has no index, so the delete scans the table. That is fine at our size; add
+  `@@index([expiresAt])` if the table ever grows large.
+- `@nestjs/schedule` is pinned to **v6**: v12 ships ESM only, which the CommonJS backend can load in Node but Jest
+  cannot. v6 has the same API and supports Nest 11.
 
 ## Operations
 
@@ -66,7 +94,8 @@ Email Verification pages. Tables are described in [data-model.md](data-model.md)
   `An account with this email already exists`.
 - `refresh` without a valid session returns `UNAUTHENTICATED` and clears both cookies (a dead refresh cookie
   would make the frontend proxy treat the user as signed in). Exception: the token was replaced less than
-  30 seconds ago by a parallel refresh — see "Parallel refresh" above.
+  30 seconds ago by a parallel refresh — see "Parallel refresh" above. A replaced token that comes later also
+  revokes the session — see "Refresh token reuse".
 - `logout` is public so it works after the access token has expired; otherwise the browser would keep httpOnly
   cookies the frontend cannot delete.
 
@@ -106,7 +135,7 @@ Email Verification pages. Tables are described in [data-model.md](data-model.md)
 ### Unverified users are read-only
 
 - They can run queries, but every mutation is rejected with `EMAIL_NOT_VERIFIED` except the ones marked
-  `@AllowUnverified()` (verify email, resend code) and the public ones (refresh, logout, password reset).
+  `@AllowUnverified()` (verify email, resend code, CV PDF export) and the public ones (refresh, logout, password reset).
   Theme and language are kept in the browser, not on the backend, so an unverified user can still change them
   (see [data-model.md](data-model.md#decisions)).
 - Changing the password in Settings is also blocked. Forgot / Reset password still works.
@@ -127,8 +156,15 @@ Mutations (both public): `requestPasswordReset(input: { email })` and `resetPass
 code in `backend/src/auth/password-reset/`.
 
 - The forgot-password response is the same whether the email exists or not (no account enumeration): it always
-  returns `true`, and the email is sent without awaiting it, so SMTP time and SMTP failures do not change the
-  response. Mail failures are logged with the user id only.
+  returns `true`, **before** the request is processed. The resolver starts the lookup, token and email in the
+  background and answers at once: for an unknown email the work stops after one query, for an existing one it
+  runs a transaction, so waiting for it would let the response time reveal which emails exist. Failures are
+  logged without the email (mail failures with the user id only). Input validation and the throttler still run
+  before the answer, so a malformed email or too many requests are reported as usual.
+  - Downside: if the database is down, the user still sees the generic confirmation. For this operation that
+    is acceptable, the answer says nothing anyway. A request lost in a server restart is simply sent again.
+  - Integration tests wait for the background work with `t.settled()` (`backend/test/utils/test-app.ts`)
+    before reading the email.
 - The reset token is random (`generateToken`), stored as a hash in `auth_tokens` (type `PASSWORD_RESET`), expires
   in **30 minutes** and is single-use. A new request expires the previous unused link.
 - Per-account cooldown: a second request within **60 seconds** is ignored silently. It cannot return
@@ -177,6 +213,7 @@ or the database.
 | Operations                                                                                                                                 | Limit per IP                             |
 | ------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------- |
 | `signUp`, `signIn`, `requestPasswordReset`, `resetPassword`, `changePassword`, `verifyEmail`, `resendVerificationCode` (`@AuthThrottle()`) | 10 per minute, each operation separately |
+| `generateCvPdf` (`@PdfThrottle()`, see [pdf.md](pdf.md#limits))                                                                            | 10 per minute                            |
 | every other operation                                                                                                                      | 100 per minute                           |
 | `health` query and `GET /health` (`@SkipThrottle()`)                                                                                       | none                                     |
 

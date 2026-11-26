@@ -4,6 +4,7 @@
   "sourceRoot": "src",
   "compilerOptions": {
     "deleteOutDir": true,
-    "tsConfigPath": "tsconfig.build.json"
+    "tsConfigPath": "tsconfig.build.json",
+    "assets": [{ "include": "cvs/cv-pdf/document/fonts/*.woff2", "watchAssets": true }]
   }
 }

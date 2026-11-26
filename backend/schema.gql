@@ -8,6 +8,51 @@ input ChangePasswordInput {
   newPassword: String!
 }
 
+input CreateCvInput {
+  description: String!
+  education: String!
+  name: String!
+
+  """
+  CV owner. An Employee may pass only their own id. In updateCv it is checked against the current owner and never changes it
+  """
+  userId: ID!
+}
+
+input CreateCvProjectInput {
+  """
+  CV the project is added to; checked against the current user. In updateCvProject it is the current CV and never changes
+  """
+  cvId: ID!
+
+  """
+  null means "Till now"; otherwise not before startDate and not after the project end
+  """
+  endDate: Date
+
+  """Project from the catalog; cannot be changed later"""
+  projectId: ID!
+
+  """
+  Free text, one responsibility per line (the UI shows each line as a chip)
+  """
+  responsibilities: String
+
+  """At least one project role; the set replaces the old one on update"""
+  roleIds: [ID!]!
+
+  """Must be within the project's start and end dates"""
+  startDate: Date!
+}
+
+input CreateCvSkillInput {
+  """
+  CV the skill is added to; checked against the current user. The skill must be one of the CV owner's skills
+  """
+  cvId: ID!
+  skillId: ID!
+}
+
 input CreateDepartmentInput {
   name: String!
 }
@@ -58,6 +103,130 @@ input CreateUserSkillInput {
   userId: ID!
 }
 
+type Cv {
+  description: String!
+  education: String!
+  id: ID!
+  name: String!
+  user: User!
+}
+
+type CvPage {
+  items: [Cv!]!
+
+  """Current page, 1-based"""
+  page: Int!
+  pageSize: Int!
+
+  """Items matching the search, not the page size"""
+  total: Int!
+}
+
+type CvPdf {
+  """PDF file encoded as base64"""
+  content: String!
+  fileName: String!
+}
+
+"""
+Aggregated read-only data of one CV for the Preview tab and the PDF export
+"""
+type CvPreview {
+  description: String!
+
+  """Distinct domains of the CV projects, sorted alphabetically"""
+  domains: [String!]!
+  education: String!
+  id: ID!
+
+  """The CV owner's languages, sorted by language name"""
+  languages: [UserLanguage!]!
+  name: String!
+
+  """CV projects, the latest start date first"""
+  projects: [CvProject!]!
+
+  """
+  CV skills grouped by category, categories sorted by name; empty categories are omitted
+  """
+  skillGroups: [CvPreviewSkillGroup!]!
+  user: User!
+}
+
+"""
+A CV skill in the Professional skills table, with experience counted from the CV projects
+"""
+type CvPreviewSkill {
+  """
+  Full years since the CV-specific start date of the earliest CV project whose environment contains the skill; 0 under a year; null if no CV project uses it
+  """
+  experienceYears: Int
+
+  """
+  End year of the latest CV project whose environment contains the skill; a project without an end date ("Till now") counts as the current year; null if no CV project uses it
+  """
+  lastUsedYear: Int
+  skill: Skill!
+}
+
+"""CV skills of one category, sorted by skill name"""
+type CvPreviewSkillGroup {
+  category: SkillCategory!
+  skills: [CvPreviewSkill!]!
+}
+
+"""
+A catalog project added to a CV, with CV-specific dates, roles and responsibilities
+"""
+type CvProject {
+  """
+  null means "Till now"
+  """
+  endDate: Date
+  id: ID!
+
+  """
+  Catalog project: name, domain, description, environment and the dates the CV dates must fit in
+  """
+  project: Project!
+
+  """Free text, one responsibility per line"""
+  responsibilities: String
+
+  """Sorted by name"""
+  roles: [ProjectRole!]!
+  startDate: Date!
+}
+
+type CvProjectList {
+  items: [CvProject!]!
+
+  """Items matching the search"""
+  total: Int!
+}
+
+"""
+`name` sorts by the project name; a missing end date ("Till now") counts as the latest
+"""
+enum CvProjectSortField {
+  endDate
+  name
+  startDate
+}
+
+"""
+Skill added to a CV; mastery belongs to this CV and starts from the owner's level
+"""
+type CvSkill {
+  id: ID!
+  mastery: Mastery!
+  skill: Skill!
+}
+
+enum CvSortField {
+  name
+}
+
 """Calendar date without time and time zone, format YYYY-MM-DD"""
 scalar Date
 
@@ -84,6 +253,11 @@ type DepartmentPage {
 
 enum DepartmentSortField {
   name
+}
+
+input GenerateCvPdfInput {
+  cvId: ID!
+  locale: Locale! = en
 }
 
 type Health {
@@ -113,6 +287,18 @@ enum LanguageSortField {
   name
 }
 
+enum Locale {
+  de
+  en
+  es
+  fr
+  it
+  pl
+  pt
+  ru
+  uk
+}
+
 enum Mastery {
   ADVANCED
   BEGINNER
@@ -126,6 +312,21 @@ type Mutation {
   Changes the password of the signed-in user. Fails with BAD_USER_INPUT (field "currentPassword") when the current password is incorrect. Signs out every other session of the user; the current session stays signed in.
   """
   changePassword(input: ChangePasswordInput!): Boolean!
+
+  """
+  Creates a CV for `input.userId`: an Employee only for themselves, an Admin for any user. Fails with FORBIDDEN for another user and NOT_FOUND if the user does not exist
+  """
+  createCv(input: CreateCvInput!): Cv!
+
+  """
+  Adds a catalog project to the CV. Own CV or Admin. Fails with NOT_FOUND if the CV does not exist and FORBIDDEN for another user's CV. BAD_USER_INPUT for dates outside the project period or unknown project / roles, CONFLICT on projectId if the project is already in the CV
+  """
+  createCvProject(input: CreateCvProjectInput!): CvProject!
+
+  """
+  Adds one of the CV owner's skills to the CV with the owner's current mastery. Own CV or Admin. Fails with NOT_FOUND if the CV does not exist and FORBIDDEN for another user's CV. Fails with BAD_USER_INPUT (skillId) if the CV owner does not have the skill and with CONFLICT (skillId) if it is already in the CV
+  """
+  createCvSkill(input: CreateCvSkillInput!): CvSkill!
   createDepartment(input: CreateDepartmentInput!): Department!
   createLanguage(input: CreateLanguageInput!): Language!
   createPosition(input: CreatePositionInput!): Position!
@@ -146,6 +347,21 @@ type Mutation {
   Own profile or Admin. Fails with BAD_USER_INPUT (skillId) if the skill does not exist and with CONFLICT (skillId) if it is already assigned
   """
   createUserSkill(input: CreateUserSkillInput!): UserSkill!
+
+  """
+  Own CV or Admin; `userId` is the CV owner, used only to check access. Returns the deleted id; the CV's skills and projects are deleted with it. Fails with FORBIDDEN for another user, NOT_FOUND if the user does not exist or the CV does not belong to them
+  """
+  deleteCv(id: ID!, userId: ID!): ID!
+
+  """
+  Removes the project from the CV with its roles and returns the id; the catalog project and roles stay. Own CV or Admin. Fails with NOT_FOUND if the CV does not exist and FORBIDDEN for another user's CV. NOT_FOUND if the CV project is not in this CV
+  """
+  deleteCvProject(cvId: ID!, id: ID!): ID!
+
+  """
+  Removes the given CvSkill ids from the CV and returns the removed ids; the catalog skill and the owner's skills stay. Own CV or Admin. Fails with NOT_FOUND if the CV does not exist and FORBIDDEN for another user's CV. Ids already removed are skipped. Fails with FORBIDDEN and removes nothing if an id belongs to another CV
+  """
+  deleteCvSkills(cvId: ID!, ids: [ID!]!): [ID!]!
 
   """Fails with ENTITY_IN_USE if the department is assigned to users"""
   deleteDepartment(id: ID!): ID!
@@ -175,9 +391,14 @@ type Mutation {
   deleteUserLanguages(ids: [ID!]!, userId: ID!): [ID!]!
 
   """
-  Own profile or Admin. Removes the given UserSkill ids of the user; returns the removed ids. Ids already removed are skipped. Fails with FORBIDDEN and removes nothing if an id belongs to another user's assignment
+  Own profile or Admin. Removes the given UserSkill ids of the user; returns the removed ids. The skills are also removed from the user's CVs. Ids already removed are skipped. Fails with FORBIDDEN and removes nothing if an id belongs to another user's assignment
   """
   deleteUserSkills(ids: [ID!]!, userId: ID!): [ID!]!
+
+  """
+  Own CV or Admin. Builds a PDF of the CV preview and returns it as base64. Fails with NOT_FOUND, FORBIDDEN for another user, BAD_USER_INPUT for an invalid cvId or locale
+  """
+  generateCvPdf(input: GenerateCvPdfInput!): CvPdf!
   logout: Boolean!
   refresh: Boolean!
 
@@ -196,6 +417,21 @@ type Mutation {
   resetPassword(input: ResetPasswordInput!): Boolean!
   signIn(input: SignInInput!): User!
   signUp(input: SignUpInput!): User!
+
+  """
+  Own CV or Admin. Changes name, education and description; `input.userId` is the current owner, used only to check access, the owner never changes. Fails with FORBIDDEN for another user, NOT_FOUND if the user does not exist or the CV does not belong to them
+  """
+  updateCv(input: UpdateCvInput!): Cv!
+
+  """
+  Changes dates, roles and responsibilities; the project never changes. Own CV or Admin. Fails with NOT_FOUND if the CV does not exist and FORBIDDEN for another user's CV. NOT_FOUND if the CV project is not in this CV
+  """
+  updateCvProject(input: UpdateCvProjectInput!): CvProject!
+
+  """
+  Changes the mastery of a skill in this CV only; the owner's profile skill stays. Own CV or Admin. Fails with NOT_FOUND if the CV skill does not exist and FORBIDDEN for another user's CV
+  """
+  updateCvSkill(input: UpdateCvSkillInput!): CvSkill!
   updateDepartment(input: UpdateDepartmentInput!): Department!
   updateLanguage(input: UpdateLanguageInput!): Language!
   updatePosition(input: UpdatePositionInput!): Position!
@@ -278,6 +514,11 @@ type ProjectList {
   total: Int!
 }
 
+type ProjectRole {
+  id: ID!
+  name: String!
+}
+
 enum ProjectSortField {
   endDate
   name
@@ -285,6 +526,16 @@ enum ProjectSortField {
 }
 
 type Query {
+  """
+  Catalog projects not yet added to the CV (Add project modal). Own CV or Admin. Fails with NOT_FOUND if the CV does not exist and FORBIDDEN for another user's CV
+  """
+  availableCvProjects(cvId: ID!): [Project!]!
+
+  """
+  Skills of the CV owner not yet added to the CV, for the Add skill modal; sorted by name. Own CV or Admin. Fails with NOT_FOUND if the CV does not exist and FORBIDDEN for another user's CV
+  """
+  availableCvSkills(cvId: ID!): [Skill!]!
+
   """
   Languages not yet assigned to the user, for the Add Language modal; sorted by name. Fails with NOT_FOUND if the user does not exist
   """
@@ -294,6 +545,40 @@ type Query {
   Skills not yet assigned to the user, for the Add Skill modal; sorted by name. Fails with NOT_FOUND if the user does not exist
   """
   availableUserSkills(userId: ID!): [Skill!]!
+
+  """
+  Own CV or Admin. Fails with NOT_FOUND if the CV does not exist and FORBIDDEN for another user's CV
+  """
+  cv(id: ID!): Cv!
+
+  """
+  Read-only data of one CV for the Preview tab and the PDF export. Own CV or Admin. Fails with NOT_FOUND if the CV does not exist and FORBIDDEN for another user's CV
+  """
+  cvPreview(id: ID!): CvPreview!
+
+  """
+  Projects of one CV. Search is case-insensitive, by project name or domain. Own CV or Admin. Fails with NOT_FOUND if the CV does not exist and FORBIDDEN for another user's CV
+  """
+  cvProjects(cvId: ID!, search: String, sortBy: CvProjectSortField! = name, sortOrder: SortOrder! = ASC): CvProjectList!
+
+  """
+  Skills of one CV with their CV mastery; sorted by category name, then skill name. Own CV or Admin. Fails with NOT_FOUND if the CV does not exist and FORBIDDEN for another user's CV
+  """
+  cvSkills(cvId: ID!): [CvSkill!]!
+
+  """
+  CVs page: own CVs for an Employee, all CVs for an Admin. Search is case-insensitive: by CV name, for an Admin also by the owner email
+  """
+  cvs(
+    """1-based page number"""
+    page: Int! = 1
+
+    """One of 10, 20, 50"""
+    pageSize: Int! = 10
+    search: String
+    sortBy: CvSortField! = name
+    sortOrder: SortOrder! = ASC
+  ): CvPage!
 
   """All departments for selects, sorted by name"""
   departmentOptions: [Department!]!
@@ -332,6 +617,7 @@ type Query {
     sortBy: PositionSortField! = name
     sortOrder: SortOrder! = ASC
   ): PositionPage!
+  projectRoles: [ProjectRole!]!
   projects(search: String, sortBy: ProjectSortField! = name, sortOrder: SortOrder! = ASC): ProjectList!
   skillCategories: [SkillCategory!]!
   skills(
@@ -352,6 +638,21 @@ type Query {
   user(id: ID!): User!
 
   """
+  CVs of one user (User CVs tab), own profile or Admin. Search is case-insensitive, by CV name only. Fails with FORBIDDEN for another user and NOT_FOUND if the user does not exist
+  """
+  userCvs(
+    """1-based page number"""
+    page: Int! = 1
+
+    """One of 10, 20, 50"""
+    pageSize: Int! = 10
+    search: String
+    sortBy: CvSortField! = name
+    sortOrder: SortOrder! = ASC
+    userId: ID!
+  ): CvPage!
+
+  """
   Languages of the user, readable by any authenticated user; sorted by language name. Fails with NOT_FOUND if the user does not exist
   """
   userLanguages(userId: ID!): [UserLanguage!]!
@@ -360,6 +661,10 @@ type Query {
   Skills of the user, readable by any authenticated user; sorted by category name, then skill name. Fails with NOT_FOUND if the user does not exist
   """
   userSkills(userId: ID!): [UserSkill!]!
+
+  """
+  Users list. Search is case-insensitive: every word must match the first or last name (so a full name in either order works), or the whole search must match the email
+  """
   users(
     """1-based page number"""
     page: Int! = 1
@@ -427,6 +732,48 @@ enum SkillSortField {
 enum SortOrder {
   ASC
   DESC
+}
+
+input UpdateCvInput {
+  description: String!
+  education: String!
+  id: ID!
+  name: String!
+
+  """
+  CV owner. An Employee may pass only their own id. In updateCv it is checked against the current owner and never changes it
+  """
+  userId: ID!
+}
+
+input UpdateCvProjectInput {
+  """
+  CV the project is added to; checked against the current user. In updateCvProject it is the current CV and never changes
+  """
+  cvId: ID!
+
+  """
+  null means "Till now"; otherwise not before startDate and not after the project end
+  """
+  endDate: Date
+  id: ID!
+
+  """
+  Free text, one responsibility per line (the UI shows each line as a chip)
+  """
+  responsibilities: String
+
+  """At least one project role; the set replaces the old one on update"""
+  roleIds: [ID!]!
+
+  """Must be within the project's start and end dates"""
+  startDate: Date!
+}
+
+input UpdateCvSkillInput {
+  """CvSkill id; its CV is checked against the current user"""
+  id: ID!
+  mastery: Mastery!
 }
 
 input UpdateDepartmentInput {

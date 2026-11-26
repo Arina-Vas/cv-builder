@@ -78,6 +78,7 @@ describe('UserSkillService', () => {
       update: jest.fn(),
       deleteMany: jest.fn(),
     },
+    cvSkill: { findMany: jest.fn() },
   };
   const service = new UserSkillService(prisma as unknown as PrismaService);
 
@@ -85,6 +86,9 @@ describe('UserSkillService', () => {
     jest.clearAllMocks();
     // By default the target user and the selected skill exist
     prisma.user.findUnique.mockResolvedValue({ id: OWNER_ID });
+    prisma.userSkill.deleteMany.mockResolvedValue({ count: 0 });
+    // By default no CV of the user lists the skills being removed
+    prisma.cvSkill.findMany.mockResolvedValue([]);
     prisma.skill.findUnique.mockResolvedValue({ id: 'skill-React' });
   });
 
@@ -256,18 +260,26 @@ describe('UserSkillService', () => {
   });
 
   describe('delete', () => {
+    // An assignment as the lookup in delete selects it
+    const assignment = (name: string, userId = OWNER_ID) => ({
+      id: `user-skill-${name}`,
+      userId,
+      skillId: `skill-${name}`,
+    });
+
+    const expectNothingDeleted = () => {
+      expect(prisma.userSkill.deleteMany).not.toHaveBeenCalled();
+    };
+
     it('deletes the assignments of the user and returns their ids', async () => {
-      prisma.userSkill.findMany.mockResolvedValue([
-        { id: 'user-skill-React', userId: OWNER_ID },
-        { id: 'user-skill-Vue', userId: OWNER_ID },
-      ]);
+      prisma.userSkill.findMany.mockResolvedValue([assignment('React'), assignment('Vue')]);
 
       const result = await service.delete(OWNER, DELETE_ARGS);
 
       // Looked up without userId, so an id of another user's assignment is found, not skipped
       expect(prisma.userSkill.findMany).toHaveBeenCalledWith({
         where: { id: { in: DELETE_ARGS.ids } },
-        select: { id: true, userId: true },
+        select: { id: true, userId: true, skillId: true },
       });
       expect(prisma.userSkill.deleteMany).toHaveBeenCalledWith({
         where: { userId: OWNER_ID, id: { in: ['user-skill-React', 'user-skill-Vue'] } },
@@ -275,11 +287,42 @@ describe('UserSkillService', () => {
       expect(result).toEqual(['user-skill-React', 'user-skill-Vue']);
     });
 
+    it("checks only the user's own CVs for the selected skills", async () => {
+      prisma.userSkill.findMany.mockResolvedValue([assignment('React'), assignment('Vue')]);
+
+      await service.delete(OWNER, DELETE_ARGS);
+
+      // Another user's CV with the same skill does not block the removal
+      expect(prisma.cvSkill.findMany).toHaveBeenCalledWith({
+        where: { skillId: { in: ['skill-React', 'skill-Vue'] }, cv: { userId: OWNER_ID } },
+        select: { skillId: true },
+        distinct: ['skillId'],
+      });
+    });
+
+    it('rejects skills that are used in CVs with ENTITY_IN_USE and the ids of those assignments', async () => {
+      prisma.userSkill.findMany.mockResolvedValue([assignment('React'), assignment('Vue')]);
+      prisma.cvSkill.findMany.mockResolvedValue([{ skillId: 'skill-Vue' }]);
+
+      await expect(service.delete(OWNER, DELETE_ARGS)).rejects.toMatchObject({
+        message: 'Skills cannot be removed because they are used in CVs',
+        // Assignment ids (what the client sent), not skill or CV skill ids
+        extensions: { code: ErrorCode.ENTITY_IN_USE, ids: ['user-skill-Vue'] },
+      });
+      // The whole request is rejected: the free skill (React) is not removed either
+      expectNothingDeleted();
+    });
+
     it('skips ids that are already removed', async () => {
-      prisma.userSkill.findMany.mockResolvedValue([{ id: 'user-skill-React', userId: OWNER_ID }]);
+      prisma.userSkill.findMany.mockResolvedValue([assignment('React')]);
 
       const result = await service.delete(OWNER, DELETE_ARGS);
 
+      expect(prisma.cvSkill.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { skillId: { in: ['skill-React'] }, cv: { userId: OWNER_ID } },
+        }),
+      );
       expect(prisma.userSkill.deleteMany).toHaveBeenCalledWith({
         where: { userId: OWNER_ID, id: { in: ['user-skill-React'] } },
       });
@@ -292,6 +335,14 @@ describe('UserSkillService', () => {
       await expect(service.delete(OWNER, DELETE_ARGS)).resolves.toEqual([]);
     });
 
+    it('fails when the removal fails', async () => {
+      prisma.userSkill.findMany.mockResolvedValue([assignment('React')]);
+      const error = new Error('connection lost');
+      prisma.userSkill.deleteMany.mockRejectedValueOnce(error);
+
+      await expect(service.delete(OWNER, DELETE_ARGS)).rejects.toBe(error);
+    });
+
     it.each([
       ['the owner', OWNER],
       ['an Admin', ADMIN],
@@ -299,22 +350,25 @@ describe('UserSkillService', () => {
       "rejects an id of another user's assignment for %s with FORBIDDEN and deletes nothing",
       async (_who, user) => {
         prisma.userSkill.findMany.mockResolvedValue([
-          { id: 'user-skill-React', userId: OWNER_ID },
-          { id: 'user-skill-Vue', userId: 'user-2' },
+          assignment('React'),
+          assignment('Vue', 'user-2'),
         ]);
 
         await expect(service.delete(user, DELETE_ARGS)).rejects.toMatchObject({
           message: 'Skill assignment belongs to another user',
           extensions: { code: ErrorCode.FORBIDDEN },
         });
-        expect(prisma.userSkill.deleteMany).not.toHaveBeenCalled();
+        expectNothingDeleted();
       },
     );
 
     it("lets an Admin delete another user's assignments", async () => {
-      prisma.userSkill.findMany.mockResolvedValue([{ id: 'user-skill-React', userId: OWNER_ID }]);
+      prisma.userSkill.findMany.mockResolvedValue([assignment('React')]);
 
       await expect(service.delete(ADMIN, DELETE_ARGS)).resolves.toEqual(['user-skill-React']);
+      expect(prisma.userSkill.deleteMany).toHaveBeenCalledWith({
+        where: { userId: OWNER_ID, id: { in: ['user-skill-React'] } },
+      });
     });
 
     it("rejects another user's profile for an Employee with FORBIDDEN", async () => {
@@ -322,7 +376,7 @@ describe('UserSkillService', () => {
         extensions: { code: ErrorCode.FORBIDDEN },
       });
       expect(prisma.userSkill.findMany).not.toHaveBeenCalled();
-      expect(prisma.userSkill.deleteMany).not.toHaveBeenCalled();
+      expectNothingDeleted();
     });
 
     it('rejects a missing user with NOT_FOUND', async () => {
@@ -331,7 +385,7 @@ describe('UserSkillService', () => {
       await expect(service.delete(ADMIN, DELETE_ARGS)).rejects.toMatchObject({
         extensions: { code: ErrorCode.NOT_FOUND },
       });
-      expect(prisma.userSkill.deleteMany).not.toHaveBeenCalled();
+      expectNothingDeleted();
     });
   });
 });

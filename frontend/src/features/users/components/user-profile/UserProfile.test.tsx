@@ -474,8 +474,8 @@ describe('UserProfile — avatar', () => {
     delay,
   });
 
-  const backendError = (code: string) => ({
-    errors: [new GraphQLError('raw backend text', { extensions: { code } })],
+  const backendError = (code: string, extensions: Record<string, unknown> = {}) => ({
+    errors: [new GraphQLError('raw backend text', { extensions: { code, ...extensions } })],
   });
 
   it('is an upload control for the owner', async () => {
@@ -522,16 +522,27 @@ describe('UserProfile — avatar', () => {
     expect(fileInput()).toBeEnabled();
   });
 
-  it('keeps the old avatar and explains when the backend rejects the file', async () => {
+  // the text comes from extensions.reason; without a known reason, the text for the code
+  it.each([
+    ['INVALID_TYPE', 'Only png, jpg or gif allowed'],
+    ['TOO_LARGE', 'File size must not exceed 5 MB'],
+    [undefined, 'Check the entered data'],
+  ])('keeps the old avatar and explains reason %j from the backend', async (reason, shown) => {
+    const fileField = { fields: [{ field: 'file', message: 'raw backend text' }] };
     const { user } = renderProfile(
-      [userMock(), optionsMock, uploadMock(backendError('BAD_USER_INPUT'))],
+      [
+        userMock(),
+        optionsMock,
+        uploadMock(backendError('BAD_USER_INPUT', { ...fileField, reason })),
+      ],
       OWNER,
     );
     await screen.findByText('Upload avatar image');
 
     await user.upload(fileInput()!, photo);
 
-    expect(await screen.findByText('Only png, jpg or gif allowed')).toBeInTheDocument();
+    expect(await screen.findByText(shown)).toBeInTheDocument();
+    expect(screen.queryByText('raw backend text')).not.toBeInTheDocument();
     expect(screen.getByText('R')).toBeInTheDocument();
     expect(screen.queryByRole('img', { name: 'Rostislav Harlanov' })).not.toBeInTheDocument();
   });

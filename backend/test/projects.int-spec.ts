@@ -9,6 +9,7 @@ const PROJECTS = `query ($search: String) { projects(search: $search) { items { 
 const CREATE_PROJECT = `mutation ($input: CreateProjectInput!) { createProject(input: $input) { ${FIELDS} } }`;
 const UPDATE_PROJECT = `mutation ($input: UpdateProjectInput!) { updateProject(input: $input) { ${FIELDS} } }`;
 const DELETE_PROJECT = 'mutation ($id: ID!) { deleteProject(id: $id) }';
+const PROJECT_ROLES = 'query { projectRoles { id name } }';
 
 const MISSING_ID = '00000000-0000-4000-8000-000000000000';
 
@@ -101,6 +102,31 @@ describe('Projects (integration)', () => {
         total: 1,
         items: [{ name: 'Payroll', startDate: '2026-01-01', technologies: [{ name: 'React' }] }],
       });
+    });
+  });
+
+  describe('projectRoles', () => {
+    it('requires authentication', async () => {
+      const error = await client().error(PROJECT_ROLES);
+
+      expect(error.extensions.code).toBe('UNAUTHENTICATED');
+    });
+
+    it('lets an Employee read all roles sorted by name', async () => {
+      const { browser } = await signedIn();
+      await t.prisma.projectRole.createMany({
+        data: [{ name: 'Team Lead' }, { name: 'Developer' }, { name: 'QA Engineer' }],
+      });
+
+      const { projectRoles } = await browser.data<{ projectRoles: { id: string; name: string }[] }>(
+        PROJECT_ROLES,
+      );
+
+      expect(projectRoles.map((role) => role.name)).toEqual([
+        'Developer',
+        'QA Engineer',
+        'Team Lead',
+      ]);
     });
   });
 

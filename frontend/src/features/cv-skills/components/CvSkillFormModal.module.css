@@ -1,0 +1,19 @@
+.hint,
+.notice {
+  margin: var(--space-1) 0 0;
+}
+
+.hint {
+  color: var(--text-secondary);
+  font-size: var(--type-helper-size);
+  line-height: var(--type-helper-lh);
+  letter-spacing: var(--type-helper-ls);
+}
+
+.notice {
+  margin-block-start: var(--space-2);
+  color: var(--text);
+  font-size: var(--type-body2-size);
+  line-height: var(--type-body2-lh);
+  letter-spacing: var(--type-body2-ls);
+}

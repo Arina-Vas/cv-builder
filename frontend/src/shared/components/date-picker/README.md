@@ -39,6 +39,14 @@ const [endDate, setEndDate] = useState<Date | null>(null);
   onChange={setEndDate}
   minDate={startDate ?? undefined}         // end can't be before start
 />
+<DatePicker
+  label={t('startDate')}
+  value={startDate}
+  onChange={setStartDate}
+  minDate={project.startDate}              // a range that may be fully in the past
+  maxDate={project.endDate}
+  openToDate={project.startDate}           // empty → open on the project start, not on today
+/>
 <DatePicker label={t('date')} value={date} onChange={setDate} excludeDates={holidays} />
 <DatePicker label={t('date')} value={date} onChange={setDate} error={t('dateRequired')} />
 <DatePicker label={t('date')} value={date} onChange={setDate} disabled />
@@ -53,16 +61,22 @@ const [endDate, setEndDate] = useState<Date | null>(null);
 | `placeholder`  | `string`: shown only while the calendar is open         | `common.datePicker.placeholder` (`Select date`) |
 | `minDate`      | `Date`: earlier days disabled                           | —                                               |
 | `maxDate`      | `Date`: later days disabled                             | —                                               |
+| `openToDate`   | `Date`: month to open on while `value` is empty         | today                                           |
 | `excludeDates` | `Date[]`: single days disabled                          | —                                               |
 | `disabled`     | `boolean`                                               | `false`                                         |
 | `onOpenChange` | `(open: boolean) => void`: the calendar opened / closed | —                                               |
 | `onBlur`       | `() => void`: called when the calendar closes           | —                                               |
 | `id`           | `string`: id of the trigger                             | `useId()`                                       |
 | `ref`          | `Ref<HTMLButtonElement>`: the trigger                   | —                                               |
+| `clearable`    | `boolean`: ✕ button that empties the date               | `false`                                         |
 
 - ⚠️ **Controlled only**: there is no `defaultValue`, the parent always owns the date. Empty is `null`, not `undefined`.
-- `onChange` is called only when a **day** is clicked; it gets a local `Date` at 00:00. The popover closes after it.
-  There is no "clear" button yet, so `onChange` is never called with `null` by the component itself.
+- `onChange` is called when a **day** is clicked; it gets a local `Date` at 00:00. The popover closes after it.
+- `clearable` is for **optional** dates only (e.g. the CV project End Date, empty = "Present"). The ✕ shows while a
+  date is set and the field is not disabled. Clicking it calls `onChange(null)` and `onBlur`, and moves focus back
+  to the trigger, because the ✕ disappears together with the value. The ✕ is a **sibling** of the trigger rather
+  than its child (a button inside a button is invalid HTML), so its click never opens the calendar and no
+  `stopPropagation` is needed. Its label is `common.datePicker.clear`.
 - The trigger shows the value as `MM/dd/yyyy` (Figma), via `formatDate` from `@/shared/lib/date/format-date`,
   the same helper the tables use, so a date looks the same everywhere in the app.
 - Disabled days (`minDate` / `maxDate` / `excludeDates`) are greyed out and struck through, they can't be clicked.
@@ -94,8 +108,10 @@ The calendar has three views, switched from the header:
 
 - ← / → are named `Previous` / `Next` (`common.datePicker.previous` / `next`) in every view; what
   they move is in the table above, and the header says where the calendar is after a click.
-- Every open starts from the `day` view on the month of `value`, or today when it's empty.
-  Switching views or months without picking a day changes nothing outside.
+- Every open starts from the `day` view on the month of `value`; when it's empty, on `openToDate`, or today
+  without it. That date is then moved into `minDate` / `maxDate`: a range fully in the past (a finished
+  project) opens on the month of `maxDate`, a range in the future on the month of `minDate`, never on a month
+  where every day is disabled. Switching views or months without picking a day changes nothing outside.
 - The week starts on **Sunday**, week days are shown as one letter (`S M T W T F S`).
 - The active view's label in the header is highlighted with `--datepicker-active-label`.
 
@@ -108,9 +124,12 @@ any timezone ahead of UTC the day moves back by one (`2025-09-04T00:00` in Minsk
 format(date, 'yyyy-MM-dd'); // send
 parseISO('2025-09-04'); // receive → local midnight
 formatDate('2025-09-04'); // show → '09/04/2025' (also takes a Date)
+formatDate('2025-09-04', 'MM.yyyy'); // month and year → '09.2025' (CV preview project period)
 ```
 
-`formatDate` is for display only; the API always gets `yyyy-MM-dd`.
+`formatDate` is for display only; the API always gets `yyyy-MM-dd`. It takes only the formats listed in its
+`DateFormat` type (`MM/dd/yyyy` by default, `MM.yyyy`); add a new one there with a test. Use `yyyy`, not `YYYY`:
+in `date-fns` `YYYY` is the week-numbering year and shows the wrong year around New Year.
 
 ## Usage with react-hook-form
 
@@ -181,15 +200,19 @@ To change a size or colour, change the token, not the component CSS.
 `play` functions in `DatePicker.stories.tsx` run in Storybook (Interactions panel) and in Vitest
 (`@storybook/addon-vitest`, needs `npx playwright install chromium` once).
 
-| Story                     | Checks                                                                                                         |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `SelectsDate`             | clicking a day calls `onChange`, shows the date in the trigger, closes the calendar with `onOpenChange(false)` |
-| `OpenClose`               | open, Escape (focus back on the trigger), click outside, `onOpenChange`; reopening resets to the day view      |
-| `BlursOnClose`            | opening does not call `onBlur`; Escape and picking a day do, once each                                         |
-| `PlaceholderOnlyWhenOpen` | empty and closed: no placeholder under the label; open: the placeholder is shown                               |
-| `LabelNamesTrigger`       | `<label for>` points at the trigger `id`                                                                       |
-| `WithError`               | the error text is `role="alert"` and is the trigger's accessible description                                   |
-| `Disabled`                | the trigger is disabled                                                                                        |
+| Story                      | Checks                                                                                                         |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `SelectsDate`              | clicking a day calls `onChange`, shows the date in the trigger, closes the calendar with `onOpenChange(false)` |
+| `OpenClose`                | open, Escape (focus back on the trigger), click outside, `onOpenChange`; reopening resets to the day view      |
+| `BlursOnClose`             | opening does not call `onBlur`; Escape and picking a day do, once each                                         |
+| `PlaceholderOnlyWhenOpen`  | empty and closed: no placeholder under the label; open: the placeholder is shown                               |
+| `LabelNamesTrigger`        | `<label for>` points at the trigger `id`                                                                       |
+| `WithError`                | the error text is `role="alert"` and is the trigger's accessible description                                   |
+| `Disabled`                 | the trigger is disabled                                                                                        |
+| `OpensWithinRange`         | empty, range in the past: opens on the month of `maxDate`, not today                                           |
+| `OpensOnOpenToDate`        | empty: opens on the month of `openToDate`                                                                      |
+| `OpenToDateClampedToRange` | `openToDate` before `minDate`: opens on the month of `minDate`                                                 |
+| `ValueWinsOverOpenToDate`  | with a value: opens on its month, `openToDate` is ignored                                                      |
 
 The other stories (`Default`, `WithValue`, `EndDate`, `ExcludeDates`, `Dark`, `DarkWithError`) are visual.
 
@@ -200,5 +223,6 @@ The other stories (`Default`, `WithValue`, `EndDate`, `ExcludeDates`, `Dark`, `D
 - The popover is portaled to `<body>`: query it with `within(canvasElement.ownerDocument.body)`.
 - Radix gives the popover `role="dialog"`, react-datepicker names the month grid
   `Month September, 2025` (`role="rowgroup"`): use those to find the calendar.
-- Stories with `minDate` / `excludeDates` build dates relative to **today**, otherwise the calendar opens on a
-  month where nothing is disabled.
+- Visual stories with `minDate` / `excludeDates` build dates relative to **today**, so the disabled days are
+  on the month the calendar opens on. The opening-month stories use a fixed range in the past (2025) instead:
+  it stays in the past whenever they run.

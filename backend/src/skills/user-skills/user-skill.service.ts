@@ -6,7 +6,13 @@ import type { CreateUserSkillInput } from '@/skills/user-skills/dto/create-user-
 import type { UpdateUserSkillInput } from '@/skills/user-skills/dto/update-user-skill.input';
 import type { DeleteUserSkillsArgs } from '@/skills/user-skills/dto/delete-user-skills.args';
 import { canManageUser } from '@/common/auth/can-manage-user';
-import { badUserInput, conflict, forbidden, notFound } from '@/common/errors/app-errors';
+import {
+  badUserInput,
+  conflict,
+  entityInUse,
+  forbidden,
+  notFound,
+} from '@/common/errors/app-errors';
 import type { User } from '@/users/models/user.model';
 import { isPrismaError } from '@/prisma/prisma-errors';
 import type { Skill } from '@/skills/models/skill.model';
@@ -63,7 +69,7 @@ export class UserSkillService {
       if (isPrismaError(error, 'P2002'))
         throw conflict('skillId', 'Skill is already assigned to the user');
       if (isPrismaError(error, 'P2003'))
-        throw badUserInput([{ field: 'skillId', message: 'Skill not found' }]);
+        throw badUserInput({ fields: [{ field: 'skillId', message: 'Skill not found' }] });
       throw error;
     }
   }
@@ -88,7 +94,7 @@ export class UserSkillService {
 
     const rows = await this.prisma.userSkill.findMany({
       where: { id: { in: ids } },
-      select: { id: true, userId: true },
+      select: { id: true, userId: true, skillId: true },
     });
 
     if (rows.some((row) => row.userId !== userId)) {
@@ -96,6 +102,21 @@ export class UserSkillService {
     }
 
     const found = rows.map((row) => row.id);
+    const skillIds = rows.map((row) => row.skillId);
+
+    const used = await this.prisma.cvSkill.findMany({
+      where: { skillId: { in: skillIds }, cv: { userId } },
+      select: { skillId: true },
+      distinct: ['skillId'],
+    });
+
+    if (used.length) {
+      const usedSkillIds = new Set(used.map((row) => row.skillId));
+      throw entityInUse(
+        'Skills cannot be removed because they are used in CVs',
+        rows.filter((row) => usedSkillIds.has(row.skillId)).map((row) => row.id),
+      );
+    }
 
     await this.prisma.userSkill.deleteMany({
       where: { userId, id: { in: found } },
@@ -123,6 +144,6 @@ export class UserSkillService {
       select: { id: true },
     });
 
-    if (!skill) throw badUserInput([{ field: 'skillId', message: 'Skill not found' }]);
+    if (!skill) throw badUserInput({ fields: [{ field: 'skillId', message: 'Skill not found' }] });
   }
 }

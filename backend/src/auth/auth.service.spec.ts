@@ -49,7 +49,8 @@ describe('AuthService', () => {
   const sessions = {
     create: jest.fn(),
     rotate: jest.fn(),
-    wasJustRotated: jest.fn(),
+    checkPreviousToken: jest.fn(),
+    revoke: jest.fn(),
     revokeByRefreshToken: jest.fn(),
   };
   const accessTokens = { sign: jest.fn() };
@@ -202,22 +203,42 @@ describe('AuthService', () => {
       expect(sessions.rotate).not.toHaveBeenCalled();
     });
 
-    it('rejects a refresh token that cannot be rotated', async () => {
+    it('rejects an unknown refresh token without revoking anything', async () => {
       sessions.rotate.mockResolvedValue(null);
-      sessions.wasJustRotated.mockResolvedValue(false);
+      sessions.checkPreviousToken.mockResolvedValue({ status: 'unknown' });
 
       const error = await errorOf(service.refresh('stale'));
 
       expect(error.extensions['code']).toBe(ErrorCode.UNAUTHENTICATED);
-      expect(sessions.wasJustRotated).toHaveBeenCalledWith('stale');
+      expect(sessions.checkPreviousToken).toHaveBeenCalledWith('stale');
+      expect(sessions.revoke).not.toHaveBeenCalled();
     });
 
     it('returns null without new tokens when a parallel refresh has just rotated the token', async () => {
       sessions.rotate.mockResolvedValue(null);
-      sessions.wasJustRotated.mockResolvedValue(true);
+      sessions.checkPreviousToken.mockResolvedValue({ status: 'grace' });
 
       await expect(service.refresh('previous')).resolves.toBeNull();
       expect(accessTokens.sign).not.toHaveBeenCalled();
+      expect(sessions.revoke).not.toHaveBeenCalled();
+    });
+
+    it('revokes the whole session when an old refresh token is reused after the grace period', async () => {
+      const warn = jest.spyOn(Logger.prototype, 'warn').mockImplementation();
+      sessions.rotate.mockResolvedValue(null);
+      sessions.checkPreviousToken.mockResolvedValue({
+        status: 'reused',
+        sessionId: 'session-1',
+        userId: 'user-1',
+      });
+
+      const error = await errorOf(service.refresh('stolen'));
+
+      expect(error.extensions['code']).toBe(ErrorCode.UNAUTHENTICATED);
+      expect(sessions.revoke).toHaveBeenCalledWith('session-1');
+      expect(accessTokens.sign).not.toHaveBeenCalled();
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('session-1'));
+      expect(warn).not.toHaveBeenCalledWith(expect.stringContaining('stolen'));
     });
   });
 

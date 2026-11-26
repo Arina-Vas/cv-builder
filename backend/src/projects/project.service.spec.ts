@@ -81,6 +81,9 @@ describe('ProjectService', () => {
     cvProject: {
       count: jest.fn(),
     },
+    projectRole: {
+      findMany: jest.fn(),
+    },
   };
   const service = new ProjectService(prisma as unknown as PrismaService);
 
@@ -166,6 +169,25 @@ describe('ProjectService', () => {
       expect(result).toEqual([
         { id: 'id-React', name: 'React', category: FRONTEND },
         { id: 'id-Redis', name: 'Redis', category: FRONTEND },
+      ]);
+    });
+  });
+
+  describe('findProjectRoles', () => {
+    it('returns all roles sorted by name, then id, without timestamps', async () => {
+      prisma.projectRole.findMany.mockResolvedValue([
+        { id: 'role-Developer', name: 'Developer', ...TIMESTAMPS },
+        { id: 'role-Team Lead', name: 'Team Lead', ...TIMESTAMPS },
+      ]);
+
+      const result = await service.findProjectRoles();
+
+      expect(prisma.projectRole.findMany).toHaveBeenCalledWith({
+        orderBy: [{ name: 'asc' }, { id: 'asc' }],
+      });
+      expect(result).toEqual([
+        { id: 'role-Developer', name: 'Developer' },
+        { id: 'role-Team Lead', name: 'Team Lead' },
       ]);
     });
   });

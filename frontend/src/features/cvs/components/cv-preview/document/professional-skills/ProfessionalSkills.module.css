@@ -1,0 +1,72 @@
+/* Figma: dark uppercase head over a red line, red categories, grey line after every category */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--type-body2-size);
+  line-height: 21px; /* [F] */
+  letter-spacing: var(--type-body2-ls);
+}
+
+/* [F] 10px above the text, 6px below; the last row of a category gets 22px */
+.table th,
+.table td {
+  padding: 10px var(--space-4) 6px;
+  text-align: start;
+  vertical-align: top;
+}
+
+.table thead th {
+  border-bottom: 1px solid var(--cv-accent);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+}
+
+/* Keeps the visually hidden column names inside the cell */
+.headCell {
+  position: relative;
+}
+
+.table tbody {
+  border-bottom: 1px solid var(--cv-divider);
+}
+
+/* Room below the last row of every category (the category cell spans all rows) */
+.table tbody tr:last-child > *,
+.table tbody .category {
+  padding-bottom: 22px;
+}
+
+.category {
+  width: 28%; /* [F] 240 of 852 */
+  color: var(--cv-accent);
+  font-weight: var(--font-weight-medium);
+  overflow-wrap: anywhere;
+}
+
+.skill {
+  font-weight: var(--font-weight-medium);
+  overflow-wrap: anywhere;
+}
+
+.table .value {
+  text-align: center;
+}
+
+/* [F] Experience 115 and Last used 140 of 852 */
+.table thead th:nth-child(3) {
+  width: 13.5%;
+}
+
+.table thead th:nth-child(4) {
+  width: 16.5%;
+}
+
+@media print {
+  .table thead {
+    display: table-header-group;
+  }
+
+  .table tbody {
+    break-inside: avoid;
+  }
+}

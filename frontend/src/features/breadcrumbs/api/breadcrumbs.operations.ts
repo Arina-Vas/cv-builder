@@ -10,3 +10,12 @@ export const BREADCRUMB_USER = graphql(`
     }
   }
 `);
+
+export const BREADCRUMB_CV = graphql(`
+  query BreadcrumbCv($id: ID!) {
+    cv(id: $id) {
+      id
+      name
+    }
+  }
+`);

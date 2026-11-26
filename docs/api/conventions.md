@@ -37,6 +37,7 @@ Modules import these instead of writing their own:
 | `SortOrder`                                             | `backend/src/common/graphql/sort-order.enum.ts`       |
 | Pagination defaults, page sizes, `MAX_NAME_LENGTH`      | `backend/src/common/graphql/constants.ts`             |
 | `DateScalar`                                            | `backend/src/common/graphql/date.scalar.ts`           |
+| `containsInsensitive`, `escapeLike` (list search)       | `backend/src/common/prisma/search.ts`                 |
 | `UserRole`, `Mastery`, `Proficiency`                    | `backend/src/common/graphql/enums.ts`                 |
 | `ErrorCode` and error helpers                           | `backend/src/common/errors/`                          |
 | `@Roles()`                                              | `backend/src/common/auth/roles.decorator.ts`          |
@@ -189,6 +190,9 @@ Lists without pagination extend `ListArgs` instead of `PaginatedListArgs` and re
 | `search`       | none                | trimmed, case-insensitive, matches part of the value; empty or `null` = no filter  |
 | Secondary sort | `id ASC`            | always added by the backend, so rows with equal values do not jump between pages   |
 
+- `search` is matched literally: `%`, `_` and `\` are escaped, so they are not LIKE wildcards. Services build the
+  filter with `containsInsensitive` from `backend/src/common/prisma/search.ts`, never a raw
+  `{ contains, mode: 'insensitive' }`.
 - `total` is the number of items matching `search`, not the number of items on the page.
 - A page past the end returns `items: []` with the real `total`; the frontend moves to the last page.
 - The frontend resets `page` to 1 when `search`, `sortBy`, `sortOrder` or `pageSize` changes.
@@ -202,7 +206,8 @@ Lists without pagination extend `ListArgs` instead of `PaginatedListArgs` and re
 | `positions`                                                                | `name`           | `name`                                            | name                         | yes       |
 | `skills`                                                                   | `name`           | `name`                                            | name                         | yes       |
 | `languages`                                                                | `name`           | `name`, `iso`                                     | name                         | yes       |
-| `cvs`                                                                      | `name`           | `name`                                            | name                         | yes       |
+| `cvs`                                                                      | `name`           | `name`                                            | name; Admin: name, email     | yes       |
+| `userCvs` (CVs of one user, User CVs tab)                                  | `name`           | `name`                                            | name                         | yes       |
 | `projects`                                                                 | `name`           | `name`, `startDate`, `endDate`                    | name, domain                 | no        |
 | `cvProjects`                                                               | `name`           | `name`, `startDate`, `endDate`                    | name, domain                 | no        |
 | `userSkills`, CV skills                                                    | —                | category name, then skill name                    | —                            | no        |
@@ -211,6 +216,7 @@ Lists without pagination extend `ListArgs` instead of `PaginatedListArgs` and re
 | `departmentOptions`, `positionOptions` (lookups for the user form selects) | `name`           | —                                                 | —                            | no        |
 | `availableUserSkills` (skills not yet assigned to the user)                | `name`           | —                                                 | —                            | no        |
 | `availableUserLanguages` (languages not yet assigned to the user)          | `name`           | —                                                 | —                            | no        |
+| `availableCvProjects` (catalog projects not yet added to the CV)           | `name`           | —                                                 | —                            | no        |
 
 Lists without pagination return `{ items, total }` (`Listed`) or a plain list for lookups.
 A select needs every value, so it uses a lookup, not the paginated list (`pageSize` is at most 50):
@@ -278,7 +284,19 @@ avoid a column-key → enum map in every table.
     idempotent; wiki: "stale selections should be removed"). The frontend evicts the returned ids and refetches.
   - An id of another user's assignment rejects the whole request with `FORBIDDEN` and nothing is removed: the UI
     never sends one, so it means a tampered request (wiki: "Assignment belongs to the selected user").
+  - `deleteUserSkills`: a skill that a CV of the same user lists rejects the whole request with `ENTITY_IN_USE`
+    and nothing is removed; `extensions.ids` holds the blocked assignment ids, so the dialog names those skills
+    ([data model](../data-model.md#deletion-policy)). The skill has to be removed from the CVs first.
 - Mutations take one argument named `input` of an `@InputType`, except deletes, which take ids directly.
+  A delete of an owned entity also takes the owner id, which scopes it like `userId` in `deleteUserSkills`:
+  `deleteCv(id: ID!, userId: ID!): ID!`. A delete of something inside a CV takes the CV id the same way:
+  `deleteCvProject(id: ID!, cvId: ID!): ID!`.
+- `generateCvPdf(input: GenerateCvPdfInput!): CvPdf!` (`{ cvId, locale = en }`) returns `{ fileName, content }`
+  with the PDF in base64 (see [pdf.md](../pdf.md)). It changes nothing but is a mutation, not a query, so Apollo
+  does not keep the large base64 string in the cache, and every click builds a new file.
+- Owned entities (`UserSkill`, `UserLanguage`, `Cv`) carry the owner's `userId` in every create / update input.
+  In an update it is not a changeable field: it is the current owner, checked against the record, and the owner
+  never changes (`UpdateCvInput extends CreateCvInput` keeps `userId` for that reason).
 - `update*` inputs contain `id` and only the fields the user can change.
 - `update*` is a full update: `Update<Entity>Input extends Create<Entity>Input` and adds `id`, so the form sends
   every field. A list of ids (`technologyIds`) replaces the whole set; an omitted list defaults to `[]` and
@@ -286,7 +304,8 @@ avoid a column-key → enum map in every table.
 - Exception: when a reference cannot be changed after creation (the skill of a `UserSkill`, the language of a
   `UserLanguage`; wiki: the field is disabled in the Update modal), the update input takes
   `PickType(Create<Entity>Input, [...])` without it and adds `id` (`UpdateUserSkillInput`: `id`, `userId`,
-  `mastery`; `UpdateUserLanguageInput`: `id`, `userId`, `proficiency`).
+  `mastery`; `UpdateUserLanguageInput`: `id`, `userId`, `proficiency`; `UpdateCvProjectInput`: `id`, `cvId`,
+  `startDate`, `endDate`, `roleIds`, `responsibilities`, without `projectId`).
 - Exception: `UpdateUserInput` (Admin, Update user modal) is `PickType(CreateUserInput, ['firstName', 'lastName',
 'departmentId', 'positionId', 'role'])` plus `id`: the wiki disables only email and password in that modal. The
   whole mutation is Admin-only, so it mixes no permissions; the Profile tab has its own mutation (own profile or
@@ -311,8 +330,10 @@ avoid a column-key → enum map in every table.
 
 ## Errors
 
-Errors use the standard GraphQL `errors` array; the code is in `extensions.code`. Modules throw errors through the
-helpers in `backend/src/common/errors/app-errors.ts`; a global exception filter converts everything else.
+Errors use the standard GraphQL `errors` array; the code is in `extensions.code`, and, when one code has several
+causes the frontend words differently, the cause is in `extensions.reason` ([Reasons](#reasons)). Modules throw
+errors through the helpers in `backend/src/common/errors/app-errors.ts`; a global exception filter converts
+everything else.
 
 ```json
 {
@@ -327,18 +348,18 @@ helpers in `backend/src/common/errors/app-errors.ts`; a global exception filter 
 
 ### Codes
 
-| Code                    | When                                                                                                                     | Extra fields                   | Frontend                                                                  |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------------------ | ------------------------------------------------------------------------- |
-| `UNAUTHENTICATED`       | no token, invalid or expired token                                                                                       | —                              | try `refresh`, otherwise go to Sign In                                    |
-| `FORBIDDEN`             | role or ownership check failed                                                                                           | —                              | query: "not authorized" state; mutation: toast                            |
-| `EMAIL_NOT_VERIFIED`    | mutation by a user whose email is not verified                                                                           | —                              | "verify your email" message + link to Email Verification; mutation: toast |
-| `NOT_FOUND`             | the entity does not exist (or was deleted meanwhile)                                                                     | —                              | query: not-found state; mutation: toast, refresh stale data               |
-| `BAD_USER_INPUT`        | validation failed                                                                                                        | `fields: [{ field, message }]` | inline errors under the fields                                            |
-| `CONFLICT`              | a unique value is already taken                                                                                          | `field` (when known)           | inline error under `field`                                                |
-| `ENTITY_IN_USE`         | delete blocked because the item is referenced                                                                            | —                              | toast, or the delete dialog shows it                                      |
-| `OPERATION_NOT_ALLOWED` | the caller has access, but a business rule forbids the action (e.g. delete own account, delete or demote the last admin) | —                              | toast, or the dialog / modal shows it                                     |
-| `RATE_LIMITED`          | too many requests (per IP or e.g. resend code)                                                                           | `retryAfter` (seconds)         | "please wait" message; mutation: toast                                    |
-| `INTERNAL_SERVER_ERROR` | unexpected error                                                                                                         | —                              | query: error state with Retry; mutation: generic error toast              |
+| Code                    | When                                                                                                                     | Extra fields                                                       | Frontend                                                                  |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------ | ------------------------------------------------------------------------- |
+| `UNAUTHENTICATED`       | no token, invalid or expired token                                                                                       | —                                                                  | try `refresh`, otherwise go to Sign In                                    |
+| `FORBIDDEN`             | role or ownership check failed                                                                                           | —                                                                  | query: "not authorized" state; mutation: toast                            |
+| `EMAIL_NOT_VERIFIED`    | mutation by a user whose email is not verified                                                                           | —                                                                  | "verify your email" message + link to Email Verification; mutation: toast |
+| `NOT_FOUND`             | the entity does not exist (or was deleted meanwhile)                                                                     | —                                                                  | query: not-found state; mutation: toast, refresh stale data               |
+| `BAD_USER_INPUT`        | validation failed                                                                                                        | `fields: [{ field, message }]`, `reason` (see [Reasons](#reasons)) | inline errors under the fields                                            |
+| `CONFLICT`              | a unique value is already taken                                                                                          | `field` (when known)                                               | inline error under `field`                                                |
+| `ENTITY_IN_USE`         | delete blocked because the item is referenced                                                                            | `ids` (only `deleteUserSkills`: the blocked assignments)           | toast, or the delete dialog shows it                                      |
+| `OPERATION_NOT_ALLOWED` | the caller has access, but a business rule forbids the action (e.g. delete own account, delete or demote the last admin) | `reason` (see [Reasons](#reasons))                                 | toast, or the dialog / modal shows it                                     |
+| `RATE_LIMITED`          | too many requests (per IP or e.g. resend code)                                                                           | `retryAfter` (seconds)                                             | "please wait" message; mutation: toast                                    |
+| `INTERNAL_SERVER_ERROR` | unexpected error                                                                                                         | —                                                                  | query: error state with Retry; mutation: generic error toast              |
 
 The codes cover the error categories the wiki asks the frontend to handle:
 
@@ -369,9 +390,61 @@ The list of codes is `ErrorCode` in `backend/src/common/errors/error-code.enum.t
 So a new or renamed code changes the enum, `ERROR_CODES` and the text in one PR. A code outside the list (for
 example Apollo Server's `GRAPHQL_VALIDATION_FAILED`) is treated by the frontend as `INTERNAL_SERVER_ERROR`.
 
+### Reasons
+
+Some codes have several causes that the frontend shows with different texts. The backend then adds
+`extensions.reason`, so the frontend never has to compare `message` (which may change wording at any time):
+
+```json
+{
+  "errors": [
+    {
+      "message": "Verification code has expired",
+      "extensions": {
+        "code": "BAD_USER_INPUT",
+        "fields": [{ "field": "code", "message": "Verification code has expired" }],
+        "reason": "EXPIRED"
+      }
+    }
+  ]
+}
+```
+
+- **`code` decides how the frontend reacts, `reason` only which text it shows.** A new reaction (another screen,
+  a redirect, a retry) needs a new code; the same reaction with a different text needs a reason.
+- `reason` describes the error as a whole. It is set only when the error has one cause the frontend must tell apart;
+  errors with a single possible cause, and errors with several fields (`startDate` and `endDate` out of the project
+  period), have no `reason`. Per-field reasons are not supported until a real case needs them.
+- A reason is read together with the operation: `INVALID` on `verifyEmail` and on `resetPassword` are different
+  texts. Values are short and generic.
+- `reason` is optional and additive: `message` and `fields` stay as they are, and a client that does not know a
+  reason falls back to the text for the code.
+- Services pass it through the helpers: `badUserInput({ fields, message, reason })`,
+  `operationNotAllowed(message, reason)`.
+
+| Operation                  | Code                    | Reasons                                                                   |
+| -------------------------- | ----------------------- | ------------------------------------------------------------------------- |
+| `verifyEmail` (`code`)     | `BAD_USER_INPUT`        | `INVALID`; `EXPIRED` (also after too many wrong attempts); `USED`         |
+| `resetPassword` (`token`)  | `BAD_USER_INPUT`        | `INVALID` (also an already used link); `EXPIRED` (also an older link)     |
+| `uploadAvatar` (`file`)    | `BAD_USER_INPUT`        | `TOO_LARGE` (over 5 MB); `INVALID_TYPE` (not PNG / JPEG / GIF, or broken) |
+| `updateUser` (role change) | `OPERATION_NOT_ALLOWED` | `SELF` (own role); `LAST_ADMIN` (demoting the last admin)                 |
+| `deleteUser`               | `OPERATION_NOT_ALLOWED` | `SELF` (own account); `LAST_ADMIN` (the last admin)                       |
+
+The wiki leaves the rules for protected users to the team ("The exact business rules should be defined by the
+team"); the ones above are those rules: an Admin cannot change their own role or delete their own account, and the
+last Admin can be neither demoted nor deleted.
+
+The list of reasons is `ErrorReason` in `backend/src/common/errors/error-reason.enum.ts`. The frontend repeats it as
+`ERROR_REASONS` (`frontend/src/shared/lib/apollo/graphql-errors.ts`); `parseError` returns a known reason and drops
+an unknown one, and `error-codes.test.ts` fails when the two lists differ. The texts are not global: each form maps
+the reasons it can get, always together with the code, because the same reason value can come with another code
+(`reasonMessages={{ OPERATION_NOT_ALLOWED: { SELF: … } }}` on `FormModal` / `ConfirmDialog`; `authErrors.ts` for the
+auth forms, called only for `BAD_USER_INPUT`). An unknown or missing reason falls back to the text for the code.
+
 ### Messages
 
-The frontend shows **its own text**, chosen by `extensions.code` and `field`, so the UI can be translated.
+The frontend shows **its own text**, chosen by `extensions.code`, `field` and `reason`, so the UI can be
+translated. It never compares `message` to tell causes apart: that is what `reason` is for.
 The backend `message` is English, meant for developers and logs, and is a fallback when the frontend has no text
 for a case.
 
@@ -421,6 +494,9 @@ Rules for services:
   whether the department is referenced by other entities"). `Restrict` stays as the safety net: a reference added
   between the check and the delete makes the database reject it, and the filter returns `ENTITY_IN_USE` with a
   generic message. The frontend shows its own per-entity text either way, keyed by the page and the code.
+  A rule with no foreign key behind it (a profile skill used in the owner's CVs) is checked the same way, without
+  the safety net; when the frontend has to name the blocked items, the service passes their ids:
+  `entityInUse('<message>', ids)` → `extensions.ids`, read by `parseError` as `AppError.ids`.
 - **Rate limits.** A service that knows the cooldown throws `rateLimited(<seconds>, '<message>')`.
 
 Which Prisma errors a service catches (with `isPrismaError(error, code)`); everything else is rethrown for the
@@ -534,6 +610,9 @@ and fails with `BAD_USER_INPUT` (`field: file`) otherwise.
   do them, using the current user from the request, never a user id sent by the client as proof of ownership:
   the resolver passes `@CurrentUser()` to the service, which throws `forbidden()` when
   `canManageUser(currentUser, userId)` is false, before checking that the user exists.
+- An operation that gets only a CV id reads the owner from the CV: `CvAccessService.getAccessibleCv(cvId,
+currentUser)` (`backend/src/cvs/cv-access.service.ts`, exported by `CvModule`) returns the CV or throws
+  `NOT_FOUND` / `FORBIDDEN`. CV skills, CV projects, preview and PDF reuse it instead of their own checks.
 - Catalogs (departments, positions, skills, languages, projects) are readable by every authenticated user, because
   employees pick values from them in forms; only changes are Admin-only.
 - Who may do what in each feature is described in [permissions.md](permissions.md).

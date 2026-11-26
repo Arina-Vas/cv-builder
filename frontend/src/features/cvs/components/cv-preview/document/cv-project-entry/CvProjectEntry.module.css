@@ -1,0 +1,79 @@
+/* Aside | red line | details, the same split as the CV summary */
+.entry {
+  display: flex;
+}
+
+.aside,
+.details {
+  min-width: 0;
+}
+
+.aside {
+  flex: 0 0 var(--cv-aside-width);
+  padding-top: var(--cv-column-offset);
+  padding-right: var(--cv-column-gap);
+}
+
+.details {
+  flex: 1;
+  padding-top: var(--cv-column-offset);
+  padding-left: var(--cv-column-gap);
+  border-left: 1px solid var(--cv-accent);
+}
+
+.name {
+  color: var(--cv-accent);
+  font-size: var(--type-body1-size);
+  font-weight: 700;
+  line-height: var(--type-body1-lh);
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.description {
+  margin-top: var(--space-2);
+  overflow-wrap: anywhere;
+}
+
+/* Label → value 8px, value → next label 16px, as in the CV summary */
+.label {
+  font-size: var(--type-body1-size);
+  font-weight: 700;
+  line-height: var(--type-body1-lh);
+}
+
+.value {
+  margin-top: var(--space-2);
+  overflow-wrap: anywhere;
+}
+
+.value + .label {
+  margin-top: var(--space-4);
+}
+
+.list {
+  padding-left: var(--space-5);
+  list-style: disc;
+}
+
+/*
+ * A long project may continue on the next page, but only between responsibilities: the name,
+ * the description, a label with its value and one responsibility stay together.
+ * Same page-break rules as `.project__*` in backend/src/cvs/cv-pdf/document/cv-pdf.styles.ts:
+ * keep both in sync.
+ */
+@media print {
+  .name,
+  .label {
+    break-after: avoid;
+  }
+
+  .description {
+    orphans: 4;
+    widows: 4;
+  }
+
+  .list > li {
+    break-inside: avoid;
+  }
+}

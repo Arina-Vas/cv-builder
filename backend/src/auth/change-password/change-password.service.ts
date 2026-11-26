@@ -6,7 +6,8 @@ import { PrismaService } from '@/prisma/prisma.service';
 export const CURRENT_PASSWORD_INCORRECT_MESSAGE = 'Current password is incorrect';
 export const SAME_PASSWORD_MESSAGE = 'New password must be different from the current password';
 
-const fieldError = (field: string, message: string) => badUserInput([{ field, message }], message);
+const fieldError = (field: string, message: string) =>
+  badUserInput({ fields: [{ field, message }], message });
 
 @Injectable()
 export class ChangePasswordService {

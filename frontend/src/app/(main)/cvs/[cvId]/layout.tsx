@@ -2,6 +2,8 @@ import { getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
 
 import { Tabs } from '@/shared/components/tabs';
+import { notFound } from 'next/navigation';
+import { isUuid } from '@/shared/lib/isUuid';
 
 interface CvDetailsLayoutProps {
   children: ReactNode;
@@ -12,6 +14,8 @@ export default async function CvDetailsLayout({ children, params }: CvDetailsLay
   const { cvId } = await params;
   const t = await getTranslations('cvs.tabs');
   const base = `/cvs/${cvId}`;
+
+  if (!isUuid(cvId)) notFound();
 
   const items = [
     { href: `${base}/details`, label: t('details') },

@@ -103,13 +103,87 @@ All tables have `id` (uuid), `created_at` and `updated_at`. Only the meaningful 
 | `user_languages`   | `user_id`, `language_id`, `proficiency` (`A1` … `C2`, `NATIVE`)                 |
 | `project_skills`   | `project_id`, `skill_id` (project technologies)                                 |
 | `cvs`              | `user_id`, `name` varchar(255), `education` varchar(255), `description`         |
-| `cv_skills`        | `cv_id`, `skill_id`                                                             |
+| `cv_skills`        | `cv_id`, `skill_id`, `mastery` (`BEGINNER` … `EXPERT`)                          |
 | `cv_projects`      | `cv_id`, `project_id`, `start_date` date, `end_date?` date, `responsibilities?` |
 | `cv_project_roles` | `cv_project_id`, `role_id`                                                      |
 
-- `cv_projects.end_date = null` means "Till now". In the `projects` catalog `end_date` is required.
+- `cv_projects.end_date = null` means "until the end of the participation". In the `projects` catalog `end_date`
+  is required, so the empty value is resolved when it is shown (CV Projects table, Preview, PDF, last used year)
+  and never stored:
+  - the catalog project is still running (its `end_date` is today or later): "Till now" / "Present";
+  - the catalog project has ended (its `end_date` is before today): the project's `end_date`.
+
+  So a CV project does not stay "Till now" after its project ends, and old rows need no migration. "Today" is
+  the user's local day on the frontend and the UTC day on the backend (dates are stored as UTC midnight). The
+  helpers are `effectiveEndDate` in `frontend/src/features/cv-projects/lib/` and `backend/src/cvs/cv-projects/`.
+  Sorting by end date still uses the stored value (empty values last on `asc`).
+
 - Project name, domain, description and technologies shown on a CV come from the referenced `projects` row;
   only participation dates, responsibilities and roles are CV-specific.
+- `cv_projects.responsibilities` is one optional text, one responsibility per line (decided 2026-11-19). The wiki
+  edits it in a single textarea, Figma shows each responsibility as a chip, so the frontend splits the text by
+  line breaks. The input is trimmed; a blank value is saved as `null`.
+- Every project role counts as active: the wiki's Add project modal lists "active roles", but roles are a
+  seed-only catalog without an `is_active` flag, so `projectRoles` returns them all.
+
+## CV preview
+
+The Preview tab and the PDF export show the same data: both read it from `CvPreviewService` (query
+`cvPreview(id)`). Nothing is stored for the preview: every value below is derived from the tables above
+when the CV is requested.
+
+The only required data are the CV name, education and description (validated on create and update). A CV
+without skills, languages or projects is complete: the Preview hides those sections and the PDF can be
+exported (mentor, 24.11.2026).
+
+### Where each part comes from
+
+| Part                   | Source                                                                           |
+| ---------------------- | -------------------------------------------------------------------------------- |
+| Name, position         | the CV owner (`users`, `positions`); the position can be missing                 |
+| Education, name, desc. | `cvs`                                                                            |
+| Language proficiency   | all `user_languages` of the CV owner; a CV has no languages of its own           |
+| Domains                | distinct `projects.domain` of the CV projects                                    |
+| Skills                 | `cv_skills`, grouped by skill category; categories without CV skills are omitted |
+| Projects               | `cv_projects` with their catalog `projects` row, roles and technologies          |
+| Experience, last used  | calculated per CV skill, see below                                               |
+
+### Experience and last used year
+
+Both values are calculated for every CV skill from **the projects of this CV only**, using the **CV-specific
+dates** (`cv_projects.start_date` / `end_date`), not the dates of the catalog project. A project counts for a
+skill when the skill is one of its technologies (`project_skills`, "Environment" in the UI); the match is by
+skill id.
+
+- **Experience in years** = full years from the start date of the earliest matching project until today
+  (rounded down, month and day included: 01.06.2023 → 24.11.2026 is 3 years).
+  - Less than a year gives `0`.
+  - Periods are not summed: overlapping or parallel projects do not add up, only the earliest start counts.
+- **Last used year** = the end year of the latest matching project, an empty end date resolved as described in
+  [Assignments](#assignments) above. A project still "Till now" counts as the current year, so it wins over any
+  finished one; a CV project without an end date whose catalog project has ended counts as the year the project
+  ended.
+- A CV skill that is in no CV project gets `null` for both values (an empty cell in the table).
+
+Example (today: 2026-11-24):
+
+| CV project | Start      | End        | Technologies      |
+| ---------- | ---------- | ---------- | ----------------- |
+| P1         | 2022-03-01 | 2023-12-31 | React, JavaScript |
+| P2         | 2023-06-01 | —          | TypeScript, React |
+| P3         | 2020-02-01 | —          | Vue               |
+
+P2's catalog project ends 2027-12-31 (still running), P3's ended 2021-06-30.
+
+| CV skill   | Experience | Last used | Why                                         |
+| ---------- | ---------- | --------- | ------------------------------------------- |
+| React      | 4          | 2026      | earliest start P1; P2 is "Till now"         |
+| JavaScript | 4          | 2023      | only P1                                     |
+| TypeScript | 3          | 2026      | only P2, "Till now"                         |
+| Vue        | 6          | 2021      | only P3, ends with its project (2021-06-30) |
+| Angular    | `null`     | `null`    | in no CV project                            |
+
+The calculation takes "today" as a parameter, so the unit tests use a fixed date.
 
 ## Deletion policy
 
@@ -144,6 +218,13 @@ The spec asks each catalog to define its deletion policy explicitly. One rule is
 Deleting a user removes their sessions, codes, skill and language assignments and CVs (with the CVs' skills and
 projects); departments, positions, skills and languages stay. Before deleting, the service rejects deleting
 oneself and the last Admin ([permissions](api/permissions.md#users)).
+
+**A profile skill used in the owner's CVs cannot be removed.** `user_skills` and `cv_skills` have no foreign key
+between them, so this is a service rule, not `Restrict`: `deleteUserSkills` looks for the selected skills in the
+CVs of that user and, if any CV lists one, rejects the whole request with `ENTITY_IN_USE` and the ids of the
+blocked assignments in `extensions.ids` (see [conventions](api/conventions.md#codes)). The user removes the skill
+from those CVs first. The same skill in another user's CV does not block it. Profile languages have no such rule:
+a CV has no languages of its own (see [CV preview](#cv-preview)).
 
 ## Constraints
 
@@ -190,7 +271,7 @@ constraints are added in the `add_dates_checks` migration; the rest is checked i
 | Project end date is not earlier than the start date                          | Input DTO (`@IsNotBeforeDate()`, see [conventions](api/conventions.md#shared-building-blocks))                                 |
 | CV project `start_date <= end_date` (if end date is set)                     | `ALTER TABLE "cv_projects" ADD CONSTRAINT "cv_projects_dates_check" CHECK ("end_date" IS NULL OR "start_date" <= "end_date");` |
 | CV project dates are within the project's dates                              | Service (a CHECK cannot reference another table)                                                                               |
-| CV skills belong to the CV owner's skills                                    | Service                                                                                                                        |
+| CV skills belong to the CV owner's skills                                    | Service (`createCvSkill` checks the profile; `deleteUserSkills` rejects a skill used in the owner's CVs)                       |
 | Names are trimmed, repeated spaces collapsed; ISO upper-cased                | Input DTO (`@NormalizeText()`, `@ToUpperCaseText()`, see [conventions](api/conventions.md#shared-building-blocks))             |
 | A new verification code invalidates the previous one; resend is rate-limited | Service                                                                                                                        |
 
@@ -234,3 +315,16 @@ pnpm db:migrate
 - **Skill mastery values follow the wiki**: `BEGINNER`, `ELEMENTARY`, `INTERMEDIATE`, `ADVANCED`, `EXPERT`
   (Add / Update Skill modals). The initial schema used other names; they were renamed in place
   (`ALTER TYPE … RENAME VALUE`), so the order of the levels is kept.
+- **A CV keeps its own mastery per skill** (`cv_skills.mastery`, confirmed by the mentor on 2026-11-24). Adding a
+  skill to a CV copies the owner's current level; after that `updateCvSkill` changes it in this CV only, and changing
+  the level in the profile does not touch CVs. The migration filled existing rows from `user_skills` and dropped CV
+  skills whose owner no longer had the skill (they were never listed).
+- **Removing a profile skill used in CVs is rejected, not cascaded.** It used to remove the skill from every CV of
+  the owner silently, losing the level set in each CV (`cv_skills.mastery`). The wiki gives no rule for this case;
+  the team chose the same policy as for catalogs (Restrict over cascade): the user sees which skills are in use and
+  removes them from the CVs first. As a result, the skills of a CV are always a subset of the owner's profile
+  skills, and the Add skill dialog of a CV can tell "the profile has no skills" from "all are already added".
+- **CV preview has no mastery.** The wiki's Professional skills table shows category, skill, experience and last
+  used year only; mastery is edited on the CV Skills tab (`cv_skills.mastery`, see above).
+- **CV preview values are calculated on request**, not stored, so they never go stale after a CV project or a
+  project's technologies change. Preview and PDF call the same service, so they always match.

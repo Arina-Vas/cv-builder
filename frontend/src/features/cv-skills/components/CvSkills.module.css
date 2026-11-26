@@ -1,0 +1,8 @@
+.root {
+  width: 100%;
+  max-width: 860px;
+  margin-block: 0;
+  margin-inline-start: clamp(0px, calc((100% - 860px) / 2), 169px);
+  margin-inline-end: auto;
+  padding-block: var(--space-8);
+}

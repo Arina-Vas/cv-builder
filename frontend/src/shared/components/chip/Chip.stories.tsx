@@ -9,10 +9,12 @@ const meta = {
   component: Chip,
   args: {
     label: 'Software Engineer',
+    variant: 'outlined',
     disabled: false,
   },
   argTypes: {
     label: { control: 'text' },
+    variant: { control: 'inline-radio', options: ['outlined', 'filled'] },
     disabled: { control: 'boolean' },
     onRemove: { control: false },
   },
@@ -108,6 +110,38 @@ export const Disabled: Story = {
   },
 };
 
+// Figma CV PROJECTS → responsibilities under the project description
+export const Filled: Story = {
+  args: { variant: 'filled', label: 'Managed to write code in time' },
+  play: async ({ canvasElement }) => {
+    const chip = within(canvasElement).getByText('Managed to write code in time').parentElement!;
+    const style = getComputedStyle(chip);
+
+    await expect(chip).toHaveAttribute('data-variant', 'filled');
+    // grey fill, no visible border, 24px high, 16px radius, same 12px side padding
+    await expect(style.backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
+    await expect(style.borderTopColor).toBe('rgba(0, 0, 0, 0)');
+    await expect(style.height).toBe('24px');
+    await expect(style.borderTopLeftRadius).toBe('16px');
+    await expect(style.paddingLeft).toBe('12px');
+    await expect(style.paddingRight).toBe('12px');
+  },
+};
+
+export const FilledList: Story = {
+  name: 'Filled: list of responsibilities',
+  parameters: { controls: { disable: true } },
+  render: () => (
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--chip-gap)', maxWidth: 360 }}>
+      {['Did something great', 'Did not break production', 'Managed to write code in time'].map(
+        (item) => (
+          <Chip key={item} label={item} variant="filled" />
+        ),
+      )}
+    </div>
+  ),
+};
+
 export const LongLabel: Story = {
   args: {
     label: 'Senior Software Engineer in Test Automation',
@@ -143,6 +177,11 @@ const STATES: { title: string; props: Partial<ChipProps> }[] = [
   {
     title: 'Long label',
     props: { label: 'Senior Software Engineer in Test Automation', onRemove: () => {} },
+  },
+  { title: 'Filled', props: { variant: 'filled' } },
+  {
+    title: 'Filled, long label',
+    props: { variant: 'filled', label: 'Senior Software Engineer in Test Automation' },
   },
 ];
 

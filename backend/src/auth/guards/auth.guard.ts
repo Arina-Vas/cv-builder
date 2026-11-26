@@ -2,9 +2,8 @@ import { type CanActivate, type ExecutionContext, Injectable } from '@nestjs/com
 import { Reflector } from '@nestjs/core';
 import { ALLOW_UNVERIFIED_KEY } from '@/common/auth/allow-unverified.decorator';
 import { IS_PUBLIC_KEY } from '@/common/auth/public.decorator';
-import { getRequest, isMutation } from '@/common/auth/request';
+import { type Authentication, getRequest, isMutation } from '@/common/auth/request';
 import { emailNotVerified, unauthenticated } from '@/common/errors/app-errors';
-import type { User } from '@/users/models/user.model';
 import { UsersService } from '@/users/users.service';
 import { AccessTokenService } from '../sessions/access-token.service';
 import { ACCESS_TOKEN_COOKIE, readCookie } from '../sessions/auth-cookies';
@@ -25,7 +24,10 @@ export class AuthGuard implements CanActivate {
     }
 
     const request = getRequest(context);
-    const authenticated = await this.authenticate(readCookie(request, ACCESS_TOKEN_COOKIE));
+    const authenticate = () => this.authenticate(readCookie(request, ACCESS_TOKEN_COOKIE));
+    const authenticated = await (isMutation(context)
+      ? authenticate()
+      : (request.authentication ??= authenticate()));
     if (!authenticated) {
       throw unauthenticated();
     }
@@ -43,9 +45,7 @@ export class AuthGuard implements CanActivate {
     return true;
   }
 
-  private async authenticate(
-    token: string | undefined,
-  ): Promise<{ user: User; sessionId: string } | null> {
+  private async authenticate(token: string | undefined): Promise<Authentication | null> {
     if (!token) {
       return null;
     }

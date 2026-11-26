@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { groupByCategory } from '@/features/skills/user-skills/lib/groupByCategory';
+import { groupByCategory } from '@/shared/lib/groupByCategory';
 import type { UserSkillFieldsFragment } from '@/gql/graphql';
 
 const frontend = { id: 'c1', name: 'Frontend' };

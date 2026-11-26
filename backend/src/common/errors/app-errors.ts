@@ -1,9 +1,16 @@
 import { GraphQLError } from 'graphql';
 import { ErrorCode } from './error-code.enum';
+import { ErrorReason } from './error-reason.enum';
 
 export interface FieldError {
   field: string;
   message: string;
+}
+
+export interface BadUserInputOptions {
+  fields: FieldError[];
+  message?: string;
+  reason?: ErrorReason;
 }
 
 export const unauthenticated = (message = 'Authentication required'): GraphQLError =>
@@ -21,17 +28,25 @@ export const emailNotVerified = (
 export const notFound = (message = 'Not found'): GraphQLError =>
   new GraphQLError(message, { extensions: { code: ErrorCode.NOT_FOUND } });
 
-export const badUserInput = (fields: FieldError[], message = 'Validation failed'): GraphQLError =>
-  new GraphQLError(message, { extensions: { code: ErrorCode.BAD_USER_INPUT, fields } });
+export const badUserInput = ({
+  fields,
+  message = 'Validation failed',
+  reason,
+}: BadUserInputOptions): GraphQLError =>
+  new GraphQLError(message, {
+    extensions: { code: ErrorCode.BAD_USER_INPUT, fields, ...(reason && { reason }) },
+  });
 
 export const conflict = (field: string, message: string): GraphQLError =>
   new GraphQLError(message, { extensions: { code: ErrorCode.CONFLICT, field } });
 
-export const entityInUse = (message: string): GraphQLError =>
-  new GraphQLError(message, { extensions: { code: ErrorCode.ENTITY_IN_USE } });
+export const entityInUse = (message: string, ids?: string[]): GraphQLError =>
+  new GraphQLError(message, { extensions: { code: ErrorCode.ENTITY_IN_USE, ...(ids && { ids }) } });
 
-export const operationNotAllowed = (message: string): GraphQLError =>
-  new GraphQLError(message, { extensions: { code: ErrorCode.OPERATION_NOT_ALLOWED } });
+export const operationNotAllowed = (message: string, reason?: ErrorReason): GraphQLError =>
+  new GraphQLError(message, {
+    extensions: { code: ErrorCode.OPERATION_NOT_ALLOWED, ...(reason && { reason }) },
+  });
 
 export const rateLimited = (retryAfter: number, message = 'Too many requests'): GraphQLError =>
   new GraphQLError(message, { extensions: { code: ErrorCode.RATE_LIMITED, retryAfter } });

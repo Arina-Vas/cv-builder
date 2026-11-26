@@ -115,6 +115,43 @@ describe('Users (integration)', () => {
       expect(users.total).toBe(3);
     });
 
+    it('finds a user by full name in either word order', async () => {
+      const { browser } = await signedIn();
+      const petrov = await createUser(t.prisma);
+      await t.prisma.user.update({
+        where: { id: petrov.id },
+        data: { firstName: 'Ivan', lastName: 'Petrov' },
+      });
+      await t.prisma.user.update({
+        where: { id: (await createUser(t.prisma)).id },
+        data: { firstName: 'Ivan', lastName: 'Sidorov' },
+      });
+
+      for (const search of ['ivan petrov', 'Petrov  Ivan']) {
+        const { users } = await browser.data<{ users: { items: GqlListUser[]; total: number } }>(
+          USERS,
+          listArgs({ search }),
+        );
+
+        expect(users.items.map((user) => user.id)).toEqual([petrov.id]);
+        expect(users.total).toBe(1);
+      }
+    });
+
+    it('matches LIKE wildcards in the search literally', async () => {
+      const { browser } = await signedIn();
+      await createUser(t.prisma);
+
+      for (const search of ['%', '_']) {
+        const { users } = await browser.data<{ users: { items: GqlListUser[]; total: number } }>(
+          USERS,
+          listArgs({ search }),
+        );
+
+        expect(users.total).toBe(0);
+      }
+    });
+
     it('sorts by department name and paginates, keeping users without one last for ASC', async () => {
       const { browser, user: me } = await signedIn();
       const qa = await t.prisma.department.create({ data: { name: 'QA' } });
@@ -308,6 +345,7 @@ describe('Users (integration)', () => {
 
       expect(error.extensions.code).toBe('OPERATION_NOT_ALLOWED');
       expect(error.message).toBe(UserMessage.ownRoleChange);
+      expect(error.extensions.reason).toBe('SELF');
     });
 
     it('lets an Admin change their own department while keeping the role', async () => {
@@ -494,6 +532,7 @@ describe('Users (integration)', () => {
 
       expect(error.extensions.code).toBe('OPERATION_NOT_ALLOWED');
       expect(error.message).toBe(UserMessage.ownAccountDelete);
+      expect(error.extensions.reason).toBe('SELF');
     });
 
     it('fails with NOT_FOUND for a user that is already deleted', async () => {

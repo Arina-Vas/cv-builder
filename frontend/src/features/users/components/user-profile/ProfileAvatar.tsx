@@ -4,7 +4,7 @@ import { useMutation } from '@apollo/client/react';
 import { useTranslations } from 'next-intl';
 import { REMOVE_AVATAR, UPLOAD_AVATAR } from '@/features/users/api/users.operations';
 import { Avatar } from '@/shared/components/avatar/Avatar';
-import { AvatarUploader } from '@/shared/components/avatar-uploader/AvatarUploader';
+import { AvatarUploader, MAX_SIZE_LABEL } from '@/shared/components/avatar-uploader/AvatarUploader';
 import { useToast } from '@/shared/components/toast/ToastProvider';
 import { NO_ERROR_TOAST } from '@/shared/lib/apollo/error-toast-link';
 import { parseError } from '@/shared/lib/apollo/graphql-errors';
@@ -33,7 +33,11 @@ export const ProfileAvatar = ({ userId, avatarUrl, fullName, canEdit }: ProfileA
   const showError = (error: unknown) => {
     const appError = parseError(error);
 
-    if (appError.code === 'BAD_USER_INPUT') {
+    const fileError = appError.code === 'BAD_USER_INPUT' ? appError.reason : undefined;
+
+    if (fileError === 'TOO_LARGE') {
+      toast.error(tUploader('tooLarge', { maxSize: MAX_SIZE_LABEL }));
+    } else if (fileError === 'INVALID_TYPE') {
       toast.error(tUploader('invalidType'));
     } else if (appError.code) {
       toast.error(errorMessage(appError));

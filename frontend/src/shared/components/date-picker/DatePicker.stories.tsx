@@ -50,6 +50,7 @@ const meta = {
     onBlur: { control: false },
     minDate: { control: false },
     maxDate: { control: false },
+    openToDate: { control: false },
     excludeDates: { control: false },
     ref: { control: false },
   },
@@ -77,6 +78,26 @@ export const EndDate: Story = {
     label: 'End Date',
     // relative to today, otherwise the calendar opens on a month with nothing disabled
     minDate: new Date(new Date().getFullYear(), new Date().getMonth(), 10),
+  },
+};
+
+export const Clearable: Story = {
+  name: 'Clearable (optional end date)',
+  args: {
+    label: 'End Date',
+    value: new Date(2025, 8, 4),
+    clearable: true,
+  },
+};
+
+export const ClearableDark: Story = {
+  args: {
+    label: 'End Date',
+    value: new Date(2025, 8, 4),
+    clearable: true,
+  },
+  globals: {
+    theme: 'dark',
   },
 };
 
@@ -207,6 +228,121 @@ export const BlursOnClose: Story = {
 
       await expect(args.onBlur).toHaveBeenCalledTimes(2);
     });
+  },
+};
+
+export const ClearsDate: Story = {
+  args: {
+    label: 'End Date',
+    value: new Date(2025, 8, 4),
+    clearable: true,
+  },
+  play: async ({ args, canvasElement, step }) => {
+    const canvas = within(canvasElement);
+    const body = getBody(canvasElement);
+    const trigger = getTrigger(canvasElement, 'End Date');
+
+    await step('clicking ✕ clears the date without opening the calendar', async () => {
+      await userEvent.click(canvas.getByRole('button', { name: 'Clear date' }));
+
+      await expect(args.onChange).toHaveBeenLastCalledWith(null);
+      await expect(args.onBlur).toHaveBeenCalledTimes(1);
+      await expect(body.queryByRole('dialog')).not.toBeInTheDocument();
+      await expect(trigger).not.toHaveTextContent('09/04/2025');
+    });
+
+    await step('✕ is gone and focus is back on the trigger', async () => {
+      await expect(canvas.queryByRole('button', { name: 'Clear date' })).not.toBeInTheDocument();
+      await expect(trigger).toHaveFocus();
+    });
+
+    await step('picking a date again brings ✕ back', async () => {
+      await userEvent.click(trigger);
+      await userEvent.click(await body.findByText('12'));
+
+      await expect(canvas.getByRole('button', { name: 'Clear date' })).toBeInTheDocument();
+    });
+  },
+};
+
+export const NoClearWithoutProp: Story = {
+  args: {
+    value: new Date(2025, 8, 4),
+  },
+  play: async ({ canvasElement }) => {
+    await expect(
+      within(canvasElement).queryByRole('button', { name: 'Clear date' }),
+    ).not.toBeInTheDocument();
+  },
+};
+
+export const NoClearWhenDisabled: Story = {
+  args: {
+    value: new Date(2025, 8, 4),
+    clearable: true,
+    disabled: true,
+  },
+  play: async ({ canvasElement }) => {
+    await expect(
+      within(canvasElement).queryByRole('button', { name: 'Clear date' }),
+    ).not.toBeInTheDocument();
+  },
+};
+
+// A range fully in the past (a finished project): the calendar can't open on today's month, where every
+// day is disabled, so the month is moved into minDate / maxDate
+const PAST_RANGE = { minDate: new Date(2025, 0, 15), maxDate: new Date(2025, 5, 30) };
+
+const openCalendar = async (canvasElement: HTMLElement, name = LABEL) => {
+  await userEvent.click(getTrigger(canvasElement, name));
+  return getBody(canvasElement).findByRole('dialog');
+};
+
+export const OpensWithinRange: Story = {
+  name: 'Opens within minDate / maxDate',
+  args: { ...PAST_RANGE },
+  play: async ({ canvasElement }) => {
+    const dialog = await openCalendar(canvasElement);
+
+    // today is after maxDate → the month of maxDate
+    await expect(
+      within(dialog).getByRole('rowgroup', { name: 'Month June, 2025' }),
+    ).toBeInTheDocument();
+  },
+};
+
+export const OpensOnOpenToDate: Story = {
+  name: 'Opens on openToDate (CV project Start Date)',
+  args: { ...PAST_RANGE, openToDate: PAST_RANGE.minDate },
+  play: async ({ canvasElement }) => {
+    const dialog = await openCalendar(canvasElement);
+
+    await expect(
+      within(dialog).getByRole('rowgroup', { name: 'Month January, 2025' }),
+    ).toBeInTheDocument();
+  },
+};
+
+export const OpenToDateClampedToRange: Story = {
+  args: { ...PAST_RANGE, openToDate: new Date(2024, 2, 1) },
+  play: async ({ canvasElement }) => {
+    const dialog = await openCalendar(canvasElement);
+
+    // openToDate is before minDate → the month of minDate
+    await expect(
+      within(dialog).getByRole('rowgroup', { name: 'Month January, 2025' }),
+    ).toBeInTheDocument();
+  },
+};
+
+export const ValueWinsOverOpenToDate: Story = {
+  args: { ...PAST_RANGE, openToDate: PAST_RANGE.minDate, value: new Date(2025, 2, 10) },
+  play: async ({ canvasElement }) => {
+    const dialog = await openCalendar(canvasElement);
+
+    await expect(
+      within(dialog).getByRole('rowgroup', { name: 'Month March, 2025' }),
+    ).toBeInTheDocument();
   },
 };
 

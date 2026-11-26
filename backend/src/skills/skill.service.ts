@@ -11,15 +11,14 @@ import { badUserInput, conflict, entityInUse } from '@/common/errors/app-errors'
 import { Skill } from '@/skills/models/skill.model';
 import { UpdateSkillInput } from '@/skills/dto/update-skill.input';
 import { SkillCategory } from '@/skills/models/skill-category.model';
+import { containsInsensitive } from '@/common/prisma/search';
 
 @Injectable()
 export class SkillService {
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll({ search, sortBy, sortOrder, page, pageSize }: SkillsArgs): Promise<SkillPage> {
-    const where: Prisma.SkillWhereInput = search
-      ? { name: { contains: search, mode: 'insensitive' } }
-      : {};
+    const where: Prisma.SkillWhereInput = search ? { name: containsInsensitive(search) } : {};
     const order: Prisma.SortOrder = sortOrder === SortOrder.ASC ? 'asc' : 'desc';
 
     const [rows, total] = await this.prisma.$transaction([
@@ -57,7 +56,7 @@ export class SkillService {
     } catch (error) {
       if (isPrismaError(error, 'P2002')) throw conflict('name', 'Skill already exists');
       if (isPrismaError(error, 'P2003'))
-        throw badUserInput([{ field: 'categoryId', message: 'Category not found' }]);
+        throw badUserInput({ fields: [{ field: 'categoryId', message: 'Category not found' }] });
       throw error;
     }
   }
@@ -76,7 +75,7 @@ export class SkillService {
     } catch (error) {
       if (isPrismaError(error, 'P2002')) throw conflict('name', 'Skill already exists');
       if (isPrismaError(error, 'P2003'))
-        throw badUserInput([{ field: 'categoryId', message: 'Category not found' }]);
+        throw badUserInput({ fields: [{ field: 'categoryId', message: 'Category not found' }] });
       throw error;
     }
   }
@@ -100,7 +99,7 @@ export class SkillService {
   private async assertCategoryExists(categoryId: string) {
     const category = await this.prisma.skillCategory.findUnique({ where: { id: categoryId } });
     if (!category) {
-      throw badUserInput([{ field: 'categoryId', message: 'Category not found' }]);
+      throw badUserInput({ fields: [{ field: 'categoryId', message: 'Category not found' }] });
     }
   }
 }

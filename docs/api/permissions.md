@@ -123,9 +123,21 @@ other users' skills and languages through the User Details tabs.
 | Update, delete a CV and its skills / projects  | own CVs only   | any CV           |
 | CVs tab of a selected employee (User Details)  | ❌             | ✅               |
 
-In the User CVs tab every operation is scoped to the selected employee; the backend rejects a CV of another employee
-even for an Admin (wiki: "The Admin must not be able to use this page to create or modify a CV for another employee
-by changing a client-supplied user ID").
+The CV owner is never taken on trust from the client (audit question 3; wiki: "The backend must determine the
+ownership of the CV using the authenticated user rather than trusting an employee ID supplied by the frontend"):
+
+- `createCv`, `updateCv` and `deleteCv` take the owner's `userId`, like the user skills mutations. An Employee may
+  pass only their own id, otherwise `FORBIDDEN`; an Admin may pass any existing user.
+- In `updateCv` and `deleteCv` the `userId` only scopes the operation: a CV that does not belong to that user is
+  `NOT_FOUND`, for an Admin as well. The owner of a CV never changes.
+- In the User CVs tab every operation is therefore scoped to the selected employee (wiki: "The Admin must not be
+  able to use this page to create or modify a CV for another employee by changing a client-supplied user ID").
+- The CV list has two queries: `cvs` for the CVs page (own CVs for an Employee, all for an Admin) and
+  `userCvs(userId)` for the User CVs tab. The tab is Admin-only in the UI; the API allows "own or Admin", like
+  `userSkills`.
+- Operations that get only a CV id (`cv`, CV projects, and later CV skills, preview and PDF) check access with
+  `CvAccessService.getAccessibleCv(cvId, currentUser)` (`backend/src/cvs/cv-access.service.ts`): `NOT_FOUND` if
+  the CV does not exist, `FORBIDDEN` if an Employee asks for another user's CV.
 
 ### Authentication and settings
 
@@ -253,3 +265,90 @@ The assignment ids must belong to that `userId` too: `updateUser*` with another 
 | `createProject` | Admin  |
 | `updateProject` | Admin  |
 | `deleteProject` | Admin  |
+
+### CVs
+
+| Operation  | Access                                      |
+| ---------- | ------------------------------------------- |
+| `cvs`      | All: own CVs for an Employee, all for Admin |
+| `userCvs`  | Own or Admin \*                             |
+| `cv`       | Own or Admin †                              |
+| `createCv` | Own or Admin \*                             |
+| `updateCv` | Own or Admin \*                             |
+| `deleteCv` | Own or Admin \*                             |
+
+\* The owner is the `userId` argument or input field, checked with `canManageUser` before the user is looked up,
+as for user skills. In `updateCv` and `deleteCv` it must also be the CV's current owner.
+† The owner is read from the CV (`CvAccessService`); the request carries only the CV id.
+
+Search on `cvs` matches the CV name; for an Admin it also matches the owner's email (wiki CVs page: "Admin searches
+CVs by Name, Employee email"). `userCvs` searches by CV name only (wiki User CVs page). Both are case-insensitive.
+
+Errors thrown by the service:
+
+| Operation                                     | Case                                       | Code        | Message                                            |
+| --------------------------------------------- | ------------------------------------------ | ----------- | -------------------------------------------------- |
+| `userCvs`, `createCv`, `updateCv`, `deleteCv` | an Employee sends another user's id        | `FORBIDDEN` | `You are not authorized to perform this action`    |
+| `userCvs`, `createCv`, `updateCv`, `deleteCv` | the user does not exist                    | `NOT_FOUND` | `User not found`                                   |
+| `cv`                                          | the CV does not exist                      | `NOT_FOUND` | `CV not found`                                     |
+| `cv`                                          | an Employee asks for another user's CV     | `FORBIDDEN` | `You are not authorized to perform this action`    |
+| `updateCv`, `deleteCv`                        | the CV does not exist or has another owner | `NOT_FOUND` | `Not found` (Prisma `P2025`, mapped by the filter) |
+
+Deleting a CV removes its skills and projects (DB cascade, see [data-model.md](../data-model.md)).
+
+### CV projects
+
+| Operation             | Access         |
+| --------------------- | -------------- |
+| `projectRoles`        | All            |
+| `cvProjects`          | Own or Admin † |
+| `availableCvProjects` | Own or Admin † |
+| `createCvProject`     | Own or Admin † |
+| `updateCvProject`     | Own or Admin † |
+| `deleteCvProject`     | Own or Admin † |
+
+† Every operation gets the CV id (`cvId` argument or input field) and checks it first with
+`CvAccessService.getAccessibleCv`, before any other lookup. The CV project id is then looked up only inside that
+CV, so a CV project of another CV is `NOT_FOUND`, even when both CVs belong to the same user.
+
+Errors thrown by the service:
+
+| Operation                            | Case                                              | Code             | Field / message                                           |
+| ------------------------------------ | ------------------------------------------------- | ---------------- | --------------------------------------------------------- |
+| all except `projectRoles`            | the CV does not exist                             | `NOT_FOUND`      | `CV not found`                                            |
+| all except `projectRoles`            | an Employee asks for another user's CV            | `FORBIDDEN`      | `You are not authorized to perform this action`           |
+| `createCvProject`                    | the project does not exist                        | `BAD_USER_INPUT` | `projectId`: `Project not found`                          |
+| `createCvProject`                    | the project is already in the CV                  | `CONFLICT`       | `projectId`: `Project is already added to the CV`         |
+| `createCvProject`, `updateCvProject` | start date outside the project's dates            | `BAD_USER_INPUT` | `startDate`: `Start date must be within project duration` |
+| `createCvProject`, `updateCvProject` | end date after the project's end                  | `BAD_USER_INPUT` | `endDate`: `End date must be within project duration`     |
+| `createCvProject`, `updateCvProject` | a role does not exist                             | `BAD_USER_INPUT` | `roleIds`: `Role not found`                               |
+| `updateCvProject`, `deleteCvProject` | the CV project does not exist or is in another CV | `NOT_FOUND`      | `CV project not found`                                    |
+
+Both date errors are returned together when both dates are wrong. Rules checked by the input DTO before the
+service runs: `End date cannot be earlier than start date`, `At least one role must be selected`.
+
+### CV PDF
+
+| Operation       | Access         |
+| --------------- | -------------- |
+| `generateCvPdf` | Own or Admin † |
+
+† The PDF is built from `CvPreviewService.getPreview`, which checks the CV with
+`CvAccessService.getAccessibleCv`, so an Employee cannot export another user's CV by changing the `cvId` (wiki
+CV Preview, AC-31, AC-49). The mutation is marked
+`@AllowUnverified()`: it changes nothing, and the Preview it prints is readable without a verified email.
+How the PDF is built: [pdf.md](../pdf.md).
+
+Errors:
+
+| Case                                   | Code                    | Message                                         |
+| -------------------------------------- | ----------------------- | ----------------------------------------------- |
+| `cvId` is not a UUID                   | `BAD_USER_INPUT`        | `fields: [{ field: 'cvId' }]`                   |
+| `locale` is not a `Locale` value       | `BAD_USER_INPUT`        | GraphQL variable error, no `fields`             |
+| the CV does not exist                  | `NOT_FOUND`             | `CV not found`                                  |
+| an Employee asks for another user's CV | `FORBIDDEN`             | `You are not authorized to perform this action` |
+| more than 10 requests a minute per IP  | `RATE_LIMITED`          | `Please wait before trying again`, `retryAfter` |
+| Chromium failed or timed out           | `INTERNAL_SERVER_ERROR` | generic message, the error is logged            |
+
+There is no incomplete-data error: the required CV data (name, education, description) is validated on create
+and update, so every accessible CV can be exported (see [pdf.md](../pdf.md#incomplete-cv-data)).

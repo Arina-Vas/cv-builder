@@ -4,9 +4,11 @@ import s from './DatePicker.module.css';
 import { format } from 'date-fns';
 import { DatePicker as ReactDatePicker } from 'react-datepicker';
 import type { Ref } from 'react';
-import { useId, useState } from 'react';
+import { useId, useRef, useState } from 'react';
 import { ChevronIcon } from '@/shared/components/icons/ChevronIcon';
 import { CalendarIcon } from '@/shared/components/icons/CalendarIcon';
+import { CrossIcon } from '@/shared/components/icons/CrossIcon';
+import { IconButton } from '@/shared/components/buttons';
 import { useTranslations } from 'next-intl';
 import { Field, getErrorId } from '@/shared/components/field/Field';
 import { formatDate } from '@/shared/lib/date/format-date';
@@ -25,9 +27,25 @@ type Props = {
   error?: string;
   ref?: Ref<HTMLButtonElement>;
   onOpenChange?: (open: boolean) => void;
+  clearable?: boolean;
+  openToDate?: Date;
 };
 
 type View = 'day' | 'month' | 'year';
+
+const clampToRange = (date: Date, minDate?: Date, maxDate?: Date): Date => {
+  let result = date;
+
+  if (minDate && result.getTime() < minDate.getTime()) {
+    result = minDate;
+  }
+
+  if (maxDate && result.getTime() > maxDate.getTime()) {
+    result = maxDate;
+  }
+
+  return result;
+};
 
 export const DatePicker = ({
   value,
@@ -42,22 +60,42 @@ export const DatePicker = ({
   label,
   error,
   onOpenChange,
+  clearable = false,
   ref,
+  openToDate,
 }: Props) => {
   const t = useTranslations('common.datePicker');
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<View>('day');
-  const [viewDate, setViewDate] = useState<Date>(value ?? new Date());
+
+  const initialViewDate = () => clampToRange(value ?? openToDate ?? new Date(), minDate, maxDate);
+
+  const [viewDate, setViewDate] = useState<Date>(initialViewDate);
 
   const autoId = useId();
   const triggerId = id ?? autoId;
+
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const setTriggerRef = (node: HTMLButtonElement | null) => {
+    triggerRef.current = node;
+    if (typeof ref === 'function') ref(node);
+    else if (ref) ref.current = node;
+  };
+
+  const showClear = clearable && value !== null && !disabled;
+
+  const handleClear = () => {
+    onChange(null);
+    onBlur?.();
+    triggerRef.current?.focus();
+  };
 
   const handleOpenChange = (next: boolean) => {
     setOpen(next);
     onOpenChange?.(next);
     if (next) {
       setView('day');
-      setViewDate(value ?? new Date());
+      setViewDate(initialViewDate());
     } else {
       onBlur?.();
     }
@@ -93,11 +131,12 @@ export const DatePicker = ({
       <Popover.Root open={open} onOpenChange={handleOpenChange}>
         <Popover.Trigger asChild disabled={disabled}>
           <button
-            ref={ref}
+            ref={setTriggerRef}
             id={triggerId}
             type="button"
             className={s.trigger}
             data-invalid={error ? true : undefined}
+            data-clearable={showClear ? true : undefined}
             aria-describedby={error ? getErrorId(triggerId) : undefined}
           >
             <span>
@@ -106,6 +145,11 @@ export const DatePicker = ({
             <CalendarIcon className={s.icon} />
           </button>
         </Popover.Trigger>
+        {showClear && (
+          <IconButton aria-label={t('clear')} className={s.clear} onClick={handleClear}>
+            <CrossIcon />
+          </IconButton>
+        )}
         <Popover.Portal>
           <Popover.Content align="start" sideOffset={0} collisionPadding={16} className={s.content}>
             <ReactDatePicker

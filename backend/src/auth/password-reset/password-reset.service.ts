@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { hashPassword } from '@/common/crypto/password';
 import { generateToken, hashToken } from '@/common/crypto/tokens';
 import { badUserInput } from '@/common/errors/app-errors';
+import { ErrorReason } from '@/common/errors/error-reason.enum';
 import type { EnvironmentVariables } from '@/config/env.validation';
 import { AuthTokenType } from '@/generated/prisma/enums';
 import { MailService } from '@/mail/mail.service';
@@ -17,7 +18,8 @@ export const RESET_PASSWORD_PATH = '/reset-password';
 const MINUTE_MS = 60 * 1000;
 const SECOND_MS = 1000;
 
-const linkError = (message: string) => badUserInput([{ field: 'token', message }], message);
+const linkError = (message: string, reason: ErrorReason) =>
+  badUserInput({ fields: [{ field: 'token', message }], message, reason });
 
 @Injectable()
 export class PasswordResetService {
@@ -73,10 +75,10 @@ export class PasswordResetService {
     });
 
     if (!found || found.usedAt) {
-      throw linkError(ResetLinkMessage.invalid);
+      throw linkError(ResetLinkMessage.invalid, ErrorReason.INVALID);
     }
     if (found.expiresAt <= new Date()) {
-      throw linkError(ResetLinkMessage.expired);
+      throw linkError(ResetLinkMessage.expired, ErrorReason.EXPIRED);
     }
 
     const passwordHash = await hashPassword(newPassword);
@@ -88,7 +90,7 @@ export class PasswordResetService {
         data: { usedAt: now },
       });
       if (count === 0) {
-        throw linkError(ResetLinkMessage.invalid);
+        throw linkError(ResetLinkMessage.invalid, ErrorReason.INVALID);
       }
       await tx.user.update({ where: { id: found.userId }, data: { passwordHash } });
       await tx.session.updateMany({

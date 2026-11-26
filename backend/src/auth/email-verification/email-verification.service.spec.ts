@@ -1,6 +1,7 @@
 import { GraphQLError } from 'graphql';
 import { hashToken } from '@/common/crypto/tokens';
 import { ErrorCode } from '@/common/errors/error-code.enum';
+import { ErrorReason } from '@/common/errors/error-reason.enum';
 import { UserRole } from '@/common/graphql/enums';
 import { AuthTokenType } from '@/generated/prisma/enums';
 import type { MailService } from '@/mail/mail.service';
@@ -177,6 +178,7 @@ describe('EmailVerificationService', () => {
       const error = await errorOf(service.verify(user, '000000'));
 
       expect(error.message).toBe(VerificationMessage.invalid);
+      expect(error.extensions['reason']).toBe(ErrorReason.INVALID);
       expect(prisma.authToken.update).toHaveBeenCalledWith({
         where: { id: 'token-1' },
         data: { attempts: { increment: 1 } },
@@ -185,15 +187,21 @@ describe('EmailVerificationService', () => {
     });
 
     it.each([
-      ['no code was sent', null, VerificationMessage.invalid],
-      ['the code is used', token({ usedAt: NOW }), VerificationMessage.used],
-      ['the code is expired', token({ expiresAt: NOW }), VerificationMessage.expired],
+      ['no code was sent', null, VerificationMessage.invalid, ErrorReason.INVALID],
+      ['the code is used', token({ usedAt: NOW }), VerificationMessage.used, ErrorReason.USED],
+      [
+        'the code is expired',
+        token({ expiresAt: NOW }),
+        VerificationMessage.expired,
+        ErrorReason.EXPIRED,
+      ],
       [
         'the attempts are used up',
         token({ attempts: MAX_CODE_ATTEMPTS }),
         VerificationMessage.expired,
+        ErrorReason.EXPIRED,
       ],
-    ])('rejects even the right code when %s', async (_, found, message) => {
+    ])('rejects even the right code when %s', async (_, found, message, reason) => {
       prisma.authToken.findFirst.mockResolvedValue(found);
 
       const error = await errorOf(service.verify(user, '042917'));
@@ -201,6 +209,7 @@ describe('EmailVerificationService', () => {
       expect(error.extensions).toEqual({
         code: ErrorCode.BAD_USER_INPUT,
         fields: [{ field: 'code', message }],
+        reason,
       });
       expect(prisma.authToken.update).not.toHaveBeenCalled();
       expect(tx.user.update).not.toHaveBeenCalled();
@@ -213,6 +222,7 @@ describe('EmailVerificationService', () => {
       const error = await errorOf(service.verify(user, '042917'));
 
       expect(error.message).toBe(VerificationMessage.used);
+      expect(error.extensions['reason']).toBe(ErrorReason.USED);
       expect(tx.user.update).not.toHaveBeenCalled();
     });
 

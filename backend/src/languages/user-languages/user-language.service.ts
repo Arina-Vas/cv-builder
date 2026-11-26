@@ -60,7 +60,7 @@ export class UserLanguageService {
       if (isPrismaError(error, 'P2002'))
         throw conflict('languageId', 'Language is already assigned to the user');
       if (isPrismaError(error, 'P2003'))
-        throw badUserInput([{ field: 'languageId', message: 'Language not found' }]);
+        throw badUserInput({ fields: [{ field: 'languageId', message: 'Language not found' }] });
       throw error;
     }
   }
@@ -120,6 +120,7 @@ export class UserLanguageService {
       select: { id: true },
     });
 
-    if (!language) throw badUserInput([{ field: 'languageId', message: 'Language not found' }]);
+    if (!language)
+      throw badUserInput({ fields: [{ field: 'languageId', message: 'Language not found' }] });
   }
 }

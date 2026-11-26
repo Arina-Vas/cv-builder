@@ -13,8 +13,10 @@ Where the token values come from and what is still unconfirmed: [TOKENS.md](TOKE
 | `theme-provider.tsx` | `ThemeProvider` + `useTheme()` hook.                                                 |
 | `TOKENS.md`          | Token sources (Figma / app / MUI defaults) and open questions for the designer.      |
 
-Wiring lives in `src/app/layout.tsx`: it imports `tokens.css` and `globals.css`, loads Roboto with
-`next/font` (`--font-roboto`), puts `themeScript` into `<head>` and wraps the app in `<ThemeProvider>`.
+Wiring lives in `src/app/layout.tsx`: it imports `tokens.css` and `globals.css`, loads the self-hosted
+Roboto from `src/app/fonts` with `next/font/local` (latin and cyrillic files, joined into `--font-roboto` in
+`globals.css`; why it is not `next/font/google`: root README → "Architectural decisions"), puts `themeScript`
+into `<head>` and wraps the app in `<ThemeProvider>`.
 
 ## How it works
 

@@ -42,7 +42,8 @@
     "datePicker": {
       "placeholder": "Select date",
       "previous": "Previous",
-      "next": "Next"
+      "next": "Next",
+      "clear": "Clear date"
     },
     "select": { "noOptions": "No options" },
     "chip": { "remove": "Remove {label}" },
@@ -132,6 +133,37 @@
       "endDate": {
         "required": "End date is required",
         "beforeStart": "End date must be later than start date"
+      },
+      "description": {
+        "required": "Description is required",
+        "maxLength": "Description must not exceed {max} characters"
+      }
+    },
+    "cvProject": {
+      "projectId": { "required": "Project is required" },
+      "startDate": {
+        "required": "Start date is required",
+        "outOfProject": "Start date must be within project duration"
+      },
+      "endDate": {
+        "outOfProject": "End date must be within project duration",
+        "beforeStart": "End date cannot be earlier than start date"
+      },
+      "roleIds": { "required": "At least one role must be selected" },
+      "responsibilities": { "maxLength": "Responsibilities must not exceed {max} characters" }
+    },
+    "cvSkill": {
+      "skillId": { "required": "Skill is required" },
+      "mastery": { "required": "Skill mastery is required" }
+    },
+    "cv": {
+      "name": {
+        "required": "Name is required",
+        "maxLength": "Name must not exceed {max} characters"
+      },
+      "education": {
+        "required": "Education is required",
+        "maxLength": "Education must not exceed {max} characters"
       },
       "description": {
         "required": "Description is required",
@@ -305,7 +337,8 @@
     "delete": {
       "title": "Delete user",
       "message": "Are you sure you want to delete user <b>{name}</b>?",
-      "lastAdmin": "The last admin cannot be deleted. Assign the Admin role to another user first"
+      "lastAdmin": "The last admin cannot be deleted. Assign the Admin role to another user first",
+      "ownAccount": "You cannot delete your own account"
     },
     "tabs": {
       "label": "Employee sections",
@@ -316,16 +349,156 @@
     },
     "errors": {
       "emailTaken": "An account with this email already exists",
-      "lastAdminDemote": "The last admin cannot be demoted. Assign the Admin role to another user first"
+      "lastAdminDemote": "The last admin cannot be demoted. Assign the Admin role to another user first",
+      "ownRoleChange": "You cannot change your own role"
     }
   },
   "cvs": {
+    "title": "CVs",
+    "createButton": "Create CV",
     "tabs": {
       "label": "CV sections",
       "details": "Details",
       "skills": "Skills",
       "projects": "Projects",
       "preview": "Preview"
+    },
+    "table": {
+      "columns": {
+        "name": "Name",
+        "education": "Education",
+        "employee": "Employee"
+      },
+      "actions": { "edit": "Edit", "delete": "Delete", "view": "View" },
+      "empty": "No CVs found",
+      "userEmpty": "You have no CVs yet"
+    },
+    "fields": {
+      "name": "Name",
+      "education": "Education",
+      "description": "Description"
+    },
+    "create": { "title": "Create CV" },
+    "update": { "title": "Update CV" },
+    "delete": {
+      "title": "Delete CV",
+      "message": "Are you sure you want to delete CV <b>{name}</b>?"
+    },
+    "details": {
+      "loading": "Loading CV",
+      "loadError": "Failed to load CV details",
+      "loadErrorTitle": "Oops",
+      "retry": "Retry",
+      "updated": "CV has been updated",
+      "forbidden": {
+        "title": "Access denied",
+        "message": "You are not authorized to access this CV"
+      }
+    },
+    "preview": {
+      "loading": "Loading CV preview",
+      "loadError": "Failed to load CV preview",
+      "loadErrorTitle": "Oops",
+      "retry": "Retry",
+      "empty": "CV preview is not available",
+      "forbidden": {
+        "title": "Access denied",
+        "message": "You are not authorized to access this CV"
+      },
+      "exportPdf": "Export PDF",
+      "exportingPdf": "Generating PDF",
+      "exportError": "Failed to generate PDF",
+      "document": {
+        "sections": {
+          "education": "Education",
+          "languages": "Language proficiency",
+          "domains": "Domains",
+          "projects": "Projects",
+          "professionalSkills": "Professional skills"
+        },
+        "languageLevel": "{language} — {level}",
+        "project": {
+          "roles": "Project roles",
+          "period": "Period",
+          "responsibilities": "Responsibilities",
+          "environment": "Environment"
+        },
+        "period": "{start} – {end}",
+        "present": "Present",
+        "skillsTable": {
+          "skills": "Skills",
+          "category": "Skill category",
+          "skill": "Skill",
+          "experience": "Experience in years",
+          "lastUsed": "Last used"
+        }
+      }
+    }
+  },
+  "cvProjects": {
+    "form": {
+      "addTitle": "Add project",
+      "updateTitle": "Update project",
+      "fields": {
+        "project": "Name",
+        "domain": "Domain",
+        "startDate": "Start Date",
+        "endDate": "End Date",
+        "description": "Description",
+        "environment": "Environment",
+        "roles": "Roles",
+        "responsibilities": "Responsibilities"
+      },
+      "responsibilitiesHint": "Separate responsibilities with a comma or a new line",
+      "errors": { "alreadyAdded": "Project is already added to the CV" }
+    },
+    "title": "CV projects",
+    "addButton": "Add project",
+    "table": {
+      "columns": {
+        "name": "Name",
+        "domain": "Domain",
+        "startDate": "Start Date",
+        "endDate": "End Date"
+      },
+      "tillNow": "Till now",
+      "empty": "No projects added yet",
+      "noResults": "No projects found",
+      "actions": { "update": "Update", "delete": "Delete" }
+    },
+    "loadError": "Failed to load projects",
+    "forbidden": "You are not authorized to access this CV",
+    "delete": {
+      "title": "Remove project",
+      "message": "Are you sure you want to remove project <b>{name}</b>?"
+    }
+  },
+  "cvSkills": {
+    "addButton": "Add skill",
+    "removeButton": "Remove skills",
+    "confirmRemove": "Remove",
+    "remove": {
+      "title": "Remove skills",
+      "message": "Are you sure you want to remove <b>{count, plural, one {# skill} other {# skills}}</b>?"
+    },
+    "empty": "No skills added yet",
+    "loading": "Loading skills",
+    "loadError": "Failed to load skills",
+    "retry": "Retry",
+    "forbidden": "You are not authorized to access this CV",
+    "form": {
+      "createTitle": "Add skill",
+      "updateTitle": "Update skill",
+      "fields": { "skillId": "Skill", "mastery": "Skill mastery" },
+      "hint": "Only skills from the employee's profile are shown",
+      "empty": {
+        "noProfileSkills": "The employee's profile has no skills yet. Add them to the profile first",
+        "allAdded": "All skills from the employee's profile are already in this CV"
+      }
+    },
+    "errors": {
+      "alreadyAdded": "Skill is already added to the CV",
+      "notOwnerSkill": "The CV owner no longer has this skill"
     }
   },
   "departments": {
@@ -455,7 +628,8 @@
     "confirmRemove": "Remove",
     "remove": {
       "title": "Remove skills",
-      "message": "Are you sure you want to remove <b>{count, plural, one {# skill} other {# skills}}</b>?"
+      "message": "Are you sure you want to remove <b>{count, plural, one {# skill} other {# skills}}</b>?",
+      "inUse": "{count, plural, =0 {Some of the selected skills are used in the employee's CVs. Remove them from those CVs first} one {{skills} is used in the employee's CVs. Remove it from those CVs first} other {{skills} are used in the employee's CVs. Remove them from those CVs first}}"
     },
     "empty": "No skills added",
     "emptyProfile": "No skills added yet",

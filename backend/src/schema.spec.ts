@@ -17,6 +17,11 @@ import { SkillResolver } from '@/skills/skill.resolver';
 import { UserSkillResolver } from '@/skills/user-skills/user-skill.resolver';
 import { UserLanguageResolver } from '@/languages/user-languages/user-language.resolver';
 import { UsersResolver } from '@/users/users.resolver';
+import { CvResolver } from '@/cvs/cv.resolver';
+import { CvProjectResolver } from '@/cvs/cv-projects/cv-project.resolver';
+import { CvSkillResolver } from '@/cvs/cv-skills/cv-skill.resolver';
+import { CvPdfResolver } from '@/cvs/cv-pdf/cv-pdf.resolver';
+import { CvPreviewResolver } from '@/cvs/cv-preview/cv-preview.resolver';
 
 jest.mock('@/prisma/prisma.service', () => ({ PrismaService: class PrismaService {} }));
 jest.mock('@nestjs/config', () => ({ ConfigService: class ConfigService {} }));
@@ -37,6 +42,11 @@ const RESOLVERS = [
   ProjectResolver,
   UserSkillResolver,
   UserLanguageResolver,
+  CvResolver,
+  CvProjectResolver,
+  CvSkillResolver,
+  CvPreviewResolver,
+  CvPdfResolver,
 ];
 
 const print = (schema: GraphQLSchema): string => printSchema(lexicographicSortSchema(schema));

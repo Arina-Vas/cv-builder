@@ -8,7 +8,7 @@ import { useActionGate } from '@/shared/lib/action-gate/ActionGate';
 import { useTranslations } from 'next-intl';
 
 export const MAX_AVATAR_SIZE = 5 * 1024 * 1024;
-const MAX_SIZE_LABEL = '5 MB';
+export const MAX_SIZE_LABEL = '5 MB';
 const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/gif'];
 
 export interface AvatarUploaderProps {

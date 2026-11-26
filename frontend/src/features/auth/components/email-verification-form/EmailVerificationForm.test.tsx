@@ -83,20 +83,31 @@ describe('EmailVerificationForm', () => {
     expect(mockRouter.replace).toHaveBeenCalledWith('/');
   });
 
+  // the text comes from extensions.reason; the backend message is arbitrary and never shown
   it.each([
-    ['Invalid verification code', 'Invalid verification code'],
-    ['Verification code has expired', 'Verification code has expired'],
-    ['Verification code has already been used', 'Verification code has already been used'],
-    ['Some new backend text', 'Invalid verification code'],
+    ['INVALID', 'Invalid verification code'],
+    ['EXPIRED', 'Verification code has expired'],
+    ['USED', 'Verification code has already been used'],
+    ['SOMETHING_NEW', 'Invalid verification code'],
+    [undefined, 'Invalid verification code'],
   ])(
-    'on "%s" from the backend shows "%s" under the input and keeps the code',
-    async (message, shown) => {
+    'on reason %j from the backend shows "%s" under the input and keeps the code',
+    async (reason, shown) => {
       const { user } = renderWithProviders(<EmailVerificationForm />, {
         mocks: [
           {
             request: verifyRequest,
             result: {
-              errors: [{ message, extensions: { code: 'BAD_USER_INPUT', field: 'code' } }],
+              errors: [
+                {
+                  message: 'any backend text',
+                  extensions: {
+                    code: 'BAD_USER_INPUT',
+                    fields: [{ field: 'code', message: 'any backend text' }],
+                    reason,
+                  },
+                },
+              ],
             },
           },
         ],
@@ -105,6 +116,7 @@ describe('EmailVerificationForm', () => {
       await enterCodeAndConfirm(user);
 
       expect(await screen.findByRole('alert')).toHaveTextContent(shown);
+      expect(screen.queryByText('any backend text')).not.toBeInTheDocument();
       expect(enteredCode()).toBe(CODE);
       expect(mockRouter.replace).not.toHaveBeenCalled();
     },

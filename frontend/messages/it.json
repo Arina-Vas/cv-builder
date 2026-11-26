@@ -47,7 +47,8 @@
     "datePicker": {
       "placeholder": "Seleziona una data",
       "previous": "Precedente",
-      "next": "Successivo"
+      "next": "Successivo",
+      "clear": "Cancella data"
     },
     "select": { "noOptions": "Nessuna opzione" },
     "chip": { "remove": "Rimuovi {label}" },
@@ -141,6 +142,37 @@
       "description": {
         "required": "La descrizione è obbligatoria",
         "maxLength": "La descrizione non deve superare {max} caratteri"
+      }
+    },
+    "cvProject": {
+      "projectId": { "required": "Il progetto è obbligatorio" },
+      "startDate": {
+        "required": "La data di inizio è obbligatoria",
+        "outOfProject": "La data di inizio deve rientrare nella durata del progetto"
+      },
+      "endDate": {
+        "outOfProject": "La data di fine deve rientrare nella durata del progetto",
+        "beforeStart": "La data di fine non può essere precedente alla data di inizio"
+      },
+      "roleIds": { "required": "È necessario selezionare almeno un ruolo" },
+      "responsibilities": { "maxLength": "Le responsabilità non devono superare {max} caratteri" }
+    },
+    "cvSkill": {
+      "skillId": { "required": "La competenza è obbligatoria" },
+      "mastery": { "required": "Il livello di padronanza è obbligatorio" }
+    },
+    "cv": {
+      "name": {
+        "required": "Il nome è obbligatorio",
+        "maxLength": "Il nome non deve superare i {max} caratteri"
+      },
+      "education": {
+        "required": "L'istruzione è obbligatoria",
+        "maxLength": "L'istruzione non deve superare i {max} caratteri"
+      },
+      "description": {
+        "required": "La descrizione è obbligatoria",
+        "maxLength": "La descrizione non deve superare i {max} caratteri"
       }
     },
     "email": {
@@ -310,7 +342,8 @@
     "delete": {
       "title": "Elimina utente",
       "message": "Vuoi davvero eliminare l'utente <b>{name}</b>?",
-      "lastAdmin": "L'ultimo amministratore non può essere eliminato. Assegna prima il ruolo di amministratore a un altro utente"
+      "lastAdmin": "L'ultimo amministratore non può essere eliminato. Assegna prima il ruolo di amministratore a un altro utente",
+      "ownAccount": "Non puoi eliminare il tuo account"
     },
     "tabs": {
       "label": "Sezioni del dipendente",
@@ -321,16 +354,164 @@
     },
     "errors": {
       "emailTaken": "Esiste già un account con questa email",
-      "lastAdminDemote": "L'ultimo amministratore non può essere declassato. Assegna prima il ruolo di amministratore a un altro utente"
+      "lastAdminDemote": "L'ultimo amministratore non può essere declassato. Assegna prima il ruolo di amministratore a un altro utente",
+      "ownRoleChange": "Non puoi modificare il tuo ruolo"
     }
   },
   "cvs": {
+    "title": "CV",
+    "createButton": "Crea CV",
     "tabs": {
       "label": "Sezioni del CV",
       "details": "Dettagli",
       "skills": "Competenze",
       "projects": "Progetti",
       "preview": "Anteprima"
+    },
+    "table": {
+      "columns": {
+        "name": "Nome",
+        "education": "Istruzione",
+        "employee": "Dipendente"
+      },
+      "actions": {
+        "edit": "Modifica",
+        "delete": "Elimina",
+        "view": "Visualizza"
+      },
+      "empty": "Nessun CV trovato",
+      "userEmpty": "Non hai ancora nessun CV"
+    },
+    "fields": {
+      "name": "Nome",
+      "education": "Istruzione",
+      "description": "Descrizione"
+    },
+    "create": {
+      "title": "Crea CV"
+    },
+    "update": {
+      "title": "Aggiorna CV"
+    },
+    "delete": {
+      "title": "Elimina CV",
+      "message": "Vuoi davvero eliminare il CV <b>{name}</b>?"
+    },
+    "details": {
+      "loading": "Caricamento del CV",
+      "loadError": "Impossibile caricare i dettagli del CV",
+      "loadErrorTitle": "Ops",
+      "retry": "Riprova",
+      "updated": "Il CV è stato aggiornato",
+      "forbidden": {
+        "title": "Accesso negato",
+        "message": "Non sei autorizzato ad accedere a questo CV"
+      }
+    },
+    "preview": {
+      "loading": "Caricamento dell'anteprima del CV",
+      "loadError": "Impossibile caricare l'anteprima del CV",
+      "loadErrorTitle": "Ops",
+      "retry": "Riprova",
+      "empty": "L'anteprima del CV non è disponibile",
+      "forbidden": {
+        "title": "Accesso negato",
+        "message": "Non sei autorizzato ad accedere a questo CV"
+      },
+      "exportPdf": "Esporta PDF",
+      "exportingPdf": "Generazione del PDF",
+      "exportError": "Impossibile generare il PDF",
+      "document": {
+        "sections": {
+          "education": "Istruzione",
+          "languages": "Conoscenze linguistiche",
+          "domains": "Domini",
+          "projects": "Progetti",
+          "professionalSkills": "Competenze professionali"
+        },
+        "languageLevel": "{language} — {level}",
+        "project": {
+          "roles": "Ruoli nel progetto",
+          "period": "Periodo",
+          "responsibilities": "Responsabilità",
+          "environment": "Tecnologie"
+        },
+        "period": "{start} – {end}",
+        "present": "oggi",
+        "skillsTable": {
+          "skills": "Competenze",
+          "category": "Categoria di competenze",
+          "skill": "Competenza",
+          "experience": "Esperienza (anni)",
+          "lastUsed": "Ultimo utilizzo"
+        }
+      }
+    }
+  },
+  "cvProjects": {
+    "form": {
+      "addTitle": "Aggiungi progetto",
+      "updateTitle": "Aggiorna progetto",
+      "fields": {
+        "project": "Nome",
+        "domain": "Dominio",
+        "startDate": "Data di inizio",
+        "endDate": "Data di fine",
+        "description": "Descrizione",
+        "environment": "Ambiente",
+        "roles": "Ruoli",
+        "responsibilities": "Responsabilità"
+      },
+      "responsibilitiesHint": "Separa le responsabilità con una virgola o un a capo",
+      "errors": { "alreadyAdded": "Il progetto è già stato aggiunto al CV" }
+    },
+    "title": "Progetti del CV",
+    "addButton": "Aggiungi progetto",
+    "table": {
+      "columns": {
+        "name": "Nome",
+        "domain": "Dominio",
+        "startDate": "Data di inizio",
+        "endDate": "Data di fine"
+      },
+      "tillNow": "Ad oggi",
+      "empty": "Nessun progetto ancora aggiunto",
+      "noResults": "Nessun progetto trovato",
+      "actions": { "update": "Aggiorna", "delete": "Elimina" }
+    },
+    "loadError": "Impossibile caricare i progetti",
+    "forbidden": "Non sei autorizzato ad accedere a questo CV",
+    "delete": {
+      "title": "Rimuovi progetto",
+      "message": "Vuoi davvero eliminare il progetto <b>{name}</b>?"
+    }
+  },
+  "cvSkills": {
+    "addButton": "Aggiungi competenza",
+    "removeButton": "Rimuovi competenze",
+    "confirmRemove": "Rimuovi",
+    "remove": {
+      "title": "Rimuovi competenze",
+      "message": "Vuoi davvero rimuovere <b>{count, plural, one {# competenza} other {# competenze}}</b>?"
+    },
+    "empty": "Nessuna competenza ancora aggiunta",
+    "loading": "Caricamento delle competenze",
+    "loadError": "Impossibile caricare le competenze",
+    "retry": "Riprova",
+    "forbidden": "Non sei autorizzato ad accedere a questo CV",
+    "form": {
+      "createTitle": "Aggiungi competenza",
+      "updateTitle": "Aggiorna competenza",
+      "fields": { "skillId": "Competenza", "mastery": "Livello di padronanza" },
+      "hint": "Vengono mostrate solo le competenze del profilo del dipendente",
+      "empty": {
+        "noProfileSkills": "Il profilo del dipendente non ha ancora competenze. Aggiungile prima al profilo",
+        "allAdded": "Tutte le competenze del profilo del dipendente sono già in questo CV"
+      }
+    },
+    "errors": {
+      "alreadyAdded": "La competenza è già aggiunta al CV",
+      "notOwnerSkill": "Il proprietario del CV non ha più questa competenza"
     }
   },
   "departments": {
@@ -460,7 +641,8 @@
     "confirmRemove": "Rimuovi",
     "remove": {
       "title": "Rimuovi competenze",
-      "message": "Vuoi davvero rimuovere <b>{count, plural, one {# competenza} other {# competenze}}</b>?"
+      "message": "Vuoi davvero rimuovere <b>{count, plural, one {# competenza} other {# competenze}}</b>?",
+      "inUse": "{count, plural, =0 {Alcune delle competenze selezionate sono usate nei CV del dipendente. Rimuovile prima da quei CV} one {La competenza {skills} è usata nei CV del dipendente. Rimuovila prima da quei CV} other {Le competenze {skills} sono usate nei CV del dipendente. Rimuovile prima da quei CV}}"
     },
     "empty": "Nessuna competenza aggiunta",
     "emptyProfile": "Nessuna competenza ancora aggiunta",

@@ -1,6 +1,7 @@
 import type { FileUpload } from 'graphql-upload-minimal';
 import sharp from 'sharp';
 import { badUserInput } from '@/common/errors/app-errors';
+import { ErrorReason } from '@/common/errors/error-reason.enum';
 import type { StoredFile } from './storage.service';
 
 export const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
@@ -40,7 +41,8 @@ export const detectImageType = (body: Buffer): Omit<ImageType, 'signatures'> | n
   return type ? { contentType: type.contentType, extension: type.extension } : null;
 };
 
-const fileError = (message: string) => badUserInput([{ field: 'file', message }]);
+const fileError = (message: string, reason: ErrorReason) =>
+  badUserInput({ fields: [{ field: 'file', message }], reason, message });
 
 const isSizeLimitError = (error: unknown): boolean =>
   typeof error === 'object' && error !== null && 'status' in error && error.status === 413;
@@ -70,6 +72,7 @@ const stripMetadata = (body: Buffer, contentType: string): Promise<Buffer> => {
 export async function readImageUpload(upload: FileUpload): Promise<StoredFile> {
   const chunks: Buffer[] = [];
   let size = 0;
+  let tooLarge = false;
 
   try {
     const stream = upload.createReadStream();
@@ -77,29 +80,31 @@ export async function readImageUpload(upload: FileUpload): Promise<StoredFile> {
       size += chunk.length;
       if (size > MAX_IMAGE_BYTES) {
         stream.destroy();
-        throw fileError(ImageUploadMessage.tooLarge);
+        tooLarge = true;
+        break;
       }
       chunks.push(chunk);
     }
-    if ((stream as { truncated?: boolean }).truncated) {
-      throw fileError(ImageUploadMessage.tooLarge);
-    }
+
+    if ((stream as { truncated?: boolean }).truncated) tooLarge = true;
   } catch (error) {
-    if (isSizeLimitError(error)) {
-      throw fileError(ImageUploadMessage.tooLarge);
-    }
-    throw error;
+    if (!isSizeLimitError(error)) throw error;
+    tooLarge = true;
+  }
+
+  if (tooLarge) {
+    throw fileError(ImageUploadMessage.tooLarge, ErrorReason.TOO_LARGE);
   }
 
   const body = Buffer.concat(chunks);
   const type = detectImageType(body);
   if (!type) {
-    throw fileError(ImageUploadMessage.invalidType);
+    throw fileError(ImageUploadMessage.invalidType, ErrorReason.INVALID_TYPE);
   }
 
   try {
     return { body: await stripMetadata(body, type.contentType), ...type };
   } catch {
-    throw fileError(ImageUploadMessage.invalidType);
+    throw fileError(ImageUploadMessage.invalidType, ErrorReason.INVALID_TYPE);
   }
 }

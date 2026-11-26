@@ -111,6 +111,7 @@ describe('Auth (integration)', () => {
 
       const wrong = await browser.error(VERIFY_EMAIL, { input: { code: '000000' } });
       expect(wrong.message).toBe('Invalid verification code');
+      expect(wrong.extensions.reason).toBe('INVALID');
 
       const { verifyEmail } = await browser.data<{ verifyEmail: GqlUser }>(VERIFY_EMAIL, {
         input: { code: t.mail.last(email, 'verification') },
@@ -160,15 +161,38 @@ describe('Auth (integration)', () => {
       for (let attempt = 1; attempt <= MAX_CODE_ATTEMPTS; attempt += 1) {
         const wrong = await browser.error(VERIFY_EMAIL, { input: { code: wrongCode } });
         expect(wrong.message).toBe('Invalid verification code');
+        expect(wrong.extensions.reason).toBe('INVALID');
       }
       const blocked = await browser.error(VERIFY_EMAIL, { input: { code } });
       expect(blocked.message).toBe('Verification code has expired');
+      expect(blocked.extensions.reason).toBe('EXPIRED');
 
       await t.prisma.authToken.updateMany({ data: { createdAt: new Date(Date.now() - 120_000) } });
       await browser.data(RESEND_CODE);
       await expect(
         browser.data(VERIFY_EMAIL, { input: { code: t.mail.last(email, 'verification') } }),
       ).resolves.toBeDefined();
+    });
+
+    it.each([
+      ['EXPIRED', { expiresAt: new Date(Date.now() - 1000) }],
+      ['USED', { usedAt: new Date() }],
+    ])('rejects even the right code with the %s reason', async (reason, data) => {
+      const browser = client();
+      const email = uniqueEmail();
+      await browser.data(SIGN_UP, {
+        input: { email, password: PASSWORD, confirmPassword: PASSWORD },
+      });
+      const code = t.mail.last(email, 'verification');
+      await t.prisma.authToken.updateMany({ data });
+
+      const error = await browser.error(VERIFY_EMAIL, { input: { code } });
+
+      expect(error.extensions).toMatchObject({
+        code: 'BAD_USER_INPUT',
+        fields: [{ field: 'code' }],
+        reason,
+      });
     });
 
     it('rate-limits resending the code per account', async () => {
@@ -230,6 +254,43 @@ describe('Auth (integration)', () => {
       const error = await replay.error(REFRESH);
       expect(error.extensions.code).toBe('UNAUTHENTICATED');
       expect(replay.cookie(REFRESH_TOKEN_COOKIE)).toBeUndefined();
+    });
+
+    it('revokes the whole session when an old refresh token is reused after the grace period', async () => {
+      const browser = client();
+      const { email } = await createUser(t.prisma);
+      await signIn(browser, email);
+      const stolenRefresh = browser.cookie(REFRESH_TOKEN_COOKIE) ?? '';
+      await browser.data(REFRESH);
+      await t.prisma.session.updateMany({
+        data: { rotatedAt: new Date(Date.now() - REFRESH_GRACE_SECONDS * 1000) },
+      });
+
+      const thief = client();
+      thief.setCookie(REFRESH_TOKEN_COOKIE, stolenRefresh);
+      expect((await thief.error(REFRESH)).extensions.code).toBe('UNAUTHENTICATED');
+
+      // Whoever holds the current tokens is signed out too: the server cannot tell who the thief is
+      const session = await t.prisma.session.findFirstOrThrow();
+      expect(session.revokedAt).not.toBeNull();
+      expect((await browser.error(ME)).extensions.code).toBe('UNAUTHENTICATED');
+      expect((await browser.error(REFRESH)).extensions.code).toBe('UNAUTHENTICATED');
+    });
+
+    it('keeps the session when the old refresh token comes back within the grace period', async () => {
+      const browser = client();
+      const { email } = await createUser(t.prisma);
+      await signIn(browser, email);
+      const oldRefresh = browser.cookie(REFRESH_TOKEN_COOKIE) ?? '';
+      await browser.data(REFRESH);
+
+      const lateTab = client();
+      lateTab.setCookie(REFRESH_TOKEN_COOKIE, oldRefresh);
+      await expect(lateTab.data(REFRESH)).resolves.toEqual({ refresh: true });
+
+      const session = await t.prisma.session.findFirstOrThrow();
+      expect(session.revokedAt).toBeNull();
+      await expect(browser.data(ME)).resolves.toMatchObject({ me: { email } });
     });
 
     it('keeps the session when two tabs refresh with the same token at once', async () => {
