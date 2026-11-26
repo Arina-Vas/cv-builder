@@ -68,8 +68,14 @@ export class UsersService {
     const where: Prisma.UserWhereInput = search
       ? {
           OR: [
-            { firstName: containsInsensitive(search) },
-            { lastName: containsInsensitive(search) },
+            {
+              AND: search.split(/\s+/).map((term) => ({
+                OR: [
+                  { firstName: containsInsensitive(term) },
+                  { lastName: containsInsensitive(term) },
+                ],
+              })),
+            },
             { email: containsInsensitive(search) },
           ],
         }

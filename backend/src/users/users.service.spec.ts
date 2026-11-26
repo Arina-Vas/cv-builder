@@ -150,18 +150,71 @@ describe('UsersService', () => {
       );
     });
 
-    it('searches first name, last name and email case-insensitively in the list and the total', async () => {
-      await service.findAll(args({ search: 'ann' }));
+    describe('search', () => {
+      const insensitive = (value: string) => ({ contains: value, mode: 'insensitive' });
+      // Every word must match the first or the last name
+      const nameTerm = (term: string) => ({
+        OR: [{ firstName: insensitive(term) }, { lastName: insensitive(term) }],
+      });
 
-      const where = {
-        OR: [
-          { firstName: { contains: 'ann', mode: 'insensitive' } },
-          { lastName: { contains: 'ann', mode: 'insensitive' } },
-          { email: { contains: 'ann', mode: 'insensitive' } },
-        ],
-      };
-      expect(prisma.user.findMany).toHaveBeenCalledWith(expect.objectContaining({ where }));
-      expect(prisma.user.count).toHaveBeenCalledWith({ where });
+      it('searches first name, last name and email case-insensitively in the list and the total', async () => {
+        await service.findAll(args({ search: 'ann' }));
+
+        const where = { OR: [{ AND: [nameTerm('ann')] }, { email: insensitive('ann') }] };
+        expect(prisma.user.findMany).toHaveBeenCalledWith(expect.objectContaining({ where }));
+        expect(prisma.user.count).toHaveBeenCalledWith({ where });
+      });
+
+      it('finds a user by full name: every word matches the first or last name', async () => {
+        await service.findAll(args({ search: 'John Smith' }));
+
+        expect(prisma.user.findMany).toHaveBeenCalledWith(
+          expect.objectContaining({
+            where: {
+              OR: [
+                { AND: [nameTerm('John'), nameTerm('Smith')] },
+                { email: insensitive('John Smith') },
+              ],
+            },
+          }),
+        );
+      });
+
+      it('splits the search on any run of whitespace, after trimming', async () => {
+        await service.findAll(args({ search: '  John \t  Smith ' }));
+
+        expect(prisma.user.findMany).toHaveBeenCalledWith(
+          expect.objectContaining({
+            where: {
+              OR: [
+                { AND: [nameTerm('John'), nameTerm('Smith')] },
+                { email: insensitive('John \t  Smith') },
+              ],
+            },
+          }),
+        );
+      });
+
+      it('matches LIKE wildcards in every word literally', async () => {
+        await service.findAll(args({ search: 'a% b_' }));
+
+        expect(prisma.user.findMany).toHaveBeenCalledWith(
+          expect.objectContaining({
+            where: {
+              OR: [
+                { AND: [nameTerm('a\\%'), nameTerm('b\\_')] },
+                { email: insensitive('a\\% b\\_') },
+              ],
+            },
+          }),
+        );
+      });
+
+      it('ignores a blank search', async () => {
+        await service.findAll(args({ search: '   ' }));
+
+        expect(prisma.user.findMany).toHaveBeenCalledWith(expect.objectContaining({ where: {} }));
+      });
     });
 
     it.each([
