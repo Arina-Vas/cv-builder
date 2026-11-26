@@ -139,6 +139,26 @@ describe('CvProjectFormModal', () => {
       expect(screen.getByRole('button', { name: 'Start Date' })).toBeEnabled();
     });
 
+    // a project created in the catalog while the CV page is open must show up without a reload
+    it('reloads the available projects each time it opens', async () => {
+      const crm = { ...blog, id: 'p2', name: 'CRM' };
+      const { user, rerender } = renderWithProviders(
+        <CvProjectFormModal open onOpenChange={vi.fn()} cvId={CV_ID} />,
+        { mocks: [availableMock(), rolesMock, availableMock([blog, crm])] },
+      );
+      const select = screen.getByRole('combobox', { name: 'Name' });
+      await expect.poll(() => select).toBeEnabled();
+
+      rerender(<CvProjectFormModal open={false} onOpenChange={vi.fn()} cvId={CV_ID} />);
+      rerender(<CvProjectFormModal open onOpenChange={vi.fn()} cvId={CV_ID} />);
+
+      const reopened = screen.getByRole('combobox', { name: 'Name' });
+      await expect.poll(() => reopened).toBeEnabled();
+      await user.click(reopened);
+
+      expect(await within(document.body).findByRole('option', { name: 'CRM' })).toBeInTheDocument();
+    });
+
     it('does not offer days outside the project duration', async () => {
       vi.setSystemTime(new Date(2023, 11, 15));
       const { user } = renderWithProviders(
