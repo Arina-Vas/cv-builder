@@ -1,6 +1,6 @@
 import { CombinedGraphQLErrors } from '@apollo/client/errors';
 import { screen } from '@testing-library/react';
-import type { ComponentProps } from 'react';
+import { type ComponentProps, useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { renderWithProviders } from '@/test/render';
 import { ConfirmDialog } from './ConfirmDialog';
@@ -134,6 +134,31 @@ describe('ConfirmDialog', () => {
       await user.click(screen.getByRole('button', { name: 'Confirm' }));
 
       expect(await screen.findByRole('alert')).toHaveTextContent(DEPARTMENT_IN_USE_TEXT);
+    });
+
+    it('shows the text errorMessages has after the error, not when Confirm was clicked', async () => {
+      // As UserSkills does: onConfirm stores details of the error in state, then rejects
+      const Page = () => {
+        const [text, setText] = useState('Nothing yet');
+        return (
+          <ConfirmDialog
+            open
+            title="Remove skills"
+            message="Are you sure?"
+            onOpenChange={() => {}}
+            onConfirm={() => {
+              setText('React is used in CVs');
+              return Promise.reject(inUseError());
+            }}
+            errorMessages={{ ENTITY_IN_USE: text }}
+          />
+        );
+      };
+      const { user } = renderWithProviders(<Page />);
+
+      await user.click(screen.getByRole('button', { name: 'Confirm' }));
+
+      expect(await screen.findByRole('alert')).toHaveTextContent('React is used in CVs');
     });
 
     it('shows errors.<code> for a code that is not in errorMessages', async () => {
