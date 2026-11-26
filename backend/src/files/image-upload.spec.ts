@@ -3,6 +3,7 @@ import type { FileUpload } from 'graphql-upload-minimal';
 import type { GraphQLError } from 'graphql';
 import sharp from 'sharp';
 import { ErrorCode } from '@/common/errors/error-code.enum';
+import { ErrorReason } from '@/common/errors/error-reason.enum';
 import {
   detectImageType,
   ImageUploadMessage,
@@ -33,10 +34,17 @@ const rejection = (promise: Promise<unknown>): Promise<GraphQLError> =>
     (error: GraphQLError) => error,
   );
 
-const fileErrorOf = (message: string) => ({
+const tooLargeError = {
   code: ErrorCode.BAD_USER_INPUT,
-  fields: [{ field: 'file', message }],
-});
+  fields: [{ field: 'file', message: ImageUploadMessage.tooLarge }],
+  reason: ErrorReason.TOO_LARGE,
+};
+
+const invalidTypeError = {
+  code: ErrorCode.BAD_USER_INPUT,
+  fields: [{ field: 'file', message: ImageUploadMessage.invalidType }],
+  reason: ErrorReason.INVALID_TYPE,
+};
 
 describe('detectImageType', () => {
   it.each([
@@ -147,7 +155,7 @@ describe('readImageUpload', () => {
   ])('rejects a file that only starts like a %s', async (_, body) => {
     const error = await rejection(readImageUpload(fromChunks(body)));
 
-    expect(error.extensions).toMatchObject(fileErrorOf(ImageUploadMessage.invalidType));
+    expect(error.extensions).toEqual(invalidTypeError);
   });
 
   it('stops reading as soon as the file is over the limit', async () => {
@@ -156,7 +164,7 @@ describe('readImageUpload', () => {
 
     const error = await rejection(readImageUpload(fileUpload(() => stream)));
 
-    expect(error.extensions).toMatchObject(fileErrorOf(ImageUploadMessage.tooLarge));
+    expect(error.extensions).toEqual(tooLargeError);
     expect(destroy).toHaveBeenCalled();
   });
 
@@ -165,7 +173,7 @@ describe('readImageUpload', () => {
 
     const error = await rejection(readImageUpload(fileUpload(() => stream)));
 
-    expect(error.extensions).toMatchObject(fileErrorOf(ImageUploadMessage.tooLarge));
+    expect(error.extensions).toEqual(tooLargeError);
   });
 
   it('turns the parser size error (HTTP 413) into the size message', async () => {
@@ -179,7 +187,7 @@ describe('readImageUpload', () => {
       ),
     );
 
-    expect(error.extensions).toMatchObject(fileErrorOf(ImageUploadMessage.tooLarge));
+    expect(error.extensions).toEqual(tooLargeError);
   });
 
   it('lets other stream errors through', async () => {
@@ -195,6 +203,6 @@ describe('readImageUpload', () => {
   it('rejects content that is not a PNG, JPEG or GIF', async () => {
     const error = await rejection(readImageUpload(fromChunks(Buffer.from('<html>'))));
 
-    expect(error.extensions).toMatchObject(fileErrorOf(ImageUploadMessage.invalidType));
+    expect(error.extensions).toEqual(invalidTypeError);
   });
 });

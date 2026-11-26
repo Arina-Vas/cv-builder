@@ -58,13 +58,15 @@ describe('ResetPasswordForm', () => {
     expect(mockRouter.replace).toHaveBeenCalledWith('/login');
   });
 
+  // the text comes from extensions.reason; the backend message is arbitrary and never shown
   it.each([
-    ['This password reset link is invalid', 'This password reset link is invalid'],
-    ['This password reset link has expired', 'This password reset link has expired'],
-    ['Some new backend text', 'This password reset link is invalid'],
+    ['INVALID', 'This password reset link is invalid'],
+    ['EXPIRED', 'This password reset link has expired'],
+    ['SOMETHING_NEW', 'This password reset link is invalid'],
+    [undefined, 'This password reset link is invalid'],
   ])(
-    'on "%s" from the backend shows "%s", keeps the passwords and stays on the page',
-    async (message, shown) => {
+    'on reason %j from the backend shows "%s", keeps the passwords and stays on the page',
+    async (reason, shown) => {
       const { user } = renderWithProviders(<ResetPasswordForm token={TOKEN} />, {
         mocks: [
           {
@@ -72,8 +74,12 @@ describe('ResetPasswordForm', () => {
             result: {
               errors: [
                 {
-                  message: 'Validation failed',
-                  extensions: { code: 'BAD_USER_INPUT', fields: [{ field: 'token', message }] },
+                  message: 'any backend text',
+                  extensions: {
+                    code: 'BAD_USER_INPUT',
+                    fields: [{ field: 'token', message: 'any backend text' }],
+                    reason,
+                  },
                 },
               ],
             },
@@ -84,6 +90,7 @@ describe('ResetPasswordForm', () => {
       await fillAndSubmit(user);
 
       expect(await screen.findByText(shown)).toBeInTheDocument();
+      expect(screen.queryByText('any backend text')).not.toBeInTheDocument();
       expect(screen.getByLabelText('New password')).toHaveValue(PASSWORD);
       expect(screen.getByLabelText('Confirm password')).toHaveValue(PASSWORD);
       expect(mockRouter.replace).not.toHaveBeenCalled();

@@ -76,7 +76,7 @@ describe('Password reset (integration)', () => {
     });
     expect(reused).toMatchObject({
       message: ResetLinkMessage.invalid,
-      extensions: { code: 'BAD_USER_INPUT', fields: [{ field: 'token' }] },
+      extensions: { code: 'BAD_USER_INPUT', fields: [{ field: 'token' }], reason: 'INVALID' },
     });
   });
 
@@ -91,6 +91,7 @@ describe('Password reset (integration)', () => {
     });
 
     expect(error.message).toBe(ResetLinkMessage.expired);
+    expect(error.extensions.reason).toBe('EXPIRED');
     await expect(signIn(client(), email, PASSWORD)).resolves.toBeDefined();
   });
 
@@ -121,6 +122,7 @@ describe('Password reset (integration)', () => {
     });
 
     expect(error.message).toBe(ResetLinkMessage.invalid);
+    expect(error.extensions.reason).toBe('INVALID');
   });
 
   it('keeps only the newest link valid', async () => {
@@ -136,6 +138,7 @@ describe('Password reset (integration)', () => {
     });
 
     expect(error.message).toBe(ResetLinkMessage.expired);
+    expect(error.extensions.reason).toBe('EXPIRED');
     await expect(
       client().data(RESET_PASSWORD, {
         input: {

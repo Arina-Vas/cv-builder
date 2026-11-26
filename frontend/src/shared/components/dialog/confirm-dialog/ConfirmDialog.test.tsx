@@ -11,9 +11,9 @@ const IN_USE_TEXT = "This item is in use and can't be deleted";
 
 const DEPARTMENT_IN_USE_TEXT = 'Department cannot be deleted because it is currently in use';
 
-const apiError = (code: string) =>
+const apiError = (code: string, extensions: Record<string, unknown> = {}) =>
   new CombinedGraphQLErrors({
-    errors: [{ message: 'backend text', extensions: { code } }],
+    errors: [{ message: 'backend text', extensions: { code, ...extensions } }],
   });
 
 const inUseError = () => apiError('ENTITY_IN_USE');
@@ -147,6 +147,67 @@ describe('ConfirmDialog', () => {
       expect(await screen.findByRole('alert')).toHaveTextContent(
         "You don't have permission to do this",
       );
+    });
+
+    describe('reasonMessages', () => {
+      const SELF = 'You cannot delete your own account';
+      const LAST_ADMIN = 'The last admin cannot be deleted';
+      const NOT_ALLOWED = 'Not allowed for this user';
+
+      const notAllowed = (reason?: string) =>
+        apiError('OPERATION_NOT_ALLOWED', reason ? { reason } : {});
+
+      it('shows the text for the reason over the text for the code', async () => {
+        const { user } = renderConfirm({
+          onConfirm: () => Promise.reject(notAllowed('LAST_ADMIN')),
+          errorMessages: { OPERATION_NOT_ALLOWED: NOT_ALLOWED },
+          reasonMessages: { OPERATION_NOT_ALLOWED: { SELF, LAST_ADMIN } },
+        });
+
+        await user.click(screen.getByRole('button', { name: 'Confirm' }));
+
+        expect(await screen.findByRole('alert')).toHaveTextContent(LAST_ADMIN);
+        expect(screen.queryByText('backend text')).not.toBeInTheDocument();
+      });
+
+      it.each([
+        ['a reason without a text', 'LAST_ADMIN'],
+        ['an unknown reason', 'SOMETHING_NEW'],
+        ['no reason', undefined],
+      ])('falls back to the text for the code for %s', async (_, reason) => {
+        const { user } = renderConfirm({
+          onConfirm: () => Promise.reject(notAllowed(reason)),
+          errorMessages: { OPERATION_NOT_ALLOWED: NOT_ALLOWED },
+          reasonMessages: { OPERATION_NOT_ALLOWED: { SELF } },
+        });
+
+        await user.click(screen.getByRole('button', { name: 'Confirm' }));
+
+        expect(await screen.findByRole('alert')).toHaveTextContent(NOT_ALLOWED);
+      });
+
+      it('ignores a text given for the same reason under another code', async () => {
+        const { user } = renderConfirm({
+          onConfirm: () => Promise.reject(notAllowed('LAST_ADMIN')),
+          errorMessages: { OPERATION_NOT_ALLOWED: NOT_ALLOWED },
+          reasonMessages: { ENTITY_IN_USE: { LAST_ADMIN } },
+        });
+
+        await user.click(screen.getByRole('button', { name: 'Confirm' }));
+
+        expect(await screen.findByRole('alert')).toHaveTextContent(NOT_ALLOWED);
+      });
+
+      it('falls back to errors.<code> when neither the reason nor the code has a text', async () => {
+        const { user } = renderConfirm({
+          onConfirm: () => Promise.reject(notAllowed('LAST_ADMIN')),
+          reasonMessages: { OPERATION_NOT_ALLOWED: { SELF } },
+        });
+
+        await user.click(screen.getByRole('button', { name: 'Confirm' }));
+
+        expect(await screen.findByRole('alert')).toHaveTextContent('This action is not allowed');
+      });
     });
 
     it('lets the user retry: the error goes away and the dialog closes', async () => {

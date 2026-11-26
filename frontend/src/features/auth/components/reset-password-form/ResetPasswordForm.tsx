@@ -57,7 +57,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
 
       // the form stays filled in (spec: a failed request keeps the passwords);
       // password field errors are caught by the client validation first, so they go to the toast
-      toast.error(tokenError ? t(resetLinkErrorKey(tokenError)) : errorMessage(appError));
+      toast.error(tokenError ? t(resetLinkErrorKey(appError.reason)) : errorMessage(appError));
       return;
     }
 

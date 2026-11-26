@@ -225,32 +225,41 @@ describe('Users', () => {
       expect(screen.getByText('john@example.com')).toBeInTheDocument();
     });
 
-    it('shows a rejected delete in the dialog and keeps it open', async () => {
-      const { user } = renderPage([
-        meMock(admin),
-        listMock(),
-        {
-          request: { query: DELETE_USER, variables: { id: 'u1' } },
-          result: {
-            errors: [
-              new GraphQLError('backend text', {
-                extensions: { code: 'OPERATION_NOT_ALLOWED' },
-              }),
-            ],
-          },
-        },
-      ]);
-
-      await openRowAction(user, 'Jane Doe', 'Delete');
-      await user.click(screen.getByRole('button', { name: 'Confirm' }));
-
-      const dialog = screen.getByRole('dialog', { name: 'Delete user' });
-      // the UI hides Delete on the own row, so OPERATION_NOT_ALLOWED here means the last admin
-      expect(await within(dialog).findByRole('alert')).toHaveTextContent(
+    // OPERATION_NOT_ALLOWED has two causes; extensions.reason tells which one
+    it.each([
+      [
+        'LAST_ADMIN',
         'The last admin cannot be deleted. Assign the Admin role to another user first',
-      );
-      expect(screen.getByText('jane@example.com')).toBeInTheDocument();
-    });
+      ],
+      ['SELF', 'You cannot delete your own account'],
+      [undefined, 'This action is not allowed'],
+    ])(
+      'shows a delete rejected with reason %j in the dialog and keeps it open',
+      async (reason, shown) => {
+        const { user } = renderPage([
+          meMock(admin),
+          listMock(),
+          {
+            request: { query: DELETE_USER, variables: { id: 'u1' } },
+            result: {
+              errors: [
+                new GraphQLError('backend text', {
+                  extensions: { code: 'OPERATION_NOT_ALLOWED', reason },
+                }),
+              ],
+            },
+          },
+        ]);
+
+        await openRowAction(user, 'Jane Doe', 'Delete');
+        await user.click(screen.getByRole('button', { name: 'Confirm' }));
+
+        const dialog = screen.getByRole('dialog', { name: 'Delete user' });
+        expect(await within(dialog).findByRole('alert')).toHaveTextContent(shown);
+        expect(within(dialog).queryByText('backend text')).not.toBeInTheDocument();
+        expect(screen.getByText('jane@example.com')).toBeInTheDocument();
+      },
+    );
 
     it('removes the row when the user to delete is already gone (NOT_FOUND)', async () => {
       const { user } = renderPage([

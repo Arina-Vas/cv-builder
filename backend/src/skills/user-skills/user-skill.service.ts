@@ -63,7 +63,7 @@ export class UserSkillService {
       if (isPrismaError(error, 'P2002'))
         throw conflict('skillId', 'Skill is already assigned to the user');
       if (isPrismaError(error, 'P2003'))
-        throw badUserInput([{ field: 'skillId', message: 'Skill not found' }]);
+        throw badUserInput({ fields: [{ field: 'skillId', message: 'Skill not found' }] });
       throw error;
     }
   }
@@ -129,6 +129,6 @@ export class UserSkillService {
       select: { id: true },
     });
 
-    if (!skill) throw badUserInput([{ field: 'skillId', message: 'Skill not found' }]);
+    if (!skill) throw badUserInput({ fields: [{ field: 'skillId', message: 'Skill not found' }] });
   }
 }

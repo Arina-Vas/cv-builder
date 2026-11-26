@@ -343,7 +343,8 @@
     "delete": {
       "title": "Benutzer löschen",
       "message": "Möchten Sie den Benutzer <b>{name}</b> wirklich löschen?",
-      "lastAdmin": "Der letzte Administrator kann nicht gelöscht werden. Weisen Sie zuerst einem anderen Benutzer die Administratorrolle zu"
+      "lastAdmin": "Der letzte Administrator kann nicht gelöscht werden. Weisen Sie zuerst einem anderen Benutzer die Administratorrolle zu",
+      "ownAccount": "Sie können Ihr eigenes Konto nicht löschen"
     },
     "tabs": {
       "label": "Mitarbeiterbereiche",
@@ -354,7 +355,8 @@
     },
     "errors": {
       "emailTaken": "Ein Konto mit dieser E-Mail existiert bereits",
-      "lastAdminDemote": "Dem letzten Administrator kann die Rolle nicht entzogen werden. Weisen Sie zuerst einem anderen Benutzer die Administratorrolle zu"
+      "lastAdminDemote": "Dem letzten Administrator kann die Rolle nicht entzogen werden. Weisen Sie zuerst einem anderen Benutzer die Administratorrolle zu",
+      "ownRoleChange": "Sie können Ihre eigene Rolle nicht ändern"
     }
   },
   "cvs": {

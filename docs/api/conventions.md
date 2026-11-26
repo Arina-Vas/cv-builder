@@ -323,8 +323,10 @@ avoid a column-key → enum map in every table.
 
 ## Errors
 
-Errors use the standard GraphQL `errors` array; the code is in `extensions.code`. Modules throw errors through the
-helpers in `backend/src/common/errors/app-errors.ts`; a global exception filter converts everything else.
+Errors use the standard GraphQL `errors` array; the code is in `extensions.code`, and, when one code has several
+causes the frontend words differently, the cause is in `extensions.reason` ([Reasons](#reasons)). Modules throw
+errors through the helpers in `backend/src/common/errors/app-errors.ts`; a global exception filter converts
+everything else.
 
 ```json
 {
@@ -339,18 +341,18 @@ helpers in `backend/src/common/errors/app-errors.ts`; a global exception filter 
 
 ### Codes
 
-| Code                    | When                                                                                                                     | Extra fields                   | Frontend                                                                  |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------------------ | ------------------------------------------------------------------------- |
-| `UNAUTHENTICATED`       | no token, invalid or expired token                                                                                       | —                              | try `refresh`, otherwise go to Sign In                                    |
-| `FORBIDDEN`             | role or ownership check failed                                                                                           | —                              | query: "not authorized" state; mutation: toast                            |
-| `EMAIL_NOT_VERIFIED`    | mutation by a user whose email is not verified                                                                           | —                              | "verify your email" message + link to Email Verification; mutation: toast |
-| `NOT_FOUND`             | the entity does not exist (or was deleted meanwhile)                                                                     | —                              | query: not-found state; mutation: toast, refresh stale data               |
-| `BAD_USER_INPUT`        | validation failed                                                                                                        | `fields: [{ field, message }]` | inline errors under the fields                                            |
-| `CONFLICT`              | a unique value is already taken                                                                                          | `field` (when known)           | inline error under `field`                                                |
-| `ENTITY_IN_USE`         | delete blocked because the item is referenced                                                                            | —                              | toast, or the delete dialog shows it                                      |
-| `OPERATION_NOT_ALLOWED` | the caller has access, but a business rule forbids the action (e.g. delete own account, delete or demote the last admin) | —                              | toast, or the dialog / modal shows it                                     |
-| `RATE_LIMITED`          | too many requests (per IP or e.g. resend code)                                                                           | `retryAfter` (seconds)         | "please wait" message; mutation: toast                                    |
-| `INTERNAL_SERVER_ERROR` | unexpected error                                                                                                         | —                              | query: error state with Retry; mutation: generic error toast              |
+| Code                    | When                                                                                                                     | Extra fields                                                       | Frontend                                                                  |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------ | ------------------------------------------------------------------------- |
+| `UNAUTHENTICATED`       | no token, invalid or expired token                                                                                       | —                                                                  | try `refresh`, otherwise go to Sign In                                    |
+| `FORBIDDEN`             | role or ownership check failed                                                                                           | —                                                                  | query: "not authorized" state; mutation: toast                            |
+| `EMAIL_NOT_VERIFIED`    | mutation by a user whose email is not verified                                                                           | —                                                                  | "verify your email" message + link to Email Verification; mutation: toast |
+| `NOT_FOUND`             | the entity does not exist (or was deleted meanwhile)                                                                     | —                                                                  | query: not-found state; mutation: toast, refresh stale data               |
+| `BAD_USER_INPUT`        | validation failed                                                                                                        | `fields: [{ field, message }]`, `reason` (see [Reasons](#reasons)) | inline errors under the fields                                            |
+| `CONFLICT`              | a unique value is already taken                                                                                          | `field` (when known)                                               | inline error under `field`                                                |
+| `ENTITY_IN_USE`         | delete blocked because the item is referenced                                                                            | —                                                                  | toast, or the delete dialog shows it                                      |
+| `OPERATION_NOT_ALLOWED` | the caller has access, but a business rule forbids the action (e.g. delete own account, delete or demote the last admin) | `reason` (see [Reasons](#reasons))                                 | toast, or the dialog / modal shows it                                     |
+| `RATE_LIMITED`          | too many requests (per IP or e.g. resend code)                                                                           | `retryAfter` (seconds)                                             | "please wait" message; mutation: toast                                    |
+| `INTERNAL_SERVER_ERROR` | unexpected error                                                                                                         | —                                                                  | query: error state with Retry; mutation: generic error toast              |
 
 The codes cover the error categories the wiki asks the frontend to handle:
 
@@ -381,9 +383,61 @@ The list of codes is `ErrorCode` in `backend/src/common/errors/error-code.enum.t
 So a new or renamed code changes the enum, `ERROR_CODES` and the text in one PR. A code outside the list (for
 example Apollo Server's `GRAPHQL_VALIDATION_FAILED`) is treated by the frontend as `INTERNAL_SERVER_ERROR`.
 
+### Reasons
+
+Some codes have several causes that the frontend shows with different texts. The backend then adds
+`extensions.reason`, so the frontend never has to compare `message` (which may change wording at any time):
+
+```json
+{
+  "errors": [
+    {
+      "message": "Verification code has expired",
+      "extensions": {
+        "code": "BAD_USER_INPUT",
+        "fields": [{ "field": "code", "message": "Verification code has expired" }],
+        "reason": "EXPIRED"
+      }
+    }
+  ]
+}
+```
+
+- **`code` decides how the frontend reacts, `reason` only which text it shows.** A new reaction (another screen,
+  a redirect, a retry) needs a new code; the same reaction with a different text needs a reason.
+- `reason` describes the error as a whole. It is set only when the error has one cause the frontend must tell apart;
+  errors with a single possible cause, and errors with several fields (`startDate` and `endDate` out of the project
+  period), have no `reason`. Per-field reasons are not supported until a real case needs them.
+- A reason is read together with the operation: `INVALID` on `verifyEmail` and on `resetPassword` are different
+  texts. Values are short and generic.
+- `reason` is optional and additive: `message` and `fields` stay as they are, and a client that does not know a
+  reason falls back to the text for the code.
+- Services pass it through the helpers: `badUserInput({ fields, message, reason })`,
+  `operationNotAllowed(message, reason)`.
+
+| Operation                  | Code                    | Reasons                                                                   |
+| -------------------------- | ----------------------- | ------------------------------------------------------------------------- |
+| `verifyEmail` (`code`)     | `BAD_USER_INPUT`        | `INVALID`; `EXPIRED` (also after too many wrong attempts); `USED`         |
+| `resetPassword` (`token`)  | `BAD_USER_INPUT`        | `INVALID` (also an already used link); `EXPIRED` (also an older link)     |
+| `uploadAvatar` (`file`)    | `BAD_USER_INPUT`        | `TOO_LARGE` (over 5 MB); `INVALID_TYPE` (not PNG / JPEG / GIF, or broken) |
+| `updateUser` (role change) | `OPERATION_NOT_ALLOWED` | `SELF` (own role); `LAST_ADMIN` (demoting the last admin)                 |
+| `deleteUser`               | `OPERATION_NOT_ALLOWED` | `SELF` (own account); `LAST_ADMIN` (the last admin)                       |
+
+The wiki leaves the rules for protected users to the team ("The exact business rules should be defined by the
+team"); the ones above are those rules: an Admin cannot change their own role or delete their own account, and the
+last Admin can be neither demoted nor deleted.
+
+The list of reasons is `ErrorReason` in `backend/src/common/errors/error-reason.enum.ts`. The frontend repeats it as
+`ERROR_REASONS` (`frontend/src/shared/lib/apollo/graphql-errors.ts`); `parseError` returns a known reason and drops
+an unknown one, and `error-codes.test.ts` fails when the two lists differ. The texts are not global: each form maps
+the reasons it can get, always together with the code, because the same reason value can come with another code
+(`reasonMessages={{ OPERATION_NOT_ALLOWED: { SELF: … } }}` on `FormModal` / `ConfirmDialog`; `authErrors.ts` for the
+auth forms, called only for `BAD_USER_INPUT`). An unknown or missing reason falls back to the text for the code.
+
 ### Messages
 
-The frontend shows **its own text**, chosen by `extensions.code` and `field`, so the UI can be translated.
+The frontend shows **its own text**, chosen by `extensions.code`, `field` and `reason`, so the UI can be
+translated. It never compares `message` to tell causes apart: that is what `reason` is for.
 The backend `message` is English, meant for developers and logs, and is a fallback when the frontend has no text
 for a case.
 

@@ -61,7 +61,7 @@ export class GraphqlExceptionFilter implements GqlExceptionFilter {
       case HttpStatus.NOT_FOUND:
         return notFound(error.message);
       case HttpStatus.BAD_REQUEST:
-        return badUserInput([], responseMessage(error));
+        return badUserInput({ fields: [], message: responseMessage(error) });
       case HttpStatus.TOO_MANY_REQUESTS:
         return rateLimited(0, 'Please wait before trying again');
       default:

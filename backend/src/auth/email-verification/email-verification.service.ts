@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { generateVerificationCode, hashToken, matchesHash } from '@/common/crypto/tokens';
 import { badUserInput, conflict, rateLimited } from '@/common/errors/app-errors';
+import { ErrorReason } from '@/common/errors/error-reason.enum';
 import { AuthTokenType } from '@/generated/prisma/enums';
 import { MailService } from '@/mail/mail.service';
 import { PrismaService } from '@/prisma/prisma.service';
@@ -22,7 +23,8 @@ export const VerificationMessage = {
 const MINUTE_MS = 60 * 1000;
 const SECOND_MS = 1000;
 
-const codeError = (message: string) => badUserInput([{ field: 'code', message }], message);
+const codeError = (message: string, reason: ErrorReason) =>
+  badUserInput({ fields: [{ field: 'code', message }], message, reason });
 
 @Injectable()
 export class EmailVerificationService {
@@ -92,20 +94,20 @@ export class EmailVerificationService {
     });
 
     if (!token) {
-      throw codeError(VerificationMessage.invalid);
+      throw codeError(VerificationMessage.invalid, ErrorReason.INVALID);
     }
     if (token.usedAt) {
-      throw codeError(VerificationMessage.used);
+      throw codeError(VerificationMessage.used, ErrorReason.USED);
     }
     if (token.expiresAt <= new Date() || token.attempts >= MAX_CODE_ATTEMPTS) {
-      throw codeError(VerificationMessage.expired);
+      throw codeError(VerificationMessage.expired, ErrorReason.EXPIRED);
     }
     if (!matchesHash(code, token.codeHash)) {
       await this.prisma.authToken.update({
         where: { id: token.id },
         data: { attempts: { increment: 1 } },
       });
-      throw codeError(VerificationMessage.invalid);
+      throw codeError(VerificationMessage.invalid, ErrorReason.INVALID);
     }
 
     await this.prisma.$transaction(async (tx) => {
@@ -121,14 +123,14 @@ export class EmailVerificationService {
         data: { usedAt: now },
       });
       if (count === 0) {
-        throw codeError(VerificationMessage.used);
+        throw codeError(VerificationMessage.used, ErrorReason.USED);
       }
       await tx.user.update({ where: { id: user.id }, data: { emailVerifiedAt: now } });
     });
 
     const verified = await this.users.findById(user.id);
     if (!verified) {
-      throw codeError(VerificationMessage.invalid);
+      throw codeError(VerificationMessage.invalid, ErrorReason.INVALID);
     }
     return verified;
   }

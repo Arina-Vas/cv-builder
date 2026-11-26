@@ -102,7 +102,12 @@ export const UserFormModal = ({ open, onOpenChange, user, isSelf = false }: Prop
       className={layout.grid}
       errorMessages={{
         CONFLICT: t('errors.emailTaken'),
-        OPERATION_NOT_ALLOWED: t('errors.lastAdminDemote'),
+      }}
+      reasonMessages={{
+        OPERATION_NOT_ALLOWED: {
+          SELF: t('errors.ownRoleChange'),
+          LAST_ADMIN: t('errors.lastAdminDemote'),
+        },
       }}
     >
       <Input

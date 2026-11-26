@@ -351,7 +351,8 @@
     "delete": {
       "title": "Supprimer l'utilisateur",
       "message": "Voulez-vous vraiment supprimer l'utilisateur <b>{name}</b> ?",
-      "lastAdmin": "Le dernier administrateur ne peut pas être supprimé. Attribuez d'abord le rôle d'administrateur à un autre utilisateur"
+      "lastAdmin": "Le dernier administrateur ne peut pas être supprimé. Attribuez d'abord le rôle d'administrateur à un autre utilisateur",
+      "ownAccount": "Vous ne pouvez pas supprimer votre propre compte"
     },
     "tabs": {
       "label": "Sections de l'employé",
@@ -362,7 +363,8 @@
     },
     "errors": {
       "emailTaken": "Un compte avec cet e-mail existe déjà",
-      "lastAdminDemote": "Le dernier administrateur ne peut pas être rétrogradé. Attribuez d'abord le rôle d'administrateur à un autre utilisateur"
+      "lastAdminDemote": "Le dernier administrateur ne peut pas être rétrogradé. Attribuez d'abord le rôle d'administrateur à un autre utilisateur",
+      "ownRoleChange": "Vous ne pouvez pas modifier votre propre rôle"
     }
   },
   "cvs": {

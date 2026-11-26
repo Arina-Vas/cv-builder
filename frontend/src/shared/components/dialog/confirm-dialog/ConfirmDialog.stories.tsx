@@ -11,7 +11,7 @@ import { ConfirmDialog } from './ConfirmDialog';
 /* ------------------------------------------------------------------ */
 
 // what onConfirm's promise does; `pending` never settles, to look at the loading state
-type Outcome = 'success' | 'error' | 'errorThenSuccess' | 'pending';
+type Outcome = 'success' | 'error' | 'errorThenSuccess' | 'pending' | 'lastAdmin';
 
 // errors.ENTITY_IN_USE in messages/en.json: the dialog gets it from useErrorMessage(parseError(error))
 const IN_USE_TEXT = "This item is in use and can't be deleted";
@@ -22,10 +22,21 @@ const inUseError = () =>
     errors: [{ message: 'Department is in use', extensions: { code: 'ENTITY_IN_USE' } }],
   });
 
+// one code with several causes: deleteUser sends OPERATION_NOT_ALLOWED with extensions.reason
+const lastAdminError = () =>
+  new CombinedGraphQLErrors({
+    errors: [
+      {
+        message: 'The last admin cannot be deleted',
+        extensions: { code: 'OPERATION_NOT_ALLOWED', reason: 'LAST_ADMIN' },
+      },
+    ],
+  });
+
 // what a mutation does: resolves on success, rejects with an Apollo error on failure
-const request = (fails: boolean) =>
+const request = (error?: CombinedGraphQLErrors) =>
   new Promise<void>((resolve, reject) => {
-    setTimeout(() => (fails ? reject(inUseError()) : resolve()), REQUEST_MS);
+    setTimeout(() => (error ? reject(error) : resolve()), REQUEST_MS);
   });
 
 /* ------------------------------------------------------------------ */
@@ -55,9 +66,9 @@ const ConfirmDialogDemo = ({
     onConfirm();
     attempts.current += 1;
     if (outcome === 'pending') return new Promise<never>(() => {});
-    return request(
-      outcome === 'error' || (outcome === 'errorThenSuccess' && attempts.current === 1),
-    );
+    if (outcome === 'lastAdmin') return request(lastAdminError());
+    const fails = outcome === 'error' || (outcome === 'errorThenSuccess' && attempts.current === 1);
+    return request(fails ? inUseError() : undefined);
   };
 
   return (
@@ -116,7 +127,7 @@ const meta = {
     message: { control: false },
     outcome: {
       control: 'inline-radio',
-      options: ['success', 'error', 'errorThenSuccess', 'pending'],
+      options: ['success', 'error', 'errorThenSuccess', 'pending', 'lastAdmin'],
     },
     onConfirm: { control: false },
     onOpenChange: { control: false },
@@ -209,6 +220,30 @@ export const WithEntityMessage: Story = {
     await expect(await within(dialog).findByRole('alert')).toHaveTextContent(
       DEPARTMENT_IN_USE_TEXT,
     );
+  },
+};
+
+// One code, several causes: the page passes a text per extensions.reason, which wins over errorMessages
+export const WithReasonMessage: Story = {
+  args: {
+    title: 'Delete user',
+    outcome: 'lastAdmin',
+    errorMessages: { OPERATION_NOT_ALLOWED: 'This user cannot be deleted' },
+    reasonMessages: {
+      OPERATION_NOT_ALLOWED: {
+        SELF: 'You cannot delete your own account',
+        LAST_ADMIN: 'The last admin cannot be deleted. Assign the Admin role to another user first',
+      },
+    },
+  },
+  play: async ({ canvasElement }) => {
+    await openDialog(canvasElement, 'Delete user');
+    const dialog = await clickConfirm(canvasElement);
+
+    await expect(await within(dialog).findByRole('alert')).toHaveTextContent(
+      'The last admin cannot be deleted. Assign the Admin role to another user first',
+    );
+    await expect(within(dialog).queryByText('This user cannot be deleted')).toBeNull();
   },
 };
 

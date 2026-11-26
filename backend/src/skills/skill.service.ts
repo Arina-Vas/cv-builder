@@ -57,7 +57,7 @@ export class SkillService {
     } catch (error) {
       if (isPrismaError(error, 'P2002')) throw conflict('name', 'Skill already exists');
       if (isPrismaError(error, 'P2003'))
-        throw badUserInput([{ field: 'categoryId', message: 'Category not found' }]);
+        throw badUserInput({ fields: [{ field: 'categoryId', message: 'Category not found' }] });
       throw error;
     }
   }
@@ -76,7 +76,7 @@ export class SkillService {
     } catch (error) {
       if (isPrismaError(error, 'P2002')) throw conflict('name', 'Skill already exists');
       if (isPrismaError(error, 'P2003'))
-        throw badUserInput([{ field: 'categoryId', message: 'Category not found' }]);
+        throw badUserInput({ fields: [{ field: 'categoryId', message: 'Category not found' }] });
       throw error;
     }
   }
@@ -100,7 +100,7 @@ export class SkillService {
   private async assertCategoryExists(categoryId: string) {
     const category = await this.prisma.skillCategory.findUnique({ where: { id: categoryId } });
     if (!category) {
-      throw badUserInput([{ field: 'categoryId', message: 'Category not found' }]);
+      throw badUserInput({ fields: [{ field: 'categoryId', message: 'Category not found' }] });
     }
   }
 }

@@ -72,7 +72,9 @@ export class ProjectService {
       return toProject(row);
     } catch (error) {
       if (isPrismaError(error, 'P2003'))
-        throw badUserInput([{ field: 'technologyIds', message: 'Technology not found' }]);
+        throw badUserInput({
+          fields: [{ field: 'technologyIds', message: 'Technology not found' }],
+        });
       throw error;
     }
   }
@@ -92,7 +94,9 @@ export class ProjectService {
       return toProject(row);
     } catch (error) {
       if (isPrismaError(error, 'P2003'))
-        throw badUserInput([{ field: 'technologyIds', message: 'Technology not found' }]);
+        throw badUserInput({
+          fields: [{ field: 'technologyIds', message: 'Technology not found' }],
+        });
       throw error;
     }
   }
@@ -113,7 +117,7 @@ export class ProjectService {
 
     const found = await this.prisma.skill.count({ where: { id: { in: technologyIds } } });
     if (found !== technologyIds.length) {
-      throw badUserInput([{ field: 'technologyIds', message: 'Technology not found' }]);
+      throw badUserInput({ fields: [{ field: 'technologyIds', message: 'Technology not found' }] });
     }
   }
 }

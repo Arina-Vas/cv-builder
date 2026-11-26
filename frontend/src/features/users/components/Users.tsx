@@ -186,7 +186,12 @@ export const Users = () => {
             b: (chunks) => <strong>{chunks}</strong>,
           })}
           onConfirm={handleDelete}
-          errorMessages={{ OPERATION_NOT_ALLOWED: t('delete.lastAdmin') }}
+          reasonMessages={{
+            OPERATION_NOT_ALLOWED: {
+              SELF: t('delete.ownAccount'),
+              LAST_ADMIN: t('delete.lastAdmin'),
+            },
+          }}
         />
       )}
     </div>
