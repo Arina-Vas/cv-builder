@@ -72,8 +72,15 @@ export class AuthService {
 
     const rotated = await this.sessions.rotate(refreshToken);
     if (!rotated) {
-      if (await this.sessions.wasJustRotated(refreshToken)) {
+      const previous = await this.sessions.checkPreviousToken(refreshToken);
+      if (previous.status === 'grace') {
         return null;
+      }
+      if (previous.status === 'reused') {
+        await this.sessions.revoke(previous.sessionId);
+        this.logger.warn(
+          `Refresh token reuse detected: session ${previous.sessionId} of user ${previous.userId} revoked`,
+        );
       }
       throw unauthenticated();
     }
