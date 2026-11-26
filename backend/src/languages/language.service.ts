@@ -10,6 +10,7 @@ import { Language } from '@/languages/models/language.model';
 import { conflict, entityInUse } from '@/common/errors/app-errors';
 import { UpdateLanguageInput } from '@/languages/dto/update-language.input';
 import { isPrismaError } from '@/prisma/prisma-errors';
+import { containsInsensitive } from '@/common/prisma/search';
 
 @Injectable()
 export class LanguageService {
@@ -22,9 +23,7 @@ export class LanguageService {
     page,
     pageSize,
   }: LanguagesArgs): Promise<LanguagePage> {
-    const where: Prisma.LanguageWhereInput = search
-      ? { name: { contains: search, mode: 'insensitive' } }
-      : {};
+    const where: Prisma.LanguageWhereInput = search ? { name: containsInsensitive(search) } : {};
 
     const order: Prisma.SortOrder = sortOrder === SortOrder.ASC ? 'asc' : 'desc';
 

@@ -14,6 +14,7 @@ import type { UpdateUserInput } from './dto/update-user.input';
 import type { UpdateProfileInput } from './dto/update-profile.input';
 import { canManageUser } from '@/common/auth/can-manage-user';
 import { hashPassword } from '@/common/crypto/password';
+import { containsInsensitive } from '@/common/prisma/search';
 import {
   badUserInput,
   conflict,
@@ -67,9 +68,9 @@ export class UsersService {
     const where: Prisma.UserWhereInput = search
       ? {
           OR: [
-            { firstName: { contains: search, mode: 'insensitive' } },
-            { lastName: { contains: search, mode: 'insensitive' } },
-            { email: { contains: search, mode: 'insensitive' } },
+            { firstName: containsInsensitive(search) },
+            { lastName: containsInsensitive(search) },
+            { email: containsInsensitive(search) },
           ],
         }
       : {};
