@@ -16,7 +16,11 @@ import { UsersService } from '@/users/users.service';
 export class UsersResolver {
   constructor(private readonly usersService: UsersService) {}
 
-  @Query(() => UserPage)
+  @Query(() => UserPage, {
+    description:
+      'Users list. Search is case-insensitive: every word must match the first or last name ' +
+      '(so a full name in either order works), or the whole search must match the email',
+  })
   users(@Args() args: UsersArgs): Promise<UserPage> {
     return this.usersService.findAll(args);
   }

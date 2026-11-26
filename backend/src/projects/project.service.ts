@@ -13,6 +13,7 @@ import { isPrismaError } from '@/prisma/prisma-errors';
 import { Skill } from '@/skills/models/skill.model';
 import { skillInclude, toSkill } from '@/skills/skill.mapper';
 import { ProjectRole } from '@/projects/models/project-role.model';
+import { containsInsensitive } from '@/common/prisma/search';
 
 @Injectable()
 export class ProjectService {
@@ -21,14 +22,7 @@ export class ProjectService {
   async findAll({ sortOrder, sortBy, search }: ProjectsArgs): Promise<ProjectList> {
     const where: Prisma.ProjectWhereInput = search
       ? {
-          OR: [
-            {
-              name: { contains: search, mode: 'insensitive' },
-            },
-            {
-              domain: { contains: search, mode: 'insensitive' },
-            },
-          ],
+          OR: [{ name: containsInsensitive(search) }, { domain: containsInsensitive(search) }],
         }
       : {};
 
