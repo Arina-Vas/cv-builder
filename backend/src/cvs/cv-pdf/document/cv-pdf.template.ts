@@ -6,6 +6,7 @@ import { CV_PDF_STYLES } from '@/cvs/cv-pdf/document/cv-pdf.styles';
 import type { CvPreview } from '@/cvs/cv-preview/models/cv-preview.model';
 import type { CvProject } from '@/cvs/cv-projects/models/cv-project.model';
 import type { CvPreviewSkillGroup } from '@/cvs/cv-preview/models/cv-preview-skill-group.model';
+import { effectiveEndDate } from '@/cvs/cv-projects/effective-end-date';
 
 /**
  * HTML of the CV PDF. A port of the CV Preview components
@@ -115,11 +116,12 @@ const renderResponsibilities = (items: string[]): string =>
     )
     .join('');
 
-const renderProject = (entry: CvProject, labels: CvPdfLabels): string => {
+const renderProject = (entry: CvProject, labels: CvPdfLabels, now: Date): string => {
   const responsibilities = splitResponsibilities(entry.responsibilities);
   const description = entry.project.description.trim();
   const { technologies } = entry.project;
-  const end = entry.endDate ? formatMonth(entry.endDate) : labels.present;
+  const endDate = effectiveEndDate(entry, now);
+  const end = endDate ? formatMonth(endDate) : labels.present;
   const period = format(labels.period, { start: formatMonth(entry.startDate), end });
 
   return `
@@ -202,7 +204,11 @@ const renderSkills = (skillGroups: CvPreviewSkillGroup[], labels: CvPdfLabels): 
 };
 
 // CvPreviewDocument
-export const renderCvPdfHtml = (data: CvPreview, locale: Locale = Locale.en): string => {
+export const renderCvPdfHtml = (
+  data: CvPreview,
+  locale: Locale = Locale.en,
+  now: Date = new Date(),
+): string => {
   const labels = CV_PDF_LABELS[locale];
 
   return `<!doctype html>
@@ -231,7 +237,7 @@ export const renderCvPdfHtml = (data: CvPreview, locale: Locale = Locale.en): st
       <section>
         <h2 class="document__section-title">${escapeHtml(labels.sections.projects)}</h2>
         <div class="document__projects">${data.projects
-          .map((project) => renderProject(project, labels))
+          .map((project) => renderProject(project, labels, now))
           .join('')}</div>
       </section>`,
       )}

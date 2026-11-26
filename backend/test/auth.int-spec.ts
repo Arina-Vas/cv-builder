@@ -256,6 +256,43 @@ describe('Auth (integration)', () => {
       expect(replay.cookie(REFRESH_TOKEN_COOKIE)).toBeUndefined();
     });
 
+    it('revokes the whole session when an old refresh token is reused after the grace period', async () => {
+      const browser = client();
+      const { email } = await createUser(t.prisma);
+      await signIn(browser, email);
+      const stolenRefresh = browser.cookie(REFRESH_TOKEN_COOKIE) ?? '';
+      await browser.data(REFRESH);
+      await t.prisma.session.updateMany({
+        data: { rotatedAt: new Date(Date.now() - REFRESH_GRACE_SECONDS * 1000) },
+      });
+
+      const thief = client();
+      thief.setCookie(REFRESH_TOKEN_COOKIE, stolenRefresh);
+      expect((await thief.error(REFRESH)).extensions.code).toBe('UNAUTHENTICATED');
+
+      // Whoever holds the current tokens is signed out too: the server cannot tell who the thief is
+      const session = await t.prisma.session.findFirstOrThrow();
+      expect(session.revokedAt).not.toBeNull();
+      expect((await browser.error(ME)).extensions.code).toBe('UNAUTHENTICATED');
+      expect((await browser.error(REFRESH)).extensions.code).toBe('UNAUTHENTICATED');
+    });
+
+    it('keeps the session when the old refresh token comes back within the grace period', async () => {
+      const browser = client();
+      const { email } = await createUser(t.prisma);
+      await signIn(browser, email);
+      const oldRefresh = browser.cookie(REFRESH_TOKEN_COOKIE) ?? '';
+      await browser.data(REFRESH);
+
+      const lateTab = client();
+      lateTab.setCookie(REFRESH_TOKEN_COOKIE, oldRefresh);
+      await expect(lateTab.data(REFRESH)).resolves.toEqual({ refresh: true });
+
+      const session = await t.prisma.session.findFirstOrThrow();
+      expect(session.revokedAt).toBeNull();
+      await expect(browser.data(ME)).resolves.toMatchObject({ me: { email } });
+    });
+
     it('keeps the session when two tabs refresh with the same token at once', async () => {
       const browser = client();
       const { email } = await createUser(t.prisma);

@@ -3,6 +3,7 @@ import { splitResponsibilities } from '@/features/cv-projects/lib/split-responsi
 import { formatDate } from '@/shared/lib/date/format-date';
 import s from './CvProjectEntry.module.css';
 import { type CvProjectFieldsFragment } from '@/gql/graphql';
+import { effectiveEndDate } from '@/features/cv-projects/lib/effective-end-date';
 
 /** The item's own ".", ";" or "," at the end, replaced by the list punctuation */
 const TRAILING_PUNCTUATION = /[.;,]+$/;
@@ -14,6 +15,7 @@ export const CvProjectEntry = ({ project }: Props) => {
   const t = useTranslations('cvs.preview.document');
   const responsibilities = splitResponsibilities(project.responsibilities);
   const description = project.project.description.trim();
+  const endDate = effectiveEndDate(project);
 
   return (
     <article className={s.entry}>
@@ -34,7 +36,7 @@ export const CvProjectEntry = ({ project }: Props) => {
             <dd className={s.value}>
               {t('period', {
                 start: formatDate(project.startDate, 'MM.yyyy'),
-                end: project.endDate ? formatDate(project.endDate, 'MM.yyyy') : t('present'),
+                end: endDate ? formatDate(endDate, 'MM.yyyy') : t('present'),
               })}
             </dd>
           </>

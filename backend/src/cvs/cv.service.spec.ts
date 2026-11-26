@@ -164,6 +164,14 @@ describe('CvService', () => {
       expect(listWhere()).toEqual({});
     });
 
+    it('matches LIKE wildcards in the search literally', async () => {
+      await service.findAll(ADMIN, cvsArgs({ search: '%_' }));
+
+      expect(listWhere()).toEqual({
+        OR: [{ name: INSENSITIVE('\\%\\_') }, { user: { email: INSENSITIVE('\\%\\_') } }],
+      });
+    });
+
     it('sorts by the requested field with id as a tie-breaker and pages the result', async () => {
       await service.findAll(ADMIN, cvsArgs({ sortOrder: SortOrder.DESC, page: 3, pageSize: 20 }));
 

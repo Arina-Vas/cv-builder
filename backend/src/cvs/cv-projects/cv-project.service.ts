@@ -15,6 +15,7 @@ import { CreateCvProjectInput } from '@/cvs/cv-projects/dto/create-cv-project.in
 import { UpdateCvProjectInput } from '@/cvs/cv-projects/dto/update-cv-project.input';
 import { Project } from '@/projects/models/project.model';
 import { projectInclude, toProject } from '@/projects/project.mapper';
+import { containsInsensitive } from '@/common/prisma/search';
 
 type ProjectPeriod = Pick<ProjectEntity, 'startDate' | 'endDate'>;
 
@@ -35,10 +36,7 @@ export class CvProjectService {
       cvId,
       ...(search && {
         project: {
-          OR: [
-            { name: { contains: search, mode: 'insensitive' } },
-            { domain: { contains: search, mode: 'insensitive' } },
-          ],
+          OR: [{ name: containsInsensitive(search) }, { domain: containsInsensitive(search) }],
         },
       }),
     };

@@ -13,9 +13,18 @@ import {
 } from '../cv-pdf.fixtures';
 import { renderCvPdfHtml, splitResponsibilities } from './cv-pdf.template';
 
+const NOW = new Date('2026-11-26T10:00:00.000Z');
+
+/** A CV project without an end date whose catalog project is still running: its period ends with "Present" */
+const runningProject = () =>
+  cvProjectFixture({
+    endDate: null,
+    project: projectFixture({ endDate: calendarDate('2099-12-31') }),
+  });
+
 /** The document without <head>: styles and fonts would match any text search */
 const renderBody = (data: CvPreview, locale: Locale = Locale.en): string => {
-  const html = renderCvPdfHtml(data, locale);
+  const html = renderCvPdfHtml(data, locale, NOW);
   return html.slice(html.indexOf('<body>'));
 };
 
@@ -141,10 +150,7 @@ describe('renderCvPdfHtml', () => {
   describe('locale', () => {
     it('renders the labels of the requested locale', () => {
       const text = textOf(
-        renderBody(
-          cvPreviewFixture({ projects: [cvProjectFixture({ endDate: null })] }),
-          Locale.ru,
-        ),
+        renderBody(cvPreviewFixture({ projects: [runningProject()] }), Locale.ru),
       );
 
       expect(text).toContain('Образование BSUIR, Software Engineering');
@@ -157,10 +163,7 @@ describe('renderCvPdfHtml', () => {
     });
 
     it('escapes an apostrophe in a translation', () => {
-      const body = renderBody(
-        cvPreviewFixture({ projects: [cvProjectFixture({ endDate: null })] }),
-        Locale.fr,
-      );
+      const body = renderBody(cvPreviewFixture({ projects: [runningProject()] }), Locale.fr);
 
       expect(body).toContain('03.2022 – aujourd&#39;hui');
     });
@@ -206,12 +209,19 @@ describe('renderCvPdfHtml', () => {
       expect(text).toContain('Environment TypeScript, React.');
     });
 
-    it('shows Present for a project without an end date', () => {
+    it('shows Present for a running project without an end date', () => {
+      const text = textOf(renderBody(cvPreviewFixture({ projects: [runningProject()] })));
+
+      expect(text).toContain('Period 03.2022 – Present');
+    });
+
+    it('ends a finished project without an end date at the project end', () => {
+      // the fixture project ended 2025-12-31
       const text = textOf(
         renderBody(cvPreviewFixture({ projects: [cvProjectFixture({ endDate: null })] })),
       );
 
-      expect(text).toContain('Period 03.2022 – Present');
+      expect(text).toContain('Period 03.2022 – 12.2025');
     });
 
     it('formats the period in UTC, so the server time zone does not shift the month', () => {

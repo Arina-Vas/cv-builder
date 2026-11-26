@@ -7,6 +7,11 @@ import { PrismaService } from '@/prisma/prisma.service';
 const DAY_MS = 24 * 60 * 60 * 1000;
 export const REFRESH_GRACE_SECONDS = 30;
 
+export type PreviousTokenCheck =
+  | { status: 'grace' }
+  | { status: 'reused'; sessionId: string; userId: string }
+  | { status: 'unknown' };
+
 export interface IssuedSession {
   sessionId: string;
   refreshToken: string;
@@ -65,18 +70,32 @@ export class SessionsService {
       : null;
   }
 
-  async wasJustRotated(refreshToken: string): Promise<boolean> {
+  // A token replaced by the last rotation: a parallel refresh within the grace period is fine,
+  // a later one means someone else holds a copy of the token
+  async checkPreviousToken(refreshToken: string): Promise<PreviousTokenCheck> {
     const session = await this.prisma.session.findUnique({
       where: { previousTokenHash: hashToken(refreshToken) },
-      select: { expiresAt: true, revokedAt: true, rotatedAt: true },
+      select: { id: true, userId: true, expiresAt: true, revokedAt: true, rotatedAt: true },
     });
 
-    return (
-      session !== null &&
-      isActive(session) &&
+    if (!session || !isActive(session)) {
+      return { status: 'unknown' };
+    }
+
+    const withinGrace =
       session.rotatedAt !== null &&
-      Date.now() - session.rotatedAt.getTime() < REFRESH_GRACE_SECONDS * 1000
-    );
+      Date.now() - session.rotatedAt.getTime() < REFRESH_GRACE_SECONDS * 1000;
+
+    return withinGrace
+      ? { status: 'grace' }
+      : { status: 'reused', sessionId: session.id, userId: session.userId };
+  }
+
+  async revoke(sessionId: string): Promise<void> {
+    await this.prisma.session.updateMany({
+      where: { id: sessionId, revokedAt: null },
+      data: { revokedAt: new Date() },
+    });
   }
 
   async findActive(sessionId: string): Promise<ActiveSession | null> {

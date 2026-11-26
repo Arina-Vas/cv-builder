@@ -10,6 +10,7 @@ import type { Prisma } from '@/generated/prisma/client';
 import { toPosition } from '@/positions/position.mapper';
 import { isPrismaError } from '@/prisma/prisma-errors';
 import { conflict, entityInUse } from '@/common/errors/app-errors';
+import { containsInsensitive } from '@/common/prisma/search';
 
 @Injectable()
 export class PositionService {
@@ -22,9 +23,7 @@ export class PositionService {
     page,
     pageSize,
   }: PositionsArgs): Promise<PositionPage> {
-    const where: Prisma.PositionWhereInput = search
-      ? { name: { contains: search, mode: 'insensitive' } }
-      : {};
+    const where: Prisma.PositionWhereInput = search ? { name: containsInsensitive(search) } : {};
 
     const order: Prisma.SortOrder = sortOrder === SortOrder.ASC ? 'asc' : 'desc';
 

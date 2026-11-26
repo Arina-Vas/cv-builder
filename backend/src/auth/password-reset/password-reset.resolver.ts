@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common';
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { Public } from '@/common/auth/public.decorator';
 import { AuthThrottle } from '@/common/throttling/throttle.decorators';
@@ -7,6 +8,8 @@ import { PasswordResetService } from './password-reset.service';
 
 @Resolver()
 export class PasswordResetResolver {
+  private readonly logger = new Logger(PasswordResetResolver.name);
+
   constructor(private readonly passwordReset: PasswordResetService) {}
 
   @Public()
@@ -14,8 +17,10 @@ export class PasswordResetResolver {
   @Mutation(() => Boolean, {
     description: 'Always returns true, whether or not the email belongs to an account',
   })
-  async requestPasswordReset(@Args('input') input: RequestPasswordResetInput): Promise<boolean> {
-    await this.passwordReset.request(input.email);
+  requestPasswordReset(@Args('input') input: RequestPasswordResetInput): boolean {
+    void this.passwordReset.request(input.email).catch((error: unknown) => {
+      this.logger.error('Password reset request failed', error);
+    });
     return true;
   }
 

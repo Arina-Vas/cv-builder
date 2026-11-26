@@ -107,7 +107,17 @@ All tables have `id` (uuid), `created_at` and `updated_at`. Only the meaningful 
 | `cv_projects`      | `cv_id`, `project_id`, `start_date` date, `end_date?` date, `responsibilities?` |
 | `cv_project_roles` | `cv_project_id`, `role_id`                                                      |
 
-- `cv_projects.end_date = null` means "Till now". In the `projects` catalog `end_date` is required.
+- `cv_projects.end_date = null` means "until the end of the participation". In the `projects` catalog `end_date`
+  is required, so the empty value is resolved when it is shown (CV Projects table, Preview, PDF, last used year)
+  and never stored:
+  - the catalog project is still running (its `end_date` is today or later): "Till now" / "Present";
+  - the catalog project has ended (its `end_date` is before today): the project's `end_date`.
+
+  So a CV project does not stay "Till now" after its project ends, and old rows need no migration. "Today" is
+  the user's local day on the frontend and the UTC day on the backend (dates are stored as UTC midnight). The
+  helpers are `effectiveEndDate` in `frontend/src/features/cv-projects/lib/` and `backend/src/cvs/cv-projects/`.
+  Sorting by end date still uses the stored value (empty values last on `asc`).
+
 - Project name, domain, description and technologies shown on a CV come from the referenced `projects` row;
   only participation dates, responsibilities and roles are CV-specific.
 - `cv_projects.responsibilities` is one optional text, one responsibility per line (decided 2026-11-19). The wiki
@@ -149,8 +159,10 @@ skill id.
   (rounded down, month and day included: 01.06.2023 → 24.11.2026 is 3 years).
   - Less than a year gives `0`.
   - Periods are not summed: overlapping or parallel projects do not add up, only the earliest start counts.
-- **Last used year** = the end year of the latest matching project. A project without an end date ("Till now")
-  counts as the current year, so it wins over any finished one.
+- **Last used year** = the end year of the latest matching project, an empty end date resolved as described in
+  [Assignments](#assignments) above. A project still "Till now" counts as the current year, so it wins over any
+  finished one; a CV project without an end date whose catalog project has ended counts as the year the project
+  ended.
 - A CV skill that is in no CV project gets `null` for both values (an empty cell in the table).
 
 Example (today: 2026-11-24):
@@ -159,13 +171,17 @@ Example (today: 2026-11-24):
 | ---------- | ---------- | ---------- | ----------------- |
 | P1         | 2022-03-01 | 2023-12-31 | React, JavaScript |
 | P2         | 2023-06-01 | —          | TypeScript, React |
+| P3         | 2020-02-01 | —          | Vue               |
 
-| CV skill   | Experience | Last used | Why                                 |
-| ---------- | ---------- | --------- | ----------------------------------- |
-| React      | 4          | 2026      | earliest start P1; P2 is "Till now" |
-| JavaScript | 4          | 2023      | only P1                             |
-| TypeScript | 3          | 2026      | only P2, "Till now"                 |
-| Angular    | `null`     | `null`    | in no CV project                    |
+P2's catalog project ends 2027-12-31 (still running), P3's ended 2021-06-30.
+
+| CV skill   | Experience | Last used | Why                                         |
+| ---------- | ---------- | --------- | ------------------------------------------- |
+| React      | 4          | 2026      | earliest start P1; P2 is "Till now"         |
+| JavaScript | 4          | 2023      | only P1                                     |
+| TypeScript | 3          | 2026      | only P2, "Till now"                         |
+| Vue        | 6          | 2021      | only P3, ends with its project (2021-06-30) |
+| Angular    | `null`     | `null`    | in no CV project                            |
 
 The calculation takes "today" as a parameter, so the unit tests use a fixed date.
 

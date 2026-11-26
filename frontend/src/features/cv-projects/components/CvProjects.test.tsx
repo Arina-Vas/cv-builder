@@ -18,14 +18,20 @@ const CV_ID = 'cv1';
 const react = { __typename: 'Skill' as const, id: 't1', name: 'React' };
 const developer = { __typename: 'ProjectRole' as const, id: 'r1', name: 'Developer' };
 
-const catalogProject = (id: string, name: string, domain: string, description: string) => ({
+const catalogProject = (
+  id: string,
+  name: string,
+  domain: string,
+  description: string,
+  endDate = '2025-12-31',
+) => ({
   __typename: 'Project' as const,
   id,
   name,
   domain,
   description,
   startDate: '2024-01-01',
-  endDate: '2025-12-31',
+  endDate,
   technologies: [react],
 });
 
@@ -46,7 +52,19 @@ const crm = {
   endDate: null,
   responsibilities: null,
   roles: [developer],
-  project: catalogProject('p2', 'CRM', 'Sales', 'A sales system'),
+  // still running, so an empty CV end date means "Till now"
+  project: catalogProject('p2', 'CRM', 'Sales', 'A sales system', '2099-12-31'),
+};
+
+const archive = {
+  __typename: 'CvProject' as const,
+  id: 'cp3',
+  startDate: '2024-02-01',
+  endDate: null,
+  responsibilities: null,
+  roles: [developer],
+  // ended 2025-12-31
+  project: catalogProject('p3', 'Archive', 'Legacy', 'A legacy system'),
 };
 
 const variables = (search = '') => ({ cvId: CV_ID, search, sortBy: 'name', sortOrder: 'ASC' });
@@ -96,11 +114,19 @@ describe('CvProjects', () => {
     expect(within(row).getByText('12/31/2024')).toBeInTheDocument();
   });
 
-  it('shows a project without an end date as ongoing', async () => {
+  it('shows a running project without an end date as ongoing', async () => {
     renderPage();
 
     const row = (await screen.findByText('CRM')).closest('tr')!;
     expect(within(row).getByText('Till now')).toBeInTheDocument();
+  });
+
+  it('shows the project end date for a finished project without a CV end date', async () => {
+    renderPage([listMock([archive])]);
+
+    const row = (await screen.findByText('Archive')).closest('tr')!;
+    expect(within(row).getByText('12/31/2025')).toBeInTheDocument();
+    expect(within(row).queryByText('Till now')).not.toBeInTheDocument();
   });
 
   it('shows the description and the responsibilities as chips under the project', async () => {

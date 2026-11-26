@@ -4,6 +4,7 @@ import type { NestExpressApplication } from '@nestjs/platform-express';
 import { Test } from '@nestjs/testing';
 import type { App } from 'supertest/types';
 import { AppModule } from '@/app.module';
+import { PasswordResetService } from '@/auth/password-reset/password-reset.service';
 import { configureApp } from '@/app.setup';
 import { Roles } from '@/common/auth/roles.decorator';
 import { UserRole } from '@/common/graphql/enums';
@@ -91,7 +92,26 @@ export interface TestApp {
   prisma: PrismaService;
   mail: FakeMailService;
   storage: FakeStorageService;
+  /** Waits for the work the API answers before finishing (the password reset request). */
+  settled: () => Promise<void>;
 }
+
+/** Remembers every unfinished password reset request, so a test can wait for its email. */
+const trackPasswordResetRequests = (service: PasswordResetService): (() => Promise<void>) => {
+  const pending = new Set<Promise<void>>();
+  const request = service.request.bind(service);
+
+  service.request = (email: string): Promise<void> => {
+    const work = request(email);
+    pending.add(work);
+    work.finally(() => pending.delete(work)).catch(() => undefined);
+    return work;
+  };
+
+  return async () => {
+    await Promise.allSettled([...pending]);
+  };
+};
 
 export const createTestApp = async (): Promise<TestApp> => {
   const mail = new FakeMailService();
@@ -113,6 +133,7 @@ export const createTestApp = async (): Promise<TestApp> => {
     prisma: app.get(PrismaService),
     mail,
     storage,
+    settled: trackPasswordResetRequests(app.get(PasswordResetService)),
   };
 };
 
