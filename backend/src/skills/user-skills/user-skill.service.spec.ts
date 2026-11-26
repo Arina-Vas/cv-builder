@@ -78,9 +78,7 @@ describe('UserSkillService', () => {
       update: jest.fn(),
       deleteMany: jest.fn(),
     },
-    cvSkill: { deleteMany: jest.fn() },
-    // The array form: the operations are already started, the transaction only awaits them
-    $transaction: jest.fn((operations: Promise<unknown>[]) => Promise.all(operations)),
+    cvSkill: { findMany: jest.fn() },
   };
   const service = new UserSkillService(prisma as unknown as PrismaService);
 
@@ -89,7 +87,8 @@ describe('UserSkillService', () => {
     // By default the target user and the selected skill exist
     prisma.user.findUnique.mockResolvedValue({ id: OWNER_ID });
     prisma.userSkill.deleteMany.mockResolvedValue({ count: 0 });
-    prisma.cvSkill.deleteMany.mockResolvedValue({ count: 0 });
+    // By default no CV of the user lists the skills being removed
+    prisma.cvSkill.findMany.mockResolvedValue([]);
     prisma.skill.findUnique.mockResolvedValue({ id: 'skill-React' });
   });
 
@@ -269,9 +268,7 @@ describe('UserSkillService', () => {
     });
 
     const expectNothingDeleted = () => {
-      expect(prisma.$transaction).not.toHaveBeenCalled();
       expect(prisma.userSkill.deleteMany).not.toHaveBeenCalled();
-      expect(prisma.cvSkill.deleteMany).not.toHaveBeenCalled();
     };
 
     it('deletes the assignments of the user and returns their ids', async () => {
@@ -290,18 +287,30 @@ describe('UserSkillService', () => {
       expect(result).toEqual(['user-skill-React', 'user-skill-Vue']);
     });
 
-    it("removes the skills from the user's CVs in the same transaction", async () => {
+    it("checks only the user's own CVs for the selected skills", async () => {
       prisma.userSkill.findMany.mockResolvedValue([assignment('React'), assignment('Vue')]);
 
       await service.delete(OWNER, DELETE_ARGS);
 
-      // Only CVs of this user, so another user's CV with the same skill keeps it
-      expect(prisma.cvSkill.deleteMany).toHaveBeenCalledWith({
+      // Another user's CV with the same skill does not block the removal
+      expect(prisma.cvSkill.findMany).toHaveBeenCalledWith({
         where: { skillId: { in: ['skill-React', 'skill-Vue'] }, cv: { userId: OWNER_ID } },
+        select: { skillId: true },
+        distinct: ['skillId'],
       });
-      expect(prisma.$transaction).toHaveBeenCalledTimes(1);
-      const [operations] = prisma.$transaction.mock.calls[0] as [Promise<unknown>[]];
-      expect(operations).toHaveLength(2);
+    });
+
+    it('rejects skills that are used in CVs with ENTITY_IN_USE and the ids of those assignments', async () => {
+      prisma.userSkill.findMany.mockResolvedValue([assignment('React'), assignment('Vue')]);
+      prisma.cvSkill.findMany.mockResolvedValue([{ skillId: 'skill-Vue' }]);
+
+      await expect(service.delete(OWNER, DELETE_ARGS)).rejects.toMatchObject({
+        message: 'Skills cannot be removed because they are used in CVs',
+        // Assignment ids (what the client sent), not skill or CV skill ids
+        extensions: { code: ErrorCode.ENTITY_IN_USE, ids: ['user-skill-Vue'] },
+      });
+      // The whole request is rejected: the free skill (React) is not removed either
+      expectNothingDeleted();
     });
 
     it('skips ids that are already removed', async () => {
@@ -309,11 +318,13 @@ describe('UserSkillService', () => {
 
       const result = await service.delete(OWNER, DELETE_ARGS);
 
+      expect(prisma.cvSkill.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { skillId: { in: ['skill-React'] }, cv: { userId: OWNER_ID } },
+        }),
+      );
       expect(prisma.userSkill.deleteMany).toHaveBeenCalledWith({
         where: { userId: OWNER_ID, id: { in: ['user-skill-React'] } },
-      });
-      expect(prisma.cvSkill.deleteMany).toHaveBeenCalledWith({
-        where: { skillId: { in: ['skill-React'] }, cv: { userId: OWNER_ID } },
       });
       expect(result).toEqual(['user-skill-React']);
     });
@@ -324,10 +335,10 @@ describe('UserSkillService', () => {
       await expect(service.delete(OWNER, DELETE_ARGS)).resolves.toEqual([]);
     });
 
-    it('fails when the transaction fails', async () => {
+    it('fails when the removal fails', async () => {
       prisma.userSkill.findMany.mockResolvedValue([assignment('React')]);
       const error = new Error('connection lost');
-      prisma.$transaction.mockRejectedValueOnce(error);
+      prisma.userSkill.deleteMany.mockRejectedValueOnce(error);
 
       await expect(service.delete(OWNER, DELETE_ARGS)).rejects.toBe(error);
     });
@@ -355,8 +366,8 @@ describe('UserSkillService', () => {
       prisma.userSkill.findMany.mockResolvedValue([assignment('React')]);
 
       await expect(service.delete(ADMIN, DELETE_ARGS)).resolves.toEqual(['user-skill-React']);
-      expect(prisma.cvSkill.deleteMany).toHaveBeenCalledWith({
-        where: { skillId: { in: ['skill-React'] }, cv: { userId: OWNER_ID } },
+      expect(prisma.userSkill.deleteMany).toHaveBeenCalledWith({
+        where: { userId: OWNER_ID, id: { in: ['user-skill-React'] } },
       });
     });
 

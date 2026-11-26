@@ -40,8 +40,8 @@ export const badUserInput = ({
 export const conflict = (field: string, message: string): GraphQLError =>
   new GraphQLError(message, { extensions: { code: ErrorCode.CONFLICT, field } });
 
-export const entityInUse = (message: string): GraphQLError =>
-  new GraphQLError(message, { extensions: { code: ErrorCode.ENTITY_IN_USE } });
+export const entityInUse = (message: string, ids?: string[]): GraphQLError =>
+  new GraphQLError(message, { extensions: { code: ErrorCode.ENTITY_IN_USE, ...(ids && { ids }) } });
 
 export const operationNotAllowed = (message: string, reason?: ErrorReason): GraphQLError =>
   new GraphQLError(message, {
