@@ -19,6 +19,13 @@ describe('Password reset (integration)', () => {
   let t: TestApp;
   const client = () => new GqlClient(t.server);
 
+  // The API answers before the request is processed; wait for it before reading the email
+  const requestReset = async (email: string): Promise<unknown> => {
+    const data = await client().data(REQUEST_RESET, { input: { email } });
+    await t.settled();
+    return data;
+  };
+
   const tokenFromEmail = (email: string): string => {
     const link = new URL(t.mail.last(email, 'password-reset'));
     expect(`${link.origin}${link.pathname}`).toBe('http://localhost:3000/reset-password');
@@ -40,7 +47,7 @@ describe('Password reset (integration)', () => {
   it('answers the same for an unknown email and sends nothing', async () => {
     const email = uniqueEmail('nobody');
 
-    await expect(client().data(REQUEST_RESET, { input: { email } })).resolves.toEqual({
+    await expect(requestReset(email)).resolves.toEqual({
       requestPasswordReset: true,
     });
     expect(t.mail.sent.filter((mail) => mail.to === email)).toHaveLength(0);
@@ -51,7 +58,7 @@ describe('Password reset (integration)', () => {
     const laptop = client();
     await signIn(laptop, email);
 
-    await expect(client().data(REQUEST_RESET, { input: { email } })).resolves.toEqual({
+    await expect(requestReset(email)).resolves.toEqual({
       requestPasswordReset: true,
     });
     const token = tokenFromEmail(email);
@@ -82,7 +89,7 @@ describe('Password reset (integration)', () => {
 
   it('rejects an expired link and leaves the password unchanged', async () => {
     const { email } = await createUser(t.prisma);
-    await client().data(REQUEST_RESET, { input: { email } });
+    await requestReset(email);
     const token = tokenFromEmail(email);
     await t.prisma.authToken.updateMany({ data: { expiresAt: new Date(Date.now() - 1000) } });
 
@@ -97,7 +104,7 @@ describe('Password reset (integration)', () => {
 
   it('rejects a confirmation that differs from the new password and keeps the link usable', async () => {
     const { email } = await createUser(t.prisma);
-    await client().data(REQUEST_RESET, { input: { email } });
+    await requestReset(email);
     const token = tokenFromEmail(email);
 
     const error = await client().error(RESET_PASSWORD, {
@@ -127,11 +134,11 @@ describe('Password reset (integration)', () => {
 
   it('keeps only the newest link valid', async () => {
     const { email } = await createUser(t.prisma);
-    await client().data(REQUEST_RESET, { input: { email } });
+    await requestReset(email);
     const first = tokenFromEmail(email);
     // The per-account cooldown counts from the newest link; move it out of the way
     await t.prisma.authToken.updateMany({ data: { createdAt: new Date(Date.now() - 120_000) } });
-    await client().data(REQUEST_RESET, { input: { email } });
+    await requestReset(email);
 
     const error = await client().error(RESET_PASSWORD, {
       input: { token: first, newPassword: NEW_PASSWORD, confirmPassword: NEW_PASSWORD },
@@ -152,9 +159,9 @@ describe('Password reset (integration)', () => {
 
   it('ignores a repeated request within the cooldown without revealing it', async () => {
     const { email } = await createUser(t.prisma);
-    await client().data(REQUEST_RESET, { input: { email } });
+    await requestReset(email);
 
-    await expect(client().data(REQUEST_RESET, { input: { email } })).resolves.toEqual({
+    await expect(requestReset(email)).resolves.toEqual({
       requestPasswordReset: true,
     });
     expect(t.mail.sent.filter((mail) => mail.to === email)).toHaveLength(1);
