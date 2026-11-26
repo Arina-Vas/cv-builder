@@ -13,9 +13,16 @@ import {
 } from '../cv-pdf.fixtures';
 import { renderCvPdfHtml, splitResponsibilities } from './cv-pdf.template';
 
-/** The document without <head>: styles and fonts would match any text search */
 const NOW = new Date('2026-11-26T10:00:00.000Z');
 
+/** A CV project without an end date whose catalog project is still running: its period ends with "Present" */
+const runningProject = () =>
+  cvProjectFixture({
+    endDate: null,
+    project: projectFixture({ endDate: calendarDate('2099-12-31') }),
+  });
+
+/** The document without <head>: styles and fonts would match any text search */
 const renderBody = (data: CvPreview, locale: Locale = Locale.en): string => {
   const html = renderCvPdfHtml(data, locale, NOW);
   return html.slice(html.indexOf('<body>'));
@@ -143,10 +150,7 @@ describe('renderCvPdfHtml', () => {
   describe('locale', () => {
     it('renders the labels of the requested locale', () => {
       const text = textOf(
-        renderBody(
-          cvPreviewFixture({ projects: [cvProjectFixture({ endDate: null })] }),
-          Locale.ru,
-        ),
+        renderBody(cvPreviewFixture({ projects: [runningProject()] }), Locale.ru),
       );
 
       expect(text).toContain('Образование BSUIR, Software Engineering');
@@ -159,10 +163,7 @@ describe('renderCvPdfHtml', () => {
     });
 
     it('escapes an apostrophe in a translation', () => {
-      const body = renderBody(
-        cvPreviewFixture({ projects: [cvProjectFixture({ endDate: null })] }),
-        Locale.fr,
-      );
+      const body = renderBody(cvPreviewFixture({ projects: [runningProject()] }), Locale.fr);
 
       expect(body).toContain('03.2022 – aujourd&#39;hui');
     });
@@ -209,11 +210,7 @@ describe('renderCvPdfHtml', () => {
     });
 
     it('shows Present for a running project without an end date', () => {
-      const running = cvProjectFixture({
-        endDate: null,
-        project: projectFixture({ endDate: calendarDate('2099-12-31') }),
-      });
-      const text = textOf(renderBody(cvPreviewFixture({ projects: [running] })));
+      const text = textOf(renderBody(cvPreviewFixture({ projects: [runningProject()] })));
 
       expect(text).toContain('Period 03.2022 – Present');
     });
