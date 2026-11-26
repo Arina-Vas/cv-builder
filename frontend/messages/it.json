@@ -502,7 +502,12 @@
     "form": {
       "createTitle": "Aggiungi competenza",
       "updateTitle": "Aggiorna competenza",
-      "fields": { "skillId": "Competenza", "mastery": "Livello di padronanza" }
+      "fields": { "skillId": "Competenza", "mastery": "Livello di padronanza" },
+      "hint": "Vengono mostrate solo le competenze del profilo del dipendente",
+      "empty": {
+        "noProfileSkills": "Il profilo del dipendente non ha ancora competenze. Aggiungile prima al profilo",
+        "allAdded": "Tutte le competenze del profilo del dipendente sono già in questo CV"
+      }
     },
     "errors": {
       "alreadyAdded": "La competenza è già aggiunta al CV",

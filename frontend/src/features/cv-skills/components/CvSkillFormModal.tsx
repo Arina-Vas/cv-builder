@@ -17,16 +17,18 @@ import { parseError } from '@/shared/lib/apollo/graphql-errors';
 import { useErrorMessage } from '@/shared/lib/apollo/useErrorMessage';
 import { useRefetchOnError } from '@/shared/lib/apollo/useRefetchOnError';
 import { useAppForm } from '@/shared/lib/form';
+import s from './CvSkillFormModal.module.css';
 
 type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   cvId: string;
+  cvSkillsCount: number;
 };
 
 const DEFAULT_VALUES = { skillId: '' };
 
-export const CvSkillFormModal = ({ open, onOpenChange, cvId }: Props) => {
+export const CvSkillFormModal = ({ open, onOpenChange, cvId, cvSkillsCount }: Props) => {
   const t = useTranslations('cvSkills');
   const tActions = useTranslations('common.actions');
   const tValidation = useTranslations('validation');
@@ -51,6 +53,11 @@ export const CvSkillFormModal = ({ open, onOpenChange, cvId }: Props) => {
   const skillOptions: SelectOption[] =
     skillsData?.availableCvSkills.map((skill) => ({ value: skill.id, label: skill.name })) ?? [];
 
+  // A CV can only list skills from the owner's profile (the backend rejects others, and a profile skill
+  // cannot be removed while a CV lists it), so an empty list means the profile has nothing more to offer
+  const noOptions =
+    !skillsLoading && Boolean(skillsData) && !skillsError && skillOptions.length === 0;
+
   const onSubmit = (values: CvSkillFormValues) =>
     withRefetch(() => createCvSkill({ variables: { input: { cvId, skillId: values.skillId } } }));
 
@@ -69,25 +76,35 @@ export const CvSkillFormModal = ({ open, onOpenChange, cvId }: Props) => {
         BAD_USER_INPUT: { skillId: t('errors.notOwnerSkill') },
       }}
     >
-      <Controller
-        control={form.control}
-        name="skillId"
-        render={({ field, fieldState }) => (
-          <Select
-            ref={field.ref}
-            name={field.name}
-            label={t('form.fields.skillId')}
-            options={skillOptions}
-            value={field.value}
-            onValueChange={field.onChange}
-            onBlur={field.onBlur}
-            disabled={skillsLoading}
-            error={
-              fieldState.error?.message ?? (skillsError && errorMessage(parseError(skillsError)))
-            }
+      {noOptions ? (
+        <p className={s.empty}>
+          {cvSkillsCount > 0 ? t('form.empty.allAdded') : t('form.empty.noProfileSkills')}
+        </p>
+      ) : (
+        <div>
+          <Controller
+            control={form.control}
+            name="skillId"
+            render={({ field, fieldState }) => (
+              <Select
+                ref={field.ref}
+                name={field.name}
+                label={t('form.fields.skillId')}
+                options={skillOptions}
+                value={field.value}
+                onValueChange={field.onChange}
+                onBlur={field.onBlur}
+                disabled={skillsLoading}
+                error={
+                  fieldState.error?.message ??
+                  (skillsError && errorMessage(parseError(skillsError)))
+                }
+              />
+            )}
           />
-        )}
-      />
+          <p className={s.hint}>{t('form.hint')}</p>
+        </div>
+      )}
     </FormModal>
   );
 };

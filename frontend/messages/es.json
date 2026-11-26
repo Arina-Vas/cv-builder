@@ -511,7 +511,12 @@
     "form": {
       "createTitle": "Añadir habilidad",
       "updateTitle": "Actualizar habilidad",
-      "fields": { "skillId": "Habilidad", "mastery": "Nivel de dominio" }
+      "fields": { "skillId": "Habilidad", "mastery": "Nivel de dominio" },
+      "hint": "Solo se muestran las habilidades del perfil del empleado",
+      "empty": {
+        "noProfileSkills": "El perfil del empleado aún no tiene habilidades. Añádelas primero al perfil",
+        "allAdded": "Todas las habilidades del perfil del empleado ya están en este CV"
+      }
     },
     "errors": {
       "alreadyAdded": "La habilidad ya está añadida al CV",

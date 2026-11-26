@@ -489,7 +489,12 @@
     "form": {
       "createTitle": "Add skill",
       "updateTitle": "Update skill",
-      "fields": { "skillId": "Skill", "mastery": "Skill mastery" }
+      "fields": { "skillId": "Skill", "mastery": "Skill mastery" },
+      "hint": "Only skills from the employee's profile are shown",
+      "empty": {
+        "noProfileSkills": "The employee's profile has no skills yet. Add them to the profile first",
+        "allAdded": "All skills from the employee's profile are already in this CV"
+      }
     },
     "errors": {
       "alreadyAdded": "Skill is already added to the CV",

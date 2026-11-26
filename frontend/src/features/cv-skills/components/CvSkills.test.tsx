@@ -156,6 +156,32 @@ describe('CvSkills', () => {
       await user.click(skill);
       expect(await within(document.body).findByRole('option', { name: 'Vue' })).toBeInTheDocument();
     });
+
+    it.each([
+      [
+        'the CV has skills',
+        [react],
+        "All skills from the employee's profile are already in this CV",
+      ],
+      [
+        'the CV is empty',
+        [],
+        "The employee's profile has no skills yet. Add them to the profile first",
+      ],
+    ])('tells in Add skill why there is nothing to add when %s', async (_case, cvSkills, text) => {
+      const { user } = renderList([
+        listMock(cvSkills),
+        {
+          request: { query: AVAILABLE_CV_SKILLS, variables: { cvId: CV_ID } },
+          result: { data: { availableCvSkills: [] } },
+        },
+      ]);
+
+      await user.click(await screen.findByRole('button', { name: 'Add skill' }));
+
+      const dialog = screen.getByRole('dialog', { name: 'Add skill' });
+      expect(await within(dialog).findByText(text)).toBeInTheDocument();
+    });
   });
 
   describe('remove', () => {

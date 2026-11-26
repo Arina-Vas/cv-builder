@@ -511,7 +511,12 @@
     "form": {
       "createTitle": "Ajouter une compétence",
       "updateTitle": "Mettre à jour la compétence",
-      "fields": { "skillId": "Compétence", "mastery": "Niveau de maîtrise" }
+      "fields": { "skillId": "Compétence", "mastery": "Niveau de maîtrise" },
+      "hint": "Seules les compétences du profil de l'employé sont affichées",
+      "empty": {
+        "noProfileSkills": "Le profil de l'employé n'a pas encore de compétences. Ajoutez-les d'abord au profil",
+        "allAdded": "Toutes les compétences du profil de l'employé sont déjà dans ce CV"
+      }
     },
     "errors": {
       "alreadyAdded": "La compétence est déjà ajoutée au CV",

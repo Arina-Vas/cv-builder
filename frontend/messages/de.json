@@ -503,7 +503,12 @@
     "form": {
       "createTitle": "Fähigkeit hinzufügen",
       "updateTitle": "Fähigkeit aktualisieren",
-      "fields": { "skillId": "Fähigkeit", "mastery": "Kenntnisstand" }
+      "fields": { "skillId": "Fähigkeit", "mastery": "Kenntnisstand" },
+      "hint": "Es werden nur Fähigkeiten aus dem Profil des Mitarbeiters angezeigt",
+      "empty": {
+        "noProfileSkills": "Das Profil des Mitarbeiters enthält noch keine Fähigkeiten. Fügen Sie sie zuerst dem Profil hinzu",
+        "allAdded": "Alle Fähigkeiten aus dem Profil des Mitarbeiters sind bereits in diesem Lebenslauf"
+      }
     },
     "errors": {
       "alreadyAdded": "Der Skill ist bereits im Lebenslauf",

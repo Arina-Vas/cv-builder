@@ -502,7 +502,12 @@
     "form": {
       "createTitle": "Dodaj umiejętność",
       "updateTitle": "Aktualizuj umiejętność",
-      "fields": { "skillId": "Umiejętność", "mastery": "Poziom umiejętności" }
+      "fields": { "skillId": "Umiejętność", "mastery": "Poziom umiejętności" },
+      "hint": "Wyświetlane są tylko umiejętności z profilu pracownika",
+      "empty": {
+        "noProfileSkills": "Profil pracownika nie ma jeszcze umiejętności. Najpierw dodaj je do profilu",
+        "allAdded": "Wszystkie umiejętności z profilu pracownika są już w tym CV"
+      }
     },
     "errors": {
       "alreadyAdded": "Umiejętność jest już dodana do CV",
