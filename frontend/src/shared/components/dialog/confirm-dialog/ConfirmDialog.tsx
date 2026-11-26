@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/shared/components/buttons';
 import { useTranslations } from 'next-intl';
 import { useErrorMessage } from '@/shared/lib/apollo/useErrorMessage';
+import type { AppError } from '@/shared/lib/apollo/graphql-errors';
 import {
   parseError,
   reasonMessage,
@@ -40,7 +41,7 @@ export const ConfirmDialog = ({
   const t = useTranslations('common.actions');
 
   const [pending, setPending] = useState(false);
-  const [error, setError] = useState<string>();
+  const [error, setError] = useState<AppError>();
   const errorMessage = useErrorMessage();
 
   const handleOpenChange = (next: boolean) => {
@@ -56,16 +57,17 @@ export const ConfirmDialog = ({
       await onConfirm();
       handleOpenChange(false);
     } catch (err) {
-      const appError = parseError(err);
-
-      const byReason = reasonMessage(appError, reasonMessages);
-      const byCode = appError.code && errorMessages?.[appError.code];
-
-      setError(byReason ?? byCode ?? errorMessage(appError));
+      setError(parseError(err));
     } finally {
       setPending(false);
     }
   };
+
+  const errorText =
+    error &&
+    (reasonMessage(error, reasonMessages) ??
+      (error.code && errorMessages?.[error.code]) ??
+      errorMessage(error));
 
   const footer = (
     <>
@@ -86,7 +88,7 @@ export const ConfirmDialog = ({
       onOpenChange={handleOpenChange}
       description={message}
       footer={footer}
-      error={error}
+      error={errorText}
       preventClose={pending}
     />
   );

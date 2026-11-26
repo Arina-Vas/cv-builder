@@ -502,7 +502,12 @@
     "form": {
       "createTitle": "Aggiungi competenza",
       "updateTitle": "Aggiorna competenza",
-      "fields": { "skillId": "Competenza", "mastery": "Livello di padronanza" }
+      "fields": { "skillId": "Competenza", "mastery": "Livello di padronanza" },
+      "hint": "Vengono mostrate solo le competenze del profilo del dipendente",
+      "empty": {
+        "noProfileSkills": "Il profilo del dipendente non ha ancora competenze. Aggiungile prima al profilo",
+        "allAdded": "Tutte le competenze del profilo del dipendente sono già in questo CV"
+      }
     },
     "errors": {
       "alreadyAdded": "La competenza è già aggiunta al CV",
@@ -636,7 +641,8 @@
     "confirmRemove": "Rimuovi",
     "remove": {
       "title": "Rimuovi competenze",
-      "message": "Vuoi davvero rimuovere <b>{count, plural, one {# competenza} other {# competenze}}</b>?"
+      "message": "Vuoi davvero rimuovere <b>{count, plural, one {# competenza} other {# competenze}}</b>?",
+      "inUse": "{count, plural, =0 {Alcune delle competenze selezionate sono usate nei CV del dipendente. Rimuovile prima da quei CV} one {La competenza {skills} è usata nei CV del dipendente. Rimuovila prima da quei CV} other {Le competenze {skills} sono usate nei CV del dipendente. Rimuovile prima da quei CV}}"
     },
     "empty": "Nessuna competenza aggiunta",
     "emptyProfile": "Nessuna competenza ancora aggiunta",

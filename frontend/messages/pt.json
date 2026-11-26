@@ -502,7 +502,12 @@
     "form": {
       "createTitle": "Adicionar habilidade",
       "updateTitle": "Atualizar habilidade",
-      "fields": { "skillId": "Habilidade", "mastery": "Nível de domínio" }
+      "fields": { "skillId": "Habilidade", "mastery": "Nível de domínio" },
+      "hint": "Apenas as habilidades do perfil do funcionário são mostradas",
+      "empty": {
+        "noProfileSkills": "O perfil do funcionário ainda não tem habilidades. Adicione-as primeiro ao perfil",
+        "allAdded": "Todas as habilidades do perfil do funcionário já estão neste currículo"
+      }
     },
     "errors": {
       "alreadyAdded": "A competência já foi adicionada ao CV",
@@ -636,7 +641,8 @@
     "confirmRemove": "Remover",
     "remove": {
       "title": "Remover habilidades",
-      "message": "Tem certeza de que deseja remover <b>{count, plural, one {# habilidade} other {# habilidades}}</b>?"
+      "message": "Tem certeza de que deseja remover <b>{count, plural, one {# habilidade} other {# habilidades}}</b>?",
+      "inUse": "{count, plural, =0 {Algumas das habilidades selecionadas são usadas nos currículos do funcionário. Remova-as primeiro desses currículos} one {A habilidade {skills} é usada nos currículos do funcionário. Remova-a primeiro desses currículos} other {As habilidades {skills} são usadas nos currículos do funcionário. Remova-as primeiro desses currículos}}"
     },
     "empty": "Nenhuma habilidade adicionada",
     "emptyProfile": "Nenhuma habilidade adicionada ainda",

@@ -502,7 +502,12 @@
     "form": {
       "createTitle": "Dodaj umiejętność",
       "updateTitle": "Aktualizuj umiejętność",
-      "fields": { "skillId": "Umiejętność", "mastery": "Poziom umiejętności" }
+      "fields": { "skillId": "Umiejętność", "mastery": "Poziom umiejętności" },
+      "hint": "Wyświetlane są tylko umiejętności z profilu pracownika",
+      "empty": {
+        "noProfileSkills": "Profil pracownika nie ma jeszcze umiejętności. Najpierw dodaj je do profilu",
+        "allAdded": "Wszystkie umiejętności z profilu pracownika są już w tym CV"
+      }
     },
     "errors": {
       "alreadyAdded": "Umiejętność jest już dodana do CV",
@@ -636,7 +641,8 @@
     "confirmRemove": "Usuń",
     "remove": {
       "title": "Usuń umiejętności",
-      "message": "Czy na pewno chcesz usunąć <b>{count, plural, one {# umiejętność} few {# umiejętności} many {# umiejętności} other {# umiejętności}}</b>?"
+      "message": "Czy na pewno chcesz usunąć <b>{count, plural, one {# umiejętność} few {# umiejętności} many {# umiejętności} other {# umiejętności}}</b>?",
+      "inUse": "{count, plural, =0 {Niektóre z wybranych umiejętności są używane w CV pracownika. Najpierw usuń je z tych CV} one {Umiejętność {skills} jest używana w CV pracownika. Najpierw usuń ją z tych CV} few {Umiejętności {skills} są używane w CV pracownika. Najpierw usuń je z tych CV} many {Umiejętności {skills} są używane w CV pracownika. Najpierw usuń je z tych CV} other {Umiejętności {skills} są używane w CV pracownika. Najpierw usuń je z tych CV}}"
     },
     "empty": "Nie dodano umiejętności",
     "emptyProfile": "Nie dodano jeszcze umiejętności",

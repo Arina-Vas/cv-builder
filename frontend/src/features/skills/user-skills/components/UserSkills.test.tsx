@@ -262,6 +262,61 @@ describe('UserSkills', () => {
       // selection mode is over
       expect(screen.getByRole('button', { name: 'Remove skills' })).toBeInTheDocument();
     });
+
+    const inUseMock = (ids: string[], inUse?: string[]): MockLink.MockedResponse => ({
+      request: { query: DELETE_USER_SKILLS, variables: { ids, userId: USER_ID } },
+      result: {
+        errors: [
+          new GraphQLError('Skills cannot be removed because they are used in CVs', {
+            extensions: { code: 'ENTITY_IN_USE', ...(inUse && { ids: inUse }) },
+          }),
+        ],
+      },
+    });
+
+    /** Selects the skills, opens the confirmation and confirms; returns the dialog. */
+    const confirmRemove = async (user: ReturnType<typeof renderList>['user'], names: RegExp[]) => {
+      await user.click(await screen.findByRole('button', { name: 'Remove skills' }));
+      for (const name of names) await user.click(screen.getByRole('button', { name }));
+      await user.click(screen.getByRole('button', { name: `Remove ${names.length}` }));
+      const dialog = screen.getByRole('dialog', { name: 'Remove skills' });
+      await user.click(within(dialog).getByRole('button', { name: 'Confirm' }));
+      return dialog;
+    };
+
+    it.each([
+      ['one', ['us1'], "React is used in the employee's CVs"],
+      ['several', ['us1', 'us3'], "React and NestJS are used in the employee's CVs"],
+    ])(
+      'names the skills that are used in CVs (%s), keeps the dialog open and the selection',
+      async (_case, inUse, text) => {
+        const { user } = renderList({
+          mocks: [listMock(), inUseMock(['us1', 'us2', 'us3'], inUse)],
+        });
+
+        const dialog = await confirmRemove(user, [/React/, /CSS/, /NestJS/]);
+
+        const alert = await within(dialog).findByRole('alert');
+        expect(alert).toHaveTextContent(text);
+        // CSS is selected but free, so it is not named
+        expect(alert).not.toHaveTextContent('CSS');
+        expect(screen.getByRole('dialog', { name: 'Remove skills' })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /React/, hidden: true })).toHaveAttribute(
+          'aria-pressed',
+          'true',
+        );
+      },
+    );
+
+    it('falls back to a general text when the backend sends no ids', async () => {
+      const { user } = renderList({ mocks: [listMock(), inUseMock(['us1'])] });
+
+      const dialog = await confirmRemove(user, [/React/]);
+
+      expect(await within(dialog).findByRole('alert')).toHaveTextContent(
+        'Some of the selected skills are used in the employee',
+      );
+    });
   });
 
   describe('with a closed action gate (unverified email)', () => {

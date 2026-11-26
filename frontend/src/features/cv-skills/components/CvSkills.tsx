@@ -92,7 +92,12 @@ export const CvSkills = ({ cvId }: Props) => {
         />
       )}
 
-      <CvSkillFormModal open={addOpen} onOpenChange={setAddOpen} cvId={cvId} />
+      <CvSkillFormModal
+        open={addOpen}
+        onOpenChange={setAddOpen}
+        cvId={cvId}
+        cvSkillsCount={data?.cvSkills.length ?? 0}
+      />
 
       <CvSkillUpdateModal cvSkill={editing} onOpenChange={(open) => !open && setEditing(null)} />
 

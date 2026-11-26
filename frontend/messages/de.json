@@ -503,7 +503,12 @@
     "form": {
       "createTitle": "Fähigkeit hinzufügen",
       "updateTitle": "Fähigkeit aktualisieren",
-      "fields": { "skillId": "Fähigkeit", "mastery": "Kenntnisstand" }
+      "fields": { "skillId": "Fähigkeit", "mastery": "Kenntnisstand" },
+      "hint": "Es werden nur Fähigkeiten aus dem Profil des Mitarbeiters angezeigt",
+      "empty": {
+        "noProfileSkills": "Das Profil des Mitarbeiters enthält noch keine Fähigkeiten. Fügen Sie sie zuerst dem Profil hinzu",
+        "allAdded": "Alle Fähigkeiten aus dem Profil des Mitarbeiters sind bereits in diesem Lebenslauf"
+      }
     },
     "errors": {
       "alreadyAdded": "Der Skill ist bereits im Lebenslauf",
@@ -637,7 +642,8 @@
     "confirmRemove": "Entfernen",
     "remove": {
       "title": "Fähigkeiten entfernen",
-      "message": "Möchten Sie wirklich <b>{count, plural, one {# Fähigkeit} other {# Fähigkeiten}}</b> entfernen?"
+      "message": "Möchten Sie wirklich <b>{count, plural, one {# Fähigkeit} other {# Fähigkeiten}}</b> entfernen?",
+      "inUse": "{count, plural, =0 {Einige der ausgewählten Fähigkeiten werden in den Lebensläufen des Mitarbeiters verwendet. Entfernen Sie sie zuerst aus diesen Lebensläufen} one {Die Fähigkeit {skills} wird in den Lebensläufen des Mitarbeiters verwendet. Entfernen Sie sie zuerst aus diesen Lebensläufen} other {Die Fähigkeiten {skills} werden in den Lebensläufen des Mitarbeiters verwendet. Entfernen Sie sie zuerst aus diesen Lebensläufen}}"
     },
     "empty": "Keine Fähigkeiten hinzugefügt",
     "emptyProfile": "Noch keine Fähigkeiten hinzugefügt",

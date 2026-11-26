@@ -43,6 +43,7 @@ interface AppErrorExtensions {
   field?: string;
   fields?: { field: string; message: string }[];
   retryAfter?: number;
+  ids?: string[];
 }
 
 export interface AppError {
@@ -52,6 +53,7 @@ export interface AppError {
   message: string;
   fieldErrors: Record<string, string>;
   retryAfter?: number;
+  ids?: string[];
 }
 
 export function parseError(error: unknown): AppError {
@@ -77,6 +79,7 @@ export function parseError(error: unknown): AppError {
     message: first.message,
     fieldErrors,
     retryAfter: extensions.retryAfter,
+    ids: Array.isArray(extensions.ids) ? extensions.ids : undefined,
   };
 }
 

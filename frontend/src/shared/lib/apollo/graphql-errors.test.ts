@@ -121,6 +121,21 @@ describe('parseError', () => {
     },
   );
 
+  it('passes extensions.ids through (ENTITY_IN_USE names the blocked items)', () => {
+    const error = graphQLError('Skills cannot be removed because they are used in CVs', {
+      code: 'ENTITY_IN_USE',
+      ids: ['us1', 'us3'],
+    });
+
+    expect(parseError(error)).toMatchObject({ code: 'ENTITY_IN_USE', ids: ['us1', 'us3'] });
+  });
+
+  it.each([['us1'], [null], [undefined]])('has no ids when extensions.ids is %j', (ids) => {
+    const error = graphQLError('In use', { code: 'ENTITY_IN_USE', ids });
+
+    expect(parseError(error).ids).toBeUndefined();
+  });
+
   it('has no reason when the backend sends none', () => {
     const error = graphQLError('Department already exists', { code: 'CONFLICT', field: 'name' });
 

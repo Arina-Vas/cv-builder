@@ -379,27 +379,42 @@ describe('CV skills (integration)', () => {
   });
 
   describe('removing a skill from the profile', () => {
-    it("removes it from the owner's CVs and leaves other users' CVs alone", async () => {
+    /** Skill ids in the user's profile, sorted. */
+    const profileSkillIds = async (userId: string) =>
+      (await t.prisma.userSkill.findMany({ where: { userId }, select: { skillId: true } }))
+        .map((row) => row.skillId)
+        .sort();
+
+    it("rejects skills used in the owner's CVs with ENTITY_IN_USE and the ids of those assignments", async () => {
+      const { browser, user } = await signedIn();
+      const cvId = await insertCv(user.id);
+      const userReact = await assign(user.id, react);
+      const userVue = await assign(user.id, vue);
+      await insertCvSkill(cvId, react);
+
+      const error = await browser.error(DELETE_USER_SKILLS, {
+        userId: user.id,
+        ids: [userReact, userVue],
+      });
+
+      expect(error.extensions).toMatchObject({ code: 'ENTITY_IN_USE', ids: [userReact] });
+      // The request is rejected as a whole: the free skill (Vue) stays too, the CV is unchanged
+      expect(await profileSkillIds(user.id)).toEqual([react, vue].sort());
+      expect(await storedSkillIds(cvId)).toEqual([react]);
+    });
+
+    it("removes a skill that only another user's CV lists", async () => {
       const { browser, user } = await signedIn();
       const other = await createUser(t.prisma);
-      const cvId = await insertCv(user.id);
-      const secondCvId = await insertCv(user.id);
       const otherCvId = await insertCv(other.id);
       const userReact = await assign(user.id, react);
-      await assign(user.id, vue);
       await assign(other.id, react);
-      await insertCvSkill(cvId, react);
-      await insertCvSkill(cvId, vue);
-      await insertCvSkill(secondCvId, react);
       await insertCvSkill(otherCvId, react);
 
       await browser.data(DELETE_USER_SKILLS, { userId: user.id, ids: [userReact] });
 
-      expect(await storedSkillIds(cvId)).toEqual([vue]);
-      expect(await storedSkillIds(secondCvId)).toEqual([]);
+      expect(await profileSkillIds(user.id)).toEqual([]);
       expect(await storedSkillIds(otherCvId)).toEqual([react]);
-      // The CV still loads: no CV skill is left without the owner's skill
-      await expect(list(browser, cvId)).resolves.toHaveLength(1);
     });
   });
 });

@@ -31,10 +31,18 @@ const createError = (code: string, message: string): MockLink.MockedResponse => 
   },
 });
 
-const renderModal = (mocks: MockLink.MockedResponse[], onOpenChange = vi.fn()) =>
-  renderWithProviders(<CvSkillFormModal open onOpenChange={onOpenChange} cvId={CV_ID} />, {
-    mocks,
-  });
+const HINT = "Only skills from the employee's profile are shown";
+
+const renderModal = (mocks: MockLink.MockedResponse[], onOpenChange = vi.fn(), cvSkillsCount = 1) =>
+  renderWithProviders(
+    <CvSkillFormModal
+      open
+      onOpenChange={onOpenChange}
+      cvId={CV_ID}
+      cvSkillsCount={cvSkillsCount}
+    />,
+    { mocks },
+  );
 
 const options = () =>
   within(document.body)
@@ -59,6 +67,35 @@ describe('CvSkillFormModal', () => {
     await expect.poll(options).toEqual(['Vue', 'Angular']);
   });
 
+  it('explains under Skill that the options come from the employee profile', async () => {
+    renderModal([availableMock()]);
+
+    // also while the options load, so nothing jumps in
+    expect(screen.getByRole('status')).toHaveTextContent(HINT);
+    await expect.poll(() => screen.getByRole('combobox', { name: 'Skill' })).toBeEnabled();
+    expect(screen.getByRole('status')).toHaveTextContent(HINT);
+  });
+
+  it.each([
+    [
+      'the CV has no skills',
+      0,
+      "The employee's profile has no skills yet. Add them to the profile first",
+    ],
+    ['the CV has skills', 2, "All skills from the employee's profile are already in this CV"],
+  ])(
+    'locks Skill and says why there is nothing to add when %s',
+    async (_case, cvSkillsCount, text) => {
+      renderModal([availableMock([])], vi.fn(), cvSkillsCount);
+
+      // the hint line turns into the reason (announced), Skill stays in place so the dialog does not jump
+      await expect.poll(() => screen.getByRole('status')).toHaveTextContent(text);
+      expect(screen.queryByText(HINT)).not.toBeInTheDocument();
+      expect(screen.getByRole('combobox', { name: 'Skill' })).toBeDisabled();
+      expect(screen.getByRole('button', { name: 'Add' })).toBeDisabled();
+    },
+  );
+
   it('keeps Add disabled until a skill is chosen', async () => {
     const { user } = renderModal([availableMock()]);
 
@@ -72,7 +109,9 @@ describe('CvSkillFormModal', () => {
 
   it('does not load the options while closed', () => {
     // no mock: a request would fail with "no more mocked responses"
-    renderWithProviders(<CvSkillFormModal open={false} onOpenChange={vi.fn()} cvId={CV_ID} />);
+    renderWithProviders(
+      <CvSkillFormModal open={false} onOpenChange={vi.fn()} cvId={CV_ID} cvSkillsCount={0} />,
+    );
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
@@ -162,5 +201,7 @@ describe('CvSkillFormModal', () => {
     await expect
       .poll(() => screen.getByRole('combobox', { name: 'Skill' }))
       .toHaveAccessibleDescription('Something went wrong. Please try again later');
+    // a failed load is not "nothing to add"
+    expect(screen.queryByText(/already in this CV|has no skills yet/)).not.toBeInTheDocument();
   });
 });

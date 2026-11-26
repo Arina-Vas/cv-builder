@@ -284,6 +284,9 @@ avoid a column-key → enum map in every table.
     idempotent; wiki: "stale selections should be removed"). The frontend evicts the returned ids and refetches.
   - An id of another user's assignment rejects the whole request with `FORBIDDEN` and nothing is removed: the UI
     never sends one, so it means a tampered request (wiki: "Assignment belongs to the selected user").
+  - `deleteUserSkills`: a skill that a CV of the same user lists rejects the whole request with `ENTITY_IN_USE`
+    and nothing is removed; `extensions.ids` holds the blocked assignment ids, so the dialog names those skills
+    ([data model](../data-model.md#deletion-policy)). The skill has to be removed from the CVs first.
 - Mutations take one argument named `input` of an `@InputType`, except deletes, which take ids directly.
   A delete of an owned entity also takes the owner id, which scopes it like `userId` in `deleteUserSkills`:
   `deleteCv(id: ID!, userId: ID!): ID!`. A delete of something inside a CV takes the CV id the same way:
@@ -353,7 +356,7 @@ everything else.
 | `NOT_FOUND`             | the entity does not exist (or was deleted meanwhile)                                                                     | —                                                                  | query: not-found state; mutation: toast, refresh stale data               |
 | `BAD_USER_INPUT`        | validation failed                                                                                                        | `fields: [{ field, message }]`, `reason` (see [Reasons](#reasons)) | inline errors under the fields                                            |
 | `CONFLICT`              | a unique value is already taken                                                                                          | `field` (when known)                                               | inline error under `field`                                                |
-| `ENTITY_IN_USE`         | delete blocked because the item is referenced                                                                            | —                                                                  | toast, or the delete dialog shows it                                      |
+| `ENTITY_IN_USE`         | delete blocked because the item is referenced                                                                            | `ids` (only `deleteUserSkills`: the blocked assignments)           | toast, or the delete dialog shows it                                      |
 | `OPERATION_NOT_ALLOWED` | the caller has access, but a business rule forbids the action (e.g. delete own account, delete or demote the last admin) | `reason` (see [Reasons](#reasons))                                 | toast, or the dialog / modal shows it                                     |
 | `RATE_LIMITED`          | too many requests (per IP or e.g. resend code)                                                                           | `retryAfter` (seconds)                                             | "please wait" message; mutation: toast                                    |
 | `INTERNAL_SERVER_ERROR` | unexpected error                                                                                                         | —                                                                  | query: error state with Retry; mutation: generic error toast              |
@@ -491,6 +494,9 @@ Rules for services:
   whether the department is referenced by other entities"). `Restrict` stays as the safety net: a reference added
   between the check and the delete makes the database reject it, and the filter returns `ENTITY_IN_USE` with a
   generic message. The frontend shows its own per-entity text either way, keyed by the page and the code.
+  A rule with no foreign key behind it (a profile skill used in the owner's CVs) is checked the same way, without
+  the safety net; when the frontend has to name the blocked items, the service passes their ids:
+  `entityInUse('<message>', ids)` → `extensions.ids`, read by `parseError` as `AppError.ids`.
 - **Rate limits.** A service that knows the cooldown throws `rateLimited(<seconds>, '<message>')`.
 
 Which Prisma errors a service catches (with `isPrismaError(error, code)`); everything else is rethrown for the

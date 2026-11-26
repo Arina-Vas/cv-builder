@@ -511,7 +511,12 @@
     "form": {
       "createTitle": "Ajouter une compétence",
       "updateTitle": "Mettre à jour la compétence",
-      "fields": { "skillId": "Compétence", "mastery": "Niveau de maîtrise" }
+      "fields": { "skillId": "Compétence", "mastery": "Niveau de maîtrise" },
+      "hint": "Seules les compétences du profil de l'employé sont affichées",
+      "empty": {
+        "noProfileSkills": "Le profil de l'employé n'a pas encore de compétences. Ajoutez-les d'abord au profil",
+        "allAdded": "Toutes les compétences du profil de l'employé sont déjà dans ce CV"
+      }
     },
     "errors": {
       "alreadyAdded": "La compétence est déjà ajoutée au CV",
@@ -645,7 +650,8 @@
     "confirmRemove": "Retirer",
     "remove": {
       "title": "Retirer des compétences",
-      "message": "Voulez-vous vraiment retirer <b>{count, plural, one {# compétence} other {# compétences}}</b> ?"
+      "message": "Voulez-vous vraiment retirer <b>{count, plural, one {# compétence} other {# compétences}}</b> ?",
+      "inUse": "{count, plural, =0 {Certaines des compétences sélectionnées sont utilisées dans les CV de l'employé. Retirez-les d'abord de ces CV} one {La compétence {skills} est utilisée dans les CV de l'employé. Retirez-la d'abord de ces CV} other {Les compétences {skills} sont utilisées dans les CV de l'employé. Retirez-les d'abord de ces CV}}"
     },
     "empty": "Aucune compétence ajoutée",
     "emptyProfile": "Aucune compétence ajoutée pour le moment",
