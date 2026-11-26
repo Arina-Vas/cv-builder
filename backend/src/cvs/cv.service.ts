@@ -14,8 +14,7 @@ import { UserCvsArgs } from '@/cvs/dto/user-cvs.args';
 import { CreateCvInput } from '@/cvs/dto/create-cv.input';
 import { Cv } from '@/cvs/models/cv.model';
 import { UpdateCvInput } from '@/cvs/dto/update-cv.input';
-
-const contains = (search: string) => ({ contains: search, mode: 'insensitive' as const });
+import { containsInsensitive } from '@/common/prisma/search';
 
 @Injectable()
 export class CvService {
@@ -27,7 +26,7 @@ export class CvService {
   async findAll(currentUser: User, args: CvsArgs): Promise<CvPage> {
     const { search } = args;
 
-    const whereUser: Prisma.CvWhereInput = search ? { name: contains(search) } : {};
+    const whereUser: Prisma.CvWhereInput = search ? { name: containsInsensitive(search) } : {};
 
     if (currentUser.role !== UserRole.ADMIN) {
       return this.paginate({ userId: currentUser.id, ...whereUser }, args);
@@ -35,7 +34,10 @@ export class CvService {
 
     const whereAdmin: Prisma.CvWhereInput = search
       ? {
-          OR: [{ name: contains(search) }, { user: { email: contains(search) } }],
+          OR: [
+            { name: containsInsensitive(search) },
+            { user: { email: containsInsensitive(search) } },
+          ],
         }
       : {};
 
@@ -46,7 +48,7 @@ export class CvService {
     const { userId, search } = args;
     await this.assertCanManage(currentUser, userId);
 
-    return this.paginate({ userId, ...(search && { name: contains(search) }) }, args);
+    return this.paginate({ userId, ...(search && { name: containsInsensitive(search) }) }, args);
   }
 
   async findOne(currentUser: User, id: string): Promise<Cv> {

@@ -31,6 +31,18 @@ const blog = {
   technologies: [react, node],
 };
 
+// a finished catalog project, to switch to after a date is picked for Blog
+const archive = {
+  __typename: 'Project' as const,
+  id: 'p2',
+  name: 'Archive',
+  domain: 'Legacy',
+  description: 'A legacy system',
+  startDate: '2020-01-01',
+  endDate: '2021-12-31',
+  technologies: [node],
+};
+
 const cvProject = {
   __typename: 'CvProject' as const,
   id: 'cp1',
@@ -62,7 +74,7 @@ const listMock: MockLink.MockedResponse = {
 const createInput = {
   cvId: CV_ID,
   projectId: 'p1',
-  startDate: '2024-03-10',
+  startDate: '2024-01-10',
   endDate: null,
   roleIds: ['r1'],
   responsibilities: 'Code review',
@@ -70,11 +82,11 @@ const createInput = {
 
 type User = ReturnType<typeof renderWithProviders>['user'];
 
-const chooseProject = async (user: User) => {
+const chooseProject = async (user: User, name = 'Blog') => {
   const select = screen.getByRole('combobox', { name: 'Name' });
   await expect.poll(() => select).toBeEnabled();
   await user.click(select);
-  await user.click(within(document.body).getByRole('option', { name: 'Blog' }));
+  await user.click(within(document.body).getByRole('option', { name }));
 };
 
 const chooseRole = async (user: User, name: string) => {
@@ -88,7 +100,7 @@ const chooseRole = async (user: User, name: string) => {
   await user.keyboard('{Escape}');
 };
 
-// the calendar opens on today's month, which is March 2024 here (see beforeEach)
+// an empty Start Date opens on the project start month: January 2024 for Blog
 const pickDay = async (user: User, field: string, day: RegExp) => {
   await user.click(screen.getByRole('button', { name: field }));
   await user.click(await screen.findByRole('gridcell', { name: day }));
@@ -96,7 +108,7 @@ const pickDay = async (user: User, field: string, day: RegExp) => {
 
 const fillAddForm = async (user: User) => {
   await chooseProject(user);
-  await pickDay(user, 'Start Date', /March 10th, 2024/);
+  await pickDay(user, 'Start Date', /January 10th, 2024/);
   await chooseRole(user, 'Developer');
   await user.type(screen.getByLabelText('Responsibilities'), 'Code review');
 };
@@ -159,8 +171,7 @@ describe('CvProjectFormModal', () => {
       expect(await within(document.body).findByRole('option', { name: 'CRM' })).toBeInTheDocument();
     });
 
-    it('does not offer days outside the project duration', async () => {
-      vi.setSystemTime(new Date(2023, 11, 15));
+    it('opens the Start Date on the project start month, days before it disabled', async () => {
       const { user } = renderWithProviders(
         <CvProjectFormModal open onOpenChange={vi.fn()} cvId={CV_ID} />,
         { mocks: [availableMock(), rolesMock] },
@@ -169,11 +180,80 @@ describe('CvProjectFormModal', () => {
       await chooseProject(user);
       await user.click(screen.getByRole('button', { name: 'Start Date' }));
 
-      // December 2023 is before the project starts
-      expect(await screen.findByRole('gridcell', { name: /December 20th, 2023/ })).toHaveAttribute(
+      // today is March 2024, the project starts in January 2024
+      expect(
+        await screen.findByRole('rowgroup', { name: 'Month January, 2024' }),
+      ).toBeInTheDocument();
+      // the last day of December shown in the first week is before the project starts
+      expect(screen.getByRole('gridcell', { name: /December 31st, 2023/ })).toHaveAttribute(
         'aria-disabled',
         'true',
       );
+    });
+
+    it('opens the End Date of a finished project on its end month, days after it disabled', async () => {
+      // the project ended 2024-12-31: today's month is fully disabled
+      vi.setSystemTime(new Date(2025, 4, 15));
+      const { user } = renderWithProviders(
+        <CvProjectFormModal open onOpenChange={vi.fn()} cvId={CV_ID} />,
+        { mocks: [availableMock(), rolesMock] },
+      );
+
+      await chooseProject(user);
+      await user.click(screen.getByRole('button', { name: 'End Date' }));
+
+      expect(
+        await screen.findByRole('rowgroup', { name: 'Month December, 2024' }),
+      ).toBeInTheDocument();
+      expect(screen.getByRole('gridcell', { name: /January 1st, 2025/ })).toHaveAttribute(
+        'aria-disabled',
+        'true',
+      );
+    });
+
+    it('does not show "Start date is required" right after a project is chosen', async () => {
+      const { user } = renderWithProviders(
+        <CvProjectFormModal open onOpenChange={vi.fn()} cvId={CV_ID} />,
+        { mocks: [availableMock(), rolesMock] },
+      );
+
+      await chooseProject(user);
+
+      expect(screen.getByRole('button', { name: 'Start Date' })).toBeEnabled();
+      expect(screen.queryByText('Start date is required')).not.toBeInTheDocument();
+    });
+
+    it('shows "Start date is required" once the Start Date is touched', async () => {
+      const { user } = renderWithProviders(
+        <CvProjectFormModal open onOpenChange={vi.fn()} cvId={CV_ID} />,
+        { mocks: [availableMock(), rolesMock] },
+      );
+
+      await chooseProject(user);
+      // opened and closed without picking a day
+      await user.click(screen.getByRole('button', { name: 'Start Date' }));
+      await screen.findByRole('rowgroup', { name: 'Month January, 2024' });
+      await user.keyboard('{Escape}');
+
+      expect(await screen.findByText('Start date is required')).toBeInTheDocument();
+    });
+
+    it('checks a picked date again when another project is chosen', async () => {
+      const { user } = renderWithProviders(
+        <CvProjectFormModal open onOpenChange={vi.fn()} cvId={CV_ID} />,
+        { mocks: [availableMock([blog, archive]), rolesMock] },
+      );
+
+      await chooseProject(user);
+      await pickDay(user, 'Start Date', /January 10th, 2024/);
+      // Archive ended in 2021, so January 2024 is outside it
+      await chooseProject(user, 'Archive');
+
+      expect(
+        await screen.findByText('Start date must be within project duration'),
+      ).toBeInTheDocument();
+      // the End Date is still empty: nothing to check there
+      expect(screen.queryByText(/End date/)).not.toBeInTheDocument();
     });
 
     it('requires at least one role', async () => {
@@ -183,7 +263,7 @@ describe('CvProjectFormModal', () => {
       );
 
       await chooseProject(user);
-      await pickDay(user, 'Start Date', /March 10th, 2024/);
+      await pickDay(user, 'Start Date', /January 10th, 2024/);
       await chooseRole(user, 'Developer');
       // remove the only role again
       // the error shows right away: removing a role touches the field, no need to leave it
@@ -207,7 +287,7 @@ describe('CvProjectFormModal', () => {
                 data: {
                   createCvProject: {
                     ...cvProject,
-                    startDate: '2024-03-10',
+                    startDate: '2024-01-10',
                     endDate: null,
                   },
                 },

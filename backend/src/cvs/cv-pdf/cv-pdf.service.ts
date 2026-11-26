@@ -21,7 +21,7 @@ export class CvPdfService implements OnModuleDestroy {
 
   async generate(input: GenerateCvPdfInput, currentUser: User): Promise<CvPdf> {
     const preview = await this.cvPreviewService.getPreview(currentUser, input.cvId);
-    const html = renderCvPdfHtml(preview, input.locale);
+    const html = renderCvPdfHtml(preview, input.locale, new Date());
     const pdf = await this.enqueue(() => this.renderPdf(html));
 
     return { fileName: toPdfFileName(preview.name), content: Buffer.from(pdf).toString('base64') };

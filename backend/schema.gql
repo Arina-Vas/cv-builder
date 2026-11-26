@@ -661,6 +661,10 @@ type Query {
   Skills of the user, readable by any authenticated user; sorted by category name, then skill name. Fails with NOT_FOUND if the user does not exist
   """
   userSkills(userId: ID!): [UserSkill!]!
+
+  """
+  Users list. Search is case-insensitive: every word must match the first or last name (so a full name in either order works), or the whole search must match the email
+  """
   users(
     """1-based page number"""
     page: Int! = 1

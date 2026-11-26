@@ -11,6 +11,7 @@ import { userInclude } from '@/users/user.mapper';
 import type { CvPreview } from './models/cv-preview.model';
 import type { CvPreviewSkillGroup } from './models/cv-preview-skill-group.model';
 import { distinctDomains, type ProjectPeriod, skillExperience } from './cv-preview.calculations';
+import { effectiveEndDate } from '@/cvs/cv-projects/effective-end-date';
 
 export const cvPreviewInclude = (ownerId: string) =>
   ({
@@ -43,7 +44,7 @@ export type CvPreviewRow = Prisma.CvGetPayload<{ include: ReturnType<typeof cvPr
 export const toCvPreview = (row: CvPreviewRow, now: Date): CvPreview => {
   const periods: ProjectPeriod[] = row.projects.map((cvProject) => ({
     startDate: cvProject.startDate,
-    endDate: cvProject.endDate,
+    endDate: effectiveEndDate(cvProject, now),
     skillIds: cvProject.project.technologies.map((technology) => technology.skillId),
   }));
 

@@ -140,8 +140,6 @@ export const CvProjectFormModal = ({ open, onOpenChange, cvId, cvProject }: Prop
       <Controller
         control={form.control}
         name="projectId"
-        // a new project brings new limits for the dates already picked
-        rules={{ deps: ['startDate', 'endDate'] }}
         render={({ field, fieldState }) => (
           <Select
             ref={field.ref}
@@ -149,7 +147,13 @@ export const CvProjectFormModal = ({ open, onOpenChange, cvId, cvProject }: Prop
             label={t('fields.project')}
             options={projectOptions}
             value={field.value}
-            onValueChange={field.onChange}
+            onValueChange={(id) => {
+              field.onChange(id);
+              const filled = (['startDate', 'endDate'] as const).filter((name) =>
+                form.getValues(name),
+              );
+              if (filled.length) void form.trigger(filled);
+            }}
             onBlur={field.onBlur}
             disabled={availableLoading || !!cvProject}
             error={
@@ -176,6 +180,7 @@ export const CvProjectFormModal = ({ open, onOpenChange, cvId, cvProject }: Prop
             maxDate={period?.endDate}
             disabled={!selected}
             error={fieldState.error?.message}
+            openToDate={period?.startDate}
           />
         )}
       />

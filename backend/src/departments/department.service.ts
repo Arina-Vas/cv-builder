@@ -10,6 +10,7 @@ import { CreateDepartmentInput } from '@/departments/dto/create-department.input
 import { conflict, entityInUse } from '@/common/errors/app-errors';
 import { isPrismaError } from '@/prisma/prisma-errors';
 import { UpdateDepartmentInput } from '@/departments/dto/update-department.input';
+import { containsInsensitive } from '@/common/prisma/search';
 
 @Injectable()
 export class DepartmentService {
@@ -22,9 +23,7 @@ export class DepartmentService {
     page,
     pageSize,
   }: DepartmentsArgs): Promise<DepartmentPage> {
-    const where: Prisma.DepartmentWhereInput = search
-      ? { name: { contains: search, mode: 'insensitive' } }
-      : {};
+    const where: Prisma.DepartmentWhereInput = search ? { name: containsInsensitive(search) } : {};
 
     const order: Prisma.SortOrder = sortOrder === SortOrder.ASC ? 'asc' : 'desc';
 

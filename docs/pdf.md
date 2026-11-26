@@ -21,8 +21,10 @@ generateCvPdf(input: { cvId, locale }) → CvPreviewService.getPreview (NOT_FOUN
    models); there is no PDF-specific mapper. The experience and last-used years come calculated from B7.
 3. **HTML.** `cv-pdf.template.ts` renders a full HTML page as a string. It is a port of the CV Preview components
    (`frontend/src/features/cvs/components/cv-preview/document/`): the same sections, the same rules for hiding
-   empty values, the period as `MM.yyyy – Present`, the same list punctuation. Labels come from the requested
-   locale, see [Language](#language). Every value from the data and every label goes through `escapeHtml`
+   empty values, the period as `MM.yyyy – MM.yyyy` or `MM.yyyy – Present`, the same list punctuation. An empty
+   CV project end date is resolved by the same rule as in the Preview (`effectiveEndDate`, see
+   [data-model.md](data-model.md#assignments)): "Present" only while the catalog project is running, otherwise
+   the project's end date. Labels come from the requested locale, see [Language](#language). Every value from the data and every label goes through `escapeHtml`
    (`src/common/html/escape-html.ts`).
 4. **Styles.** `cv-pdf.styles.ts` is a port of the Preview CSS modules with design tokens replaced by their values
    and the print palette. It adds the print rules: `@page { size: A4; margin: 16mm 14mm }`, a project and a skill

@@ -72,9 +72,21 @@ describe('CvProjectEntry', () => {
   });
 
   it('shows an active project as running to the present', () => {
-    renderWithProviders(<CvProjectEntry project={finSight} />);
+    // the fixture project ends 2027-12-31: pushed further so the test doesn't expire
+    renderWithProviders(
+      <CvProjectEntry
+        project={{ ...finSight, project: { ...finSight.project, endDate: '2099-12-31' } }}
+      />,
+    );
 
     expect(valueOf('Period')).toHaveTextContent('01.2024 – Present');
+  });
+
+  it('ends a finished project without a CV end date at the project end', () => {
+    // ShopWave ended 2025-06-30
+    renderWithProviders(<CvProjectEntry project={{ ...shopWave, endDate: null }} />);
+
+    expect(valueOf('Period')).toHaveTextContent('03.2022 – 06.2025');
   });
 
   it('lists responsibilities with a semicolon after each item and a dot after the last', () => {

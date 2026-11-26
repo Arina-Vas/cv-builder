@@ -40,6 +40,7 @@ const cvProjectRow = (
   startDate: string,
   endDate: string | null,
   technologies: ReturnType<typeof skillRow>[],
+  projectEndDate = '2030-01-01',
 ) => ({
   id: `cv-project-${name}`,
   cvId: 'cv-1',
@@ -53,7 +54,7 @@ const cvProjectRow = (
     domain,
     description: `${name} description`,
     startDate: day('2020-01-01'),
-    endDate: day('2030-01-01'),
+    endDate: day(projectEndDate),
     technologies: technologies.map((skill) => ({
       id: `link-${name}-${skill.name}`,
       projectId: `project-${name}`,
@@ -208,6 +209,30 @@ describe('toCvPreview', () => {
         ],
       },
     ]);
+  });
+
+  it('takes the last used year of a finished project without a CV end date from the project end', () => {
+    // Shop B has no CV end date, its project ended 2025-06-30: not "Till now" any more
+    const finished = row({
+      projects: [
+        cvProjectRow('Shop B', 'E-commerce', '2023-06-01', null, [REACT], '2025-06-30'),
+        cvProjectRow('Shop A', 'E-commerce', '2022-03-01', '2023-12-31', [REACT, JAVASCRIPT]),
+      ],
+    });
+
+    const react = toCvPreview(finished, NOW)
+      .skillGroups.flatMap((group) => group.skills)
+      .find((cvSkill) => cvSkill.skill.id === REACT.id);
+
+    expect(react).toMatchObject({ experienceYears: 4, lastUsedYear: 2025 });
+  });
+
+  it('keeps the CV end date empty in the mapped projects', () => {
+    const finished = row({
+      projects: [cvProjectRow('Shop B', 'E-commerce', '2023-06-01', null, [REACT], '2025-06-30')],
+    });
+
+    expect(toCvPreview(finished, NOW).projects[0]).toMatchObject({ endDate: null });
   });
 
   it('returns empty lists for a CV without skills, projects and owner languages', () => {

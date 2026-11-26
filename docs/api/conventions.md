@@ -37,6 +37,7 @@ Modules import these instead of writing their own:
 | `SortOrder`                                             | `backend/src/common/graphql/sort-order.enum.ts`       |
 | Pagination defaults, page sizes, `MAX_NAME_LENGTH`      | `backend/src/common/graphql/constants.ts`             |
 | `DateScalar`                                            | `backend/src/common/graphql/date.scalar.ts`           |
+| `containsInsensitive`, `escapeLike` (list search)       | `backend/src/common/prisma/search.ts`                 |
 | `UserRole`, `Mastery`, `Proficiency`                    | `backend/src/common/graphql/enums.ts`                 |
 | `ErrorCode` and error helpers                           | `backend/src/common/errors/`                          |
 | `@Roles()`                                              | `backend/src/common/auth/roles.decorator.ts`          |
@@ -189,6 +190,9 @@ Lists without pagination extend `ListArgs` instead of `PaginatedListArgs` and re
 | `search`       | none                | trimmed, case-insensitive, matches part of the value; empty or `null` = no filter  |
 | Secondary sort | `id ASC`            | always added by the backend, so rows with equal values do not jump between pages   |
 
+- `search` is matched literally: `%`, `_` and `\` are escaped, so they are not LIKE wildcards. Services build the
+  filter with `containsInsensitive` from `backend/src/common/prisma/search.ts`, never a raw
+  `{ contains, mode: 'insensitive' }`.
 - `total` is the number of items matching `search`, not the number of items on the page.
 - A page past the end returns `items: []` with the real `total`; the frontend moves to the last page.
 - The frontend resets `page` to 1 when `search`, `sortBy`, `sortOrder` or `pageSize` changes.
