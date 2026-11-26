@@ -28,9 +28,24 @@ type Props = {
   ref?: Ref<HTMLButtonElement>;
   onOpenChange?: (open: boolean) => void;
   clearable?: boolean;
+  openToDate?: Date;
 };
 
 type View = 'day' | 'month' | 'year';
+
+const clampToRange = (date: Date, minDate?: Date, maxDate?: Date): Date => {
+  let result = date;
+
+  if (minDate && result.getTime() < minDate.getTime()) {
+    result = minDate;
+  }
+
+  if (maxDate && result.getTime() > maxDate.getTime()) {
+    result = maxDate;
+  }
+
+  return result;
+};
 
 export const DatePicker = ({
   value,
@@ -47,11 +62,15 @@ export const DatePicker = ({
   onOpenChange,
   clearable = false,
   ref,
+  openToDate,
 }: Props) => {
   const t = useTranslations('common.datePicker');
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<View>('day');
-  const [viewDate, setViewDate] = useState<Date>(value ?? new Date());
+
+  const initialViewDate = () => clampToRange(value ?? openToDate ?? new Date(), minDate, maxDate);
+
+  const [viewDate, setViewDate] = useState<Date>(initialViewDate);
 
   const autoId = useId();
   const triggerId = id ?? autoId;
@@ -76,7 +95,7 @@ export const DatePicker = ({
     onOpenChange?.(next);
     if (next) {
       setView('day');
-      setViewDate(value ?? new Date());
+      setViewDate(initialViewDate());
     } else {
       onBlur?.();
     }

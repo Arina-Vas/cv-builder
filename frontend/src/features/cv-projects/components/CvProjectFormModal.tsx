@@ -172,6 +172,7 @@ export const CvProjectFormModal = ({ open, onOpenChange, cvId, cvProject }: Prop
             maxDate={period?.endDate}
             disabled={!selected}
             error={fieldState.error?.message}
+            openToDate={period?.startDate}
           />
         )}
       />
