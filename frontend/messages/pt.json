@@ -636,7 +636,8 @@
     "confirmRemove": "Remover",
     "remove": {
       "title": "Remover habilidades",
-      "message": "Tem certeza de que deseja remover <b>{count, plural, one {# habilidade} other {# habilidades}}</b>?"
+      "message": "Tem certeza de que deseja remover <b>{count, plural, one {# habilidade} other {# habilidades}}</b>?",
+      "inUse": "{count, plural, =0 {Algumas das habilidades selecionadas são usadas nos currículos do funcionário. Remova-as primeiro desses currículos} one {A habilidade {skills} é usada nos currículos do funcionário. Remova-a primeiro desses currículos} other {As habilidades {skills} são usadas nos currículos do funcionário. Remova-as primeiro desses currículos}}"
     },
     "empty": "Nenhuma habilidade adicionada",
     "emptyProfile": "Nenhuma habilidade adicionada ainda",

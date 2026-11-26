@@ -6,7 +6,7 @@ import {
   USER_SKILL_REFETCH_QUERIES,
   USER_SKILLS,
 } from '@/features/skills/user-skills/api/userSkills.operations';
-import { useTranslations } from 'next-intl';
+import { useFormatter, useTranslations } from 'next-intl';
 import { useSelection } from '@/shared/hooks/useSelection';
 import { useState } from 'react';
 import type { UserSkillFieldsFragment } from '@/gql/graphql';
@@ -17,7 +17,7 @@ import { ConfirmDialog } from '@/shared/components/dialog';
 import { AsyncList } from '@/shared/components/async-list/AsyncList';
 import { SelectionActions } from '@/shared/components/selection-actions/SelectionActions';
 import { notFound } from 'next/navigation';
-import { hasErrorCode } from '@/shared/lib/apollo/graphql-errors';
+import { hasErrorCode, parseError } from '@/shared/lib/apollo/graphql-errors';
 import { useRefetchOnError } from '@/shared/lib/apollo/useRefetchOnError';
 
 type Props = {
@@ -30,12 +30,14 @@ type ModalState = { type: 'create' } | { type: 'update'; skill: UserSkillFieldsF
 
 export const UserSkills = ({ userId, canEdit, emptyMessage }: Props) => {
   const t = useTranslations('userSkill');
+  const format = useFormatter();
   const tActions = useTranslations('common.actions');
 
   const { selectingMode, selectedIds, toggle, start, exit } = useSelection();
 
   const [modal, setModal] = useState<ModalState | null>(null);
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
+  const [inUseIds, setInUseIds] = useState<string[]>([]);
 
   const { data, loading, error, refetch } = useQuery(
     USER_SKILLS,
@@ -47,9 +49,18 @@ export const UserSkills = ({ userId, canEdit, emptyMessage }: Props) => {
   const [deleteSkills] = useMutation(DELETE_USER_SKILLS, USER_SKILL_MUTATION_OPTIONS);
 
   const handleDeleteSkills = async () => {
-    await withRefetch(() => deleteSkills({ variables: { ids: [...selectedIds], userId } }));
-    exit();
+    try {
+      await withRefetch(() => deleteSkills({ variables: { ids: [...selectedIds], userId } }));
+      exit();
+    } catch (error) {
+      setInUseIds(parseError(error).ids ?? []);
+      throw error;
+    }
   };
+
+  const inUseNames =
+    data?.userSkills.filter((item) => inUseIds.includes(item.id)).map((item) => item.skill.name) ??
+    [];
 
   if (hasErrorCode(error, 'NOT_FOUND')) notFound();
 
@@ -109,6 +120,12 @@ export const UserSkills = ({ userId, canEdit, emptyMessage }: Props) => {
           b: (chunks) => <strong>{chunks}</strong>,
         })}
         onConfirm={handleDeleteSkills}
+        errorMessages={{
+          ENTITY_IN_USE: t('remove.inUse', {
+            count: inUseNames.length,
+            skills: format.list(inUseNames),
+          }),
+        }}
       />
     </div>
   );

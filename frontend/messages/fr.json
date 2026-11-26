@@ -645,7 +645,8 @@
     "confirmRemove": "Retirer",
     "remove": {
       "title": "Retirer des compétences",
-      "message": "Voulez-vous vraiment retirer <b>{count, plural, one {# compétence} other {# compétences}}</b> ?"
+      "message": "Voulez-vous vraiment retirer <b>{count, plural, one {# compétence} other {# compétences}}</b> ?",
+      "inUse": "{count, plural, =0 {Certaines des compétences sélectionnées sont utilisées dans les CV de l'employé. Retirez-les d'abord de ces CV} one {La compétence {skills} est utilisée dans les CV de l'employé. Retirez-la d'abord de ces CV} other {Les compétences {skills} sont utilisées dans les CV de l'employé. Retirez-les d'abord de ces CV}}"
     },
     "empty": "Aucune compétence ajoutée",
     "emptyProfile": "Aucune compétence ajoutée pour le moment",

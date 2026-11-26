@@ -623,7 +623,8 @@
     "confirmRemove": "Remove",
     "remove": {
       "title": "Remove skills",
-      "message": "Are you sure you want to remove <b>{count, plural, one {# skill} other {# skills}}</b>?"
+      "message": "Are you sure you want to remove <b>{count, plural, one {# skill} other {# skills}}</b>?",
+      "inUse": "{count, plural, =0 {Some of the selected skills are used in the employee's CVs. Remove them from those CVs first} one {{skills} is used in the employee's CVs. Remove it from those CVs first} other {{skills} are used in the employee's CVs. Remove them from those CVs first}}"
     },
     "empty": "No skills added",
     "emptyProfile": "No skills added yet",

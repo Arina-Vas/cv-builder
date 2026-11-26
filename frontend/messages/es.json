@@ -645,7 +645,8 @@
     "confirmRemove": "Quitar",
     "remove": {
       "title": "Quitar habilidades",
-      "message": "¿Seguro que quieres quitar <b>{count, plural, one {# habilidad} other {# habilidades}}</b>?"
+      "message": "¿Seguro que quieres quitar <b>{count, plural, one {# habilidad} other {# habilidades}}</b>?",
+      "inUse": "{count, plural, =0 {Algunas de las habilidades seleccionadas se usan en los CV del empleado. Quítalas primero de esos CV} one {La habilidad {skills} se usa en los CV del empleado. Quítala primero de esos CV} other {Las habilidades {skills} se usan en los CV del empleado. Quítalas primero de esos CV}}"
     },
     "empty": "No se han añadido habilidades",
     "emptyProfile": "Todavía no se han añadido habilidades",

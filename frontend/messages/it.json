@@ -636,7 +636,8 @@
     "confirmRemove": "Rimuovi",
     "remove": {
       "title": "Rimuovi competenze",
-      "message": "Vuoi davvero rimuovere <b>{count, plural, one {# competenza} other {# competenze}}</b>?"
+      "message": "Vuoi davvero rimuovere <b>{count, plural, one {# competenza} other {# competenze}}</b>?",
+      "inUse": "{count, plural, =0 {Alcune delle competenze selezionate sono usate nei CV del dipendente. Rimuovile prima da quei CV} one {La competenza {skills} è usata nei CV del dipendente. Rimuovila prima da quei CV} other {Le competenze {skills} sono usate nei CV del dipendente. Rimuovile prima da quei CV}}"
     },
     "empty": "Nessuna competenza aggiunta",
     "emptyProfile": "Nessuna competenza ancora aggiunta",
