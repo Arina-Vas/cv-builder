@@ -14,8 +14,10 @@ import {
 import { renderCvPdfHtml, splitResponsibilities } from './cv-pdf.template';
 
 /** The document without <head>: styles and fonts would match any text search */
+const NOW = new Date('2026-11-26T10:00:00.000Z');
+
 const renderBody = (data: CvPreview, locale: Locale = Locale.en): string => {
-  const html = renderCvPdfHtml(data, locale);
+  const html = renderCvPdfHtml(data, locale, NOW);
   return html.slice(html.indexOf('<body>'));
 };
 
@@ -206,12 +208,23 @@ describe('renderCvPdfHtml', () => {
       expect(text).toContain('Environment TypeScript, React.');
     });
 
-    it('shows Present for a project without an end date', () => {
+    it('shows Present for a running project without an end date', () => {
+      const running = cvProjectFixture({
+        endDate: null,
+        project: projectFixture({ endDate: calendarDate('2099-12-31') }),
+      });
+      const text = textOf(renderBody(cvPreviewFixture({ projects: [running] })));
+
+      expect(text).toContain('Period 03.2022 – Present');
+    });
+
+    it('ends a finished project without an end date at the project end', () => {
+      // the fixture project ended 2025-12-31
       const text = textOf(
         renderBody(cvPreviewFixture({ projects: [cvProjectFixture({ endDate: null })] })),
       );
 
-      expect(text).toContain('Period 03.2022 – Present');
+      expect(text).toContain('Period 03.2022 – 12.2025');
     });
 
     it('formats the period in UTC, so the server time zone does not shift the month', () => {

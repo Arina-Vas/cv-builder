@@ -21,6 +21,7 @@ import { hasErrorCode } from '@/shared/lib/apollo/graphql-errors';
 import { useRefetchOnError } from '@/shared/lib/apollo/useRefetchOnError';
 import { formatDate } from '@/shared/lib/date/format-date';
 import s from './CvProjects.module.css';
+import { effectiveEndDate } from '@/features/cv-projects/lib/effective-end-date';
 
 type ModalState =
   | { type: 'add' }
@@ -82,8 +83,10 @@ export const CvProjects = ({ cvId }: Props) => {
     {
       key: 'endDate',
       header: t('table.columns.endDate'),
-      render: (cvProject) =>
-        cvProject.endDate ? formatDate(cvProject.endDate) : t('table.tillNow'),
+      render: (cvProject) => {
+        const endDate = effectiveEndDate(cvProject);
+        return endDate ? formatDate(endDate) : t('table.tillNow');
+      },
       sortable: true,
     },
   ];
