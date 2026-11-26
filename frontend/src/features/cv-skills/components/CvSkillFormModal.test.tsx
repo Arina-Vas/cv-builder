@@ -70,10 +70,10 @@ describe('CvSkillFormModal', () => {
   it('explains under Skill that the options come from the employee profile', async () => {
     renderModal([availableMock()]);
 
-    // also while the options load, so the hint does not jump in
-    expect(screen.getByText(HINT)).toBeInTheDocument();
+    // also while the options load, so nothing jumps in
+    expect(screen.getByRole('status')).toHaveTextContent(HINT);
     await expect.poll(() => screen.getByRole('combobox', { name: 'Skill' })).toBeEnabled();
-    expect(screen.getByText(HINT)).toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent(HINT);
   });
 
   it.each([
@@ -84,13 +84,14 @@ describe('CvSkillFormModal', () => {
     ],
     ['the CV has skills', 2, "All skills from the employee's profile are already in this CV"],
   ])(
-    'shows why there is nothing to add instead of Skill when %s',
+    'locks Skill and says why there is nothing to add when %s',
     async (_case, cvSkillsCount, text) => {
       renderModal([availableMock([])], vi.fn(), cvSkillsCount);
 
-      expect(await screen.findByText(text)).toBeInTheDocument();
-      expect(screen.queryByRole('combobox', { name: 'Skill' })).not.toBeInTheDocument();
+      // the hint line turns into the reason (announced), Skill stays in place so the dialog does not jump
+      await expect.poll(() => screen.getByRole('status')).toHaveTextContent(text);
       expect(screen.queryByText(HINT)).not.toBeInTheDocument();
+      expect(screen.getByRole('combobox', { name: 'Skill' })).toBeDisabled();
       expect(screen.getByRole('button', { name: 'Add' })).toBeDisabled();
     },
   );

@@ -76,35 +76,34 @@ export const CvSkillFormModal = ({ open, onOpenChange, cvId, cvSkillsCount }: Pr
         BAD_USER_INPUT: { skillId: t('errors.notOwnerSkill') },
       }}
     >
-      {noOptions ? (
-        <p className={s.empty}>
-          {cvSkillsCount > 0 ? t('form.empty.allAdded') : t('form.empty.noProfileSkills')}
+      <div>
+        <Controller
+          control={form.control}
+          name="skillId"
+          render={({ field, fieldState }) => (
+            <Select
+              ref={field.ref}
+              name={field.name}
+              label={t('form.fields.skillId')}
+              options={skillOptions}
+              value={field.value}
+              onValueChange={field.onChange}
+              onBlur={field.onBlur}
+              disabled={skillsLoading || noOptions}
+              error={
+                fieldState.error?.message ?? (skillsError && errorMessage(parseError(skillsError)))
+              }
+            />
+          )}
+        />
+        <p className={noOptions ? s.notice : s.hint} role="status">
+          {noOptions
+            ? cvSkillsCount > 0
+              ? t('form.empty.allAdded')
+              : t('form.empty.noProfileSkills')
+            : t('form.hint')}
         </p>
-      ) : (
-        <div>
-          <Controller
-            control={form.control}
-            name="skillId"
-            render={({ field, fieldState }) => (
-              <Select
-                ref={field.ref}
-                name={field.name}
-                label={t('form.fields.skillId')}
-                options={skillOptions}
-                value={field.value}
-                onValueChange={field.onChange}
-                onBlur={field.onBlur}
-                disabled={skillsLoading}
-                error={
-                  fieldState.error?.message ??
-                  (skillsError && errorMessage(parseError(skillsError)))
-                }
-              />
-            )}
-          />
-          <p className={s.hint}>{t('form.hint')}</p>
-        </div>
-      )}
+      </div>
     </FormModal>
   );
 };
