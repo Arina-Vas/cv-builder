@@ -223,7 +223,10 @@ export const CvProjectFormModal = ({ open, onOpenChange, cvId, cvProject }: Prop
             label={t('fields.roles')}
             options={roleOptions}
             value={field.value}
-            onValueChange={field.onChange}
+            onValueChange={(ids) => {
+              field.onChange(ids);
+              field.onBlur();
+            }}
             onBlur={field.onBlur}
             disabled={rolesLoading}
             error={

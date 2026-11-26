@@ -186,9 +186,8 @@ describe('CvProjectFormModal', () => {
       await pickDay(user, 'Start Date', /March 10th, 2024/);
       await chooseRole(user, 'Developer');
       // remove the only role again
+      // the error shows right away: removing a role touches the field, no need to leave it
       await user.click(screen.getByRole('button', { name: 'Remove Developer' }));
-      // the form shows errors once the field is touched; ⊗ keeps the focus in the field, so leave it
-      await user.tab();
 
       expect(await screen.findByText('At least one role must be selected')).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Add' })).toBeDisabled();
@@ -286,6 +285,16 @@ describe('CvProjectFormModal', () => {
       expect(screen.getByLabelText('Responsibilities')).toHaveValue('Code review');
       // the role chip appears once the roles are loaded
       expect(await screen.findByText('Developer')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Update' })).toBeDisabled();
+    });
+
+    // ⊗ doesn't focus the field, so before the fix it was never touched: Update off, no message
+    it('shows the roles error when the last role is removed with ⊗', async () => {
+      const { user } = renderUpdate();
+
+      await user.click(await screen.findByRole('button', { name: 'Remove Developer' }));
+
+      expect(await screen.findByText('At least one role must be selected')).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Update' })).toBeDisabled();
     });
 
