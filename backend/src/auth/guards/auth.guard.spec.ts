@@ -171,4 +171,74 @@ describe('AuthGuard', () => {
       guard.canActivate(graphqlContext({ cookies: { access_token: 'token' } }, 'Mutation')),
     ).resolves.toBe(true);
   });
+
+  describe('several root fields in one request', () => {
+    const request = (): Partial<AuthenticatedRequest> => ({ cookies: { access_token: 'token' } });
+
+    it('authenticates once for the parallel root fields of a query', async () => {
+      signedIn();
+      const req = request();
+
+      await expect(
+        Promise.all([
+          guard.canActivate(graphqlContext(req)),
+          guard.canActivate(graphqlContext(req)),
+        ]),
+      ).resolves.toEqual([true, true]);
+      expect(accessTokens.verify).toHaveBeenCalledTimes(1);
+      expect(sessions.findActive).toHaveBeenCalledTimes(1);
+      expect(users.findById).toHaveBeenCalledTimes(1);
+      expect(req.user).toBe(user);
+    });
+
+    it('rejects every root field of a query when the shared authentication fails', async () => {
+      signedIn();
+      sessions.findActive.mockResolvedValue(null);
+      const req = request();
+
+      await expect(
+        Promise.all([
+          codeOf(guard.canActivate(graphqlContext(req))),
+          codeOf(guard.canActivate(graphqlContext(req))),
+        ]),
+      ).resolves.toEqual([ErrorCode.UNAUTHENTICATED, ErrorCode.UNAUTHENTICATED]);
+      expect(sessions.findActive).toHaveBeenCalledTimes(1);
+    });
+
+    it('re-authenticates every mutation field so it sees the session as left by the previous one', async () => {
+      signedIn();
+      sessions.findActive
+        .mockResolvedValueOnce({ id: 'session-1', userId: 'user-1' })
+        .mockResolvedValueOnce(null); // e.g. the first field was `logout`
+      const req = request();
+
+      await expect(guard.canActivate(graphqlContext(req, 'Mutation'))).resolves.toBe(true);
+      await expect(codeOf(guard.canActivate(graphqlContext(req, 'Mutation')))).resolves.toBe(
+        ErrorCode.UNAUTHENTICATED,
+      );
+      expect(sessions.findActive).toHaveBeenCalledTimes(2);
+    });
+
+    it('checks email verification for every mutation field', async () => {
+      signedIn({ ...user, emailVerifiedAt: null });
+      const req = request();
+
+      flags[ALLOW_UNVERIFIED_KEY] = true;
+      await expect(guard.canActivate(graphqlContext(req, 'Mutation'))).resolves.toBe(true);
+
+      delete flags[ALLOW_UNVERIFIED_KEY];
+      await expect(codeOf(guard.canActivate(graphqlContext(req, 'Mutation')))).resolves.toBe(
+        ErrorCode.EMAIL_NOT_VERIFIED,
+      );
+    });
+
+    it('does not share the authentication between requests', async () => {
+      signedIn();
+
+      await guard.canActivate(graphqlContext(request()));
+      await guard.canActivate(graphqlContext(request()));
+
+      expect(sessions.findActive).toHaveBeenCalledTimes(2);
+    });
+  });
 });
