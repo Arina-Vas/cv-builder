@@ -10,6 +10,7 @@ import { themeScript } from '@/shared/theme/theme-script';
 import '@/shared/theme/tokens.css';
 import './globals.css';
 import { ToastProvider } from '@/shared/components/toast/ToastProvider';
+import { AuthSync } from '@/features/auth/components/auth-sync/AuthSync';
 import { DeviceGuard } from '@/features/system-pages/components/device-guard/DeviceGuard';
 import { NetworkStatusGate } from '@/features/system-pages/components/network-status-gate/NetworkStatusGate';
 
@@ -66,6 +67,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
             <ToastProvider>
               <ApiErrorToaster />
               <ApolloWrapper>
+                <AuthSync />
                 <DeviceGuard>
                   <NetworkStatusGate>{children}</NetworkStatusGate>
                 </DeviceGuard>
