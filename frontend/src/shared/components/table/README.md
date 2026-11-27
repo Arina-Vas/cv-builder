@@ -45,7 +45,7 @@ import { DataTable, type Column } from '@/shared/components/table';
 | `caption`          | `string`                  | table name for screen readers (hidden)                                          |
 | `emptyMessage`     | `string`                  | text when `rows` is empty, e.g. `No users found`                                |
 | `sort`             | `SortState`               | current sort: `{ field, order: 'ASC' \| 'DESC' }`                               |
-| `onSortChange`     | `(sort) => void`          | header click; without it no column is sortable                                  |
+| `onSortChange`     | `(sort) => void`          | header click; without it, or while `rows` is empty, no column is sortable       |
 | `rowActions`       | `(row) => RowAction<T>[]` | ⋮ menu in the last column                                                       |
 | `onRowClick`       | `(row) => void`           | › arrow in the last column (Employee on Users)                                  |
 | `getRowLabel`      | `(row) => string`         | row name in `Actions for …` / `Open …`; default `common.table.row` (`row {id}`) |
@@ -74,7 +74,10 @@ const columns: Column<UserRow>[] = [
 - `key` is the React key and the sort field sent in `onSortChange`: use the backend's
   `*SortField` enum value so the page passes it on as is.
 - `render` returns any node: text, `Avatar`, `Chip`s, a formatted date.
-- `sortable` shows the arrow and makes the header a button. It only works together with `onSortChange`.
+- `sortable` shows the arrow and makes the header a button. It only works together with `onSortChange`
+  and while there are rows: an empty table (no data, no search results, an error, the first load)
+  shows plain headers, so a click cannot send a request for a list that has nothing to sort. The
+  sort stays in the URL and comes back with the rows.
 - `hideHeader` keeps `header` for screen readers only (`visuallyHidden`), the cell looks empty: a column
   without a visible title in Figma (Avatar). Don't pass `header: ''`: the column then has no name at all.
   Not for a `sortable` column, whose header is the sort button.
@@ -152,7 +155,7 @@ the description). The two rows share one bottom line and the hover background.
 | ---------- | --------------- | ------------------------------------------- |
 | loading    | `isLoading`     | 5 skeleton rows, `aria-busy` on the table   |
 | error      | `error`         | message + Retry (`onRetry`), `role="alert"` |
-| empty      | `rows` is empty | `emptyMessage`                              |
+| empty      | `rows` is empty | `emptyMessage`, headers without sort        |
 | rows       | otherwise       | the rows                                    |
 | refreshing | `isRefreshing`  | the old rows at half opacity, `inert`       |
 
@@ -184,7 +187,7 @@ at the pagination and sees the dimmed rows; a cached page scrolls at once. Not o
 Names below are the English texts; the keys are in `common.table`.
 
 - `<caption>` (hidden) names the table; headers have `scope="col"`.
-- Sortable headers are buttons with `aria-sort` (`ascending` / `descending` / `none`). These are
+- Sortable headers (while there are rows) are buttons with `aria-sort` (`ascending` / `descending` / `none`). These are
   ARIA tokens, not text: they are never translated, the screen reader announces them in its own
   language.
 - The ⋮ and › buttons are named `Actions for …` / `Open …` (`rowActions` / `openRow`) from

@@ -69,7 +69,7 @@ export function DataTable<T>({
     <thead>
       <tr>
         {columns.map((column) => {
-          const isSortable = !!column.sortable && onSortChange;
+          const isSortable = !!column.sortable && onSortChange && rows.length > 0;
 
           return isSortable ? (
             <SortableHeaderCell
