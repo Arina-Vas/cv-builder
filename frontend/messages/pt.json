@@ -302,6 +302,10 @@
   },
   "users": {
     "title": "Funcionários",
+    "notFound": {
+      "title": "Funcionário não encontrado",
+      "message": "O funcionário não existe ou foi excluído"
+    },
     "createButton": "Criar usuário",
     "table": {
       "avatar": "Avatar",

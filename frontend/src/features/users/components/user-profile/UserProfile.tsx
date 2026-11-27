@@ -1,7 +1,6 @@
 'use client';
 
 import { useQuery } from '@apollo/client/react';
-import { notFound } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useCurrentUser } from '@/features/auth/hooks/useCurrentUser';
 import { USER } from '@/features/users/api/users.operations';
@@ -13,6 +12,7 @@ import s from './UserProfile.module.css';
 import { ProfileAvatar } from './ProfileAvatar';
 import { UserProfileForm } from './UserProfileForm';
 import { UserProfileSkeleton } from './UserProfileSkeleton';
+import { UserNotFound } from '@/features/users/components/UserNotFound';
 
 interface UserProfileProps {
   userId: string;
@@ -33,7 +33,7 @@ export const UserProfile = ({ userId }: UserProfileProps) => {
   const { data, loading, error, refetch } = useQuery(USER, { variables: { id: userId } });
 
   if (error) {
-    if (hasErrorCode(error, 'NOT_FOUND')) notFound();
+    if (hasErrorCode(error, 'NOT_FOUND')) return <UserNotFound />;
 
     return (
       <div className={s.error} role="alert">

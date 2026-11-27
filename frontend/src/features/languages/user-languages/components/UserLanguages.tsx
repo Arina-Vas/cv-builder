@@ -20,8 +20,8 @@ import { AsyncList } from '@/shared/components/async-list/AsyncList';
 import { SelectionActions } from '@/shared/components/selection-actions/SelectionActions';
 import { PROFICIENCY_LEVEL } from '@/features/languages/user-languages/lib/proficiency';
 import { hasErrorCode } from '@/shared/lib/apollo/graphql-errors';
-import { notFound } from 'next/navigation';
 import { useRefetchOnError } from '@/shared/lib/apollo/useRefetchOnError';
+import { UserNotFound } from '@/features/users/components/UserNotFound';
 
 type Props = {
   userId: string;
@@ -67,7 +67,7 @@ export const UserLanguages = ({
     exit();
   };
 
-  if (hasErrorCode(error, 'NOT_FOUND')) notFound();
+  if (hasErrorCode(error, 'NOT_FOUND')) return <UserNotFound />;
 
   return (
     <div className={s.root}>

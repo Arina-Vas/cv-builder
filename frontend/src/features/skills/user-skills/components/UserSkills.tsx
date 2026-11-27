@@ -16,9 +16,9 @@ import s from './UserSkills.module.css';
 import { ConfirmDialog } from '@/shared/components/dialog';
 import { AsyncList } from '@/shared/components/async-list/AsyncList';
 import { SelectionActions } from '@/shared/components/selection-actions/SelectionActions';
-import { notFound } from 'next/navigation';
 import { hasErrorCode, parseError } from '@/shared/lib/apollo/graphql-errors';
 import { useRefetchOnError } from '@/shared/lib/apollo/useRefetchOnError';
+import { UserNotFound } from '@/features/users/components/UserNotFound';
 
 type Props = {
   userId: string;
@@ -62,7 +62,7 @@ export const UserSkills = ({ userId, canEdit, emptyMessage }: Props) => {
     data?.userSkills.filter((item) => inUseIds.includes(item.id)).map((item) => item.skill.name) ??
     [];
 
-  if (hasErrorCode(error, 'NOT_FOUND')) notFound();
+  if (hasErrorCode(error, 'NOT_FOUND')) return <UserNotFound />;
 
   return (
     <div className={s.root}>

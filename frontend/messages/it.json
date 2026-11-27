@@ -302,6 +302,10 @@
   },
   "users": {
     "title": "Dipendenti",
+    "notFound": {
+      "title": "Dipendente non trovato",
+      "message": "Il dipendente non esiste o è stato eliminato"
+    },
     "createButton": "Crea utente",
     "table": {
       "avatar": "Avatar",

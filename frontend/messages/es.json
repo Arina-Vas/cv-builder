@@ -311,6 +311,10 @@
   },
   "users": {
     "title": "Empleados",
+    "notFound": {
+      "title": "Empleado no encontrado",
+      "message": "El empleado no existe o ha sido eliminado"
+    },
     "createButton": "Crear usuario",
     "table": {
       "avatar": "Avatar",

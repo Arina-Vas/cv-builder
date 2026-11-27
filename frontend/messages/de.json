@@ -303,6 +303,10 @@
   },
   "users": {
     "title": "Mitarbeiter",
+    "notFound": {
+      "title": "Mitarbeiter nicht gefunden",
+      "message": "Der Mitarbeiter existiert nicht oder wurde gelöscht"
+    },
     "createButton": "Benutzer erstellen",
     "table": {
       "avatar": "Profilbild",

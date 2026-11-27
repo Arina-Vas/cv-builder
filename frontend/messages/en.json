@@ -297,6 +297,10 @@
   },
   "users": {
     "title": "Employees",
+    "notFound": {
+      "title": "Employee not found",
+      "message": "The employee does not exist or has been deleted"
+    },
     "createButton": "Create user",
     "table": {
       "avatar": "Avatar",

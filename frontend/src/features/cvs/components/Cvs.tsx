@@ -5,7 +5,7 @@ import type { CvFieldsFragment } from '@/gql/graphql';
 import { useTranslations } from 'next-intl';
 import { Pagination } from '@/shared/components/pagination';
 import { useCvList } from '@/features/cvs/hooks/useCvList';
-import { notFound, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useCurrentUser } from '@/features/auth/hooks/useCurrentUser';
 import { useState } from 'react';
 import { CvFormModal } from '@/features/cvs/components/CvFormModal';
@@ -14,6 +14,7 @@ import { useMutation } from '@apollo/client/react';
 
 import { CV_MUTATION_OPTIONS, CVS, DELETE_CV, USER_CVS } from '@/features/cvs/api/cvs.operations';
 import { useRefetchOnError } from '@/shared/lib/apollo/useRefetchOnError';
+import { UserNotFound } from '@/features/users/components/UserNotFound';
 
 type Props = {
   userId?: string;
@@ -68,7 +69,7 @@ export const Cvs = ({ userId }: Props) => {
     );
   };
 
-  if (isUserNotFound) notFound();
+  if (isUserNotFound) return <UserNotFound />;
 
   return (
     <div>

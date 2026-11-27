@@ -302,6 +302,10 @@
   },
   "users": {
     "title": "Pracownicy",
+    "notFound": {
+      "title": "Nie znaleziono pracownika",
+      "message": "Pracownik nie istnieje lub został usunięty"
+    },
     "createButton": "Utwórz użytkownika",
     "table": {
       "avatar": "Awatar",
