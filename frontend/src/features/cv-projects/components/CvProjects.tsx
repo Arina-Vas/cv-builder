@@ -98,7 +98,10 @@ export const CvProjects = ({ cvId }: Props) => {
       <TableToolbar
         search={search}
         onSearch={setSearch}
-        action={{ label: t('addButton'), onClick: () => setModal({ type: 'add' }) }}
+        // No access to the CV: ADD would open a modal whose availableCvProjects fails the same way
+        action={
+          forbidden ? undefined : { label: t('addButton'), onClick: () => setModal({ type: 'add' }) }
+        }
       />
       <DataTable<CvProjectFieldsFragment>
         rows={shown?.cvProjects.items ?? []}
