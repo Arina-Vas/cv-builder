@@ -61,6 +61,7 @@ export const Languages = () => {
     },
     {
       key: 'iso',
+      width: '120px',
       header: t('table.columns.iso'),
       render: (language) => language.iso,
       sortable: true,

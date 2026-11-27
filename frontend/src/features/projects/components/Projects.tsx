@@ -59,12 +59,14 @@ export const Projects = () => {
     },
     {
       key: 'startDate',
+      width: '140px',
       header: t('table.columns.startDate'),
       render: (project) => formatDate(project.startDate),
       sortable: true,
     },
     {
       key: 'endDate',
+      width: '140px',
       header: t('table.columns.endDate'),
       render: (project) => formatDate(project.endDate),
       sortable: true,

@@ -76,12 +76,14 @@ export const CvProjects = ({ cvId }: Props) => {
     },
     {
       key: 'startDate',
+      width: '140px',
       header: t('table.columns.startDate'),
       render: (cvProject) => formatDate(cvProject.startDate),
       sortable: true,
     },
     {
       key: 'endDate',
+      width: '140px',
       header: t('table.columns.endDate'),
       render: (cvProject) => {
         const endDate = effectiveEndDate(cvProject);

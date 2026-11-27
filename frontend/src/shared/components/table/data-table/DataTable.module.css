@@ -1,6 +1,6 @@
 .root {
   position: relative;
-  scroll-margin-top: var(--header-height)
+  scroll-margin-top: var(--header-height);
 }
 
 .table {
@@ -8,6 +8,7 @@
   border-collapse: collapse;
   font-family: var(--font-family);
   color: var(--text);
+  table-layout: fixed;
 }
 
 .table th,
@@ -33,7 +34,14 @@
 .table td {
   font-weight: var(--type-body2-weight);
   line-height: var(--type-body2-lh);
-  overflow-wrap: anywhere;
+}
+
+/* One line per value: a long value (an email, a name) is cut with "…", the full text is in `title`.
+   The actions cell is left out, overflow: hidden would cut the button's focus ring */
+.table td:not(.actionsCell) {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .table tbody tr {
@@ -60,6 +68,9 @@
   font-weight: var(--type-body1-weight);
   line-height: var(--type-body1-lh);
   letter-spacing: var(--type-body1-ls);
+  /* a paragraph (description): wrapped, not cut */
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .table tbody tr:has(+ .detailsRow:hover),
@@ -67,8 +78,9 @@
   background: var(--table-row-hover);
 }
 
+/* table-layout: fixed takes widths from the head: the ⋮ / › button plus the cell's side padding */
 .table .actionsCell {
-  width: 1%;
+  width: calc(var(--icon-button-size) + 2 * var(--table-cell-padding));
   padding-block: 0;
   text-align: right;
   white-space: nowrap;

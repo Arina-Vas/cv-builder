@@ -33,6 +33,15 @@ describe('DataTable', () => {
     expect(screen.getByRole('cell', { name: 'React' })).toBeInTheDocument();
   });
 
+  it('gives a text cell its value as title, so a cut value can be read in full', () => {
+    renderTable({
+      columns: [...columns, { key: 'icon', header: 'Icon', render: () => <span>icon</span> }],
+    });
+
+    expect(screen.getByRole('cell', { name: 'React' })).toHaveAttribute('title', 'React');
+    expect(screen.getAllByRole('cell', { name: 'icon' })[0]).not.toHaveAttribute('title');
+  });
+
   it('keeps a hidden header for screen readers only', () => {
     renderTable({
       columns: [{ key: 'icon', header: 'Icon', hideHeader: true, render: () => null }, ...columns],

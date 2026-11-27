@@ -129,14 +129,19 @@ export function DataTable<T>({
           return (
             <Fragment key={getRowId(row)}>
               <tr>
-                {columns.map((column) => (
-                  <td
-                    key={column.key}
-                    className={column.hideOnTablet ? styles.hideOnTablet : undefined}
-                  >
-                    {column.render(row)}
-                  </td>
-                ))}
+                {columns.map((column) => {
+                  const content = column.render(row);
+
+                  return (
+                    <td
+                      key={column.key}
+                      className={column.hideOnTablet ? styles.hideOnTablet : undefined}
+                      title={typeof content === 'string' ? content : undefined}
+                    >
+                      {content}
+                    </td>
+                  );
+                })}
                 {hasActionsColumn && (
                   <td className={styles.actionsCell}>{renderActionsCell(row)}</td>
                 )}

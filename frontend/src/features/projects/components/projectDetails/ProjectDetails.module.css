@@ -10,3 +10,8 @@
   gap: var(--space-3);
   flex-wrap: wrap;
 }
+
+.technologies > li {
+  min-width: 0;
+  max-width: 100%;
+}
