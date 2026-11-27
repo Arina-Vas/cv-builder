@@ -49,6 +49,9 @@ describe('createErrorToastLink', () => {
   });
 
   it.each([
+    // A form that shows these under its fields passes NO_ERROR_TOAST; without it they must not be lost
+    'BAD_USER_INPUT',
+    'CONFLICT',
     'FORBIDDEN',
     'NOT_FOUND',
     'EMAIL_NOT_VERIFIED',
@@ -79,17 +82,6 @@ describe('createErrorToastLink', () => {
 
     expect(report).not.toHaveBeenCalled();
   });
-
-  it.each(['BAD_USER_INPUT', 'CONFLICT'])(
-    'skips %s: it belongs under the form fields',
-    async (code) => {
-      const { client, report } = failWith(code);
-
-      await expect(client.mutate({ mutation: DELETE_POSITION })).rejects.toThrow();
-
-      expect(report).not.toHaveBeenCalled();
-    },
-  );
 
   it('skips UNAUTHENTICATED: refresh-link handles it', async () => {
     const { client, report } = failWith('UNAUTHENTICATED');

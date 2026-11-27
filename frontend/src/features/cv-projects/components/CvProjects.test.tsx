@@ -180,13 +180,14 @@ describe('CvProjects', () => {
       expect(await screen.findByText('Blog')).toBeInTheDocument();
     });
 
-    it('shows FORBIDDEN as "not authorized", without Retry', async () => {
+    it('shows FORBIDDEN as "not authorized", without Retry and Add project', async () => {
       renderPage([errorMock('FORBIDDEN')]);
 
       expect(
         await screen.findByText('You are not authorized to access this CV'),
       ).toBeInTheDocument();
       expect(screen.queryByRole('button', { name: 'Retry' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Add project' })).not.toBeInTheDocument();
     });
 
     it('shows CV not found without actions when the CV does not exist', async () => {

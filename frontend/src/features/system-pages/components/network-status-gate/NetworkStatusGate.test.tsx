@@ -2,8 +2,10 @@ import { ApolloClient, ApolloLink, InMemoryCache, gql } from '@apollo/client';
 import { ApolloProvider, useQuery } from '@apollo/client/react';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { useState } from 'react';
 import { of, throwError } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { Dialog } from '@/shared/components/dialog';
 import { networkStatus } from '@/shared/lib/network/network-status';
 import { createNetworkErrorLink } from '@/shared/lib/apollo/network-error-link';
 import { IntlProvider, renderWithProviders } from '@/test/render';
@@ -79,6 +81,33 @@ describe('NetworkStatusGate', () => {
 
     await waitFor(() => expect(screen.queryByText(NO_INTERNET_MESSAGE)).not.toBeInTheDocument());
     expect(screen.getByRole('textbox', { name: 'Name' })).toHaveValue('Ada');
+  });
+
+  it('closes an open dialog, so RETRY is reachable from the keyboard', async () => {
+    function PageWithDialog() {
+      const [open, setOpen] = useState(true);
+      return (
+        <Dialog open={open} onOpenChange={setOpen} title="Create user">
+          <input aria-label="Email" />
+        </Dialog>
+      );
+    }
+    const { user } = renderWithProviders(
+      <NetworkStatusGate>
+        <PageWithDialog />
+      </NetworkStatusGate>,
+    );
+    expect(screen.getByRole('dialog', { name: 'Create user' })).toBeInTheDocument();
+
+    act(() => networkStatus.reportFailure());
+
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    await user.tab();
+    expect(screen.getByRole('button', { name: 'Retry' })).toHaveFocus();
+
+    act(() => networkStatus.clearFailure());
+    // Closed for good, like any page content: it does not pop up again when back online
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
   it('refetches failed queries when the browser comes back online', async () => {

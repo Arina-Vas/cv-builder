@@ -27,7 +27,7 @@ type ModalState =
 
 export const Cvs = ({ userId }: Props) => {
   const t = useTranslations('cvs');
-  const { user } = useCurrentUser();
+  const { user, loading: userLoading } = useCurrentUser();
   const router = useRouter();
   const withRefetch = useRefetchOnError([CVS, USER_CVS], ['NOT_FOUND']);
 
@@ -85,11 +85,15 @@ export const Cvs = ({ userId }: Props) => {
       <DataTable<CvFieldsFragment>
         scrollResetKey={tableParams.page}
         {...tableState}
+        // The empty text depends on the role: wait for ME instead of guessing it
+        isLoading={tableState.isLoading || (userLoading && !user)}
         rows={rows}
         getRowId={(cv) => cv.id}
         columns={cvsColumns}
         caption={t('title')}
-        emptyMessage={user?.role !== 'ADMIN' && !search ? t('table.userEmpty') : t('table.empty')}
+        emptyMessage={
+          user && user.role !== 'ADMIN' && !search ? t('table.userEmpty') : t('table.empty')
+        }
         getRowLabel={(cv) => cv.name}
         onSortChange={setSort}
         sort={sort}

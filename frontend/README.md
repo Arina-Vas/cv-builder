@@ -226,12 +226,13 @@ and a network failure opens the No Internet page.
   refreshed the session and repeated the request. It reports a mutation error unless:
   - the operation is not a mutation;
   - the mutation opted out with `context: NO_ERROR_TOAST` (below);
-  - the code is `UNAUTHENTICATED` (`refresh-link` repeats the request or redirects to Sign In);
-  - the code is `BAD_USER_INPUT` or `CONFLICT`: those go under the form fields (wiki: "validation errors are
-    displayed inline").
+  - the code is `UNAUTHENTICATED` (`refresh-link` repeats the request or redirects to Sign In).
 
-  Everything else is reported: `ENTITY_IN_USE`, `FORBIDDEN`, `NOT_FOUND`, `EMAIL_NOT_VERIFIED`, `RATE_LIMITED`,
-  `INTERNAL_SERVER_ERROR`, and a network failure, a non-GraphQL response or an unknown code with the generic text.
+  Everything else is reported: `BAD_USER_INPUT`, `CONFLICT`, `ENTITY_IN_USE`, `FORBIDDEN`, `NOT_FOUND`,
+  `EMAIL_NOT_VERIFIED`, `RATE_LIMITED`, `INTERNAL_SERVER_ERROR`, and a network failure, a non-GraphQL response or
+  an unknown code with the generic text. Field errors (wiki: "validation errors are displayed inline") are not
+  skipped by code: the form that puts them under its fields opts out with `NO_ERROR_TOAST`, so a mutation without
+  its own handling never fails silently.
   The link only reports: the error still reaches the component (`catch`, `useMutation().error`).
 
 - `apiErrors` (`src/shared/lib/apollo/api-errors.ts`) carries errors from Apollo links, which live outside
@@ -302,7 +303,9 @@ The code is in `src/features/system-pages`.
 - Device Error: CSS media query picks what the first paint shows; after hydration `useMediaQuery`
   unmounts the app on narrow screens.
 - No Internet: `network-error-link` sets the flag in `shared/lib/network/network-status`. The app is
-  hidden, not unmounted, so form values survive and the failed queries are refetched on RETRY.
+  hidden, not unmounted, so form values survive and the failed queries are refetched on RETRY. The page sits
+  above everything (`--z-offline`, toasts included); an open dialog is portaled out of the hidden app, so it
+  closes itself (`shared/components/dialog/README.md` → Offline) instead of staying on top with the focus.
   Failed mutations don't open the page: forms show their own "Something went wrong" message.
 
 ## Structure

@@ -1,5 +1,6 @@
 import { Dialog as RadixDialog } from 'radix-ui';
-import { type ReactNode, useRef } from 'react';
+import { type ReactNode, useEffect, useEffectEvent, useRef } from 'react';
+import { useNetworkStatus } from '@/shared/lib/network/useNetworkStatus';
 import s from './Dialog.module.css';
 import { CrossIcon } from '@/shared/components/icons/CrossIcon';
 import { IconButton } from '@/shared/components/buttons';
@@ -36,6 +37,13 @@ export const Dialog = ({
   };
 
   const returnFocusRef = useRef<HTMLElement | null>(null);
+
+  const { isOffline } = useNetworkStatus();
+  const closeOnOffline = useEffectEvent(() => onOpenChange(false));
+
+  useEffect(() => {
+    if (open && isOffline) closeOnOffline();
+  }, [open, isOffline]);
 
   return (
     <RadixDialog.Root

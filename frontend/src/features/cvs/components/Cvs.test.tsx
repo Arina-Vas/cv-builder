@@ -6,6 +6,7 @@ import { renderWithProviders } from '@/test/render';
 import { mockRouter } from '@/test/next-navigation';
 import { meMock } from '@/test/me-mock';
 import { CatchErrors } from '@/test/catch-errors';
+import { ME } from '@/features/auth/api/auth.operations';
 import { CREATE_CV, CVS, DELETE_CV, USER_CVS } from '../api/cvs.operations';
 import { Cvs } from './Cvs';
 
@@ -99,6 +100,26 @@ describe('Cvs', () => {
       renderCvs([meMock({ id: ME_ID, role: 'ADMIN' }), cvsMock([])]);
 
       expect(await screen.findByText('No CVs found')).toBeInTheDocument();
+    });
+
+    it('waits for the current user before choosing the empty text', async () => {
+      // ME never answers, the empty CV list arrives at once: the role is still unknown
+      renderCvs([{ ...meMock({ id: ME_ID, role: 'ADMIN' }), delay: Infinity }, cvsMock([])]);
+
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      expect(screen.queryByText('You have no CVs yet')).not.toBeInTheDocument();
+      expect(screen.queryByText('No CVs found')).not.toBeInTheDocument();
+    });
+
+    it('does not tell "you have no CVs yet" when the current user failed to load', async () => {
+      renderCvs([
+        { request: { query: ME }, result: { errors: [gqlError('INTERNAL_SERVER_ERROR')] } },
+        cvsMock([]),
+      ]);
+
+      expect(await screen.findByText('No CVs found')).toBeInTheDocument();
+      expect(screen.queryByText('You have no CVs yet')).not.toBeInTheDocument();
     });
 
     it('shows the error with Retry that repeats the request', async () => {
