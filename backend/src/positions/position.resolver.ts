@@ -13,6 +13,7 @@ import { ParseUUIDPipe } from '@nestjs/common';
 export class PositionResolver {
   constructor(private readonly positionService: PositionService) {}
 
+  @Roles(UserRole.ADMIN)
   @Query(() => PositionPage)
   positions(@Args() args: PositionsArgs): Promise<PositionPage> {
     return this.positionService.findAll(args);

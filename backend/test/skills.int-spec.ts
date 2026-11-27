@@ -94,22 +94,36 @@ describe('Skills (integration)', () => {
       expect(error.extensions.code).toBe('UNAUTHENTICATED');
     });
 
-    it('lets an Employee read and search skills with their category, and read the categories', async () => {
+    it('rejects an Employee with FORBIDDEN', async () => {
       const { browser } = await signedIn();
+
+      const error = await browser.error(SKILLS);
+
+      expect(error.extensions.code).toBe('FORBIDDEN');
+    });
+
+    it('lets an Admin read and search skills with their category', async () => {
+      const { browser } = await signedIn(UserRole.ADMIN);
       await skill('React');
       await skill('NestJS', backend);
 
       const { skills } = await browser.data<{
         skills: { items: { name: string; category: { name: string } }[]; total: number };
       }>(SKILLS, { search: 'nest' });
-      const { skillCategories } = await browser.data<{ skillCategories: { name: string }[] }>(
-        SKILL_CATEGORIES,
-      );
 
       expect(skills).toMatchObject({
         total: 1,
         items: [{ name: 'NestJS', category: { name: 'Backend' } }],
       });
+    });
+
+    it('lets an Employee read the categories', async () => {
+      const { browser } = await signedIn();
+
+      const { skillCategories } = await browser.data<{ skillCategories: { name: string }[] }>(
+        SKILL_CATEGORIES,
+      );
+
       expect(skillCategories).toHaveLength(2);
     });
   });

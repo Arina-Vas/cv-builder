@@ -46,8 +46,16 @@ describe('Departments (integration)', () => {
       expect(error.extensions.code).toBe('UNAUTHENTICATED');
     });
 
-    it('lets an Employee read and search the list', async () => {
+    it('rejects an Employee with FORBIDDEN', async () => {
       const { browser } = await signedIn();
+
+      const error = await browser.error(DEPARTMENTS);
+
+      expect(error.extensions.code).toBe('FORBIDDEN');
+    });
+
+    it('lets an Admin read and search the list', async () => {
+      const { browser } = await signedIn(UserRole.ADMIN);
       await department('Backend');
       await department('Frontend');
 

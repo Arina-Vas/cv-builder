@@ -23,10 +23,11 @@ Status: **draft for review.** Operation tables are added together with the resol
   the owner with the current user from the request. A user id or CV id sent by the client is never proof of
   ownership (wiki: "The backend must determine the ownership of the CV using the authenticated user rather than
   trusting an employee ID supplied by the frontend").
-- **Catalogs** (departments, positions, skills, skill categories, languages, projects, project roles) are readable by
-  every authenticated user; changing them is Admin-only. The wiki defines only the Admin management pages; read
-  access for employees follows from the forms that use the catalogs (department and position in the profile,
-  "available skills" and "available languages" in the Add modals).
+- **Catalogs** (departments, positions, skills, languages, projects): the paginated list queries and all changes
+  are Admin-only, because only the Management pages use them (wiki: "Admin only ... BE rejects non-admin").
+  Employees read catalogs only through the lookups for selects and Add modals (`departmentOptions`,
+  `positionOptions`, `skillCategories`, `technologies`, `projectRoles`, `availableUserSkills`,
+  `availableUserLanguages`, `availableCvSkills`, `availableCvProjects`), which every authenticated user may call.
 - Hiding a control on the frontend is not authorization (wiki: "Frontend role-based UI restrictions must not be
   considered a security mechanism"). Every protected operation is checked on the backend.
 - A failed check returns `FORBIDDEN`; a missing or invalid token returns `UNAUTHENTICATED`
@@ -58,7 +59,7 @@ From the wiki Module Page Access table.
 \* Two different pages share the name. The user version manages the current user's own skills / languages
 (`user_skills`, `user_languages`); Management manages the global catalog (`skills`, `languages`). The table shows
 which page the menu opens for each role. API access does not depend on the page: user skills and languages are
-readable by every authenticated user and changed "own or Admin"; catalog changes are Admin-only.
+readable by every authenticated user and changed "own or Admin"; catalog lists and changes are Admin-only.
 
 ## Rules per feature
 
@@ -108,10 +109,11 @@ other users' skills and languages through the User Details tabs.
 
 ### Catalogs
 
-| Action                                                                     | Employee | Admin |
-| -------------------------------------------------------------------------- | -------- | ----- |
-| Read departments, positions, skills, skill categories, languages, projects | ✅       | ✅    |
-| Create, update, delete departments, positions, skills, languages, projects | ❌       | ✅    |
+| Action                                                                                       | Employee | Admin |
+| -------------------------------------------------------------------------------------------- | -------- | ----- |
+| Lookups for selects (department and position options, skill categories, technologies, roles) | ✅       | ✅    |
+| List, search, sort departments, positions, skills, languages, projects (Management pages)    | ❌       | ✅    |
+| Create, update, delete departments, positions, skills, languages, projects                   | ❌       | ✅    |
 
 ### CVs
 
@@ -194,7 +196,7 @@ otherwise).
 
 | Operation           | Access |
 | ------------------- | ------ |
-| `departments`       | All    |
+| `departments`       | Admin  |
 | `departmentOptions` | All    |
 | `createDepartment`  | Admin  |
 | `updateDepartment`  | Admin  |
@@ -204,7 +206,7 @@ otherwise).
 
 | Operation         | Access |
 | ----------------- | ------ |
-| `positions`       | All    |
+| `positions`       | Admin  |
 | `positionOptions` | All    |
 | `createPosition`  | Admin  |
 | `updatePosition`  | Admin  |
@@ -214,7 +216,7 @@ otherwise).
 
 | Operation        | Access |
 | ---------------- | ------ |
-| `languages`      | All    |
+| `languages`      | Admin  |
 | `createLanguage` | Admin  |
 | `updateLanguage` | Admin  |
 | `deleteLanguage` | Admin  |
@@ -223,7 +225,7 @@ otherwise).
 
 | Operation         | Access |
 | ----------------- | ------ |
-| `skills`          | All    |
+| `skills`          | Admin  |
 | `skillCategories` | All    |
 | `createSkill`     | Admin  |
 | `updateSkill`     | Admin  |
@@ -260,7 +262,7 @@ The assignment ids must belong to that `userId` too: `updateUser*` with another 
 
 | Operation       | Access |
 | --------------- | ------ |
-| `projects`      | All    |
+| `projects`      | Admin  |
 | `technologies`  | All    |
 | `createProject` | Admin  |
 | `updateProject` | Admin  |
