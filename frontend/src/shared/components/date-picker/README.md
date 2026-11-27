@@ -10,9 +10,13 @@ Live examples of every state, Light and Dark: Storybook → **Shared/DatePicker*
 
 The default placeholder and the ← / → names come from `common.datePicker` in `messages/en.json`, so
 the picker needs `NextIntlClientProvider` above it: the root layout mounts it in the app,
-`.storybook/preview.tsx` in Storybook. Month names, week days and the `MM/dd/yyyy` format are not
-translated yet: `date-fns` and `react-datepicker` run without a locale (English) until a second
-language is added.
+`.storybook/preview.tsx` in Storybook.
+
+The calendar follows the app language: `useDateFnsLocale()` (`@/shared/lib/date/date-fns-locale`) maps the
+`next-intl` locale to a `date-fns` locale, and the picker passes it to `react-datepicker` (`locale`) and to the
+month name in the header. That gives translated month and week-day names and the language's first day of the
+week. The object is passed directly, so `registerLocale` is not needed. The value in the trigger stays
+`MM/dd/yyyy` in every language (Figma).
 
 ## Files
 
@@ -112,7 +116,12 @@ The calendar has three views, switched from the header:
   without it. That date is then moved into `minDate` / `maxDate`: a range fully in the past (a finished
   project) opens on the month of `maxDate`, a range in the future on the month of `minDate`, never on a month
   where every day is disabled. Switching views or months without picking a day changes nothing outside.
-- The week starts on **Sunday**, week days are shown as one letter (`S M T W T F S`).
+- The first day of the week comes from the locale: **Sunday** for `en` and `pt`, **Monday** for the other
+  languages. Don't set `calendarStartDay`, it would override the locale for every language.
+- Week days are shown as one capital letter (`S M T W T F S`, `П В С Ч П С Н`); screen readers get the full
+  name (`Sunday`, `понеділок`).
+- The month in the header uses `LLLL`, the standalone name: `листопад`, not the genitive `листопада` that
+  `MMMM` gives in Slavic languages.
 - The active view's label in the header is highlighted with `--datepicker-active-label`.
 
 ## Dates and the API
@@ -213,9 +222,14 @@ To change a size or colour, change the token, not the component CSS.
 | `OpensOnOpenToDate`        | empty: opens on the month of `openToDate`                                                                      |
 | `OpenToDateClampedToRange` | `openToDate` before `minDate`: opens on the month of `minDate`                                                 |
 | `ValueWinsOverOpenToDate`  | with a value: opens on its month, `openToDate` is ignored                                                      |
+| `EnglishLocale`            | `en`: header `November`, week starts on Sunday (`S M T W T F S`)                                               |
+| `UkrainianLocale`          | `uk`: header `листопад`, week starts on Monday (`П В С Ч П С Н`), full day name for screen readers             |
+| `UkrainianMonthView`       | `uk`: the month view lists month names in Ukrainian                                                            |
 
 The other stories (`Default`, `WithValue`, `EndDate`, `ExcludeDates`, `Dark`, `DarkWithError`) are visual.
 
+- The locale stories wrap the picker in their own `NextIntlClientProvider` (decorator `withLocale`); the
+  others use `en` from `.storybook/preview.tsx`.
 - The trigger is found by its label, `getByRole('button', { name: 'Start Date' })`; the date is checked with
   `toHaveTextContent`.
 - The `Field` label has `pointer-events: none` (clicks go through to the control), so tests don't click it.

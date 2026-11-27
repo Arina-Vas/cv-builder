@@ -1,7 +1,10 @@
 import { useState, type ComponentProps } from 'react';
-import type { Meta, StoryObj } from '@storybook/nextjs-vite';
+import type { Decorator, Meta, StoryObj } from '@storybook/nextjs-vite';
+import { NextIntlClientProvider } from 'next-intl';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
+import type { Locale } from '@/i18n/config';
 import { DatePicker } from './DatePicker';
+import messages from '../../../../messages/en.json';
 
 type Props = ComponentProps<typeof DatePicker>;
 
@@ -396,5 +399,61 @@ export const OpenClose: Story = {
         within(reopened).getByRole('rowgroup', { name: 'Month September, 2025' }),
       ).toBeInTheDocument();
     });
+  },
+};
+
+/* ---------------- locale ---------------- */
+
+// the calendar follows the app language (next-intl), so these stories wrap it in their own provider
+const withLocale = (locale: Locale): Decorator =>
+  function WithLocale(Story) {
+    return (
+      <NextIntlClientProvider locale={locale} messages={messages}>
+        <Story />
+      </NextIntlClientProvider>
+    );
+  };
+
+const getWeekDays = (dialog: HTMLElement) =>
+  within(dialog)
+    .getAllByRole('columnheader')
+    .map((header) => header.querySelector('[aria-hidden="true"]')?.textContent);
+
+export const EnglishLocale: Story = {
+  name: 'Locale: English (week starts on Sunday)',
+  args: { value: new Date(2025, 10, 4) },
+  play: async ({ canvasElement }) => {
+    const dialog = await openCalendar(canvasElement);
+
+    await expect(within(dialog).getByRole('button', { name: 'November' })).toBeInTheDocument();
+    await expect(getWeekDays(dialog)).toEqual(['S', 'M', 'T', 'W', 'T', 'F', 'S']);
+    await expect(within(dialog).getAllByRole('columnheader')[0]).toHaveAccessibleName('Sunday');
+  },
+};
+
+export const UkrainianLocale: Story = {
+  name: 'Locale: Ukrainian (week starts on Monday)',
+  decorators: [withLocale('uk')],
+  args: { value: new Date(2025, 10, 4) },
+  play: async ({ canvasElement }) => {
+    const dialog = await openCalendar(canvasElement);
+
+    // standalone month name (LLLL), not the genitive "листопада"
+    await expect(within(dialog).getByRole('button', { name: 'листопад' })).toBeInTheDocument();
+    await expect(getWeekDays(dialog)).toEqual(['П', 'В', 'С', 'Ч', 'П', 'С', 'Н']);
+    await expect(within(dialog).getAllByRole('columnheader')[0]).toHaveAccessibleName('понеділок');
+  },
+};
+
+export const UkrainianMonthView: Story = {
+  name: 'Locale: Ukrainian month view',
+  decorators: [withLocale('uk')],
+  args: { value: new Date(2025, 10, 4) },
+  play: async ({ canvasElement }) => {
+    const dialog = await openCalendar(canvasElement);
+
+    await userEvent.click(within(dialog).getByRole('button', { name: 'листопад' }));
+
+    await expect(await within(dialog).findByText('січень')).toBeInTheDocument();
   },
 };
