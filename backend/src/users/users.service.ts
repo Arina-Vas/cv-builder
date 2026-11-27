@@ -25,6 +25,7 @@ import {
 } from '@/common/errors/app-errors';
 import { ErrorReason } from '@/common/errors/error-reason.enum';
 import { isPrismaError } from '@/prisma/prisma-errors';
+import { runSerializable } from '@/prisma/serializable';
 import { readImageUpload } from '@/files/image-upload';
 import { StorageService } from '@/files/storage.service';
 
@@ -132,32 +133,29 @@ export class UsersService {
   ): Promise<User> {
     await this.assertDepartmentAndPositionExist(departmentId, positionId);
 
-    return this.prisma.$transaction(
-      async (tx) => {
-        const target = await tx.user.findUnique({ where: { id }, select: { role: true } });
-        if (!target) {
-          throw notFound(UserMessage.notFound);
+    return runSerializable(this.prisma, async (tx) => {
+      const target = await tx.user.findUnique({ where: { id }, select: { role: true } });
+      if (!target) {
+        throw notFound(UserMessage.notFound);
+      }
+
+      if (target.role !== role) {
+        if (id === currentUserId) {
+          throw operationNotAllowed(UserMessage.ownRoleChange, ErrorReason.SELF);
         }
-
-        if (target.role !== role) {
-          if (id === currentUserId) {
-            throw operationNotAllowed(UserMessage.ownRoleChange, ErrorReason.SELF);
-          }
-          if (target.role === UserRole.ADMIN && (await countAdmins(tx)) <= 1) {
-            throw operationNotAllowed(UserMessage.lastAdminDemote, ErrorReason.LAST_ADMIN);
-          }
+        if (target.role === UserRole.ADMIN && (await countAdmins(tx)) <= 1) {
+          throw operationNotAllowed(UserMessage.lastAdminDemote, ErrorReason.LAST_ADMIN);
         }
+      }
 
-        const row = await tx.user.update({
-          where: { id },
-          data: { firstName, lastName, departmentId, positionId, role },
-          include: userInclude,
-        });
+      const row = await tx.user.update({
+        where: { id },
+        data: { firstName, lastName, departmentId, positionId, role },
+        include: userInclude,
+      });
 
-        return toUser(row);
-      },
-      { isolationLevel: 'Serializable' },
-    );
+      return toUser(row);
+    });
   }
 
   async updateProfile(
@@ -186,25 +184,22 @@ export class UsersService {
       throw operationNotAllowed(UserMessage.ownAccountDelete, ErrorReason.SELF);
     }
 
-    const avatarKey = await this.prisma.$transaction(
-      async (tx) => {
-        const target = await tx.user.findUnique({
-          where: { id },
-          select: { role: true, avatarKey: true },
-        });
-        if (!target) {
-          throw notFound(UserMessage.notFound);
-        }
-        if (target.role === UserRole.ADMIN && (await countAdmins(tx)) <= 1) {
-          throw operationNotAllowed(UserMessage.lastAdminDelete, ErrorReason.LAST_ADMIN);
-        }
+    const avatarKey = await runSerializable(this.prisma, async (tx) => {
+      const target = await tx.user.findUnique({
+        where: { id },
+        select: { role: true, avatarKey: true },
+      });
+      if (!target) {
+        throw notFound(UserMessage.notFound);
+      }
+      if (target.role === UserRole.ADMIN && (await countAdmins(tx)) <= 1) {
+        throw operationNotAllowed(UserMessage.lastAdminDelete, ErrorReason.LAST_ADMIN);
+      }
 
-        await tx.user.delete({ where: { id } });
+      await tx.user.delete({ where: { id } });
 
-        return target.avatarKey;
-      },
-      { isolationLevel: 'Serializable' },
-    );
+      return target.avatarKey;
+    });
     await this.deleteFileQuietly(avatarKey);
 
     return id;
