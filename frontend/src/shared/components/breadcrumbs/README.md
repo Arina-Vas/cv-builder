@@ -25,18 +25,21 @@ import { ProfileIcon } from '@/shared/components/icons/ProfileIcon';
 
 `BreadcrumbItem`:
 
-| Field     | Type                    | Notes                                                      |
-| --------- | ----------------------- | ---------------------------------------------------------- |
-| `label`   | `string`                | Already translated text                                    |
-| `href`    | `string?`               | Makes the item a `next/link`. Ignored on the last item     |
-| `icon`    | `ComponentType?`        | 24px icon before the text (the employee has one, a CV not) |
-| `variant` | `'default' \| 'entity'` | `entity` = employee / CV name in the primary colour        |
-| `loading` | `boolean?`              | Shows a skeleton instead of the text (name not loaded yet) |
+| Field     | Type                    | Notes                                                             |
+| --------- | ----------------------- | ----------------------------------------------------------------- |
+| `label`   | `string`                | Already translated text                                           |
+| `href`    | `string?`               | Makes the item a `next/link`; without it the last item is current |
+| `icon`    | `ComponentType?`        | 24px icon before the text (the employee has one, a CV not)        |
+| `variant` | `'default' \| 'entity'` | `entity` = employee / CV name in the primary colour               |
+| `loading` | `boolean?`              | Shows a skeleton instead of the text (name not loaded yet)        |
 
 ## Behaviour
 
-- **Current page.** The last item is always plain text with `aria-current="page"`, even if it has
-  an `href`. A single item (list pages: `Employees`, `Settings`) is therefore plain text too.
+- **Current page.** The last item without `href` is plain text with `aria-current="page"`: the
+  tab on a detail page, the only item on a list page (`Employees`, `Settings`).
+- **Last item with `href`.** It is a link and not current: the user is not on that page. Used when
+  a CV or employee does not exist (or is not the user's): only `CVs` / `Employees` is left, as the
+  way back to the list (wiki: "Clicking CVs returns to the CVs page").
 - **Links.** Earlier items with `href` are links in the muted colour, underlined on hover, with a
   focus ring for the keyboard.
 - **Long names.** Only the `entity` item shrinks, so the section and the tab always stay whole.

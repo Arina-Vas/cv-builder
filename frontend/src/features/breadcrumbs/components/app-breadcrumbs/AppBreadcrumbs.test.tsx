@@ -118,13 +118,13 @@ describe('AppBreadcrumbs', () => {
     // wiki CV Details: the breadcrumb must not expose a CV the user may not access.
     // The page shows CV not found / Access denied, so only the section is left: no empty name, no tab
     it.each(['FORBIDDEN', 'NOT_FOUND'])(
-      'leaves only CVs and shows no CV data on %s',
+      'leaves only CVs, linked to the list, and shows no CV data on %s',
       async (code) => {
         usePathname.mockReturnValue('/cvs/7/details');
         renderWithProviders(<AppBreadcrumbs />, { mocks: [cvErrorMock(code)] });
 
         await waitFor(() => expect(screen.getAllByRole('listitem')).toHaveLength(1));
-        expect(screen.getByText('CVs')).toBeInTheDocument();
+        expect(screen.getByRole('link', { name: 'CVs' })).toHaveAttribute('href', '/cvs');
         expect(screen.queryByText('Details')).not.toBeInTheDocument();
         expect(screen.queryByText('backend text')).not.toBeInTheDocument();
       },

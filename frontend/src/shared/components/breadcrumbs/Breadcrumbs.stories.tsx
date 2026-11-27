@@ -52,8 +52,9 @@ export const Cv: Story = {
   },
 };
 
+/** A list page: one item without href, the current page */
 export const SectionOnly: Story = {
-  args: { items: [{ label: 'Employees', href: '/users' }] },
+  args: { items: [{ label: 'Employees' }] },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.queryByRole('link')).not.toBeInTheDocument();
@@ -61,6 +62,16 @@ export const SectionOnly: Story = {
       'aria-current',
       'page',
     );
+  },
+};
+
+/** A CV or employee that does not exist: only the section is left, as a link back to the list */
+export const SectionLink: Story = {
+  args: { items: [{ label: 'CVs', href: '/cvs' }] },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole('link', { name: 'CVs' })).toHaveAttribute('href', '/cvs');
+    await expect(canvas.getByRole('link', { name: 'CVs' })).not.toHaveAttribute('aria-current');
   },
 };
 

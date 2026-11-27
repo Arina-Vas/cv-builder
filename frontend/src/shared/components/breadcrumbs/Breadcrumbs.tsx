@@ -24,7 +24,7 @@ export function Breadcrumbs({ items, label }: BreadcrumbsProps) {
         {items.map((item, index) => (
           <li key={`${index}-${item.label}`} className={styles.item} data-variant={item.variant}>
             {index > 0 && <ChevronIcon direction="right" className={styles.separator} />}
-            <Crumb item={item} isCurrent={index === items.length - 1} />
+            <Crumb item={item} isCurrent={index === items.length - 1 && !item.href} />
           </li>
         ))}
       </ol>
