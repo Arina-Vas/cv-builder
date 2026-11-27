@@ -1,12 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '@/prisma/prisma.service';
+import { DAY_MS } from '@/common/time';
 
 // Dead records are kept for a day: the resend cooldown and the verification error messages
 // read the latest token even after it has expired or been used
 export const CLEANUP_RETENTION_DAYS = 1;
-
-const DAY_MS = 24 * 60 * 60 * 1000;
 
 export interface CleanupResult {
   sessions: number;

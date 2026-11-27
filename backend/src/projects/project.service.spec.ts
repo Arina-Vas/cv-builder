@@ -1,5 +1,6 @@
 import { plainToInstance } from 'class-transformer';
 import { ErrorCode } from '@/common/errors/error-code.enum';
+import { ErrorReason } from '@/common/errors/error-reason.enum';
 import { SortOrder } from '@/common/graphql/sort-order.enum';
 import { Prisma } from '@/generated/prisma/client';
 import type { PrismaService } from '@/prisma/prisma.service';
@@ -307,6 +308,58 @@ describe('ProjectService', () => {
       prisma.project.update.mockRejectedValue(error);
 
       await expect(service.update(UPDATE)).rejects.toBe(error);
+    });
+
+    describe('dates of the CV projects that use it', () => {
+      // CV projects that start before the new start date / end after the new end date
+      const cvProjectsOutside = (startsBefore: number, endsAfter: number) =>
+        prisma.cvProject.count.mockResolvedValueOnce(startsBefore).mockResolvedValueOnce(endsAfter);
+
+      it('looks for CV projects starting before the start date or ending after the end date', async () => {
+        prisma.project.update.mockResolvedValue(projectRow('CV Builder'));
+
+        await service.update(UPDATE);
+
+        expect(prisma.cvProject.count).toHaveBeenCalledWith({
+          where: { projectId: 'id-CV Builder', startDate: { lt: START } },
+        });
+        // an empty CV end date ends with the project, so only stored ones are compared
+        expect(prisma.cvProject.count).toHaveBeenCalledWith({
+          where: {
+            projectId: 'id-CV Builder',
+            OR: [{ startDate: { gt: END } }, { endDate: { gt: END } }],
+          },
+        });
+      });
+
+      it.each([
+        ['start before the start date', 1, 0, ['startDate']],
+        ['end after the end date', 0, 2, ['endDate']],
+        ['fall outside on both sides', 1, 1, ['startDate', 'endDate']],
+      ])(
+        'rejects with BAD_USER_INPUT (USED_IN_CVS) when CV projects %s, unchanged',
+        async (_, startsBefore, endsAfter, fields) => {
+          cvProjectsOutside(startsBefore, endsAfter);
+
+          await expect(service.update(UPDATE)).rejects.toMatchObject({
+            extensions: {
+              code: ErrorCode.BAD_USER_INPUT,
+              reason: ErrorReason.USED_IN_CVS,
+              fields: fields.map((field) => expect.objectContaining({ field })),
+            },
+          });
+          expect(prisma.project.update).not.toHaveBeenCalled();
+        },
+      );
+
+      it('saves the dates when every CV project stays within them', async () => {
+        cvProjectsOutside(0, 0);
+        prisma.project.update.mockResolvedValue(projectRow('CV Builder'));
+
+        await service.update(UPDATE);
+
+        expect(prisma.project.update).toHaveBeenCalled();
+      });
     });
   });
 

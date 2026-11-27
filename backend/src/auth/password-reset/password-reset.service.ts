@@ -10,13 +10,11 @@ import { MailService } from '@/mail/mail.service';
 import { PrismaService } from '@/prisma/prisma.service';
 import { UsersService } from '@/users/users.service';
 import { ResetLinkMessage } from './password-reset.messages';
+import { MINUTE_MS, SECOND_MS } from '@/common/time';
 
 export const RESET_TOKEN_TTL_MINUTES = 30;
 export const REQUEST_COOLDOWN_SECONDS = 60;
 export const RESET_PASSWORD_PATH = '/reset-password';
-
-const MINUTE_MS = 60 * 1000;
-const SECOND_MS = 1000;
 
 const linkError = (message: string, reason: ErrorReason) =>
   badUserInput({ fields: [{ field: 'token', message }], message, reason });

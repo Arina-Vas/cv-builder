@@ -7,6 +7,7 @@ import { MailService } from '@/mail/mail.service';
 import { PrismaService } from '@/prisma/prisma.service';
 import type { User } from '@/users/models/user.model';
 import { UsersService } from '@/users/users.service';
+import { MINUTE_MS, SECOND_MS } from '@/common/time';
 
 export const CODE_TTL_MINUTES = 10;
 export const RESEND_COOLDOWN_SECONDS = 60;
@@ -19,9 +20,6 @@ export const VerificationMessage = {
   alreadyVerified: 'Email is already verified',
   wait: 'Please wait before requesting another code',
 } as const;
-
-const MINUTE_MS = 60 * 1000;
-const SECOND_MS = 1000;
 
 const codeError = (message: string, reason: ErrorReason) =>
   badUserInput({ fields: [{ field: 'code', message }], message, reason });

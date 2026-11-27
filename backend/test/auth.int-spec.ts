@@ -2,6 +2,7 @@ import { ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE } from '@/auth/sessions/auth-
 import { MAX_CODE_ATTEMPTS } from '@/auth/email-verification/email-verification.service';
 import { REFRESH_GRACE_SECONDS } from '@/auth/sessions/sessions.service';
 import { AUTH_THROTTLE_LIMIT } from '@/common/throttling/throttle.decorators';
+import { SECOND_MS } from '@/common/time';
 import { UserRole } from '@/common/graphql/enums';
 import {
   ADMIN_PROBE,
@@ -247,7 +248,7 @@ describe('Auth (integration)', () => {
       await expect(browser.data(ME)).resolves.toBeDefined();
 
       await t.prisma.session.updateMany({
-        data: { rotatedAt: new Date(Date.now() - REFRESH_GRACE_SECONDS * 1000) },
+        data: { rotatedAt: new Date(Date.now() - REFRESH_GRACE_SECONDS * SECOND_MS) },
       });
       const replay = client();
       replay.setCookie(REFRESH_TOKEN_COOKIE, oldRefresh);
@@ -263,7 +264,7 @@ describe('Auth (integration)', () => {
       const stolenRefresh = browser.cookie(REFRESH_TOKEN_COOKIE) ?? '';
       await browser.data(REFRESH);
       await t.prisma.session.updateMany({
-        data: { rotatedAt: new Date(Date.now() - REFRESH_GRACE_SECONDS * 1000) },
+        data: { rotatedAt: new Date(Date.now() - REFRESH_GRACE_SECONDS * SECOND_MS) },
       });
 
       const thief = client();

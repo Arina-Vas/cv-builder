@@ -41,26 +41,26 @@ const POSITIONS = [
 <MultiSelect label="Position" options={POSITIONS} defaultValue={['se']} disabled />
 ```
 
-| Prop            | Values                                                 | Default                                  |
-| --------------- | ------------------------------------------------------ | ---------------------------------------- |
-| `options`       | `{ value, label, disabled? }[]` (`SelectOption`)       | required                                 |
-| `label`         | `string`: also the placeholder of the empty field      | required                                 |
-| `value`         | `string[]` · `[]` = nothing selected ⚠️                | —                                        |
-| `defaultValue`  | `string[]`                                             | `[]`                                     |
-| `onValueChange` | `(value: string[]) => void`                            | —                                        |
-| `error`         | `string`: red border + chevron + text                  | —                                        |
-| `disabled`      | `boolean`: grey field, chips with disabled ⊗           | `false`                                  |
-| `required`      | `boolean`: `aria-required` only, no native validation  | `false`                                  |
-| `name`          | `string`: one hidden `<input name>` per selected value | —                                        |
-| `id`            | `string`: input id, auto via `useId`                   | auto                                     |
-| `open`          | `boolean`                                              | —                                        |
-| `defaultOpen`   | `boolean`                                              | `false`                                  |
-| `onOpenChange`  | `(open: boolean) => void`                              | —                                        |
-| `onBlur`        | `() => void`: called when the input loses focus        | —                                        |
-| `filter`        | `(option, query) => boolean`                           | label contains query, case-insensitive   |
-| `emptyText`     | `string`: shown when nothing matches                   | `common.select.noOptions` (`No options`) |
-| `ref`           | `Ref<HTMLInputElement>`: the search input              | —                                        |
-| `className`     | on the `Field` root (label + field + error)            | —                                        |
+| Prop            | Values                                                  | Default                                  |
+| --------------- | ------------------------------------------------------- | ---------------------------------------- |
+| `options`       | `{ value, label, disabled? }[]` (`SelectOption`)        | required                                 |
+| `label`         | `string`: also the placeholder of the empty field       | required                                 |
+| `value`         | `string[]` · `[]` = nothing selected ⚠️                 | —                                        |
+| `defaultValue`  | `string[]`                                              | `[]`                                     |
+| `onValueChange` | `(value: string[]) => void`                             | —                                        |
+| `error`         | `string`: red border + chevron + text                   | —                                        |
+| `disabled`      | `boolean`: grey field, chips with disabled ⊗            | `false`                                  |
+| `required`      | `boolean`: `aria-required` only, no native validation   | `false`                                  |
+| `name`          | `string`: one hidden `<input name>` per selected value  | —                                        |
+| `id`            | `string`: input id, auto via `useId`                    | auto                                     |
+| `open`          | `boolean`                                               | —                                        |
+| `defaultOpen`   | `boolean`                                               | `false`                                  |
+| `onOpenChange`  | `(open: boolean) => void`                               | —                                        |
+| `onBlur`        | `() => void`: the input loses focus or ⊗ removes a chip | —                                        |
+| `filter`        | `(option, query) => boolean`                            | label contains query, case-insensitive   |
+| `emptyText`     | `string`: shown when nothing matches                    | `common.select.noOptions` (`No options`) |
+| `ref`           | `Ref<HTMLInputElement>`: the search input               | —                                        |
+| `className`     | on the `Field` root (label + field + error)             | —                                        |
 
 - ⚠️ **Controlled vs uncontrolled:** `value === undefined` → uncontrolled. To clear a controlled select pass
   `value={[]}`, **not** `undefined`. Start the state as `useState<string[]>([])`. Same for `open` / `defaultOpen`.
@@ -82,7 +82,7 @@ const POSITIONS = [
 | click on the empty area    | toggles the list, focus goes to the input                  |
 | typing                     | opens + filters the list, highlights the first match       |
 | click / Enter on an option | toggles it, clears the search, **the list stays open**     |
-| ⊗ on a chip                | removes the value, doesn't open the list                   |
+| ⊗ on a chip                | removes the value, calls `onBlur`, doesn't open the list   |
 | click outside / Tab out    | closes the list and clears the search, nothing is selected |
 
 Focus stays in the input the whole time; the list is never focused. That's why:
@@ -154,6 +154,9 @@ max width. Set the width with the form layout (e.g. one column on tablet) or `cl
 
 - `onBlur` fires when the input loses focus. Picking options keeps focus in the input (the list never takes it),
   so it means the user really left the field: pass `field.onBlur` as is.
+- ⊗ on a chip also calls `onBlur`, right after `onValueChange`. ⊗ cancels `mousedown`, so the input never gets
+  or loses focus there; without it a form would never mark the field touched and a required field would not show
+  its error after the last chip is removed. Don't call `field.onBlur` from `onValueChange` for this.
 
 ## Tokens
 
@@ -177,7 +180,7 @@ To change a size or colour, change the token, not the component CSS.
 | `DisabledOption`      | a disabled option can't be chosen                                                  |
 | `SelectsSeveral`      | two clicks → two chips, the list stays open                                        |
 | `Deselects`           | a second click removes the value                                                   |
-| `RemoveChip`          | ⊗ removes the value and doesn't open the list                                      |
+| `RemoveChip`          | ⊗ removes the value, calls `onBlur` once and doesn't open the list                 |
 | `Filters`             | typing filters, `emptyText`, picking clears the search                             |
 | `Keyboard`            | arrows, ends, Enter toggles, highlight kept after a search                         |
 | `EnterDoesNotSubmit`  | Enter in an open list doesn't submit the form                                      |

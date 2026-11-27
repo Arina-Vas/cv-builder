@@ -693,7 +693,10 @@
       "environment": "Ambiente"
     },
     "create": { "title": "Criar projeto" },
-    "update": { "title": "Atualizar projeto" },
+    "update": {
+      "title": "Atualizar projeto",
+      "datesUsedInCvs": "Alguns CVs usam este projeto fora destas datas. Altere primeiro as datas nesses CVs"
+    },
     "delete": {
       "title": "Excluir projeto",
       "message": "Tem certeza de que deseja excluir o projeto <b>{name}</b>?",

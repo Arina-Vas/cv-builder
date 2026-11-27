@@ -188,7 +188,10 @@ export function MultiSelect({
                 key={option.value}
                 label={option.label}
                 disabled={disabled}
-                onRemove={() => toggle(option.value)}
+                onRemove={() => {
+                  toggle(option.value);
+                  onBlur?.();
+                }}
               />
             ))}
 

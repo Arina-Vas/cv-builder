@@ -6,7 +6,11 @@ import { isPrismaError } from '@/prisma/prisma-errors';
 import { SortOrder } from '@/common/graphql/sort-order.enum';
 import type { User } from '@/users/models/user.model';
 import { CvAccessService } from '@/cvs/cv-access.service';
-import { cvProjectInclude, toCvProject } from '@/cvs/cv-projects/cv-project.mapper';
+import {
+  cvProjectInclude,
+  CvProjectWithRelations,
+  toCvProject,
+} from '@/cvs/cv-projects/cv-project.mapper';
 import { CvProject } from '@/cvs/cv-projects/models/cv-project.model';
 import { CvProjectList } from '@/cvs/cv-projects/models/cv-project-list.model';
 import { CvProjectSortField } from '@/cvs/cv-projects/models/cv-project-sort-field.enum';
@@ -16,6 +20,7 @@ import { UpdateCvProjectInput } from '@/cvs/cv-projects/dto/update-cv-project.in
 import { Project } from '@/projects/models/project.model';
 import { projectInclude, toProject } from '@/projects/project.mapper';
 import { containsInsensitive } from '@/common/prisma/search';
+import { compareEndDates, effectiveEndDate } from '@/cvs/cv-projects/effective-end-date';
 
 type ProjectPeriod = Pick<ProjectEntity, 'startDate' | 'endDate'>;
 
@@ -47,7 +52,10 @@ export class CvProjectService {
       orderBy: [this.orderBy(sortBy, sortOrder), { id: 'asc' }],
     });
 
-    return { items: rows.map(toCvProject), total: rows.length };
+    const sortedRows =
+      sortBy === CvProjectSortField.endDate ? this.sortByEndDate(rows, sortOrder) : rows;
+
+    return { items: sortedRows.map(toCvProject), total: rows.length };
   }
 
   async findAvailable(currentUser: User, cvId: string): Promise<Project[]> {
@@ -158,7 +166,7 @@ export class CvProjectService {
       case CvProjectSortField.startDate:
         return { startDate: order };
       case CvProjectSortField.endDate:
-        return { endDate: { sort: order, nulls: order === 'asc' ? 'last' : 'first' } };
+        return { id: 'asc' };
     }
   }
 
@@ -185,5 +193,18 @@ export class CvProjectService {
     if (found !== roleIds.length) {
       throw badUserInput({ fields: [{ field: 'roleIds', message: 'Role not found' }] });
     }
+  }
+
+  private sortByEndDate(
+    rows: CvProjectWithRelations[],
+    sortOrder: SortOrder,
+  ): CvProjectWithRelations[] {
+    const now = new Date();
+    const dir = sortOrder === SortOrder.ASC ? 1 : -1;
+
+    return rows
+      .map((row) => ({ row, end: effectiveEndDate(row, now) }))
+      .toSorted((a, b) => dir * compareEndDates(a.end, b.end) || a.row.id.localeCompare(b.row.id))
+      .map(({ row }) => row);
   }
 }

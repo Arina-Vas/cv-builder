@@ -235,6 +235,8 @@ export const RemoveChip: Story = {
     // ⊗ doesn't open the list
     await expect(getBody(canvasElement).queryByRole('listbox')).not.toBeInTheDocument();
     await expect(args.onOpenChange).not.toHaveBeenCalled();
+    // ⊗ never focuses the input, so it touches the field itself
+    await expect(args.onBlur).toHaveBeenCalledTimes(1);
   },
 };
 

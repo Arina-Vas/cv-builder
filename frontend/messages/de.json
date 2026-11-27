@@ -694,7 +694,10 @@
       "environment": "Umgebung"
     },
     "create": { "title": "Projekt erstellen" },
-    "update": { "title": "Projekt aktualisieren" },
+    "update": {
+      "title": "Projekt aktualisieren",
+      "datesUsedInCvs": "Einige Lebensläufe nutzen dieses Projekt außerhalb dieser Daten. Ändern Sie zuerst die Daten in diesen Lebensläufen"
+    },
     "delete": {
       "title": "Projekt löschen",
       "message": "Möchten Sie das Projekt <b>{name}</b> wirklich löschen?",

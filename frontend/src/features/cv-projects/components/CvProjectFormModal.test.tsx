@@ -100,7 +100,7 @@ const chooseRole = async (user: User, name: string) => {
   await user.keyboard('{Escape}');
 };
 
-// an empty Start Date opens on the project start month: January 2024 for Blog
+// the Start Date is filled with the project start, so its picker opens on that month: January 2024 for Blog
 const pickDay = async (user: User, field: string, day: RegExp) => {
   await user.click(screen.getByRole('button', { name: field }));
   await user.click(await screen.findByRole('gridcell', { name: day }));
@@ -211,7 +211,7 @@ describe('CvProjectFormModal', () => {
       );
     });
 
-    it('does not show "Start date is required" right after a project is chosen', async () => {
+    it('fills the Start Date with the project start and leaves the End Date empty ("Till now")', async () => {
       const { user } = renderWithProviders(
         <CvProjectFormModal open onOpenChange={vi.fn()} cvId={CV_ID} />,
         { mocks: [availableMock(), rolesMock] },
@@ -219,26 +219,14 @@ describe('CvProjectFormModal', () => {
 
       await chooseProject(user);
 
-      expect(screen.getByRole('button', { name: 'Start Date' })).toBeEnabled();
-      expect(screen.queryByText('Start date is required')).not.toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Start Date' })).toHaveTextContent('01/01/2024');
+      expect(screen.getByRole('button', { name: 'End Date' }).textContent).not.toMatch(/\d/);
+      expect(
+        screen.queryByText(/date is required|within project duration/),
+      ).not.toBeInTheDocument();
     });
 
-    it('shows "Start date is required" once the Start Date is touched', async () => {
-      const { user } = renderWithProviders(
-        <CvProjectFormModal open onOpenChange={vi.fn()} cvId={CV_ID} />,
-        { mocks: [availableMock(), rolesMock] },
-      );
-
-      await chooseProject(user);
-      // opened and closed without picking a day
-      await user.click(screen.getByRole('button', { name: 'Start Date' }));
-      await screen.findByRole('rowgroup', { name: 'Month January, 2024' });
-      await user.keyboard('{Escape}');
-
-      expect(await screen.findByText('Start date is required')).toBeInTheDocument();
-    });
-
-    it('checks a picked date again when another project is chosen', async () => {
+    it('replaces the Start Date with the start of another chosen project', async () => {
       const { user } = renderWithProviders(
         <CvProjectFormModal open onOpenChange={vi.fn()} cvId={CV_ID} />,
         { mocks: [availableMock([blog, archive]), rolesMock] },
@@ -246,14 +234,30 @@ describe('CvProjectFormModal', () => {
 
       await chooseProject(user);
       await pickDay(user, 'Start Date', /January 10th, 2024/);
-      // Archive ended in 2021, so January 2024 is outside it
+      // Archive ended in 2021: the picked January 2024 would be outside it
+      await chooseProject(user, 'Archive');
+
+      expect(screen.getByRole('button', { name: 'Start Date' })).toHaveTextContent('01/01/2020');
+      expect(
+        screen.queryByText('Start date must be within project duration'),
+      ).not.toBeInTheDocument();
+    });
+
+    it('checks a picked End Date again when another project is chosen', async () => {
+      const { user } = renderWithProviders(
+        <CvProjectFormModal open onOpenChange={vi.fn()} cvId={CV_ID} />,
+        { mocks: [availableMock([blog, archive]), rolesMock] },
+      );
+
+      await chooseProject(user);
+      // today is March 2024, so the End Date opens on it
+      await pickDay(user, 'End Date', /March 20th, 2024/);
+      // Archive ended in 2021, so March 2024 is outside it
       await chooseProject(user, 'Archive');
 
       expect(
-        await screen.findByText('Start date must be within project duration'),
+        await screen.findByText('End date must be within project duration'),
       ).toBeInTheDocument();
-      // the End Date is still empty: nothing to check there
-      expect(screen.queryByText(/End date/)).not.toBeInTheDocument();
     });
 
     it('requires at least one role', async () => {
@@ -265,8 +269,8 @@ describe('CvProjectFormModal', () => {
       await chooseProject(user);
       await pickDay(user, 'Start Date', /January 10th, 2024/);
       await chooseRole(user, 'Developer');
-      // remove the only role again
-      // the error shows right away: removing a role touches the field, no need to leave it
+      // remove the only role again with ⊗
+      // the error shows right away: MultiSelect touches the field on ⊗, no need to leave it
       await user.click(screen.getByRole('button', { name: 'Remove Developer' }));
 
       expect(await screen.findByText('At least one role must be selected')).toBeInTheDocument();
