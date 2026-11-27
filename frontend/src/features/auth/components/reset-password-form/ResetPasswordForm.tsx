@@ -10,8 +10,9 @@ import { useToast } from '@/shared/components/toast/ToastProvider';
 import { NO_ERROR_TOAST } from '@/shared/lib/apollo/error-toast-link';
 import { parseError } from '@/shared/lib/apollo/graphql-errors';
 import { useErrorMessage } from '@/shared/lib/apollo/useErrorMessage';
-import { LOGOUT, RESET_PASSWORD } from '../../api/auth.operations';
+import { RESET_PASSWORD } from '../../api/auth.operations';
 import { AuthRoute } from '../../auth.constants';
+import { useLogout } from '../../hooks/useLogout';
 import { resetLinkErrorKey } from '../../lib/authErrors';
 import { useFormFields } from '../../lib/useFormFields';
 import { validateConfirmPassword, validatePassword } from '../../lib/validation';
@@ -27,8 +28,9 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
   const t = useTranslations('auth');
   const errorMessage = useErrorMessage();
   const [resetPassword, { loading }] = useMutation(RESET_PASSWORD, { context: NO_ERROR_TOAST });
-  // a failed logout is ignored on purpose (the user leaves anyway), so no toast either
-  const [logout] = useMutation(LOGOUT, { context: NO_ERROR_TOAST });
+  // the backend has already revoked every session; this clears the cookies and the cache
+  // here, tells the other tabs and goes to Sign In
+  const { logout } = useLogout();
 
   const { values, validateAll, register } = useFormFields(
     { password: '', confirmPassword: '' },
@@ -61,9 +63,8 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
       return;
     }
 
-    await logout().catch(() => undefined);
     toast.success(t('resetPassword.success'));
-    router.replace(AuthRoute.signIn);
+    await logout();
   };
 
   if (!token) {

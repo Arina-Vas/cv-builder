@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { mockRouter } from '@/test/next-navigation';
 import { renderWithProviders } from '@/test/render';
 import { LOGOUT, RESET_PASSWORD } from '../../api/auth.operations';
+import { subscribeToAuthEvents } from '../../lib/auth-channel';
 import { ResetPasswordForm } from './ResetPasswordForm';
 
 const TOKEN = 'reset-token';
@@ -54,8 +55,24 @@ describe('ResetPasswordForm', () => {
     expect(
       await screen.findByText('Your password has been reset. Please sign in.'),
     ).toBeInTheDocument();
+    await waitFor(() => expect(mockRouter.replace).toHaveBeenCalledWith('/login'));
     expect(logoutResult).toHaveBeenCalledTimes(1);
-    expect(mockRouter.replace).toHaveBeenCalledWith('/login');
+  });
+
+  it('tells the other tabs that the session has ended', async () => {
+    const onEvent = vi.fn();
+    const unsubscribe = subscribeToAuthEvents(onEvent);
+    const { user } = renderWithProviders(<ResetPasswordForm token={TOKEN} />, {
+      mocks: [
+        { request, result: { data: { resetPassword: true } } },
+        { request: { query: LOGOUT }, result: { data: { logout: true } } },
+      ],
+    });
+
+    await fillAndSubmit(user);
+
+    await waitFor(() => expect(onEvent).toHaveBeenCalledWith('logout'));
+    unsubscribe();
   });
 
   // the text comes from extensions.reason; the backend message is arbitrary and never shown
