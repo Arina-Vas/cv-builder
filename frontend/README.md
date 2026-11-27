@@ -131,14 +131,23 @@ Portuguese, Russian, Spanish, Ukrainian.
   (`en`). Adding one = a code in `LOCALES`, its name in `LOCALE_NAMES` and a `messages/<code>.json`, plus the
   backend CV PDF: the code in `Locale` (`../backend/src/common/graphql/locale.enum.ts`) and its texts in
   `CV_PDF_LABELS` (`../backend/src/cvs/cv-pdf/document/cv-pdf.labels.ts`); `cv-pdf.labels.spec.ts` fails
-  until both match.
+  until both match. The same enum lists the email languages: add the texts to `MAIL_STRINGS` and the plural
+  forms to `MINUTE_FORMS` (`../backend/src/mail/mail.translations.ts`), or the backend type-check fails.
 - **Language names** in the select are in their own language (`Français`, `Українська`) and do not follow the UI
   language, so someone who switched to a language they cannot read still finds theirs. They live in
   `LOCALE_NAMES`, not in the messages files.
 - **Choosing the locale.** The Language select on the Settings page writes the `locale` cookie (one year) and
-  calls `router.refresh()`. `src/i18n/request.ts` reads the cookie on every request; a missing or unknown value
-  falls back to `en`. A cookie, not `localStorage`, because the server renders the texts. Like the theme, the
+  calls `router.refresh()`. `src/i18n/request.ts` reads the cookie on every request. Without a valid cookie
+  (nothing chosen yet) it takes the browser language from the `Accept-Language` header
+  (`src/i18n/negotiate-locale.ts`: ranked by `q`, primary subtag only, `pt-BR` → `pt`), and only when none of the
+  browser languages is supported it falls back to `en`. A cookie, not `localStorage`, because the server renders
+  the texts. Like the theme, the
   choice belongs to the browser, not to the user (`docs/data-model.md`, decisions).
+- **Language of emails.** `createLocaleLink` (`src/shared/lib/apollo/locale-link.ts`) sends the current app
+  language (`useLocale()`) as `Accept-Language` with every GraphQL request, replacing the browser's own header.
+  The backend writes the verification and password reset emails in that language, so they match the page the user
+  sent them from (`../docs/auth.md`, Email language). The Apollo client is made once, so `ApolloWrapper` keeps the
+  language in a ref and the link reads it on each request: a language changed in Settings is used at once.
 - **Messages** live in `messages/<locale>.json`. `en.json` is the source of every key: `request.ts` merges the
   chosen translation over it (`src/i18n/merge-messages.ts`), so a key missing in a translation shows the English
   text instead of the raw key.

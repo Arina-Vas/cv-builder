@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { generateVerificationCode, hashToken, matchesHash } from '@/common/crypto/tokens';
 import { badUserInput, conflict, rateLimited } from '@/common/errors/app-errors';
 import { ErrorReason } from '@/common/errors/error-reason.enum';
+import type { Locale } from '@/common/i18n/locale';
 import { AuthTokenType } from '@/generated/prisma/enums';
 import { MailService } from '@/mail/mail.service';
 import { PrismaService } from '@/prisma/prisma.service';
@@ -34,9 +35,9 @@ export class EmailVerificationService {
     private readonly mail: MailService,
   ) {}
 
-  async sendCode(userId: string, email: string): Promise<void> {
+  async sendCode(userId: string, email: string, locale: Locale): Promise<void> {
     const code = await this.issueCode(userId);
-    await this.mail.sendVerificationCode(email, code, CODE_TTL_MINUTES);
+    await this.mail.sendVerificationCode(email, code, CODE_TTL_MINUTES, locale);
   }
 
   /**
@@ -44,11 +45,13 @@ export class EmailVerificationService {
    * must not hold the response. The code is already in the database when this
    * resolves, so a resend right after it still sees the cooldown.
    */
-  async sendCodeInBackground(userId: string, email: string): Promise<void> {
+  async sendCodeInBackground(userId: string, email: string, locale: Locale): Promise<void> {
     const code = await this.issueCode(userId);
-    void this.mail.sendVerificationCode(email, code, CODE_TTL_MINUTES).catch((error: unknown) => {
-      this.logger.warn(`Failed to send verification email to user ${userId}`, error);
-    });
+    void this.mail
+      .sendVerificationCode(email, code, CODE_TTL_MINUTES, locale)
+      .catch((error: unknown) => {
+        this.logger.warn(`Failed to send verification email to user ${userId}`, error);
+      });
   }
 
   private async issueCode(userId: string): Promise<string> {
@@ -78,7 +81,7 @@ export class EmailVerificationService {
     return code;
   }
 
-  async resend(user: User): Promise<void> {
+  async resend(user: User, locale: Locale): Promise<void> {
     if (user.emailVerifiedAt) {
       throw conflict('email', VerificationMessage.alreadyVerified);
     }
@@ -95,7 +98,7 @@ export class EmailVerificationService {
       throw rateLimited(Math.ceil(waitMs / SECOND_MS), VerificationMessage.wait);
     }
 
-    await this.sendCode(user.id, user.email);
+    await this.sendCode(user.id, user.email, locale);
   }
 
   async verify(user: User, code: string): Promise<User> {

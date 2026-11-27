@@ -204,6 +204,33 @@ code in `backend/src/auth/change-password/`. Used by the Change Password form on
 - Rate-limited with `@AuthThrottle()` (see [Rate limiting](#rate-limiting)) against guessing the current password.
 - Passwords and hashes are never returned or logged.
 
+## Email language
+
+Verification and password reset emails come in the language the app is shown in, one of the nine app languages.
+
+| Email               | Sent by                                                                  |
+| ------------------- | ------------------------------------------------------------------------ |
+| verification code   | `signUp`; `resendVerificationCode` (Resend code, Profile → VERIFY EMAIL) |
+| password reset link | `requestPasswordReset` (Forgot Password)                                 |
+
+- **Where the language comes from.** The frontend sends the app language in the `Accept-Language` header of every
+  GraphQL request (`frontend/src/shared/lib/apollo/locale-link.ts`). The app language is the one chosen in Settings,
+  otherwise the browser language, otherwise English (see the i18n section of `frontend/README.md`), so the email and
+  the page the user just saw are in the same language. A client that sends no header of its own (e.g. a direct API
+  call) gets the browser's header, which works the same way.
+- **On the backend** the `@RequestLocale()` param decorator (`backend/src/common/i18n/`) picks the language with
+  `negotiateLocale`: it ranks the header by `q`, takes the primary subtag (`pt-BR` → `pt`) and returns the first
+  app language, or `en` if none matches. The resolver passes it through the service to `MailService`.
+- **Not stored.** The language is not saved on the user: like the theme, it belongs to the browser
+  ([data-model.md](data-model.md), decisions), so it comes with each request. An email sent without a request
+  (none exists today) would have to fall back to English.
+- **Safe to trust.** The header only picks a translation and grants nothing; unknown values fall back to `en`.
+- **Texts** live in `backend/src/mail/mail.translations.ts` (`MAIL_STRINGS`, one entry per language);
+  `mail.templates.ts` builds the text and HTML versions from them. Minutes are pluralized with `Intl.PluralRules`
+  (`1 минуту`, `3 минуты`, `10 минут`). The list of languages is the GraphQL `Locale` enum
+  (`backend/src/common/graphql/locale.enum.ts`, shared with the CV PDF), so a language added there fails the
+  type-check until its email texts exist.
+
 ## Rate limiting
 
 `@nestjs/throttler` counts requests per client IP in memory. `GqlThrottlerGuard`
@@ -259,7 +286,7 @@ directly.
 | `TRUST_PROXY_HOPS`       | Reverse proxies in front of the API, for the client IP in rate limits (default `0`) |
 
 Emails are sent by `MailService` (`backend/src/mail/`, nodemailer over SMTP); their texts are in
-`mail.templates.ts`. Codes and reset links appear only in the email itself, never in logs or error messages.
+`mail.translations.ts`, in the language of the request (see [Email language](#email-language)). Codes and reset links appear only in the email itself, never in logs or error messages.
 
 All variables are validated on startup in `backend/src/config/env.validation.ts`; the app does not start if one
 is missing or invalid. In local development every email lands in Mailpit: http://localhost:8025.

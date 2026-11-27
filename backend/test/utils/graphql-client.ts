@@ -20,6 +20,8 @@ let clients = 0;
 export class GqlClient {
   private readonly cookies = new Map<string, string>();
   readonly ip: string;
+  /** Sent as `Accept-Language`, like the frontend does with the language of the app. */
+  language?: string;
 
   constructor(private readonly server: App) {
     clients += 1;
@@ -37,6 +39,7 @@ export class GqlClient {
         'Cookie',
         [...this.cookies].map(([name, value]) => `${name}=${value}`),
       )
+      .set(this.language ? { 'Accept-Language': this.language } : {})
       .send({ query, variables });
 
     this.store(response.headers['set-cookie']);

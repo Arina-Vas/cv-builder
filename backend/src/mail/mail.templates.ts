@@ -1,4 +1,6 @@
 import { escapeHtml } from '@/common/html/escape-html';
+import type { Locale } from '@/common/i18n/locale';
+import { formatMinutes, MAIL_STRINGS } from './mail.translations';
 
 export interface MailContent {
   subject: string;
@@ -6,33 +8,42 @@ export interface MailContent {
   html: string;
 }
 
-export const verificationCodeMail = (code: string, expiresInMinutes: number): MailContent => ({
-  subject: 'Your CV Builder verification code',
-  text: [
-    `Your verification code is ${code}.`,
-    `It expires in ${expiresInMinutes} minutes.`,
-    'If you did not create a CV Builder account, ignore this email.',
-  ].join('\n\n'),
-  html: [
-    '<p>Your verification code is:</p>',
-    `<p style="font-size:24px;font-weight:bold;letter-spacing:4px">${escapeHtml(code)}</p>`,
-    `<p>It expires in ${expiresInMinutes} minutes.</p>`,
-    '<p>If you did not create a CV Builder account, ignore this email.</p>',
-  ].join(''),
-});
+export const verificationCodeMail = (
+  code: string,
+  expiresInMinutes: number,
+  locale: Locale,
+): MailContent => {
+  const t = MAIL_STRINGS[locale].verification;
+  const expires = t.expires(formatMinutes(locale, expiresInMinutes));
 
-export const passwordResetMail = (link: string, expiresInMinutes: number): MailContent => ({
-  subject: 'Reset your CV Builder password',
-  text: [
-    'To set a new password, open this link:',
-    link,
-    `The link expires in ${expiresInMinutes} minutes and can be used once.`,
-    'If you did not ask to reset your password, ignore this email; your password stays the same.',
-  ].join('\n\n'),
-  html: [
-    '<p>To set a new password, open this link:</p>',
-    `<p><a href="${escapeHtml(link)}">Reset password</a></p>`,
-    `<p>The link expires in ${expiresInMinutes} minutes and can be used once.</p>`,
-    '<p>If you did not ask to reset your password, ignore this email; your password stays the same.</p>',
-  ].join(''),
-});
+  return {
+    subject: t.subject,
+    text: [`${t.codeIntro} ${code}`, expires, t.ignore].join('\n\n'),
+    html: [
+      `<p>${escapeHtml(t.codeIntro)}</p>`,
+      `<p style="font-size:24px;font-weight:bold;letter-spacing:4px">${escapeHtml(code)}</p>`,
+      `<p>${escapeHtml(expires)}</p>`,
+      `<p>${escapeHtml(t.ignore)}</p>`,
+    ].join(''),
+  };
+};
+
+export const passwordResetMail = (
+  link: string,
+  expiresInMinutes: number,
+  locale: Locale,
+): MailContent => {
+  const t = MAIL_STRINGS[locale].passwordReset;
+  const expires = t.expires(formatMinutes(locale, expiresInMinutes));
+
+  return {
+    subject: t.subject,
+    text: [t.openLink, link, expires, t.ignore].join('\n\n'),
+    html: [
+      `<p>${escapeHtml(t.openLink)}</p>`,
+      `<p><a href="${escapeHtml(link)}">${escapeHtml(t.linkLabel)}</a></p>`,
+      `<p>${escapeHtml(expires)}</p>`,
+      `<p>${escapeHtml(t.ignore)}</p>`,
+    ].join(''),
+  };
+};

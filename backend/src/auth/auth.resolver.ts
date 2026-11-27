@@ -2,6 +2,8 @@ import { ConfigService } from '@nestjs/config';
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CurrentUser } from '@/common/auth/current-user.decorator';
 import { Public } from '@/common/auth/public.decorator';
+import type { Locale } from '@/common/i18n/locale';
+import { RequestLocale } from '@/common/i18n/request-locale.decorator';
 import { AuthThrottle } from '@/common/throttling/throttle.decorators';
 import type { GqlContext } from '@/common/graphql/graphql.context';
 import { Environment, type EnvironmentVariables } from '@/config/env.validation';
@@ -28,9 +30,10 @@ export class AuthResolver {
   @Mutation(() => User)
   async signUp(
     @Args('input') input: SignUpInput,
+    @RequestLocale() locale: Locale,
     @Context() { req, res }: GqlContext,
   ): Promise<User> {
-    const { user, tokens } = await this.auth.signUp(input, req.headers['user-agent']);
+    const { user, tokens } = await this.auth.signUp(input, locale, req.headers['user-agent']);
     setAuthCookies(res, tokens, this.cookieSettings());
     return user;
   }

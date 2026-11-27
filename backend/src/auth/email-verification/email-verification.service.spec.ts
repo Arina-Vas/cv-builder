@@ -76,7 +76,7 @@ describe('EmailVerificationService', () => {
 
   describe('sendCode', () => {
     it('expires older codes, stores the hash of a new one and emails the code', async () => {
-      await service.sendCode('user-1', user.email);
+      await service.sendCode('user-1', user.email, 'en');
 
       expect(prisma.authToken.updateMany).toHaveBeenCalledWith({
         where: {
@@ -89,9 +89,15 @@ describe('EmailVerificationService', () => {
       });
       expect(prisma.$transaction).toHaveBeenCalledWith(['expire-previous', 'create-new']);
 
-      const [, code, minutes] = mail.sendVerificationCode.mock.calls[0] as [string, string, number];
+      const [, code, minutes, locale] = mail.sendVerificationCode.mock.calls[0] as [
+        string,
+        string,
+        number,
+        string,
+      ];
       expect(code).toMatch(/^\d{6}$/);
       expect(minutes).toBe(10);
+      expect(locale).toBe('en');
       expect(prisma.authToken.create).toHaveBeenCalledWith({
         data: {
           userId: 'user-1',
@@ -105,7 +111,7 @@ describe('EmailVerificationService', () => {
     it('waits for the mail server and passes its error on', async () => {
       mail.sendVerificationCode.mockRejectedValue(new Error('SMTP is down'));
 
-      await expect(service.sendCode('user-1', user.email)).rejects.toThrow('SMTP is down');
+      await expect(service.sendCode('user-1', user.email, 'en')).rejects.toThrow('SMTP is down');
     });
   });
 
@@ -113,17 +119,24 @@ describe('EmailVerificationService', () => {
     it('stores the code before it resolves but does not wait for the email', async () => {
       mail.sendVerificationCode.mockReturnValue(new Promise(() => {}));
 
-      await service.sendCodeInBackground('user-1', user.email);
+      await service.sendCodeInBackground('user-1', user.email, 'ru');
 
       expect(prisma.$transaction).toHaveBeenCalledWith(['expire-previous', 'create-new']);
-      expect(mail.sendVerificationCode).toHaveBeenCalledWith(user.email, expect.any(String), 10);
+      expect(mail.sendVerificationCode).toHaveBeenCalledWith(
+        user.email,
+        expect.any(String),
+        10,
+        'ru',
+      );
     });
 
     it('logs a failed email without the code and does not reject', async () => {
       const warn = jest.spyOn(Logger.prototype, 'warn').mockImplementation();
       mail.sendVerificationCode.mockRejectedValue(new Error('SMTP is down'));
 
-      await expect(service.sendCodeInBackground('user-1', user.email)).resolves.toBeUndefined();
+      await expect(
+        service.sendCodeInBackground('user-1', user.email, 'en'),
+      ).resolves.toBeUndefined();
       await Promise.resolve();
 
       const [, code] = mail.sendVerificationCode.mock.calls[0] as [string, string];
@@ -141,9 +154,14 @@ describe('EmailVerificationService', () => {
         createdAt: new Date('2026-10-27T11:58:00.000Z'),
       });
 
-      await service.resend(user);
+      await service.resend(user, 'ru');
 
-      expect(mail.sendVerificationCode).toHaveBeenCalledWith(user.email, expect.any(String), 10);
+      expect(mail.sendVerificationCode).toHaveBeenCalledWith(
+        user.email,
+        expect.any(String),
+        10,
+        'ru',
+      );
     });
 
     it('asks to wait during the cooldown and says how long', async () => {
@@ -151,7 +169,7 @@ describe('EmailVerificationService', () => {
         createdAt: new Date('2026-10-27T11:59:40.000Z'),
       });
 
-      const error = await errorOf(service.resend(user));
+      const error = await errorOf(service.resend(user, 'en'));
 
       expect(error.extensions).toEqual({ code: ErrorCode.RATE_LIMITED, retryAfter: 40 });
       expect(error.message).toBe(VerificationMessage.wait);
@@ -159,7 +177,7 @@ describe('EmailVerificationService', () => {
     });
 
     it('rejects a user whose email is already verified', async () => {
-      const error = await errorOf(service.resend({ ...user, emailVerifiedAt: NOW }));
+      const error = await errorOf(service.resend({ ...user, emailVerifiedAt: NOW }, 'en'));
 
       expect(error.message).toBe(VerificationMessage.alreadyVerified);
     });

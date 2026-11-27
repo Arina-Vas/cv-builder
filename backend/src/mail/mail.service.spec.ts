@@ -31,7 +31,7 @@ describe('MailService', () => {
   });
 
   it('sends the verification code with its expiry', async () => {
-    await service.sendVerificationCode('employee@cv-builder.local', '042917', 10);
+    await service.sendVerificationCode('employee@cv-builder.local', '042917', 10, 'en');
 
     expect(sendMail).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -49,7 +49,7 @@ describe('MailService', () => {
   it('sends the password reset link with its expiry', async () => {
     const link = 'http://localhost:3000/reset-password?token=abc_123';
 
-    await service.sendPasswordReset('employee@cv-builder.local', link, 60);
+    await service.sendPasswordReset('employee@cv-builder.local', link, 60, 'en');
 
     const { subject, text, html } = sendMail.mock.calls[0][0] as {
       subject: string;
@@ -65,7 +65,7 @@ describe('MailService', () => {
   it('lets a failed delivery reach the caller', async () => {
     sendMail.mockRejectedValue(new Error('SMTP is down'));
 
-    await expect(service.sendVerificationCode('a@b.co', '123456', 10)).rejects.toThrow(
+    await expect(service.sendVerificationCode('a@b.co', '123456', 10, 'en')).rejects.toThrow(
       'SMTP is down',
     );
   });

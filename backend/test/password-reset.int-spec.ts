@@ -53,6 +53,17 @@ describe('Password reset (integration)', () => {
     expect(t.mail.sent.filter((mail) => mail.to === email)).toHaveLength(0);
   });
 
+  it('emails the link in the browser language when the app sends no choice of its own', async () => {
+    const { email } = await createUser(t.prisma);
+    const browser = client();
+    browser.language = 'pl-PL,pl;q=0.9,en;q=0.8';
+
+    await browser.data(REQUEST_RESET, { input: { email } });
+    await t.settled();
+
+    expect(t.mail.sent.find((mail) => mail.to === email)?.locale).toBe('pl');
+  });
+
   it('replaces the password, signs out every session and keeps the link single-use', async () => {
     const { email } = await createUser(t.prisma);
     const laptop = client();
