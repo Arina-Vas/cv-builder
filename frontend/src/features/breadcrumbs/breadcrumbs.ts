@@ -52,9 +52,12 @@ export function buildBreadcrumbs(
   if (route.kind === 'section') return [{ label: sectionLabel }];
 
   const { section, id, tab } = route;
+  const sectionItem = { label: sectionLabel, href: `/${section}` };
+
+  if (!userOrCvName.loading && !userOrCvName.name) return [{ label: sectionLabel }];
 
   return [
-    { label: sectionLabel, href: `/${section}` },
+    sectionItem,
     {
       label: userOrCvName.name ?? '',
       href: `/${section}/${id}/${DETAIL_TABS[section][0]}`,
