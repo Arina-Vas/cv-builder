@@ -1,5 +1,6 @@
 import { ConfigService } from '@nestjs/config';
 import { hashToken } from '@/common/crypto/tokens';
+import { SECOND_MS } from '@/common/time';
 import type { EnvironmentVariables } from '@/config/env.validation';
 import { PrismaService } from '@/prisma/prisma.service';
 import { REFRESH_GRACE_SECONDS, SessionsService } from './sessions.service';
@@ -116,7 +117,7 @@ describe('SessionsService', () => {
       userId: 'user-1',
       expiresAt: IN_ONE_DAY,
       revokedAt: null,
-      rotatedAt: new Date(NOW.getTime() - (REFRESH_GRACE_SECONDS - 1) * 1000),
+      rotatedAt: new Date(NOW.getTime() - (REFRESH_GRACE_SECONDS - 1) * SECOND_MS),
       ...overrides,
     });
 
@@ -135,7 +136,7 @@ describe('SessionsService', () => {
     it.each([
       [
         'grace period is over',
-        rotatedSession({ rotatedAt: new Date(NOW.getTime() - REFRESH_GRACE_SECONDS * 1000) }),
+        rotatedSession({ rotatedAt: new Date(NOW.getTime() - REFRESH_GRACE_SECONDS * SECOND_MS) }),
       ],
       ['rotation time is missing', rotatedSession({ rotatedAt: null })],
     ])('is reused with the session when the %s', async (_, row) => {
@@ -162,7 +163,7 @@ describe('SessionsService', () => {
 
     it('does not change any session', async () => {
       prisma.session.findUnique.mockResolvedValue(
-        rotatedSession({ rotatedAt: new Date(NOW.getTime() - REFRESH_GRACE_SECONDS * 1000) }),
+        rotatedSession({ rotatedAt: new Date(NOW.getTime() - REFRESH_GRACE_SECONDS * SECOND_MS) }),
       );
 
       await service.checkPreviousToken('old-token');

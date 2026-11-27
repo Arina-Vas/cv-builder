@@ -3,8 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { generateToken, hashToken } from '@/common/crypto/tokens';
 import type { EnvironmentVariables } from '@/config/env.validation';
 import { PrismaService } from '@/prisma/prisma.service';
+import { DAY_MS, SECOND_MS } from '@/common/time';
 
-const DAY_MS = 24 * 60 * 60 * 1000;
 export const REFRESH_GRACE_SECONDS = 30;
 
 export type PreviousTokenCheck =
@@ -84,7 +84,7 @@ export class SessionsService {
 
     const withinGrace =
       session.rotatedAt !== null &&
-      Date.now() - session.rotatedAt.getTime() < REFRESH_GRACE_SECONDS * 1000;
+      Date.now() - session.rotatedAt.getTime() < REFRESH_GRACE_SECONDS * SECOND_MS;
 
     return withinGrace
       ? { status: 'grace' }

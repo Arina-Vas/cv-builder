@@ -1,10 +1,8 @@
 import type { CookieOptions, Request, Response } from 'express';
+import { DAY_MS, SECOND_MS } from '@/common/time';
 
 export const ACCESS_TOKEN_COOKIE = 'access_token';
 export const REFRESH_TOKEN_COOKIE = 'refresh_token';
-
-const SECOND_MS = 1000;
-const DAY_MS = 24 * 60 * 60 * SECOND_MS;
 
 export interface AuthCookieSettings {
   secure: boolean;
