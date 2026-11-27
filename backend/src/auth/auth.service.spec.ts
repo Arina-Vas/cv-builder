@@ -77,7 +77,7 @@ describe('AuthService', () => {
       users.findByEmail.mockResolvedValue(null);
       users.create.mockResolvedValue(user);
 
-      const result = await service.signUp(input, 'Firefox');
+      const result = await service.signUp(input, 'en', 'Firefox');
 
       const { email, passwordHash } = users.create.mock.calls[0][0] as {
         email: string;
@@ -95,9 +95,9 @@ describe('AuthService', () => {
       users.findByEmail.mockResolvedValue(null);
       users.create.mockResolvedValue(user);
 
-      await service.signUp(input);
+      await service.signUp(input, 'ru');
 
-      expect(verification.sendCode).toHaveBeenCalledWith('user-1', user.email);
+      expect(verification.sendCode).toHaveBeenCalledWith('user-1', user.email, 'ru');
     });
 
     it('still signs the user up when the email cannot be sent', async () => {
@@ -106,14 +106,14 @@ describe('AuthService', () => {
       users.create.mockResolvedValue(user);
       verification.sendCode.mockRejectedValue(new Error('SMTP is down'));
 
-      await expect(service.signUp(input)).resolves.toMatchObject({ user });
+      await expect(service.signUp(input, 'en')).resolves.toMatchObject({ user });
       expect(sessions.create).toHaveBeenCalled();
     });
 
     it('rejects an email that is already registered', async () => {
       users.findByEmail.mockResolvedValue(user);
 
-      const error = await errorOf(service.signUp(input));
+      const error = await errorOf(service.signUp(input, 'en'));
 
       expect(error.extensions).toEqual({ code: ErrorCode.CONFLICT, field: 'email' });
       expect(error.message).toBe(UserMessage.emailTaken);
@@ -129,7 +129,7 @@ describe('AuthService', () => {
         }),
       );
 
-      const error = await errorOf(service.signUp(input));
+      const error = await errorOf(service.signUp(input, 'en'));
 
       expect(error.extensions['code']).toBe(ErrorCode.CONFLICT);
       expect(sessions.create).not.toHaveBeenCalled();
@@ -139,7 +139,7 @@ describe('AuthService', () => {
       users.findByEmail.mockResolvedValue(null);
       users.create.mockRejectedValue(new Error('connection lost'));
 
-      await expect(service.signUp(input)).rejects.toThrow('connection lost');
+      await expect(service.signUp(input, 'en')).rejects.toThrow('connection lost');
     });
   });
 

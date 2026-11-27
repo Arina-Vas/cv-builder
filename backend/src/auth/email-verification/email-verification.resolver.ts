@@ -1,6 +1,8 @@
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { AllowUnverified } from '@/common/auth/allow-unverified.decorator';
 import { CurrentUser } from '@/common/auth/current-user.decorator';
+import type { Locale } from '@/common/i18n/locale';
+import { RequestLocale } from '@/common/i18n/request-locale.decorator';
 import { AuthThrottle } from '@/common/throttling/throttle.decorators';
 import { User } from '@/users/models/user.model';
 import { VerifyEmailInput } from './dto/verify-email.input';
@@ -20,8 +22,11 @@ export class EmailVerificationResolver {
   @AllowUnverified()
   @AuthThrottle()
   @Mutation(() => Boolean)
-  async resendVerificationCode(@CurrentUser() user: User): Promise<boolean> {
-    await this.verification.resend(user);
+  async resendVerificationCode(
+    @CurrentUser() user: User,
+    @RequestLocale() locale: Locale,
+  ): Promise<boolean> {
+    await this.verification.resend(user, locale);
     return true;
   }
 }

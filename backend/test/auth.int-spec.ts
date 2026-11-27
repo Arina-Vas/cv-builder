@@ -206,6 +206,23 @@ describe('Auth (integration)', () => {
       expect(error.extensions.code).toBe('RATE_LIMITED');
       expect(error.message).toBe('Please wait before requesting another code');
     });
+
+    it('emails the code in the language the app sends, English without one', async () => {
+      const russian = client();
+      russian.language = 'ru';
+      const ruEmail = uniqueEmail();
+      const enEmail = uniqueEmail();
+
+      await russian.data(SIGN_UP, {
+        input: { email: ruEmail, password: PASSWORD, confirmPassword: PASSWORD },
+      });
+      await client().data(SIGN_UP, {
+        input: { email: enEmail, password: PASSWORD, confirmPassword: PASSWORD },
+      });
+
+      expect(t.mail.sent.find((mail) => mail.to === ruEmail)?.locale).toBe('ru');
+      expect(t.mail.sent.find((mail) => mail.to === enEmail)?.locale).toBe('en');
+    });
   });
 
   describe('sign in, refresh and logout', () => {

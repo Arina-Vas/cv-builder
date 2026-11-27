@@ -1,6 +1,8 @@
 import { Logger } from '@nestjs/common';
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { Public } from '@/common/auth/public.decorator';
+import type { Locale } from '@/common/i18n/locale';
+import { RequestLocale } from '@/common/i18n/request-locale.decorator';
 import { AuthThrottle } from '@/common/throttling/throttle.decorators';
 import { RequestPasswordResetInput } from './dto/request-password-reset.input';
 import { ResetPasswordInput } from './dto/reset-password.input';
@@ -17,8 +19,11 @@ export class PasswordResetResolver {
   @Mutation(() => Boolean, {
     description: 'Always returns true, whether or not the email belongs to an account',
   })
-  requestPasswordReset(@Args('input') input: RequestPasswordResetInput): boolean {
-    void this.passwordReset.request(input.email).catch((error: unknown) => {
+  requestPasswordReset(
+    @Args('input') input: RequestPasswordResetInput,
+    @RequestLocale() locale: Locale,
+  ): boolean {
+    void this.passwordReset.request(input.email, locale).catch((error: unknown) => {
       this.logger.error('Password reset request failed', error);
     });
     return true;

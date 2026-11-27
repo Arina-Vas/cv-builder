@@ -24,9 +24,9 @@ describe('EmailVerificationResolver', () => {
     expect(verification.verify).toHaveBeenCalledWith(user, '042917');
   });
 
-  it('resends the code to the current user', async () => {
-    await expect(resolver.resendVerificationCode(user)).resolves.toBe(true);
-    expect(verification.resend).toHaveBeenCalledWith(user);
+  it('resends the code to the current user in the language of the request', async () => {
+    await expect(resolver.resendVerificationCode(user, 'de')).resolves.toBe(true);
+    expect(verification.resend).toHaveBeenCalledWith(user, 'de');
   });
 });
 

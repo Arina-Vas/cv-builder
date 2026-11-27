@@ -75,7 +75,7 @@ describe('EmailVerificationService', () => {
 
   describe('sendCode', () => {
     it('expires older codes, stores the hash of a new one and emails the code', async () => {
-      await service.sendCode('user-1', user.email);
+      await service.sendCode('user-1', user.email, 'en');
 
       expect(prisma.authToken.updateMany).toHaveBeenCalledWith({
         where: {
@@ -88,9 +88,15 @@ describe('EmailVerificationService', () => {
       });
       expect(prisma.$transaction).toHaveBeenCalledWith(['expire-previous', 'create-new']);
 
-      const [, code, minutes] = mail.sendVerificationCode.mock.calls[0] as [string, string, number];
+      const [, code, minutes, locale] = mail.sendVerificationCode.mock.calls[0] as [
+        string,
+        string,
+        number,
+        string,
+      ];
       expect(code).toMatch(/^\d{6}$/);
       expect(minutes).toBe(10);
+      expect(locale).toBe('en');
       expect(prisma.authToken.create).toHaveBeenCalledWith({
         data: {
           userId: 'user-1',
@@ -108,9 +114,14 @@ describe('EmailVerificationService', () => {
         createdAt: new Date('2026-10-27T11:58:00.000Z'),
       });
 
-      await service.resend(user);
+      await service.resend(user, 'ru');
 
-      expect(mail.sendVerificationCode).toHaveBeenCalledWith(user.email, expect.any(String), 10);
+      expect(mail.sendVerificationCode).toHaveBeenCalledWith(
+        user.email,
+        expect.any(String),
+        10,
+        'ru',
+      );
     });
 
     it('asks to wait during the cooldown and says how long', async () => {
@@ -118,7 +129,7 @@ describe('EmailVerificationService', () => {
         createdAt: new Date('2026-10-27T11:59:40.000Z'),
       });
 
-      const error = await errorOf(service.resend(user));
+      const error = await errorOf(service.resend(user, 'en'));
 
       expect(error.extensions).toEqual({ code: ErrorCode.RATE_LIMITED, retryAfter: 40 });
       expect(error.message).toBe(VerificationMessage.wait);
@@ -126,7 +137,7 @@ describe('EmailVerificationService', () => {
     });
 
     it('rejects a user whose email is already verified', async () => {
-      const error = await errorOf(service.resend({ ...user, emailVerifiedAt: NOW }));
+      const error = await errorOf(service.resend({ ...user, emailVerifiedAt: NOW }, 'en'));
 
       expect(error.message).toBe(VerificationMessage.alreadyVerified);
     });
