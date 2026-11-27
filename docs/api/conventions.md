@@ -45,6 +45,7 @@ Modules import these instead of writing their own:
 | `@NormalizeText()`, `@TrimText()`, `@ToUpperCaseText()` | `backend/src/common/validation/transforms.ts`         |
 | `@IsNotBeforeDate(property)`                            | `backend/src/common/validation/is-not-before-date.ts` |
 | `isPrismaError(error, code)`                            | `backend/src/prisma/prisma-errors.ts`                 |
+| `runSerializable(prisma, fn)` (retries `P2034`)         | `backend/src/prisma/serializable.ts`                  |
 
 Prisma enums are always imported from `common/graphql/enums.ts`, not from `src/generated/prisma`: that file
 registers them for GraphQL.
@@ -510,6 +511,12 @@ global filter:
 | `P2003` | `create` / `update` whose input references ids | `badUserInput([{ field: '<id field>', … }])`  | `ENTITY_IN_USE`, wrong for a form |
 | `P2025` | not caught                                     | —                                             | `NOT_FOUND` (filter)              |
 | `P2003` | `delete`: not caught                           | —                                             | `ENTITY_IN_USE` (filter)          |
+| `P2034` | Serializable transaction (`runSerializable`)   | retried, up to 3 attempts in total            | `INTERNAL_SERVER_ERROR` (logged)  |
+
+`P2034` is a serialization failure: Postgres aborts one of two Serializable transactions that read and wrote the
+same rows at once. Run such transactions with `runSerializable(this.prisma, async (tx) => …)`, never
+`$transaction(…, { isolationLevel: 'Serializable' })` directly: it retries `P2034` with a short backoff and rethrows
+any other error, so the callback may run more than once and must not have side effects outside `tx`.
 
 `P2003` on `create` / `update` happens when a referenced record is deleted between the existence check and the
 write; on `delete`, when a reference is added between the reference check and the delete. `P2025` is caught only

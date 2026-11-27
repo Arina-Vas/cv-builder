@@ -237,7 +237,10 @@ oneself and the last Admin ([permissions](api/permissions.md#users)).
 between them, so this is a service rule, not `Restrict`: `deleteUserSkills` looks for the selected skills in the
 CVs of that user and, if any CV lists one, rejects the whole request with `ENTITY_IN_USE` and the ids of the
 blocked assignments in `extensions.ids` (see [conventions](api/conventions.md#codes)). The user removes the skill
-from those CVs first. The same skill in another user's CV does not block it. Profile languages have no such rule:
+from those CVs first. The same skill in another user's CV does not block it. Known limitation: the check in `createCvSkill`
+and the one in `deleteUserSkills` run in separate transactions, so if both requests for the same skill of one user
+arrive at the same moment, a CV skill can outlive the profile skill. The case is accepted as too narrow to fix; reads
+hide such rows (`ownerHasSkill` in `cv-skill.mapper.ts`, used by the CV Skills tab and the preview). Profile languages have no such rule:
 a CV has no languages of its own (see [CV preview](#cv-preview)).
 
 ## Constraints
