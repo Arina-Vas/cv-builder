@@ -82,6 +82,7 @@ export const Cvs = ({ userId }: Props) => {
         }
       />
       <DataTable<CvFieldsFragment>
+        scrollResetKey={tableParams.page}
         {...tableState}
         rows={rows}
         getRowId={(cv) => cv.id}

@@ -92,6 +92,7 @@ export const Languages = () => {
         }}
       />
       <DataTable<LanguageFieldsFragment>
+        scrollResetKey={page}
         rows={shown?.languages.items ?? []}
         getRowId={(language) => language.id}
         columns={languagesColumns}

@@ -132,6 +132,7 @@ export const Users = () => {
       />
 
       <DataTable<UserListFieldsFragment>
+        scrollResetKey={page}
         rows={shown?.users.items ?? []}
         getRowId={(user) => user.id}
         columns={usersColumns}
