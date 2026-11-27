@@ -43,9 +43,10 @@ export class AuthService {
       throw isUniqueViolation(error) ? conflict('email', UserMessage.emailTaken) : error;
     });
 
-    // The account exists either way; the user can ask for a new code on the verification page
-    await this.verification.sendCode(user.id, user.email).catch((error: unknown) => {
-      this.logger.warn(`Failed to send verification email to user ${user.id}`, error);
+    // The email goes out in the background, like the password reset one. The account exists
+    // either way; the user can ask for a new code on the verification page
+    await this.verification.sendCodeInBackground(user.id, user.email).catch((error: unknown) => {
+      this.logger.warn(`Failed to issue a verification code for user ${user.id}`, error);
     });
 
     return { user, tokens: await this.startSession(user.id, userAgent) };
