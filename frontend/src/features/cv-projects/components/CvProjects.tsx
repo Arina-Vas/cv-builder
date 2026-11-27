@@ -100,7 +100,9 @@ export const CvProjects = ({ cvId }: Props) => {
         onSearch={setSearch}
         // No access to the CV: ADD would open a modal whose availableCvProjects fails the same way
         action={
-          forbidden ? undefined : { label: t('addButton'), onClick: () => setModal({ type: 'add' }) }
+          forbidden
+            ? undefined
+            : { label: t('addButton'), onClick: () => setModal({ type: 'add' }) }
         }
       />
       <DataTable<CvProjectFieldsFragment>

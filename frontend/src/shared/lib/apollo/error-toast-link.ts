@@ -2,7 +2,7 @@ import type { ApolloLink } from '@apollo/client';
 import { ErrorLink } from '@apollo/client/link/error';
 import { OperationTypeNode } from 'graphql';
 import { apiErrors } from './api-errors';
-import { hasErrorCode, parseError, type AppError, type ErrorCode } from './graphql-errors';
+import { hasErrorCode, parseError, type AppError } from './graphql-errors';
 
 declare module '@apollo/client' {
   interface DefaultContext {
@@ -13,9 +13,6 @@ declare module '@apollo/client' {
 
 /** `useMutation(DOC, { context: NO_ERROR_TOAST })` when the component shows the error itself */
 export const NO_ERROR_TOAST = { skipErrorToast: true } as const;
-
-// Shown under the form fields (wiki: "validation errors are displayed inline"), never as a toast
-const FIELD_ERROR_CODES: readonly ErrorCode[] = ['BAD_USER_INPUT', 'CONFLICT'];
 
 /**
  * Reports failed *mutations* nobody shows locally, so ApiErrorToaster shows them as toasts.
@@ -32,9 +29,6 @@ export function createErrorToastLink(
     // refresh-link either repeated the request or is redirecting to Sign In
     if (hasErrorCode(error, 'UNAUTHENTICATED')) return;
 
-    const appError = parseError(error);
-    if (appError.code && FIELD_ERROR_CODES.includes(appError.code)) return;
-
-    report(appError);
+    report(parseError(error));
   });
 }
