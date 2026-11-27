@@ -16,12 +16,12 @@ import {
   REQUEST_COOLDOWN_SECONDS,
   RESET_TOKEN_TTL_MINUTES,
 } from './password-reset.service';
+import { MINUTE_MS, SECOND_MS } from '@/common/time';
 
 jest.mock('@/prisma/prisma.service', () => ({ PrismaService: class PrismaService {} }));
 jest.mock('@nestjs/config', () => ({ ConfigService: class ConfigService {} }));
 
 const NOW = new Date('2026-10-28T12:00:00.000Z');
-const MINUTE_MS = 60 * 1000;
 const TOKEN = 'a'.repeat(43);
 
 const errorOf = async (promise: Promise<unknown>): Promise<GraphQLError> => {
@@ -115,7 +115,7 @@ describe('PasswordResetService', () => {
     it('silently skips a repeated request within the cooldown', async () => {
       users.findByEmail.mockResolvedValue(user);
       prisma.authToken.findFirst.mockResolvedValue({
-        createdAt: new Date(NOW.getTime() - (REQUEST_COOLDOWN_SECONDS - 1) * 1000),
+        createdAt: new Date(NOW.getTime() - (REQUEST_COOLDOWN_SECONDS - 1) * SECOND_MS),
       });
 
       await expect(service.request(user.email)).resolves.toBeUndefined();
@@ -126,7 +126,7 @@ describe('PasswordResetService', () => {
     it('sends a new link once the cooldown has passed', async () => {
       users.findByEmail.mockResolvedValue(user);
       prisma.authToken.findFirst.mockResolvedValue({
-        createdAt: new Date(NOW.getTime() - REQUEST_COOLDOWN_SECONDS * 1000),
+        createdAt: new Date(NOW.getTime() - REQUEST_COOLDOWN_SECONDS * SECOND_MS),
       });
 
       await service.request(user.email);

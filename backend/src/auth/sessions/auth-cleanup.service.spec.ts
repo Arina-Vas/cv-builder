@@ -1,11 +1,12 @@
 import { Logger } from '@nestjs/common';
+import { DAY_MS } from '@/common/time';
 import { PrismaService } from '@/prisma/prisma.service';
 import { AuthCleanupService, CLEANUP_RETENTION_DAYS } from './auth-cleanup.service';
 
 jest.mock('@/prisma/prisma.service', () => ({ PrismaService: class PrismaService {} }));
 
 const NOW = new Date('2026-11-26T03:00:00.000Z');
-const CUTOFF = new Date(NOW.getTime() - CLEANUP_RETENTION_DAYS * 24 * 60 * 60 * 1000);
+const CUTOFF = new Date(NOW.getTime() - CLEANUP_RETENTION_DAYS * DAY_MS);
 
 describe('AuthCleanupService', () => {
   const prisma = {

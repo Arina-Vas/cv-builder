@@ -81,6 +81,7 @@ export const ProjectFormModal = ({ open, onOpenChange, project }: Props) => {
         technologyIds: project?.technologies.map((t) => t.id) ?? [],
       }}
       requireDirty={!!project}
+      reasonMessages={{ BAD_USER_INPUT: { USED_IN_CVS: t('update.datesUsedInCvs') } }}
       size="md"
       className={layout.grid}
     >

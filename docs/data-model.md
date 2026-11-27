@@ -116,7 +116,21 @@ All tables have `id` (uuid), `created_at` and `updated_at`. Only the meaningful 
   So a CV project does not stay "Till now" after its project ends, and old rows need no migration. "Today" is
   the user's local day on the frontend and the UTC day on the backend (dates are stored as UTC midnight). The
   helpers are `effectiveEndDate` in `frontend/src/features/cv-projects/lib/` and `backend/src/cvs/cv-projects/`.
-  Sorting by end date still uses the stored value (empty values last on `asc`).
+  Sorting by end date uses the same effective date, so the order matches what the table shows: "Till now" is
+  the latest (last on `asc`, first on `desc`), equal dates go by `id ASC`. Prisma cannot sort by a computed
+  value, so `cvProjects` sorts its rows in memory for `sortBy: endDate`; the list of one CV is small and not
+  paginated. The backend takes "today" in UTC and the table in the user's time zone, so for a project that ends
+  that very day the sort and the shown value can differ for a few hours around midnight.
+
+- CV project dates stay within the dates of the catalog project. `createCvProject` / `updateCvProject` check the
+  CV dates; `updateProject` rejects new project dates that would leave a CV project outside them
+  (`BAD_USER_INPUT` on `startDate` / `endDate`, reason `USED_IN_CVS`). The CVs are never moved to fit the new
+  dates: they belong to their owners, so the CV projects have to be edited first. An empty CV end date ends with
+  the project and never blocks the change.
+- The Add project form fills Start Date with the start of the chosen project and leaves End Date empty
+  ("Till now", resolved as above), decided 2026-11-27: the wiki lists the project dates next to the
+  auto-populated fields but its AC-8 names only Domain, Description and Environment. Choosing another project
+  replaces Start Date and checks a picked End Date again.
 
 - Project name, domain, description and technologies shown on a CV come from the referenced `projects` row;
   only participation dates, responsibilities and roles are CV-specific.
@@ -273,7 +287,7 @@ constraints are added in the `add_dates_checks` migration; the rest is checked i
 | Project `start_date <= end_date`                                             | `ALTER TABLE "projects" ADD CONSTRAINT "projects_dates_check" CHECK ("start_date" <= "end_date");`                             |
 | Project end date is not earlier than the start date                          | Input DTO (`@IsNotBeforeDate()`, see [conventions](api/conventions.md#shared-building-blocks))                                 |
 | CV project `start_date <= end_date` (if end date is set)                     | `ALTER TABLE "cv_projects" ADD CONSTRAINT "cv_projects_dates_check" CHECK ("end_date" IS NULL OR "start_date" <= "end_date");` |
-| CV project dates are within the project's dates                              | Service (a CHECK cannot reference another table)                                                                               |
+| CV project dates are within the project's dates                              | Service (a CHECK cannot reference another table); `updateProject` too, see [Assignments](#assignments)                         |
 | CV skills belong to the CV owner's skills                                    | Service (`createCvSkill` checks the profile; `deleteUserSkills` rejects a skill used in the owner's CVs)                       |
 | Names are trimmed, repeated spaces collapsed; ISO upper-cased                | Input DTO (`@NormalizeText()`, `@ToUpperCaseText()`, see [conventions](api/conventions.md#shared-building-blocks))             |
 | A new verification code invalidates the previous one; resend is rate-limited | Service                                                                                                                        |

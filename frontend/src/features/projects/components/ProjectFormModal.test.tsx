@@ -1,5 +1,6 @@
 import type { MockLink } from '@apollo/client/testing';
 import { screen, within } from '@testing-library/react';
+import { GraphQLError } from 'graphql';
 import { describe, expect, it, vi } from 'vitest';
 import { renderWithProviders } from '@/test/render';
 import { TECHNOLOGIES, UPDATE_PROJECT } from '../api/projects.operations';
@@ -93,5 +94,56 @@ describe('ProjectFormModal', () => {
     await user.click(screen.getByRole('button', { name: 'Update' }));
 
     await expect.poll(() => onOpenChange).toHaveBeenCalledWith(false);
+  });
+
+  it('explains dates rejected because CVs use the project outside them, and stays open', async () => {
+    const onOpenChange = vi.fn();
+    const { user } = renderWithProviders(
+      <ProjectFormModal open onOpenChange={onOpenChange} project={project} />,
+      {
+        mocks: [
+          technologiesMock,
+          {
+            request: {
+              query: UPDATE_PROJECT,
+              variables: {
+                input: {
+                  id: 'p1',
+                  name: 'Blog v2',
+                  domain: 'Blogging',
+                  description: 'A blogging website',
+                  startDate: '2024-03-01',
+                  endDate: '2024-12-31',
+                  technologyIds: ['t1'],
+                },
+              },
+            },
+            result: {
+              errors: [
+                new GraphQLError('backend text', {
+                  extensions: {
+                    code: 'BAD_USER_INPUT',
+                    reason: 'USED_IN_CVS',
+                    fields: [{ field: 'endDate', message: 'CV projects end after this date' }],
+                  },
+                }),
+              ],
+            },
+          },
+        ],
+      },
+    );
+
+    expect(await screen.findByText('React')).toBeInTheDocument();
+    await user.type(screen.getByLabelText('Name'), ' v2');
+    await user.click(screen.getByRole('button', { name: 'Update' }));
+
+    expect(
+      await screen.findByText(
+        'Some CVs use this project outside these dates. Change the dates in those CVs first',
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByText('backend text')).not.toBeInTheDocument();
+    expect(onOpenChange).not.toHaveBeenCalledWith(false);
   });
 });

@@ -54,16 +54,23 @@ describe('CV projects (integration)', () => {
       })
     ).id;
 
-  /** A catalog project running through 2026. */
-  const insertProject = async (name = 'CV Builder', domain = 'HR') =>
+  /** A catalog project running through 2026 unless another period is given. */
+  const insertProject = async (
+    name = 'CV Builder',
+    domain = 'HR',
+    period: { startDate: string; endDate: string } = {
+      startDate: '2026-01-01',
+      endDate: '2026-12-31',
+    },
+  ) =>
     (
       await t.prisma.project.create({
         data: {
           name,
           domain,
           description: `${name} description`,
-          startDate: new Date('2026-01-01'),
-          endDate: new Date('2026-12-31'),
+          startDate: new Date(period.startDate),
+          endDate: new Date(period.endDate),
           technologies: { create: [{ skillId: react }] },
         },
         select: { id: true },
@@ -210,20 +217,56 @@ describe('CV projects (integration)', () => {
       expect(byDomain.items.map((item) => item.project.name)).toEqual(['CV Builder']);
     });
 
-    it('sorts by end date with "Till now" as the latest', async () => {
+    it('sorts by the displayed end date: an ended project ends the CV project, "Till now" is the latest', async () => {
       const { browser, user } = await signedIn();
       const cvId = await insertCv(user.id);
-      await insertCvProject(cvId, await insertProject('Ongoing'), { endDate: null });
-      await insertCvProject(cvId, await insertProject('Early'), { endDate: '2026-03-01' });
-      await insertCvProject(cvId, await insertProject('Late'), { endDate: '2026-09-01' });
+      // the test runs on the real clock: one period ended long ago, the other runs for decades
+      const ended = { startDate: '2024-01-01', endDate: '2024-12-31' };
+      const running = { startDate: '2026-01-01', endDate: '2099-12-31' };
+      const inEnded = { startDate: '2024-02-01' };
+      await insertCvProject(cvId, await insertProject('Ongoing', 'HR', running), { endDate: null });
+      await insertCvProject(cvId, await insertProject('Late', 'HR', running), {
+        endDate: '2030-01-01',
+      });
+      // no CV end date, shown as the project end date 2024-12-31
+      await insertCvProject(cvId, await insertProject('Finished', 'HR', ended), {
+        ...inEnded,
+        endDate: null,
+      });
+      await insertCvProject(cvId, await insertProject('Early', 'HR', ended), {
+        ...inEnded,
+        endDate: '2024-06-30',
+      });
 
       const names = async (sortOrder: string) =>
         (await list(browser, { cvId, sortBy: 'endDate', sortOrder })).items.map(
           (item) => item.project.name,
         );
 
-      expect(await names('ASC')).toEqual(['Early', 'Late', 'Ongoing']);
-      expect(await names('DESC')).toEqual(['Ongoing', 'Late', 'Early']);
+      expect(await names('ASC')).toEqual(['Early', 'Finished', 'Late', 'Ongoing']);
+      expect(await names('DESC')).toEqual(['Ongoing', 'Late', 'Finished', 'Early']);
+    });
+
+    it('sorts by end date within the search results only', async () => {
+      const { browser, user } = await signedIn();
+      const cvId = await insertCv(user.id);
+      await insertCvProject(cvId, await insertProject('Payroll', 'Finance'), {
+        endDate: '2026-03-01',
+      });
+      await insertCvProject(cvId, await insertProject('Ledger', 'Finance'), { endDate: null });
+      await insertCvProject(cvId, await insertProject('CV Builder', 'HR'), {
+        endDate: '2026-02-01',
+      });
+
+      const result = await list(browser, {
+        cvId,
+        search: 'finance',
+        sortBy: 'endDate',
+        sortOrder: 'DESC',
+      });
+
+      expect(result.items.map((item) => item.project.name)).toEqual(['Ledger', 'Payroll']);
+      expect(result.total).toBe(2);
     });
   });
 

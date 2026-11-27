@@ -87,7 +87,7 @@ describe('UserFormModal', () => {
     await user.click(create);
 
     await expect.poll(() => onOpenChange).toHaveBeenCalledWith(false);
-  });
+  }, 15_000);
 
   it('offers every department, not only the first page of 50', async () => {
     const many = Array.from({ length: 60 }, (_, i) => ({

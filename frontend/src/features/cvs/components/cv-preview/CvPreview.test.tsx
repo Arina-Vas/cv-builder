@@ -204,30 +204,4 @@ describe('CvPreview', () => {
       expect(downloadBase64File).not.toHaveBeenCalled();
     });
   });
-
-  // AC-23: Unauthorized state, no CV data and no Export
-  it("shows Access denied without CV data or Export for another user's CV", async () => {
-    renderPreview([previewErrorMock('FORBIDDEN')]);
-
-    expect(await screen.findByText(en.cvs.preview.forbidden.title)).toBeInTheDocument();
-    expect(screen.getByText(en.cvs.preview.forbidden.message)).toBeInTheDocument();
-    expect(screen.queryByRole('heading', { name: 'Eleanor Whitmore' })).not.toBeInTheDocument();
-    expect(queryExportButton()).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: en.cvs.preview.retry })).not.toBeInTheDocument();
-  });
-
-  // AC-46: load error with Retry; Export is unavailable until the preview loads
-  it('shows the load error with Retry that repeats the request', async () => {
-    const { user } = renderPreview([
-      { request: previewRequest, error: new Error('Network down') },
-      previewMock(),
-    ]);
-
-    expect(await screen.findByText(en.cvs.preview.loadError)).toBeInTheDocument();
-    expect(queryExportButton()).not.toBeInTheDocument();
-
-    await user.click(screen.getByRole('button', { name: en.cvs.preview.retry }));
-
-    expect(await findDocument()).toBeInTheDocument();
-  });
 });

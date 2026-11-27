@@ -149,10 +149,17 @@ export const CvProjectFormModal = ({ open, onOpenChange, cvId, cvProject }: Prop
             value={field.value}
             onValueChange={(id) => {
               field.onChange(id);
-              const filled = (['startDate', 'endDate'] as const).filter((name) =>
-                form.getValues(name),
-              );
-              if (filled.length) void form.trigger(filled);
+              const nextProject = projects.find((project) => project.id === id);
+              const nextStartDate = nextProject ? parseISO(nextProject.startDate) : null;
+
+              form.setValue('startDate', nextStartDate, {
+                shouldDirty: true,
+                shouldValidate: true,
+              });
+
+              if (form.getValues('endDate')) {
+                void form.trigger('endDate');
+              }
             }}
             onBlur={field.onBlur}
             disabled={availableLoading || !!cvProject}
@@ -228,10 +235,7 @@ export const CvProjectFormModal = ({ open, onOpenChange, cvId, cvProject }: Prop
             label={t('fields.roles')}
             options={roleOptions}
             value={field.value}
-            onValueChange={(ids) => {
-              field.onChange(ids);
-              field.onBlur();
-            }}
+            onValueChange={field.onChange}
             onBlur={field.onBlur}
             disabled={rolesLoading}
             error={

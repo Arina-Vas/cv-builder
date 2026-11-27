@@ -1,6 +1,5 @@
 import { Throttle, type ThrottlerOptions } from '@nestjs/throttler';
-
-const MINUTE_MS = 60 * 1000;
+import { MINUTE_MS } from '@/common/time';
 
 export const DEFAULT_THROTTLE: ThrottlerOptions = { name: 'default', ttl: MINUTE_MS, limit: 100 };
 

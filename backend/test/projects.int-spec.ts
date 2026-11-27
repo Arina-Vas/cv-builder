@@ -213,6 +213,99 @@ describe('Projects (integration)', () => {
 
       expect(error.extensions.code).toBe('NOT_FOUND');
     });
+
+    describe('with CV projects', () => {
+      // The project runs 2026-01-01 – 2026-06-30; the CV takes part in it from `startDate` to `endDate`
+      const usedInCv = async (startDate: string, endDate: string | null) => {
+        const { id } = await project();
+        const owner = await createUser(t.prisma);
+        await t.prisma.cv.create({
+          data: {
+            name: 'Frontend CV',
+            education: 'BSU',
+            description: 'React developer',
+            userId: owner.id,
+            projects: {
+              create: [
+                {
+                  projectId: id,
+                  startDate: new Date(startDate),
+                  endDate: endDate ? new Date(endDate) : null,
+                },
+              ],
+            },
+          },
+        });
+        return id;
+      };
+
+      it.each([
+        [
+          'starts after the CV start',
+          ['2026-01-15', '2026-05-31'],
+          ['2026-02-01', '2026-06-30'],
+          ['startDate'],
+        ],
+        [
+          'ends before the CV end',
+          ['2026-01-15', '2026-05-31'],
+          ['2026-01-01', '2026-04-30'],
+          ['endDate'],
+        ],
+        [
+          'ends before the CV start',
+          ['2026-03-01', null],
+          ['2026-01-01', '2026-02-28'],
+          ['endDate'],
+        ],
+        [
+          'is narrower on both sides',
+          ['2026-01-15', '2026-05-31'],
+          ['2026-02-01', '2026-04-30'],
+          ['startDate', 'endDate'],
+        ],
+      ] as const)(
+        'rejects a period that %s with BAD_USER_INPUT (USED_IN_CVS), unchanged',
+        async (_, [cvStart, cvEnd], [startDate, endDate], fields) => {
+          const { browser } = await signedIn(UserRole.ADMIN);
+          const id = await usedInCv(cvStart, cvEnd);
+
+          const error = await browser.error(UPDATE_PROJECT, {
+            input: { id, ...input({ startDate, endDate }) },
+          });
+
+          expect(error.extensions).toMatchObject({ code: 'BAD_USER_INPUT', reason: 'USED_IN_CVS' });
+          expect((error.extensions.fields as { field: string }[]).map((f) => f.field)).toEqual(
+            fields,
+          );
+          expect(await stored(id)).toMatchObject({
+            startDate: new Date('2026-01-01'),
+            endDate: new Date('2026-06-30'),
+          });
+        },
+      );
+
+      it.each([
+        ['still covers the CV dates', ['2026-01-15', '2026-05-31'], ['2026-01-15', '2026-05-31']],
+        ['is extended', ['2026-01-15', '2026-05-31'], ['2025-06-01', '2026-12-31']],
+        // an empty CV end date ends with the project
+        [
+          'ends earlier for a CV without an end date',
+          ['2026-01-15', null],
+          ['2026-01-01', '2026-01-31'],
+        ],
+      ] as const)('saves a period that %s', async (_, [cvStart, cvEnd], [startDate, endDate]) => {
+        const { browser } = await signedIn(UserRole.ADMIN);
+        const id = await usedInCv(cvStart, cvEnd);
+
+        await browser.data(UPDATE_PROJECT, { input: { id, ...input({ startDate, endDate }) } });
+
+        expect(await stored(id)).toMatchObject({
+          startDate: new Date(startDate),
+          endDate: new Date(endDate),
+        });
+      });
+    });
   });
 
   describe('deleteProject', () => {
