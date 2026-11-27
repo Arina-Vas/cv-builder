@@ -32,7 +32,7 @@ export default defineConfig({
         'src/**/__fixtures__/**',
         'src/**/*.d.ts',
       ],
-        thresholds: {
+      thresholds: {
         lines: 80,
         statements: 80,
         functions: 80,
