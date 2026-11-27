@@ -127,6 +127,10 @@ All tables have `id` (uuid), `created_at` and `updated_at`. Only the meaningful 
   (`BAD_USER_INPUT` on `startDate` / `endDate`, reason `USED_IN_CVS`). The CVs are never moved to fit the new
   dates: they belong to their owners, so the CV projects have to be edited first. An empty CV end date ends with
   the project and never blocks the change.
+- The Add project form fills Start Date with the start of the chosen project and leaves End Date empty
+  ("Till now", resolved as above), decided 2026-11-27: the wiki lists the project dates next to the
+  auto-populated fields but its AC-8 names only Domain, Description and Environment. Choosing another project
+  replaces Start Date and checks a picked End Date again.
 
 - Project name, domain, description and technologies shown on a CV come from the referenced `projects` row;
   only participation dates, responsibilities and roles are CV-specific.
