@@ -49,10 +49,7 @@ export class CvProjectService {
     const rows = await this.prisma.cvProject.findMany({
       where,
       include: cvProjectInclude,
-      orderBy:
-        sortBy === CvProjectSortField.endDate
-          ? { id: 'asc' }
-          : [this.orderBy(sortBy, sortOrder), { id: 'asc' }],
+      orderBy: [this.orderBy(sortBy, sortOrder), { id: 'asc' }],
     });
 
     const sortedRows =
@@ -169,7 +166,7 @@ export class CvProjectService {
       case CvProjectSortField.startDate:
         return { startDate: order };
       case CvProjectSortField.endDate:
-        return { endDate: { sort: order, nulls: order === 'asc' ? 'last' : 'first' } };
+        return { id: 'asc' };
     }
   }
 
