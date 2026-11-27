@@ -4,6 +4,7 @@ import type { NestExpressApplication } from '@nestjs/platform-express';
 import { Test } from '@nestjs/testing';
 import type { App } from 'supertest/types';
 import { AppModule } from '@/app.module';
+import type { Locale } from '@/common/i18n/locale';
 import { PasswordResetService } from '@/auth/password-reset/password-reset.service';
 import { configureApp } from '@/app.setup';
 import { Roles } from '@/common/auth/roles.decorator';
@@ -17,6 +18,7 @@ export interface SentMail {
   kind: 'verification' | 'password-reset';
   /** Verification code or reset link */
   secret: string;
+  locale: Locale;
 }
 
 /** Replaces SMTP: keeps every email in memory so a test can read the code or link from it. */
@@ -24,13 +26,13 @@ export interface SentMail {
 export class FakeMailService {
   readonly sent: SentMail[] = [];
 
-  sendVerificationCode(to: string, code: string): Promise<void> {
-    this.sent.push({ to, kind: 'verification', secret: code });
+  sendVerificationCode(to: string, code: string, _minutes: number, locale: Locale): Promise<void> {
+    this.sent.push({ to, kind: 'verification', secret: code, locale });
     return Promise.resolve();
   }
 
-  sendPasswordReset(to: string, link: string): Promise<void> {
-    this.sent.push({ to, kind: 'password-reset', secret: link });
+  sendPasswordReset(to: string, link: string, _minutes: number, locale: Locale): Promise<void> {
+    this.sent.push({ to, kind: 'password-reset', secret: link, locale });
     return Promise.resolve();
   }
 
@@ -101,8 +103,8 @@ const trackPasswordResetRequests = (service: PasswordResetService): (() => Promi
   const pending = new Set<Promise<void>>();
   const request = service.request.bind(service);
 
-  service.request = (email: string): Promise<void> => {
-    const work = request(email);
+  service.request = (email: string, locale: Locale): Promise<void> => {
+    const work = request(email, locale);
     pending.add(work);
     work.finally(() => pending.delete(work)).catch(() => undefined);
     return work;

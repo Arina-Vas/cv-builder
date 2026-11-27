@@ -4,6 +4,7 @@ import { hashPassword } from '@/common/crypto/password';
 import { generateToken, hashToken } from '@/common/crypto/tokens';
 import { badUserInput } from '@/common/errors/app-errors';
 import { ErrorReason } from '@/common/errors/error-reason.enum';
+import type { Locale } from '@/common/i18n/locale';
 import type { EnvironmentVariables } from '@/config/env.validation';
 import { AuthTokenType } from '@/generated/prisma/enums';
 import { MailService } from '@/mail/mail.service';
@@ -30,7 +31,7 @@ export class PasswordResetService {
     private readonly config: ConfigService<EnvironmentVariables, true>,
   ) {}
 
-  async request(email: string): Promise<void> {
+  async request(email: string, locale: Locale): Promise<void> {
     const user = await this.users.findByEmail(email);
     if (!user || (await this.isCoolingDown(user.id))) {
       return;
@@ -60,7 +61,7 @@ export class PasswordResetService {
     ]);
 
     void this.mail
-      .sendPasswordReset(user.email, this.resetLink(token), RESET_TOKEN_TTL_MINUTES)
+      .sendPasswordReset(user.email, this.resetLink(token), RESET_TOKEN_TTL_MINUTES, locale)
       .catch((error: unknown) => {
         this.logger.warn(`Failed to send password reset email to user ${user.id}`, error);
       });

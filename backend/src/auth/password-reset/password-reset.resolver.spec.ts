@@ -31,24 +31,24 @@ describe('PasswordResetResolver', () => {
     jest.restoreAllMocks();
   });
 
-  it('requests a reset link and always returns true', () => {
+  it('requests a reset link in the language of the request and always returns true', () => {
     passwordReset.request.mockResolvedValue(undefined);
 
-    expect(resolver.requestPasswordReset({ email: 'employee@cv-builder.local' })).toBe(true);
-    expect(passwordReset.request).toHaveBeenCalledWith('employee@cv-builder.local');
+    expect(resolver.requestPasswordReset({ email: 'employee@cv-builder.local' }, 'pl')).toBe(true);
+    expect(passwordReset.request).toHaveBeenCalledWith('employee@cv-builder.local', 'pl');
   });
 
   it('answers before the request has finished, so the timing does not reveal the account', () => {
     passwordReset.request.mockReturnValue(new Promise<void>(() => undefined));
 
-    expect(resolver.requestPasswordReset({ email: 'employee@cv-builder.local' })).toBe(true);
+    expect(resolver.requestPasswordReset({ email: 'employee@cv-builder.local' }, 'en')).toBe(true);
   });
 
   it('still returns true and logs the failure without the email when the request fails', async () => {
     const logged = jest.spyOn(Logger.prototype, 'error').mockImplementation();
     passwordReset.request.mockRejectedValue(new Error('database is down'));
 
-    expect(resolver.requestPasswordReset({ email: 'employee@cv-builder.local' })).toBe(true);
+    expect(resolver.requestPasswordReset({ email: 'employee@cv-builder.local' }, 'en')).toBe(true);
     await new Promise(process.nextTick);
 
     expect(logged).toHaveBeenCalledWith('Password reset request failed', expect.any(Error));

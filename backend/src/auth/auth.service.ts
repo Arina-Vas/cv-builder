@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { hashPassword, verifyPassword } from '@/common/crypto/password';
 import { conflict, unauthenticated } from '@/common/errors/app-errors';
+import type { Locale } from '@/common/i18n/locale';
 import { Prisma } from '@/generated/prisma/client';
 import type { User } from '@/users/models/user.model';
 import { UserMessage } from '@/users/user.messages';
@@ -33,7 +34,7 @@ export class AuthService {
     private readonly verification: EmailVerificationService,
   ) {}
 
-  async signUp(input: SignUpInput, userAgent?: string): Promise<AuthResult> {
+  async signUp(input: SignUpInput, locale: Locale, userAgent?: string): Promise<AuthResult> {
     if (await this.users.findByEmail(input.email)) {
       throw conflict('email', UserMessage.emailTaken);
     }
@@ -44,7 +45,7 @@ export class AuthService {
     });
 
     // The account exists either way; the user can ask for a new code on the verification page
-    await this.verification.sendCode(user.id, user.email).catch((error: unknown) => {
+    await this.verification.sendCode(user.id, user.email, locale).catch((error: unknown) => {
       this.logger.warn(`Failed to send verification email to user ${user.id}`, error);
     });
 

@@ -54,8 +54,8 @@ describe('AuthResolver', () => {
     auth.signUp.mockResolvedValue({ user, tokens });
     const { res, context } = createContext();
 
-    await expect(resolver.signUp(input, context)).resolves.toBe(user);
-    expect(auth.signUp).toHaveBeenCalledWith(input, 'Firefox');
+    await expect(resolver.signUp(input, 'uk', context)).resolves.toBe(user);
+    expect(auth.signUp).toHaveBeenCalledWith(input, 'uk', 'Firefox');
     expect(res.cookie).toHaveBeenCalledWith(
       ACCESS_TOKEN_COOKIE,
       'access',

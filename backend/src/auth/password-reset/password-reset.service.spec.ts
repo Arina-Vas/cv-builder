@@ -74,7 +74,7 @@ describe('PasswordResetService', () => {
     it('does nothing for an unknown email', async () => {
       users.findByEmail.mockResolvedValue(null);
 
-      await expect(service.request('nobody@cv-builder.local')).resolves.toBeUndefined();
+      await expect(service.request('nobody@cv-builder.local', 'en')).resolves.toBeUndefined();
       expect(prisma.$transaction).not.toHaveBeenCalled();
       expect(mail.sendPasswordReset).not.toHaveBeenCalled();
     });
@@ -83,7 +83,7 @@ describe('PasswordResetService', () => {
       users.findByEmail.mockResolvedValue(user);
       prisma.authToken.findFirst.mockResolvedValue(null);
 
-      await service.request(user.email);
+      await service.request(user.email, 'uk');
 
       expect(prisma.authToken.updateMany).toHaveBeenCalledWith({
         where: {
@@ -96,12 +96,18 @@ describe('PasswordResetService', () => {
       });
       expect(prisma.$transaction).toHaveBeenCalledWith(['expire-previous', 'create-new']);
 
-      const [to, link, minutes] = mail.sendPasswordReset.mock.calls[0] as [string, string, number];
+      const [to, link, minutes, locale] = mail.sendPasswordReset.mock.calls[0] as [
+        string,
+        string,
+        number,
+        string,
+      ];
       const token = new URL(link).searchParams.get('token') ?? '';
       expect(to).toBe(user.email);
       expect(link).toMatch(/^http:\/\/localhost:3000\/reset-password\?token=/);
       expect(token).toMatch(/^[\w-]{43}$/);
       expect(minutes).toBe(RESET_TOKEN_TTL_MINUTES);
+      expect(locale).toBe('uk');
       expect(prisma.authToken.create).toHaveBeenCalledWith({
         data: {
           userId: 'user-1',
@@ -118,7 +124,7 @@ describe('PasswordResetService', () => {
         createdAt: new Date(NOW.getTime() - (REQUEST_COOLDOWN_SECONDS - 1) * SECOND_MS),
       });
 
-      await expect(service.request(user.email)).resolves.toBeUndefined();
+      await expect(service.request(user.email, 'en')).resolves.toBeUndefined();
       expect(prisma.$transaction).not.toHaveBeenCalled();
       expect(mail.sendPasswordReset).not.toHaveBeenCalled();
     });
@@ -129,7 +135,7 @@ describe('PasswordResetService', () => {
         createdAt: new Date(NOW.getTime() - REQUEST_COOLDOWN_SECONDS * SECOND_MS),
       });
 
-      await service.request(user.email);
+      await service.request(user.email, 'en');
 
       expect(mail.sendPasswordReset).toHaveBeenCalledTimes(1);
     });
@@ -140,7 +146,7 @@ describe('PasswordResetService', () => {
       prisma.authToken.findFirst.mockResolvedValue(null);
       mail.sendPasswordReset.mockRejectedValue(new Error('SMTP down'));
 
-      await expect(service.request(user.email)).resolves.toBeUndefined();
+      await expect(service.request(user.email, 'en')).resolves.toBeUndefined();
       await Promise.resolve();
 
       expect(warn).toHaveBeenCalledTimes(1);
