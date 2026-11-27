@@ -32,12 +32,11 @@ export default defineConfig({
         'src/**/__fixtures__/**',
         'src/**/*.d.ts',
       ],
-      // Just below current coverage so CI blocks regressions; raise toward 80 as tests are added
-      thresholds: {
-        lines: 75,
-        statements: 70,
-        functions: 70,
-        branches: 65,
+        thresholds: {
+        lines: 80,
+        statements: 80,
+        functions: 80,
+        branches: 80,
       },
     },
     projects: [
