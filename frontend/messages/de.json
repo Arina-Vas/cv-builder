@@ -383,6 +383,10 @@
       "empty": "Keine Lebensläufe gefunden",
       "userEmpty": "Sie haben noch keine Lebensläufe"
     },
+    "notFound": {
+      "title": "Lebenslauf nicht gefunden",
+      "message": "Der Lebenslauf existiert nicht oder wurde gelöscht"
+    },
     "fields": {
       "name": "Name",
       "education": "Ausbildung",

@@ -391,6 +391,10 @@
       "empty": "Aucun CV trouvé",
       "userEmpty": "Vous n'avez pas encore de CV"
     },
+    "notFound": {
+      "title": "CV introuvable",
+      "message": "Le CV n'existe pas ou a été supprimé"
+    },
     "fields": {
       "name": "Nom",
       "education": "Formation",

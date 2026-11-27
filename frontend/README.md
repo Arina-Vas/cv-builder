@@ -276,6 +276,11 @@ The code is in `src/features/system-pages`.
 | No Internet  | a page crashed while rendering (`app/error.tsx`, `app/global-error.tsx`)    | RETRY: `reset()`                                          |
 | Device Error | viewport < 768px, also after a resize                                       | none                                                      |
 
+- Not Found is for a URL the app has no page for, including a CV id that is not a UUID
+  (`cvs/[cvId]/layout.tsx`). A valid id the backend answers with `NOT_FOUND` is not a 404: the CV
+  tabs show the inline "CV not found" state (`features/cvs/components/CvNotFound`, wiki CV Details
+  "Not Found State") under the tabs, and the breadcrumbs keep only `CVs`. Employee pages still call
+  `notFound()`.
 - `DeviceGuard` and `NetworkStatusGate` wrap the app in the root layout.
 - Device Error: CSS media query picks what the first paint shows; after hydration `useMediaQuery`
   unmounts the app on narrow screens.

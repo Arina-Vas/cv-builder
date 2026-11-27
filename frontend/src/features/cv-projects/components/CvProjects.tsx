@@ -2,7 +2,6 @@
 
 import { useMutation, useQuery } from '@apollo/client/react';
 import { useTranslations } from 'next-intl';
-import { notFound } from 'next/navigation';
 import { useState } from 'react';
 import type { CvProjectFieldsFragment } from '@/gql/graphql';
 import {
@@ -22,6 +21,7 @@ import { useRefetchOnError } from '@/shared/lib/apollo/useRefetchOnError';
 import { formatDate } from '@/shared/lib/date/format-date';
 import s from './CvProjects.module.css';
 import { effectiveEndDate } from '@/features/cv-projects/lib/effective-end-date';
+import { CvNotFound } from '@/features/cvs/components/CvNotFound';
 
 type ModalState =
   | { type: 'add' }
@@ -57,7 +57,7 @@ export const CvProjects = ({ cvId }: Props) => {
     await withRefetch(() => deleteCvProject({ variables: { id: cvProjectToDelete.id, cvId } }));
   };
 
-  if (hasErrorCode(error, 'NOT_FOUND')) notFound();
+  if (hasErrorCode(error, 'NOT_FOUND')) return <CvNotFound />;
 
   const forbidden = hasErrorCode(error, 'FORBIDDEN');
 
