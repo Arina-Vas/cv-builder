@@ -9,5 +9,6 @@ export enum CvProjectSortField {
 registerEnumType(CvProjectSortField, {
   name: 'CvProjectSortField',
   description:
-    '`name` sorts by the project name; a missing end date ("Till now") counts as the latest',
+    '`name` sorts by the project name; `endDate` by the end date the table shows: a missing CV end date is ' +
+    'the project end date once the project has ended, otherwise "Till now", which counts as the latest',
 });

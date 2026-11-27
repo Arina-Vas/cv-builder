@@ -116,7 +116,11 @@ All tables have `id` (uuid), `created_at` and `updated_at`. Only the meaningful 
   So a CV project does not stay "Till now" after its project ends, and old rows need no migration. "Today" is
   the user's local day on the frontend and the UTC day on the backend (dates are stored as UTC midnight). The
   helpers are `effectiveEndDate` in `frontend/src/features/cv-projects/lib/` and `backend/src/cvs/cv-projects/`.
-  Sorting by end date still uses the stored value (empty values last on `asc`).
+  Sorting by end date uses the same effective date, so the order matches what the table shows: "Till now" is
+  the latest (last on `asc`, first on `desc`), equal dates go by `id ASC`. Prisma cannot sort by a computed
+  value, so `cvProjects` sorts its rows in memory for `sortBy: endDate`; the list of one CV is small and not
+  paginated. The backend takes "today" in UTC and the table in the user's time zone, so for a project that ends
+  that very day the sort and the shown value can differ for a few hours around midnight.
 
 - CV project dates stay within the dates of the catalog project. `createCvProject` / `updateCvProject` check the
   CV dates; `updateProject` rejects new project dates that would leave a CV project outside them

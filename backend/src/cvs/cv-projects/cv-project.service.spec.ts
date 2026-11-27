@@ -202,15 +202,99 @@ describe('CvProjectService', () => {
       [CvProjectSortField.name, SortOrder.DESC, { project: { name: 'desc' } }],
       [CvProjectSortField.startDate, SortOrder.ASC, { startDate: 'asc' }],
       [CvProjectSortField.startDate, SortOrder.DESC, { startDate: 'desc' }],
-      // "Till now" (no end date) is the latest: last ascending, first descending
-      [CvProjectSortField.endDate, SortOrder.ASC, { endDate: { sort: 'asc', nulls: 'last' } }],
-      [CvProjectSortField.endDate, SortOrder.DESC, { endDate: { sort: 'desc', nulls: 'first' } }],
     ])('sorts by %s %s', async (sortBy, sortOrder, expected) => {
       await service.findAll(OWNER, args({ sortBy, sortOrder }));
 
       expect(prisma.cvProject.findMany).toHaveBeenCalledWith(
         expect.objectContaining({ orderBy: [expected, { id: 'asc' }] }),
       );
+    });
+
+    // End Date shows the effective end date (docs/data-model.md, Assignments): an empty CV end date is
+    // "Till now" while the project runs and the project end date once it has ended. The sort follows it.
+    describe('by end date', () => {
+      const NOW = new Date('2026-11-27T12:00:00.000Z');
+
+      // A CV project of `name` with the given CV end date in a catalog project ending on `projectEnd`
+      const ending = (name: string, endDate: string | null, projectEnd: string) => {
+        const row = cvProjectRow(name);
+        return {
+          ...row,
+          endDate: endDate === null ? null : day(endDate),
+          project: { ...row.project, endDate: day(projectEnd) },
+        };
+      };
+
+      const EARLY = ending('Early', '2026-03-01', '2026-12-31');
+      const LATE = ending('Late', '2026-09-01', '2026-12-31');
+      // no CV end date, the project ended on 2026-06-30: shown and sorted as 2026-06-30
+      const FINISHED = ending('Finished', null, '2026-06-30');
+      // no CV end date, the project still runs: "Till now", the latest
+      const RUNNING = ending('Running', null, '2026-12-31');
+
+      const sortedNames = async (sortOrder: SortOrder) =>
+        (
+          await service.findAll(OWNER, args({ sortBy: CvProjectSortField.endDate, sortOrder }))
+        ).items.map((item) => item.project.name);
+
+      beforeEach(() => {
+        jest.useFakeTimers({ now: NOW });
+        // the database order must not matter
+        prisma.cvProject.findMany.mockResolvedValue([RUNNING, LATE, FINISHED, EARLY]);
+      });
+
+      afterEach(() => {
+        jest.useRealTimers();
+      });
+
+      it('sorts ascending by the displayed end date, "Till now" last', async () => {
+        expect(await sortedNames(SortOrder.ASC)).toEqual(['Early', 'Finished', 'Late', 'Running']);
+      });
+
+      it('sorts descending by the displayed end date, "Till now" first', async () => {
+        expect(await sortedNames(SortOrder.DESC)).toEqual(['Running', 'Late', 'Finished', 'Early']);
+      });
+
+      it('counts a project that ends today as running', async () => {
+        prisma.cvProject.findMany.mockResolvedValue([ending('Today', null, '2026-11-27'), LATE]);
+
+        expect(await sortedNames(SortOrder.ASC)).toEqual(['Late', 'Today']);
+      });
+
+      it('orders equal end dates by id ascending in both directions', async () => {
+        // the same displayed date: a stored one and one taken from the ended project; two "Till now"
+        const stored = ending('A', '2026-06-30', '2026-12-31');
+        const fromProject = ending('B', null, '2026-06-30');
+        const runningC = ending('C', null, '2026-12-31');
+        const runningD = ending('D', null, '2027-12-31');
+        prisma.cvProject.findMany.mockResolvedValue([runningD, fromProject, runningC, stored]);
+
+        expect(await sortedNames(SortOrder.ASC)).toEqual(['A', 'B', 'C', 'D']);
+        expect(await sortedNames(SortOrder.DESC)).toEqual(['C', 'D', 'A', 'B']);
+      });
+
+      it('still loads only this CV, with the search applied', async () => {
+        await service.findAll(
+          OWNER,
+          args({ sortBy: CvProjectSortField.endDate, sortOrder: SortOrder.ASC, search: 'hr' }),
+        );
+
+        expect(prisma.cvProject.findMany).toHaveBeenCalledWith(
+          expect.objectContaining({
+            where: expect.objectContaining({ cvId: CV_ID, project: expect.anything() }),
+            include: cvProjectInclude,
+          }),
+        );
+      });
+
+      it('returns the total of all matching rows', async () => {
+        const result = await service.findAll(
+          OWNER,
+          args({ sortBy: CvProjectSortField.endDate, sortOrder: SortOrder.ASC }),
+        );
+
+        expect(result.total).toBe(4);
+      });
     });
 
     it('returns mapped items and their count', async () => {
