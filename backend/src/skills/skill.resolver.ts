@@ -14,6 +14,7 @@ import { SkillCategory } from '@/skills/models/skill-category.model';
 export class SkillResolver {
   constructor(private readonly skillService: SkillService) {}
 
+  @Roles(UserRole.ADMIN)
   @Query(() => SkillPage)
   skills(@Args() args: SkillsArgs): Promise<SkillPage> {
     return this.skillService.findAll(args);

@@ -621,8 +621,9 @@ and fails with `BAD_USER_INPUT` (`field: file`) otherwise.
 - An operation that gets only a CV id reads the owner from the CV: `CvAccessService.getAccessibleCv(cvId,
 currentUser)` (`backend/src/cvs/cv-access.service.ts`, exported by `CvModule`) returns the CV or throws
   `NOT_FOUND` / `FORBIDDEN`. CV skills, CV projects, preview and PDF reuse it instead of their own checks.
-- Catalogs (departments, positions, skills, languages, projects) are readable by every authenticated user, because
-  employees pick values from them in forms; only changes are Admin-only.
+- Catalog list queries (`departments`, `positions`, `skills`, `languages`, `projects`) and catalog changes are
+  Admin-only. Employees pick catalog values through the lookups for selects (`*Options`, `skillCategories`,
+  `technologies`, `projectRoles`, `available*`), which every authenticated user may call.
 - Who may do what in each feature is described in [permissions.md](permissions.md).
 
 ## Sensitive data

@@ -13,6 +13,7 @@ import { UserRole } from '@/common/graphql/enums';
 export class LanguageResolver {
   constructor(private readonly languageService: LanguageService) {}
 
+  @Roles(UserRole.ADMIN)
   @Query(() => LanguagePage)
   languages(@Args() args: LanguagesArgs): Promise<LanguagePage> {
     return this.languageService.findAll(args);

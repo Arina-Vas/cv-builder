@@ -15,6 +15,7 @@ import { ProjectRole } from '@/projects/models/project-role.model';
 export class ProjectResolver {
   constructor(private readonly projectService: ProjectService) {}
 
+  @Roles(UserRole.ADMIN)
   @Query(() => ProjectList)
   projects(@Args() args: ProjectsArgs): Promise<ProjectList> {
     return this.projectService.findAll(args);

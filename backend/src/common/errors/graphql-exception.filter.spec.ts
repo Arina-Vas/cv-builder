@@ -61,6 +61,22 @@ describe('GraphqlExceptionFilter', () => {
       expect(result.message).not.toContain('prisma');
       expect(Logger.prototype.error).toHaveBeenCalled();
     });
+
+    it('logs only the name and code of Prisma errors, without the query arguments', () => {
+      filter.catch(prismaError('P2034'));
+      filter.catch(
+        new Prisma.PrismaClientValidationError(
+          'Invalid prisma.user.create() invocation: { data: { passwordHash: "secret-hash" } }',
+          { clientVersion: 'test' },
+        ),
+      );
+
+      expect(Logger.prototype.error).toHaveBeenNthCalledWith(
+        1,
+        'PrismaClientKnownRequestError P2034',
+      );
+      expect(Logger.prototype.error).toHaveBeenNthCalledWith(2, 'PrismaClientValidationError');
+    });
   });
 
   describe('HTTP exceptions', () => {
@@ -86,6 +102,15 @@ describe('GraphqlExceptionFilter', () => {
       const exception = new BadRequestException(['id must be a UUID', 'page must be an integer']);
 
       expect(filter.catch(exception).message).toBe('id must be a UUID, page must be an integer');
+    });
+
+    it('logs unexpected HTTP errors and hides their message', () => {
+      const exception = new HttpException('Upstream mail service is down', HttpStatus.BAD_GATEWAY);
+      const result = filter.catch(exception);
+
+      expect(result.extensions['code']).toBe(ErrorCode.INTERNAL_SERVER_ERROR);
+      expect(result.message).not.toContain('mail');
+      expect(Logger.prototype.error).toHaveBeenCalledWith(exception);
     });
 
     it('replaces the default Forbidden message', () => {

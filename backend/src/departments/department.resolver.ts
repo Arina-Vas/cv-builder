@@ -13,6 +13,7 @@ import { DepartmentService } from '@/departments/department.service';
 export class DepartmentResolver {
   constructor(private readonly departmentService: DepartmentService) {}
 
+  @Roles(UserRole.ADMIN)
   @Query(() => DepartmentPage)
   departments(@Args() args: DepartmentsArgs): Promise<DepartmentPage> {
     return this.departmentService.findAll(args);
