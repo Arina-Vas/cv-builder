@@ -29,8 +29,17 @@ export class GraphqlExceptionFilter implements GqlExceptionFilter {
     if (exception instanceof HttpException) {
       return this.fromHttp(exception);
     }
-    this.logger.error(exception);
+    this.logUnexpected(exception);
     return internalError();
+  }
+
+  private logUnexpected(error: unknown): void {
+    if (error instanceof Error && error.name.startsWith('PrismaClient')) {
+      const code = 'code' in error ? ` ${String(error.code)}` : '';
+      this.logger.error(`${error.name}${code}`);
+      return;
+    }
+    this.logger.error(error);
   }
 
   private fromPrisma(error: Prisma.PrismaClientKnownRequestError): GraphQLError {
@@ -47,7 +56,7 @@ export class GraphqlExceptionFilter implements GqlExceptionFilter {
       case 'P2025':
         return notFound();
       default:
-        this.logger.error(error);
+        this.logUnexpected(error);
         return internalError();
     }
   }
@@ -65,9 +74,8 @@ export class GraphqlExceptionFilter implements GqlExceptionFilter {
       case HttpStatus.TOO_MANY_REQUESTS:
         return rateLimited(0, 'Please wait before trying again');
       default:
-        return new GraphQLError(error.message, {
-          extensions: { code: ErrorCode.INTERNAL_SERVER_ERROR },
-        });
+        this.logger.error(error);
+        return internalError();
     }
   }
 }
