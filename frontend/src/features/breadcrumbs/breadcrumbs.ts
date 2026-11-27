@@ -52,9 +52,13 @@ export function buildBreadcrumbs(
   if (route.kind === 'section') return [{ label: sectionLabel }];
 
   const { section, id, tab } = route;
+  const sectionItem = { label: sectionLabel, href: `/${section}` };
+
+  // The CV / employee does not exist or is not ours: no name and no tab, only the way back to the list
+  if (!userOrCvName.loading && !userOrCvName.name) return [sectionItem];
 
   return [
-    { label: sectionLabel, href: `/${section}` },
+    sectionItem,
     {
       label: userOrCvName.name ?? '',
       href: `/${section}/${id}/${DETAIL_TABS[section][0]}`,

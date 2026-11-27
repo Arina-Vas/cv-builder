@@ -302,6 +302,10 @@
   },
   "users": {
     "title": "Dipendenti",
+    "notFound": {
+      "title": "Dipendente non trovato",
+      "message": "Il dipendente non esiste o è stato eliminato"
+    },
     "createButton": "Crea utente",
     "table": {
       "avatar": "Avatar",
@@ -381,6 +385,10 @@
       },
       "empty": "Nessun CV trovato",
       "userEmpty": "Non hai ancora nessun CV"
+    },
+    "notFound": {
+      "title": "CV non trovato",
+      "message": "Il CV non esiste o è stato eliminato"
     },
     "fields": {
       "name": "Nome",

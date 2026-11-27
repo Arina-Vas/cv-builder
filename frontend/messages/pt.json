@@ -302,6 +302,10 @@
   },
   "users": {
     "title": "Funcionários",
+    "notFound": {
+      "title": "Funcionário não encontrado",
+      "message": "O funcionário não existe ou foi excluído"
+    },
     "createButton": "Criar usuário",
     "table": {
       "avatar": "Avatar",
@@ -381,6 +385,10 @@
       },
       "empty": "Nenhum currículo encontrado",
       "userEmpty": "Você ainda não tem currículos"
+    },
+    "notFound": {
+      "title": "Currículo não encontrado",
+      "message": "O currículo não existe ou foi excluído"
     },
     "fields": {
       "name": "Nome",

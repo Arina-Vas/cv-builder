@@ -276,6 +276,19 @@ The code is in `src/features/system-pages`.
 | No Internet  | a page crashed while rendering (`app/error.tsx`, `app/global-error.tsx`)    | RETRY: `reset()`                                          |
 | Device Error | viewport < 768px, also after a resize                                       | none                                                      |
 
+- Not Found is for a URL the app has no page for, including a CV or employee id that is not a UUID
+  (`cvs/[cvId]/layout.tsx`, `users/[userId]/layout.tsx`). A valid id the backend answers with
+  `NOT_FOUND` is not a 404: the tabs show an inline state under the tab bar and the breadcrumbs keep
+  only the section (`CVs` / `Employees`).
+
+  | Pages                                    | State                | Component                                |
+  | ---------------------------------------- | -------------------- | ---------------------------------------- |
+  | CV Details, Skills, Projects, Preview    | "CV not found"       | `features/cvs/components/CvNotFound`     |
+  | Employee Profile, Skills, Languages, CVs | "Employee not found" | `features/users/components/UserNotFound` |
+
+  "CV not found" is the wiki CV Details "Not Found State"; the employee pages follow it (the wiki
+  lists "User not found" among the profile errors, the UI calls users employees).
+
 - `DeviceGuard` and `NetworkStatusGate` wrap the app in the root layout.
 - Device Error: CSS media query picks what the first paint shows; after hydration `useMediaQuery`
   unmounts the app on narrow screens.

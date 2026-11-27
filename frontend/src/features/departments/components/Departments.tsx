@@ -79,6 +79,7 @@ export const Departments = () => {
       />
 
       <DataTable<DepartmentFieldsFragment>
+        scrollResetKey={page}
         rows={shown?.departments.items ?? []}
         getRowId={(department) => department.id}
         columns={departmentsColumns}

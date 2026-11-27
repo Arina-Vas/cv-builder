@@ -100,6 +100,7 @@ export const Users = () => {
     },
     {
       key: 'email',
+      width: '25%',
       header: t('table.email'),
       render: (user) => user.email,
       hideOnTablet: true,
@@ -112,6 +113,7 @@ export const Users = () => {
     },
     {
       key: 'position',
+      width: '20%',
       header: t('table.position'),
       render: (user) => user.position?.name,
       sortable: true,
@@ -132,6 +134,7 @@ export const Users = () => {
       />
 
       <DataTable<UserListFieldsFragment>
+        scrollResetKey={page}
         rows={shown?.users.items ?? []}
         getRowId={(user) => user.id}
         columns={usersColumns}

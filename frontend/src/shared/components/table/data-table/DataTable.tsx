@@ -69,7 +69,7 @@ export function DataTable<T>({
     <thead>
       <tr>
         {columns.map((column) => {
-          const isSortable = !!column.sortable && onSortChange;
+          const isSortable = !!column.sortable && onSortChange && rows.length > 0;
 
           return isSortable ? (
             <SortableHeaderCell
@@ -129,14 +129,19 @@ export function DataTable<T>({
           return (
             <Fragment key={getRowId(row)}>
               <tr>
-                {columns.map((column) => (
-                  <td
-                    key={column.key}
-                    className={column.hideOnTablet ? styles.hideOnTablet : undefined}
-                  >
-                    {column.render(row)}
-                  </td>
-                ))}
+                {columns.map((column) => {
+                  const content = column.render(row);
+
+                  return (
+                    <td
+                      key={column.key}
+                      className={column.hideOnTablet ? styles.hideOnTablet : undefined}
+                      title={typeof content === 'string' ? content : undefined}
+                    >
+                      {content}
+                    </td>
+                  );
+                })}
                 {hasActionsColumn && (
                   <td className={styles.actionsCell}>{renderActionsCell(row)}</td>
                 )}

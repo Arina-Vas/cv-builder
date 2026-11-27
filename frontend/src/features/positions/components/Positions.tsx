@@ -78,6 +78,7 @@ export const Positions = () => {
         action={{ label: t('createButton'), onClick: () => setModal({ type: 'create' }) }}
       />
       <DataTable<PositionFieldsFragment>
+        scrollResetKey={page}
         rows={shown?.positions.items ?? []}
         getRowId={(position) => position.id}
         columns={positionsColumns}

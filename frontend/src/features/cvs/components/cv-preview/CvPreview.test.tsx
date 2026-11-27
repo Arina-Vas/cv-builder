@@ -1,7 +1,6 @@
 import type { MockLink } from '@apollo/client/testing';
 import { screen, waitFor } from '@testing-library/react';
 import { GraphQLError } from 'graphql';
-import { notFound } from 'next/navigation';
 import { describe, expect, it, vi } from 'vitest';
 import { GENERATE_CV_PDF } from '@/features/cv-pdf/api/cv-pdf.operations';
 import { CV_PREVIEW } from '@/features/cvs/api/cvs.operations';
@@ -118,13 +117,12 @@ describe('CvPreview', () => {
       expect(screen.getByRole('heading', { name: 'Professional skills' })).toBeInTheDocument();
     });
 
-    it('opens the 404 page when the CV does not exist', async () => {
-      // React logs the error caught by the boundary; keep the test output clean
-      vi.spyOn(console, 'error').mockImplementation(() => {});
-
+    it('shows CV not found without Export when the CV does not exist', async () => {
       renderPreview([previewErrorMock('NOT_FOUND')]);
 
-      await vi.waitFor(() => expect(notFound).toHaveBeenCalled());
+      expect(await screen.findByRole('heading', { name: 'CV not found' })).toBeInTheDocument();
+      expect(screen.getByText('The CV does not exist or has been deleted')).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Export PDF' })).not.toBeInTheDocument();
     });
 
     // AC-23: Unauthorized state, no CV data and no Export
@@ -205,15 +203,6 @@ describe('CvPreview', () => {
       expect(exportButton()).toBeEnabled();
       expect(downloadBase64File).not.toHaveBeenCalled();
     });
-  });
-
-  it('opens the 404 page when the CV does not exist', async () => {
-    // React logs the error caught by the boundary; keep the test output clean
-    vi.spyOn(console, 'error').mockImplementation(() => {});
-
-    renderPreview([previewErrorMock('NOT_FOUND')]);
-
-    await vi.waitFor(() => expect(notFound).toHaveBeenCalled());
   });
 
   // AC-23: Unauthorized state, no CV data and no Export

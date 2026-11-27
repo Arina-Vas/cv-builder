@@ -1,8 +1,7 @@
 import type { MockLink } from '@apollo/client/testing';
 import { screen, waitFor, within } from '@testing-library/react';
 import { GraphQLError } from 'graphql';
-import { notFound } from 'next/navigation';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { closedGate } from '@/test/action-gate';
 import { CatchErrors } from '@/test/catch-errors';
 import { renderWithProviders } from '@/test/render';
@@ -87,10 +86,7 @@ describe('UserLanguages', () => {
       expect(await screen.findByText('English')).toBeInTheDocument();
     });
 
-    it('opens the 404 page instead of Retry when the user does not exist', async () => {
-      // React logs the error caught by the boundary; keep the test output clean
-      vi.spyOn(console, 'error').mockImplementation(() => {});
-
+    it('shows Employee not found instead of Retry when the user does not exist', async () => {
       renderList({
         mocks: [
           {
@@ -102,7 +98,12 @@ describe('UserLanguages', () => {
         ],
       });
 
-      await vi.waitFor(() => expect(notFound).toHaveBeenCalled());
+      expect(
+        await screen.findByRole('heading', { name: 'Employee not found' }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('The employee does not exist or has been deleted'),
+      ).toBeInTheDocument();
       expect(screen.queryByRole('button', { name: 'Retry' })).not.toBeInTheDocument();
     });
   });

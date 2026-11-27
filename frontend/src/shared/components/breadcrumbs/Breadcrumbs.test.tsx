@@ -6,7 +6,7 @@ import { Breadcrumbs, type BreadcrumbItem } from './Breadcrumbs';
 const ITEMS: BreadcrumbItem[] = [
   { label: 'Employees', href: '/users' },
   { label: 'Anna Smith', href: '/users/42/profile', icon: ProfileIcon, variant: 'entity' },
-  { label: 'Skills', href: '/users/42/skills' },
+  { label: 'Skills' },
 ];
 
 const renderBreadcrumbs = (items: readonly BreadcrumbItem[] = ITEMS) =>
@@ -32,7 +32,7 @@ describe('Breadcrumbs', () => {
     );
   });
 
-  it('shows the last item as the current page, not a link, even with an href', () => {
+  it('shows the last item without href as the current page, not a link', () => {
     renderBreadcrumbs();
 
     expect(screen.queryByRole('link', { name: 'Skills' })).not.toBeInTheDocument();
@@ -43,14 +43,22 @@ describe('Breadcrumbs', () => {
     expect(screen.getByRole('link', { name: 'Employees' })).not.toHaveAttribute('aria-current');
   });
 
-  it('shows a single item as plain current text', () => {
-    renderBreadcrumbs([{ label: 'Settings', href: '/settings' }]);
+  it('shows a single item without href as plain current text', () => {
+    renderBreadcrumbs([{ label: 'Settings' }]);
 
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
     expect(screen.getByText('Settings').closest('[aria-current]')).toHaveAttribute(
       'aria-current',
       'page',
     );
+  });
+
+  // e.g. "CVs" on a CV that does not exist: the user is not on the CVs page, the item leads back to it
+  it('links a last item that has an href, without marking it current', () => {
+    renderBreadcrumbs([{ label: 'CVs', href: '/cvs' }]);
+
+    expect(screen.getByRole('link', { name: 'CVs' })).toHaveAttribute('href', '/cvs');
+    expect(screen.getByRole('link', { name: 'CVs' })).not.toHaveAttribute('aria-current');
   });
 
   it('renders an item without href as text', () => {

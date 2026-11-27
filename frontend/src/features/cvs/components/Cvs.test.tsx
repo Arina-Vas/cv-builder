@@ -1,8 +1,7 @@
 import type { MockLink } from '@apollo/client/testing';
 import { screen, waitFor, within } from '@testing-library/react';
 import { GraphQLError } from 'graphql';
-import { notFound } from 'next/navigation';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { renderWithProviders } from '@/test/render';
 import { mockRouter } from '@/test/next-navigation';
 import { meMock } from '@/test/me-mock';
@@ -260,10 +259,7 @@ describe('Cvs', () => {
       expect(screen.getByText('QA Engineer')).toBeInTheDocument();
     });
 
-    it('opens the 404 page when the user does not exist', async () => {
-      // React logs the error caught by the boundary; keep the test output clean
-      vi.spyOn(console, 'error').mockImplementation(() => {});
-
+    it('shows Employee not found when the user does not exist', async () => {
       renderCvs(
         [
           meMock({ id: ME_ID }),
@@ -275,7 +271,12 @@ describe('Cvs', () => {
         'missing',
       );
 
-      await vi.waitFor(() => expect(notFound).toHaveBeenCalled());
+      expect(
+        await screen.findByRole('heading', { name: 'Employee not found' }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('The employee does not exist or has been deleted'),
+      ).toBeInTheDocument();
     });
   });
 });

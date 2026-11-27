@@ -88,6 +88,7 @@ export const Skills = () => {
         action={{ label: t('createButton'), onClick: () => setModal({ type: 'create' }) }}
       />
       <DataTable<SkillFieldsFragment>
+        scrollResetKey={page}
         rows={shown?.skills.items ?? []}
         getRowId={(skill) => skill.id}
         columns={skillsColumns}

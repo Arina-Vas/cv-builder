@@ -116,6 +116,22 @@ describe('buildBreadcrumbs', () => {
     expect(user).toMatchObject({ label: '', loading: true });
   });
 
+  // the CV / employee does not exist or is not ours: no name to show and no tab to be on
+  it.each([
+    ['cvs', 'details', 'nav.cvs'],
+    ['users', 'profile', 'nav.employees'],
+  ] as const)(
+    'leaves only the %s section, linked to its list, when the name has not come',
+    (section, tab, label) => {
+      const items = buildBreadcrumbs({ kind: 'detail', section, id: '7', tab }, translate, {
+        name: undefined,
+        loading: false,
+      });
+
+      expect(items).toEqual([{ label, href: `/${section}` }]);
+    },
+  );
+
   it('follows the tab when only the tab changes', () => {
     const route = parseBreadcrumbRoute('/users/42/languages');
     const items = buildBreadcrumbs(route, translate, LOADED);

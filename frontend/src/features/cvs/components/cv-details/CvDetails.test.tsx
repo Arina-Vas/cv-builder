@@ -1,8 +1,7 @@
 import type { MockLink } from '@apollo/client/testing';
 import { screen } from '@testing-library/react';
 import { GraphQLError } from 'graphql';
-import { notFound } from 'next/navigation';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { renderWithProviders } from '@/test/render';
 import { CatchErrors } from '@/test/catch-errors';
 import { CV, UPDATE_CV } from '../../api/cvs.operations';
@@ -70,13 +69,13 @@ describe('CvDetails', () => {
       expect(screen.getByRole('button', { name: 'Update' })).toBeDisabled();
     });
 
-    it('opens the 404 page when the CV does not exist', async () => {
-      // React logs the error caught by the boundary; keep the test output clean
-      vi.spyOn(console, 'error').mockImplementation(() => {});
-
+    // wiki: Not Found State, no empty form for a CV that does not exist
+    it('shows CV not found without the form when the CV does not exist', async () => {
       renderDetails([errorMock('NOT_FOUND')]);
 
-      await vi.waitFor(() => expect(notFound).toHaveBeenCalled());
+      expect(await screen.findByRole('heading', { name: 'CV not found' })).toBeInTheDocument();
+      expect(screen.getByText('The CV does not exist or has been deleted')).toBeInTheDocument();
+      expect(screen.queryByLabelText('Name')).not.toBeInTheDocument();
     });
 
     it("shows Access denied without any CV data for another user's CV", async () => {
@@ -160,23 +159,23 @@ describe('CvDetails', () => {
     });
 
     // wiki: a CV deleted meanwhile must not stay on screen as current data
-    it('opens the 404 page when the CV was deleted before saving', async () => {
-      // React logs the error caught by the boundary; keep the test output clean
-      vi.spyOn(console, 'error').mockImplementation(() => {});
+    it('shows CV not found when the CV was deleted before saving', async () => {
       const gone = {
         errors: [new GraphQLError('backend text', { extensions: { code: 'NOT_FOUND' } })],
       };
       const { user } = renderDetails([
         cvMock(),
         { request: updateRequest('Frontend Developer v2'), result: gone },
-        // useRefetchOnError: cv(id) again, now NOT_FOUND, so CvDetails opens Not Found
+        // useRefetchOnError: cv(id) again, now NOT_FOUND, so CvDetails shows CV not found
         { request: cvRequest, result: gone },
       ]);
 
       await user.type(await screen.findByLabelText('Name'), ' v2');
       await user.click(screen.getByRole('button', { name: 'Update' }));
 
-      await vi.waitFor(() => expect(notFound).toHaveBeenCalled());
+      expect(await screen.findByRole('heading', { name: 'CV not found' })).toBeInTheDocument();
+      expect(screen.getByText('The CV does not exist or has been deleted')).toBeInTheDocument();
+      expect(screen.queryByLabelText('Name')).not.toBeInTheDocument();
     });
   });
 });
