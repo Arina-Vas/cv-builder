@@ -45,7 +45,7 @@ import { DataTable, type Column } from '@/shared/components/table';
 | `caption`          | `string`                  | table name for screen readers (hidden)                                          |
 | `emptyMessage`     | `string`                  | text when `rows` is empty, e.g. `No users found`                                |
 | `sort`             | `SortState`               | current sort: `{ field, order: 'ASC' \| 'DESC' }`                               |
-| `onSortChange`     | `(sort) => void`          | header click; without it no column is sortable                                  |
+| `onSortChange`     | `(sort) => void`          | header click; without it, or while `rows` is empty, no column is sortable       |
 | `rowActions`       | `(row) => RowAction<T>[]` | ⋮ menu in the last column                                                       |
 | `onRowClick`       | `(row) => void`           | › arrow in the last column (Employee on Users)                                  |
 | `getRowLabel`      | `(row) => string`         | row name in `Actions for …` / `Open …`; default `common.table.row` (`row {id}`) |
@@ -74,11 +74,18 @@ const columns: Column<UserRow>[] = [
 - `key` is the React key and the sort field sent in `onSortChange`: use the backend's
   `*SortField` enum value so the page passes it on as is.
 - `render` returns any node: text, `Avatar`, `Chip`s, a formatted date.
-- `sortable` shows the arrow and makes the header a button. It only works together with `onSortChange`.
+- `sortable` shows the arrow and makes the header a button. It only works together with `onSortChange`
+  and while there are rows: an empty table (no data, no search results, an error, the first load)
+  shows plain headers, so a click cannot send a request for a list that has nothing to sort. The
+  sort stays in the URL and comes back with the rows.
 - `hideHeader` keeps `header` for screen readers only (`visuallyHidden`), the cell looks empty: a column
   without a visible title in Figma (Avatar). Don't pass `header: ''`: the column then has no name at all.
   Not for a `sortable` column, whose header is the sort button.
-- `width` goes to the `<th>` style. Leave it out and the browser shares the width.
+- `width` goes to the `<th>` style. The table has `table-layout: fixed`: widths come from the head,
+  not from the cells, so they stay the same on every page and with any data. Columns without
+  `width` share what is left equally; set it for short values (dates `140px`, ISO code `120px`)
+  and for long ones (Users: Email `25%`, Position `20%`). The actions column is the button plus the
+  cell's side padding (72px).
 - `hideOnTablet` hides the column (header and cells) below 1024px, see [Tablet](#tablet).
 
 ## Tablet
@@ -104,14 +111,21 @@ and the header would stop sticking to the page).
   stays and the sort arrow is just not visible.
 - `display: none` also removes the column from the accessibility tree, so a screen reader on tablet
   hears the same columns the user sees.
+- Give a percentage `width` only to columns hidden on tablet. If every column left on tablet has a
+  `width` and together they are narrower than the table, `table-layout: fixed` hands the rest to
+  all of them, the 72px avatar and actions columns too. A column without `width` takes it instead.
 
 ## Long values
 
-Cells have `overflow-wrap: anywhere`: a value without spaces (an email, a long name) breaks inside
-its cell instead of setting the table's minimum width. The row gets taller, the page does not
-scroll sideways. Without it a 38-character email kept the Users table at 859px, wider than the
-817px left at 1080px with the full 200px sidebar. The wiki has no truncation rule, so values are
-wrapped, not cut with `…`.
+A cell shows its value on one line: a value longer than the column (an email, a long name) is cut
+with `…`. When `render` returns a string, the cell gets it as `title`, so the full value shows on
+hover; a column that renders a node (a chip, a link) passes its own `title` (`Chip` already does).
+Rows keep one height and the page never scrolls sideways.
+
+- The actions cell is not cut: `overflow: hidden` would cut the button's focus ring.
+- Row details (`renderRowDetails`) are a paragraph: wrapped with `overflow-wrap: anywhere`, not cut.
+- The wiki has no truncation rule: cutting is a design choice, made so long values do not break
+  inside words.
 
 ## Row actions
 
@@ -141,7 +155,7 @@ the description). The two rows share one bottom line and the hover background.
 | ---------- | --------------- | ------------------------------------------- |
 | loading    | `isLoading`     | 5 skeleton rows, `aria-busy` on the table   |
 | error      | `error`         | message + Retry (`onRetry`), `role="alert"` |
-| empty      | `rows` is empty | `emptyMessage`                              |
+| empty      | `rows` is empty | `emptyMessage`, headers without sort        |
 | rows       | otherwise       | the rows                                    |
 | refreshing | `isRefreshing`  | the old rows at half opacity, `inert`       |
 
@@ -173,7 +187,7 @@ at the pagination and sees the dimmed rows; a cached page scrolls at once. Not o
 Names below are the English texts; the keys are in `common.table`.
 
 - `<caption>` (hidden) names the table; headers have `scope="col"`.
-- Sortable headers are buttons with `aria-sort` (`ascending` / `descending` / `none`). These are
+- Sortable headers (while there are rows) are buttons with `aria-sort` (`ascending` / `descending` / `none`). These are
   ARIA tokens, not text: they are never translated, the screen reader announces them in its own
   language.
 - The ⋮ and › buttons are named `Actions for …` / `Open …` (`rowActions` / `openRow`) from

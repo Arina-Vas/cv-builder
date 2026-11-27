@@ -1,7 +1,7 @@
 import type { MockLink } from '@apollo/client/testing';
 import { screen, waitFor, within } from '@testing-library/react';
 import { GraphQLError } from 'graphql';
-import { notFound, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { describe, expect, it, vi } from 'vitest';
 import { CatchErrors } from '@/test/catch-errors';
 import { renderWithProviders } from '@/test/render';
@@ -189,13 +189,12 @@ describe('CvProjects', () => {
       expect(screen.queryByRole('button', { name: 'Retry' })).not.toBeInTheDocument();
     });
 
-    it('opens the 404 page when the CV does not exist', async () => {
-      // React logs the error caught by the boundary; keep the test output clean
-      vi.spyOn(console, 'error').mockImplementation(() => {});
-
+    it('shows CV not found without actions when the CV does not exist', async () => {
       renderPage([errorMock('NOT_FOUND')]);
 
-      await vi.waitFor(() => expect(notFound).toHaveBeenCalled());
+      expect(await screen.findByRole('heading', { name: 'CV not found' })).toBeInTheDocument();
+      expect(screen.getByText('The CV does not exist or has been deleted')).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Add project' })).not.toBeInTheDocument();
     });
   });
 

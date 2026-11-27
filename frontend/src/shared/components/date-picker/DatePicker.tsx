@@ -12,6 +12,7 @@ import { IconButton } from '@/shared/components/buttons';
 import { useTranslations } from 'next-intl';
 import { Field, getErrorId } from '@/shared/components/field/Field';
 import { formatDate } from '@/shared/lib/date/format-date';
+import { useDateFnsLocale } from '@/shared/lib/date/date-fns-locale';
 
 type Props = {
   value: Date | null;
@@ -65,6 +66,7 @@ export const DatePicker = ({
   openToDate,
 }: Props) => {
   const t = useTranslations('common.datePicker');
+  const dateLocale = useDateFnsLocale();
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<View>('day');
 
@@ -160,8 +162,8 @@ export const DatePicker = ({
               onChange={handleSelect}
               onMonthChange={setViewDate}
               onYearChange={setViewDate}
-              calendarStartDay={0}
-              formatWeekDay={(dayName) => dayName.charAt(0)}
+              locale={dateLocale}
+              formatWeekDay={(dayName) => dayName.charAt(0).toUpperCase()}
               showFullMonthYearPicker
               showMonthYearPicker={view === 'month'}
               showYearPicker={view === 'year'}
@@ -183,7 +185,7 @@ export const DatePicker = ({
                     data-active={view === 'month'}
                     onClick={() => setView('month')}
                   >
-                    {format(date, 'MMMM')}
+                    {format(date, 'LLLL', { locale: dateLocale })}
                   </button>
                   <button
                     type="button"

@@ -33,6 +33,15 @@ describe('DataTable', () => {
     expect(screen.getByRole('cell', { name: 'React' })).toBeInTheDocument();
   });
 
+  it('gives a text cell its value as title, so a cut value can be read in full', () => {
+    renderTable({
+      columns: [...columns, { key: 'icon', header: 'Icon', render: () => <span>icon</span> }],
+    });
+
+    expect(screen.getByRole('cell', { name: 'React' })).toHaveAttribute('title', 'React');
+    expect(screen.getAllByRole('cell', { name: 'icon' })[0]).not.toHaveAttribute('title');
+  });
+
   it('keeps a hidden header for screen readers only', () => {
     renderTable({
       columns: [{ key: 'icon', header: 'Icon', hideHeader: true, render: () => null }, ...columns],
@@ -72,6 +81,28 @@ describe('DataTable', () => {
     await user.click(screen.getByRole('button', { name: 'Name' }));
 
     expect(onSortChange).toHaveBeenCalledWith({ field: 'name', order: 'ASC' });
+  });
+
+  it('hides the sort button while there are no rows, so sorting sends no request', () => {
+    const onSortChange = vi.fn();
+    const { rerender } = renderTable({ rows: [], onSortChange });
+
+    const header = screen.getByRole('columnheader', { name: 'Name' });
+    expect(within(header).queryByRole('button')).not.toBeInTheDocument();
+    expect(header).not.toHaveAttribute('aria-sort');
+
+    rerender(
+      <DataTable
+        columns={columns}
+        rows={departments.slice(0, 3)}
+        getRowId={(row) => row.id}
+        caption="Departments"
+        emptyMessage="No departments found"
+        onSortChange={onSortChange}
+      />,
+    );
+
+    expect(screen.getByRole('button', { name: 'Name' })).toBeInTheDocument();
   });
 
   it('renders a plain header when sorting is not wired', () => {

@@ -2,7 +2,6 @@
 
 import { useMutation, useQuery } from '@apollo/client/react';
 import { useTranslations } from 'next-intl';
-import { notFound } from 'next/navigation';
 import { useState } from 'react';
 import type { CvSkillFieldsFragment } from '@/gql/graphql';
 import {
@@ -22,6 +21,7 @@ import { useSelection } from '@/shared/hooks/useSelection';
 import { hasErrorCode } from '@/shared/lib/apollo/graphql-errors';
 import { useRefetchOnError } from '@/shared/lib/apollo/useRefetchOnError';
 import s from './CvSkills.module.css';
+import { CvNotFound } from '@/features/cvs/components/CvNotFound';
 
 type Props = {
   cvId: string;
@@ -50,7 +50,7 @@ export const CvSkills = ({ cvId }: Props) => {
     exit();
   };
 
-  if (hasErrorCode(error, 'NOT_FOUND')) notFound();
+  if (hasErrorCode(error, 'NOT_FOUND')) return <CvNotFound />;
 
   const forbidden = hasErrorCode(error, 'FORBIDDEN');
 

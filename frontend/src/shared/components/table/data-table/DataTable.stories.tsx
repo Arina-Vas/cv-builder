@@ -40,6 +40,18 @@ export const Empty: Story = {
   args: { rows: [] },
 };
 
+/** A sortable column with no rows: the header is plain text, no sort button and no arrow,
+ *  so a click cannot send a request for an empty list */
+export const EmptySortable: Story = {
+  name: 'Empty (sortable column)',
+  args: {
+    columns: [{ key: 'name', header: 'Name', sortable: true, render: (row) => row.name }],
+    rows: [],
+    sort: { field: 'name', order: 'ASC' },
+    onSortChange: fn(),
+  },
+};
+
 export const ErrorState: Story = {
   name: 'Error',
   args: {

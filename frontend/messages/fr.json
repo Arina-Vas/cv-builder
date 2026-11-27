@@ -311,6 +311,10 @@
   },
   "users": {
     "title": "Employés",
+    "notFound": {
+      "title": "Employé introuvable",
+      "message": "L'employé n'existe pas ou a été supprimé"
+    },
     "createButton": "Créer un utilisateur",
     "table": {
       "avatar": "Avatar",
@@ -390,6 +394,10 @@
       },
       "empty": "Aucun CV trouvé",
       "userEmpty": "Vous n'avez pas encore de CV"
+    },
+    "notFound": {
+      "title": "CV introuvable",
+      "message": "Le CV n'existe pas ou a été supprimé"
     },
     "fields": {
       "name": "Nom",

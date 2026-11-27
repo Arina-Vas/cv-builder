@@ -303,6 +303,10 @@
   },
   "users": {
     "title": "Mitarbeiter",
+    "notFound": {
+      "title": "Mitarbeiter nicht gefunden",
+      "message": "Der Mitarbeiter existiert nicht oder wurde gelöscht"
+    },
     "createButton": "Benutzer erstellen",
     "table": {
       "avatar": "Profilbild",
@@ -382,6 +386,10 @@
       },
       "empty": "Keine Lebensläufe gefunden",
       "userEmpty": "Sie haben noch keine Lebensläufe"
+    },
+    "notFound": {
+      "title": "Lebenslauf nicht gefunden",
+      "message": "Der Lebenslauf existiert nicht oder wurde gelöscht"
     },
     "fields": {
       "name": "Name",

@@ -61,6 +61,7 @@ export const Languages = () => {
     },
     {
       key: 'iso',
+      width: '120px',
       header: t('table.columns.iso'),
       render: (language) => language.iso,
       sortable: true,
@@ -92,6 +93,7 @@ export const Languages = () => {
         }}
       />
       <DataTable<LanguageFieldsFragment>
+        scrollResetKey={page}
         rows={shown?.languages.items ?? []}
         getRowId={(language) => language.id}
         columns={languagesColumns}

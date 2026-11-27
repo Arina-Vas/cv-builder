@@ -297,6 +297,10 @@
   },
   "users": {
     "title": "Employees",
+    "notFound": {
+      "title": "Employee not found",
+      "message": "The employee does not exist or has been deleted"
+    },
     "createButton": "Create user",
     "table": {
       "avatar": "Avatar",
@@ -372,6 +376,10 @@
       "actions": { "edit": "Edit", "delete": "Delete", "view": "View" },
       "empty": "No CVs found",
       "userEmpty": "You have no CVs yet"
+    },
+    "notFound": {
+      "title": "CV not found",
+      "message": "The CV does not exist or has been deleted"
     },
     "fields": {
       "name": "Name",
