@@ -7,4 +7,5 @@ export enum ErrorReason {
   INVALID_TYPE = 'INVALID_TYPE',
   SELF = 'SELF',
   LAST_ADMIN = 'LAST_ADMIN',
+  USED_IN_CVS = 'USED_IN_CVS',
 }

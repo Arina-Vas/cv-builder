@@ -8,7 +8,8 @@ import { projectInclude, toProject, toProjectRole } from '@/projects/project.map
 import { CreateProjectInput } from '@/projects/dto/create-project.input';
 import { Project } from '@/projects/models/project.model';
 import { UpdateProjectInput } from '@/projects/dto/update-project.input';
-import { badUserInput, entityInUse } from '@/common/errors/app-errors';
+import { badUserInput, entityInUse, type FieldError } from '@/common/errors/app-errors';
+import { ErrorReason } from '@/common/errors/error-reason.enum';
 import { isPrismaError } from '@/prisma/prisma-errors';
 import { Skill } from '@/skills/models/skill.model';
 import { skillInclude, toSkill } from '@/skills/skill.mapper';
@@ -75,6 +76,8 @@ export class ProjectService {
 
   async update({ id, technologyIds, ...input }: UpdateProjectInput): Promise<Project> {
     await this.assertTechnologiesExist(technologyIds);
+    await this.assertCvProjectsWithin(id, input.startDate, input.endDate);
+
     try {
       const row = await this.prisma.project.update({
         where: { id },
@@ -104,6 +107,34 @@ export class ProjectService {
     const row = await this.prisma.project.delete({ where: { id } });
 
     return row.id;
+  }
+
+  private async assertCvProjectsWithin(id: string, startDate: Date, endDate: Date): Promise<void> {
+    const [startsBefore, endsAfter] = await Promise.all([
+      this.prisma.cvProject.count({ where: { projectId: id, startDate: { lt: startDate } } }),
+      this.prisma.cvProject.count({
+        where: {
+          projectId: id,
+          OR: [{ startDate: { gt: endDate } }, { endDate: { gt: endDate } }],
+        },
+      }),
+    ]);
+
+    const fields: FieldError[] = [];
+    if (startsBefore > 0) {
+      fields.push({ field: 'startDate', message: 'CV projects start before this date' });
+    }
+    if (endsAfter > 0) {
+      fields.push({ field: 'endDate', message: 'CV projects end after this date' });
+    }
+
+    if (fields.length > 0) {
+      throw badUserInput({
+        fields,
+        message: 'Project dates must include the dates of the CV projects that use it',
+        reason: ErrorReason.USED_IN_CVS,
+      });
+    }
   }
 
   private async assertTechnologiesExist(technologyIds: string[]) {

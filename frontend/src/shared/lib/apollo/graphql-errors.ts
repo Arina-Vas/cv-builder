@@ -30,6 +30,7 @@ export const ERROR_REASONS = [
   'INVALID_TYPE',
   'SELF',
   'LAST_ADMIN',
+  'USED_IN_CVS',
 ] as const;
 
 export type ErrorReason = (typeof ERROR_REASONS)[number];

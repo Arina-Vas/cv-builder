@@ -422,13 +422,14 @@ Some codes have several causes that the frontend shows with different texts. The
 - Services pass it through the helpers: `badUserInput({ fields, message, reason })`,
   `operationNotAllowed(message, reason)`.
 
-| Operation                  | Code                    | Reasons                                                                   |
-| -------------------------- | ----------------------- | ------------------------------------------------------------------------- |
-| `verifyEmail` (`code`)     | `BAD_USER_INPUT`        | `INVALID`; `EXPIRED` (also after too many wrong attempts); `USED`         |
-| `resetPassword` (`token`)  | `BAD_USER_INPUT`        | `INVALID` (also an already used link); `EXPIRED` (also an older link)     |
-| `uploadAvatar` (`file`)    | `BAD_USER_INPUT`        | `TOO_LARGE` (over 5 MB); `INVALID_TYPE` (not PNG / JPEG / GIF, or broken) |
-| `updateUser` (role change) | `OPERATION_NOT_ALLOWED` | `SELF` (own role); `LAST_ADMIN` (demoting the last admin)                 |
-| `deleteUser`               | `OPERATION_NOT_ALLOWED` | `SELF` (own account); `LAST_ADMIN` (the last admin)                       |
+| Operation                               | Code                    | Reasons                                                                      |
+| --------------------------------------- | ----------------------- | ---------------------------------------------------------------------------- |
+| `verifyEmail` (`code`)                  | `BAD_USER_INPUT`        | `INVALID`; `EXPIRED` (also after too many wrong attempts); `USED`            |
+| `resetPassword` (`token`)               | `BAD_USER_INPUT`        | `INVALID` (also an already used link); `EXPIRED` (also an older link)        |
+| `uploadAvatar` (`file`)                 | `BAD_USER_INPUT`        | `TOO_LARGE` (over 5 MB); `INVALID_TYPE` (not PNG / JPEG / GIF, or broken)    |
+| `updateProject` (`startDate`/`endDate`) | `BAD_USER_INPUT`        | `USED_IN_CVS` (CV projects of this project would fall outside the new dates) |
+| `updateUser` (role change)              | `OPERATION_NOT_ALLOWED` | `SELF` (own role); `LAST_ADMIN` (demoting the last admin)                    |
+| `deleteUser`                            | `OPERATION_NOT_ALLOWED` | `SELF` (own account); `LAST_ADMIN` (the last admin)                          |
 
 The wiki leaves the rules for protected users to the team ("The exact business rules should be defined by the
 team"); the ones above are those rules: an Admin cannot change their own role or delete their own account, and the

@@ -118,6 +118,12 @@ All tables have `id` (uuid), `created_at` and `updated_at`. Only the meaningful 
   helpers are `effectiveEndDate` in `frontend/src/features/cv-projects/lib/` and `backend/src/cvs/cv-projects/`.
   Sorting by end date still uses the stored value (empty values last on `asc`).
 
+- CV project dates stay within the dates of the catalog project. `createCvProject` / `updateCvProject` check the
+  CV dates; `updateProject` rejects new project dates that would leave a CV project outside them
+  (`BAD_USER_INPUT` on `startDate` / `endDate`, reason `USED_IN_CVS`). The CVs are never moved to fit the new
+  dates: they belong to their owners, so the CV projects have to be edited first. An empty CV end date ends with
+  the project and never blocks the change.
+
 - Project name, domain, description and technologies shown on a CV come from the referenced `projects` row;
   only participation dates, responsibilities and roles are CV-specific.
 - `cv_projects.responsibilities` is one optional text, one responsibility per line (decided 2026-11-19). The wiki
@@ -270,7 +276,7 @@ constraints are added in the `add_dates_checks` migration; the rest is checked i
 | Project `start_date <= end_date`                                             | `ALTER TABLE "projects" ADD CONSTRAINT "projects_dates_check" CHECK ("start_date" <= "end_date");`                             |
 | Project end date is not earlier than the start date                          | Input DTO (`@IsNotBeforeDate()`, see [conventions](api/conventions.md#shared-building-blocks))                                 |
 | CV project `start_date <= end_date` (if end date is set)                     | `ALTER TABLE "cv_projects" ADD CONSTRAINT "cv_projects_dates_check" CHECK ("end_date" IS NULL OR "start_date" <= "end_date");` |
-| CV project dates are within the project's dates                              | Service (a CHECK cannot reference another table)                                                                               |
+| CV project dates are within the project's dates                              | Service (a CHECK cannot reference another table); `updateProject` too, see [Assignments](#assignments)                         |
 | CV skills belong to the CV owner's skills                                    | Service (`createCvSkill` checks the profile; `deleteUserSkills` rejects a skill used in the owner's CVs)                       |
 | Names are trimmed, repeated spaces collapsed; ISO upper-cased                | Input DTO (`@NormalizeText()`, `@ToUpperCaseText()`, see [conventions](api/conventions.md#shared-building-blocks))             |
 | A new verification code invalidates the previous one; resend is rate-limited | Service                                                                                                                        |
