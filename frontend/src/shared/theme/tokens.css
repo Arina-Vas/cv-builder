@@ -303,6 +303,7 @@
   --z-sidebar: 30; /* below popovers (50) */
   --z-dialog: 40; /* above the sidebar, below popovers (50) opened inside the dialog */
   --z-toast: 9999;
+  --z-offline: 10000; /* No Internet page: covers the app, dialogs and toasts */
   /* Provide default values for Radix Toast dynamic variables */
   --radix-toast-swipe-move-x: 0px;
   --radix-toast-swipe-end-x: 0px;

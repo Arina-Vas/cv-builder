@@ -42,7 +42,11 @@ export function NetworkStatusGate({ children }: { children: ReactNode }) {
       <div className={isOffline ? s.hidden : s.app} aria-hidden={isOffline || undefined}>
         {children}
       </div>
-      {isOffline && <NoInternetPage onRetry={retry} retrying={retrying} />}
+      {isOffline && (
+        <div className={s.offline}>
+          <NoInternetPage onRetry={retry} retrying={retrying} />
+        </div>
+      )}
     </>
   );
 }

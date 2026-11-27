@@ -1,6 +1,7 @@
-import { screen } from '@testing-library/react';
+import { act, screen } from '@testing-library/react';
 import type { ComponentProps } from 'react';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { networkStatus } from '@/shared/lib/network/network-status';
 import { renderWithProviders } from '@/test/render';
 import { Dialog } from './Dialog';
 
@@ -120,6 +121,41 @@ describe('Dialog', () => {
 
       expect(onOpenChange).not.toHaveBeenCalled();
       expect(screen.getByRole('dialog')).toBeInTheDocument();
+    });
+  });
+
+  // The No Internet page hides the app, the portaled dialog must not stay on top of it
+  describe('offline', () => {
+    afterEach(() => {
+      vi.restoreAllMocks();
+      networkStatus.clearFailure();
+    });
+
+    it('closes when the browser goes offline, even with preventClose', () => {
+      const { onOpenChange } = renderDialog({ preventClose: true });
+
+      vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
+      act(() => {
+        window.dispatchEvent(new Event('offline'));
+      });
+
+      expect(onOpenChange).toHaveBeenCalledExactlyOnceWith(false);
+    });
+
+    it('closes when a query could not reach the backend', () => {
+      const { onOpenChange } = renderDialog();
+
+      act(() => networkStatus.reportFailure());
+
+      expect(onOpenChange).toHaveBeenCalledExactlyOnceWith(false);
+    });
+
+    it('does nothing while closed', () => {
+      const { onOpenChange } = renderDialog({ open: false });
+
+      act(() => networkStatus.reportFailure());
+
+      expect(onOpenChange).not.toHaveBeenCalled();
     });
   });
 });

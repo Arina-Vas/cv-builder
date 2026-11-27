@@ -6,3 +6,11 @@
 .hidden {
   display: none;
 }
+
+/* Above the toasts, which live outside the gate (dialogs close themselves, see Dialog.tsx). */
+.offline {
+  position: fixed;
+  z-index: var(--z-offline);
+  inset: 0;
+  overflow-y: auto;
+}
