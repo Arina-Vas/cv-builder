@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { generateVerificationCode, hashToken, matchesHash } from '@/common/crypto/tokens';
 import { badUserInput, conflict, rateLimited } from '@/common/errors/app-errors';
 import { ErrorReason } from '@/common/errors/error-reason.enum';
@@ -27,6 +27,8 @@ const codeError = (message: string, reason: ErrorReason) =>
 
 @Injectable()
 export class EmailVerificationService {
+  private readonly logger = new Logger(EmailVerificationService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly users: UsersService,
@@ -34,6 +36,25 @@ export class EmailVerificationService {
   ) {}
 
   async sendCode(userId: string, email: string, locale: Locale): Promise<void> {
+    const code = await this.issueCode(userId);
+    await this.mail.sendVerificationCode(email, code, CODE_TTL_MINUTES, locale);
+  }
+
+  /**
+   * Stores a new code but does not wait for the email: a slow mail server
+   * must not hold the response. The code is already in the database when this
+   * resolves, so a resend right after it still sees the cooldown.
+   */
+  async sendCodeInBackground(userId: string, email: string, locale: Locale): Promise<void> {
+    const code = await this.issueCode(userId);
+    void this.mail
+      .sendVerificationCode(email, code, CODE_TTL_MINUTES, locale)
+      .catch((error: unknown) => {
+        this.logger.warn(`Failed to send verification email to user ${userId}`, error);
+      });
+  }
+
+  private async issueCode(userId: string): Promise<string> {
     const code = generateVerificationCode();
     const now = new Date();
 
@@ -57,7 +78,7 @@ export class EmailVerificationService {
       }),
     ]);
 
-    await this.mail.sendVerificationCode(email, code, CODE_TTL_MINUTES, locale);
+    return code;
   }
 
   async resend(user: User, locale: Locale): Promise<void> {

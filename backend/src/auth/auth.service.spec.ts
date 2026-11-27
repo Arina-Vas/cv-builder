@@ -54,7 +54,7 @@ describe('AuthService', () => {
     revokeByRefreshToken: jest.fn(),
   };
   const accessTokens = { sign: jest.fn() };
-  const verification = { sendCode: jest.fn() };
+  const verification = { sendCodeInBackground: jest.fn() };
   const service = new AuthService(
     users as unknown as UsersService,
     sessions as unknown as SessionsService,
@@ -65,7 +65,7 @@ describe('AuthService', () => {
   beforeEach(() => {
     sessions.create.mockResolvedValue({ sessionId: 'session-1', refreshToken: 'refresh' });
     accessTokens.sign.mockResolvedValue('access');
-    verification.sendCode.mockResolvedValue(undefined);
+    verification.sendCodeInBackground.mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -91,20 +91,20 @@ describe('AuthService', () => {
       expect(result).toEqual({ user, tokens: { accessToken: 'access', refreshToken: 'refresh' } });
     });
 
-    it('sends a verification code to the new user', async () => {
+    it('sends a verification code to the new user without waiting for the email', async () => {
       users.findByEmail.mockResolvedValue(null);
       users.create.mockResolvedValue(user);
 
       await service.signUp(input, 'ru');
 
-      expect(verification.sendCode).toHaveBeenCalledWith('user-1', user.email, 'ru');
+      expect(verification.sendCodeInBackground).toHaveBeenCalledWith('user-1', user.email, 'ru');
     });
 
-    it('still signs the user up when the email cannot be sent', async () => {
+    it('still signs the user up when the code cannot be issued', async () => {
       jest.spyOn(Logger.prototype, 'warn').mockImplementation();
       users.findByEmail.mockResolvedValue(null);
       users.create.mockResolvedValue(user);
-      verification.sendCode.mockRejectedValue(new Error('SMTP is down'));
+      verification.sendCodeInBackground.mockRejectedValue(new Error('database is down'));
 
       await expect(service.signUp(input, 'en')).resolves.toMatchObject({ user });
       expect(sessions.create).toHaveBeenCalled();

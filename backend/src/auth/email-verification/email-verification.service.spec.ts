@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common';
 import { GraphQLError } from 'graphql';
 import { hashToken } from '@/common/crypto/tokens';
 import { ErrorCode } from '@/common/errors/error-code.enum';
@@ -105,6 +106,45 @@ describe('EmailVerificationService', () => {
           expiresAt: new Date('2026-10-27T12:10:00.000Z'),
         },
       });
+    });
+
+    it('waits for the mail server and passes its error on', async () => {
+      mail.sendVerificationCode.mockRejectedValue(new Error('SMTP is down'));
+
+      await expect(service.sendCode('user-1', user.email, 'en')).rejects.toThrow('SMTP is down');
+    });
+  });
+
+  describe('sendCodeInBackground', () => {
+    it('stores the code before it resolves but does not wait for the email', async () => {
+      mail.sendVerificationCode.mockReturnValue(new Promise(() => {}));
+
+      await service.sendCodeInBackground('user-1', user.email, 'ru');
+
+      expect(prisma.$transaction).toHaveBeenCalledWith(['expire-previous', 'create-new']);
+      expect(mail.sendVerificationCode).toHaveBeenCalledWith(
+        user.email,
+        expect.any(String),
+        10,
+        'ru',
+      );
+    });
+
+    it('logs a failed email without the code and does not reject', async () => {
+      const warn = jest.spyOn(Logger.prototype, 'warn').mockImplementation();
+      mail.sendVerificationCode.mockRejectedValue(new Error('SMTP is down'));
+
+      await expect(
+        service.sendCodeInBackground('user-1', user.email, 'en'),
+      ).resolves.toBeUndefined();
+      await Promise.resolve();
+
+      const [, code] = mail.sendVerificationCode.mock.calls[0] as [string, string];
+      expect(warn).toHaveBeenCalledWith(
+        'Failed to send verification email to user user-1',
+        expect.any(Error),
+      );
+      expect(JSON.stringify(warn.mock.calls)).not.toContain(code);
     });
   });
 
