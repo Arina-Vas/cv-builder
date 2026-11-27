@@ -12,6 +12,7 @@ import { parseError } from '@/shared/lib/apollo/graphql-errors';
 import { useErrorMessage } from '@/shared/lib/apollo/useErrorMessage';
 import { SIGN_UP } from '../../api/auth.operations';
 import { AuthRoute } from '../../auth.constants';
+import { broadcastAuthEvent } from '../../lib/auth-channel';
 import { useFormFields } from '../../lib/useFormFields';
 import { validateConfirmPassword, validateEmail, validatePassword } from '../../lib/validation';
 import { AuthForm } from '../auth-form/AuthForm';
@@ -46,6 +47,7 @@ export function SignUpForm() {
         },
       });
       // signUp starts a session and sends the code: the user verifies while signed in.
+      broadcastAuthEvent('login');
       router.replace(`${AuthRoute.verifyEmail}?sent=1`);
     } catch (error) {
       const appError = parseError(error);

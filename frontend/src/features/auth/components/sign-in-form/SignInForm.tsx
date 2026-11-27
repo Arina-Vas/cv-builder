@@ -12,6 +12,7 @@ import { parseError } from '@/shared/lib/apollo/graphql-errors';
 import { useErrorMessage } from '@/shared/lib/apollo/useErrorMessage';
 import { SIGN_IN } from '../../api/auth.operations';
 import { AuthRoute } from '../../auth.constants';
+import { broadcastAuthEvent } from '../../lib/auth-channel';
 import { useFormFields } from '../../lib/useFormFields';
 import { validateEmail, validatePassword } from '../../lib/validation';
 import { AuthForm } from '../auth-form/AuthForm';
@@ -38,6 +39,7 @@ export function SignInForm() {
       await signIn({
         variables: { input: { email: values.email.trim(), password: values.password } },
       });
+      broadcastAuthEvent('login');
       router.replace(AuthRoute.home);
     } catch (error) {
       const appError = parseError(error);

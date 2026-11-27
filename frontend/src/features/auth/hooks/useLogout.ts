@@ -7,6 +7,7 @@ import { NO_ERROR_TOAST } from '@/shared/lib/apollo/error-toast-link';
 
 import { LOGOUT } from '../api/auth.operations';
 import { AuthRoute } from '../auth.constants';
+import { broadcastAuthEvent } from '../lib/auth-channel';
 
 export function useLogout() {
   const router = useRouter();
@@ -17,6 +18,7 @@ export function useLogout() {
   const handleLogout = async () => {
     await logout().catch(() => undefined);
     await client.clearStore();
+    broadcastAuthEvent('logout');
     router.replace(AuthRoute.signIn);
   };
 
